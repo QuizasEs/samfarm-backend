@@ -1,0 +1,33 @@
+    <!---------------------------------------------Cabecera--------------------------------------------------->
+    <header>
+        <nav id="navbar">
+            <div class="hamburguesa">
+                <ion-icon name="menu"></ion-icon>
+            </div>
+            <div class="nav-container">
+                <div class="nav-title">
+                    <h3>sistema farmacia administrador</h3>
+                </div>
+                <div class="nav-content">
+
+                    <!-----------------------Modo Oscuro--------------------------------->
+                    <div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggleInput">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <!-----------------------Mensage notificaciones--------------------------------->
+
+                    <div class="notificacion">
+                        <ion-icon name="notifications-outline"></ion-icon>
+                    </div>
+                    <div class="user">
+                        <ion-icon name="contact"></ion-icon>
+                    </div>
+
+                </div>
+
+            </div>
+        </nav>
+    </header>
