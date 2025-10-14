@@ -6,7 +6,7 @@
             </div>
             <div class="nav-container">
                 <div class="nav-title">
-                    <h3>sistema farmacia administrador</h3>
+                    <h3>BIENVENIDO <?php echo $_SESSION['nombre_smp'];?></h3>
                 </div>
                 <div class="nav-content">
 

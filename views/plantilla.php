@@ -1,32 +1,44 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
-    <?php include"inc/head.php"; ?>
+<?php include "inc/head.php"; ?>
 
 
 <body class="darkmode">
-    <?php 
-        $peticionAjax = false;
-        require_once __DIR__ . "/../controllers/viewsController.php";
+    <?php
+    $peticionAjax = false;
+    require_once __DIR__ . "/../controllers/viewsController.php";
 
-        $IV = new viewsController();
-        $vistas = $IV->get_views_controller();
+    $IV = new viewsController();
+    $vistas = $IV->get_views_controller();
 
-        if($vistas=="login" || $vistas == "404"){
-            require_once "./views/content/".$vistas."-view.php";
-            } else{
+    if ($vistas == "login" || $vistas == "404") {
+        require_once "./views/content/" . $vistas . "-view.php";
+    } else {
+        /* inicializa sesion */
+        session_start(['name' => 'SMP']);
+        include_once "inc/header.php";
+        $pagina = explode("/", $_GET['views']);
 
-            include_once "inc/header.php";
-            ?> 
-    <main>
-        <!---------------------------------------------sidebar--------------------------------------------------->
-        <?php include_once "inc/sidebar.php";?>
-        <!---------------------------------------------Cuerpo principal--------------------------------------------------->
+        require_once "./controllers/loginController.php";
+        $lc = new loginController();
+        if (
+            !isset($_SESSION['token_smp']) ||
+            !isset($_SESSION['apellido_paterno_smp']) ||
+            !isset($_SESSION['apellido_materno_smp']) ||
+            !isset($_SESSION['nombre_smp'])
+        ) {
+            echo $lc->forzar_cierre_sesion_controller();
+        }
+    ?>
+        <main>
+            <!---------------------------------------------sidebar--------------------------------------------------->
+            <?php include_once "inc/sidebar.php"; ?>
+            <!---------------------------------------------Cuerpo principal--------------------------------------------------->
             <div class="main-content">
                 <!--------------------------------------------- contenido de platillas y vistas--------------------------------------------------->
-            <?php include_once $vistas;?>
-            <?php
+                <?php include_once $vistas; ?>
+                <?php
                 // Configuración de conexión
                 $host = "localhost";      // o la IP del servidor
                 $usuario = "root";        // tu usuario MySQL
@@ -43,32 +55,31 @@
                 } catch (PDOException $e) {
                     // Si falla la conexión, mostramos el error
                     echo "❌ Error de conexión: " . $e->getMessage();
-                }?>
+                } ?>
 
 
-        </div>
+            </div>
 
-    </main>
+        </main>
 
-    <!---------------------------------------------Pie de pagina--------------------------------------------------->
+        <!---------------------------------------------Pie de pagina--------------------------------------------------->
 
-    <?php include_once "inc/footer.php"; ?>
-    <!---------------- -----------------------------Script--------------------------------------------------->
+        <?php include_once "inc/footer.php"; ?>
+        <!---------------- -----------------------------Script--------------------------------------------------->
 
-    <?php 
-        
-        }
-        
-        include_once "inc/script.php";
+    <?php
+
+    }
+
+    include_once "inc/script.php";
 
 
-        include_once "inc/footer.php";
-        ?>
+    include_once "inc/footer.php";
+    ?>
 
-    
+
 
 
 </body>
 
 </html>
-
