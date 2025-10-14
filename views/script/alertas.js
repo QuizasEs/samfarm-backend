@@ -42,30 +42,24 @@ function enviar_formulario_ajax(e) {
             break;
     }
 
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: texto_alerta,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Aceptar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.value) {
-            fetch(action, config)
-                .then(respuesta => respuesta.json())
-                .then(respuesta => alertas_ajax(respuesta))
-                .catch(error => {
-                    console.error("Error en la solicitud AJAX:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error de conexión",
-                        text: "No se pudo contactar con el servidor."
-                    });
-                });
-        }
-    });
+	Swal.fire({
+		title: '¿Estás seguro?',
+		text: texto_alerta,
+		type: 'question',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Aceptar',
+		cancelButtonText: 'Cancelar'
+	}).then((result) => {
+		if(result.value){
+			fetch(action,config)
+			.then(respuesta => respuesta.json())
+			.then(respuesta => {
+				return alertas_ajax(respuesta);
+			});
+		}
+	});
 }
 
 // Asociar evento a cada formulario
@@ -78,15 +72,15 @@ function alertas_ajax(alerta) {
     if (alerta.Alerta === "simple") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.Texto,
-            icon: alerta.icon,
+            text: alerta.texto,
+            icon: alerta.Tipo,
             confirmButtonText: "Aceptar"
         });
     } else if (alerta.Alerta === "recargar") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.Texto,
-            icon: alerta.icon,
+            text: alerta.texto,
+            icon: alerta.Tipo,
             confirmButtonText: "Aceptar"
         }).then((result) => {
             if (result.isConfirmed) location.reload();
@@ -94,8 +88,8 @@ function alertas_ajax(alerta) {
     } else if (alerta.Alerta === "limpiar") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.Texto,
-            icon: alerta.icon,
+            text: alerta.texto,
+            icon: alerta.Tipo,
             confirmButtonText: "Aceptar"
         }).then((result) => {
             if (result.isConfirmed) {

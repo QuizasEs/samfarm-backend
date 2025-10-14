@@ -13,15 +13,15 @@
         <div class="form-group">
             <div class="form-bloque">
                 <label for="">NOMBRES*</label>
-                <input type="text" name="Nombres_reg" placeholder="ingresar nombre" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                <input type="text" name="Nombres_reg" placeholder="ingresar nombre" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
             </div>
             <div class="form-bloque">
                 <label for="">APELLIDO PATERNO*</label>
-                <input type="text" name="ApellidoPaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" placeholder="ingresar apellido paterno" required>
+                <input type="text" name="ApellidoPaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" placeholder="ingresar apellido paterno" required>
             </div>
             <div class="form-bloque">
                 <label for="">APELLIDO MATERNO*</label>
-                <input type="text" name="ApellidoMaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" placeholder="ingesar apellido materno" required>
+                <input type="text" name="ApellidoMaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" placeholder="ingesar apellido materno" required>
             </div>
         </div>
 
@@ -30,11 +30,11 @@
 
             <div class="form-bloque">
                 <label for="">NUMERO DE CARNET*</label>
-                <input type="text" name="Carnet_reg" pattern="[0-9]" maxlength="20" placeholder="ingresar número de carnet" required>
+                <input type="text" name="Carnet_reg" pattern="[0-9]{6,20}" maxlength="20" placeholder="ingresar número de carnet" required>
             </div>
             <div class="form-bloque">
                 <label for="">TELEFONO O CELULAR PERSONAL</label>
-                <input type="text" name="Telefono_reg" pattern="[0-9]" maxlength="12" placeholder="ingresar telefono o celular" required>
+                <input type="text" name="Telefono_reg" pattern="[0-9]{6,20}" maxlength="12" placeholder="ingresar telefono o celular" required>
             </div>
             <div class="form-bloque">
                 <label for="">DIRECCION DE CORREO ELECTRONICO</label>
@@ -46,7 +46,7 @@
         <div class="form-group">
             <div class="form-bloque">
                 <label for="">DIRECCION DE VIVIENDA</label>
-                <input type="text" name="Direccion_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ().,#\/- ] {3,200}" maxlength="200" placeholder="ingresar direccion" required>
+                <input type="text" name="Direccion_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ().,#\/]{3,200}" maxlength="200" placeholder="ingresar direccion" required>
             </div>
         </div>
 
@@ -58,15 +58,15 @@
         <div class="form-group">
             <div class="form-bloque">
                 <label for="">NOMBRE DE USUARIO*</label>
-                <input type="text" name="UsuarioName_reg" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]{3,100}$" maxlength="100" placeholder="ingresar nombre de usuario" required>
+                <input type="text" name="UsuarioName_reg" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}" maxlength="100" placeholder="ingresar nombre de usuario" required>
             </div>
             <div class="form-bloque">
                 <label for="">CONTRASEÑA*</label>
-                <input type="text" name="Password_reg" pattern="[a-zA-Z0-9$@.-]{3,100}" maxlength="100" placeholder="ingresar contraseña" required>
+                <input type="password" name="Password_reg" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ0-9@$!%*?&._#\]{3,100}" maxlength="100" placeholder="ingresar contraseña" required>
             </div>
             <div class="form-bloque">
                 <label for="">CONTRASEÑA CONFIRMACION*</label>
-                <input type="text" name="PasswordConfirm_reg" pattern="[a-zA-Z0-9$@.-]{3,100}" maxlength="100" placeholder="confirmar contraseña" required>
+                <input type="password" name="PasswordConfirm_reg" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ0-9@$!%*?&._#\]{3,100}" maxlength="100" placeholder="confirmar contraseña" required>
             </div>
         </div>
         <div class="form-group">
@@ -74,18 +74,18 @@
             <div class="form-bloque">
                 <label for="">ASIGNAR SUCURSAL</label>
                 <select class="select-style" name="Sucursal_reg">
-                    <option value="En espera">en espera</option>
-                    <option value="En espera">en espera</option>
-                    <option value="En espera">en espera</option>
-                    <option value="En espera">en espera</option>
+                    <option value="1">en espera</option>
+                    <option value="2">en espera</option>
+                    <option value="3">en espera</option>
+                    <option value="4">en espera</option>
                 </select>
             </div>
             <div class="form-bloque">
                 <label for="">ASIGNAR ROL</label>
                 <select class="select-style" name="Rol_reg">
-                    <option value="usuario">usuario</option>
-                    <option value="gerente">gerente</option>
-                    <option value="administrador">administrador</option>
+                    <option value="3">usuario</option>
+                    <option value="2">gerente</option>
+                    <option value="1">administrador</option>
                 </select>
             </div>
         </div>
