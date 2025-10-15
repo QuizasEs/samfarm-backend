@@ -74,8 +74,8 @@ class loginController extends loginModel
             $_SESSION['apellido_paterno_smp'] = $row['us_apellido_paterno'];
             $_SESSION['apellido_materno_smp'] = $row['us_apellido_materno'];
             $_SESSION['sucursal_smp'] = $row['su_id'];
-            /* $_SESSION[''] = $row[''];
-            $_SESSION[''] = $row[''];
+            $_SESSION['rol_smp'] = $row['ro_id'];
+            /*$_SESSION[''] = $row[''];
             $_SESSION[''] = $row['']; */
             $_SESSION['token_smp'] = md5(uniqid(mt_rand(), true));
             return header("Location: " . SERVER_URL . "dashboard/");
