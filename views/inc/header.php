@@ -23,7 +23,9 @@
                         <ion-icon name="notifications-outline"></ion-icon>
                     </div>
                     <div class="user">
-                        <ion-icon name="contact"></ion-icon>
+                        <button class="btn-exit-system">
+                            <ion-icon name="contact"></ion-icon>
+                        </button>
                     </div>
 
                 </div>

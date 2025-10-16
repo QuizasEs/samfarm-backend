@@ -1,3 +1,9 @@
+<?php
+    if ($_SESSION['rol_smp'] !=1 ){/* preguntamos que si el que intenta entrar a esta vista tien un privilegio distinto de admin que sierre su sesio */
+        echo $lc->forzar_cierre_sesion_controller();
+        exit();
+    }
+?>
 <div class="title">
     <h1>Registro de usuarios</h1>
 </div>

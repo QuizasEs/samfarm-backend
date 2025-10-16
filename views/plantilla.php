@@ -26,9 +26,11 @@
             !isset($_SESSION['token_smp']) ||
             !isset($_SESSION['apellido_paterno_smp']) ||
             !isset($_SESSION['apellido_materno_smp']) ||
-            !isset($_SESSION['nombre_smp'])
+            !isset($_SESSION['nombre_smp']) ||
+            !isset($_SESSION['usuario_smp'])
         ) {
             echo $lc->forzar_cierre_sesion_controller();
+            exit();
         }
     ?>
         <main>
@@ -38,24 +40,6 @@
             <div class="main-content">
                 <!--------------------------------------------- contenido de platillas y vistas--------------------------------------------------->
                 <?php include_once $vistas; ?>
-                <?php
-                // Configuración de conexión
-                $host = "localhost";      // o la IP del servidor
-                $usuario = "root";        // tu usuario MySQL
-                $clave = "";              // tu contraseña
-                $bd = "samfarm_db";       // el nombre de tu base de datos
-
-                try {
-                    // Intentamos conectar
-                    $conexion = new PDO("mysql:host=$host;dbname=$bd;charset=utf8", $usuario, $clave);
-                    // Configuramos el modo de errores
-                    $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-                    echo "✅ Conexión exitosa a la base de datos '$bd'";
-                } catch (PDOException $e) {
-                    // Si falla la conexión, mostramos el error
-                    echo "❌ Error de conexión: " . $e->getMessage();
-                } ?>
 
 
             </div>
@@ -70,7 +54,7 @@
     <?php
 
     }
-
+    include_once "inc/logOut.php";
     include_once "inc/script.php";
 
 

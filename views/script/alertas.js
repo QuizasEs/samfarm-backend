@@ -42,24 +42,24 @@ function enviar_formulario_ajax(e) {
             break;
     }
 
-	Swal.fire({
-		title: '¿Estás seguro?',
-		text: texto_alerta,
-		type: 'question',
-		showCancelButton: true,
-		confirmButtonColor: '#3085d6',
-		cancelButtonColor: '#d33',
-		confirmButtonText: 'Aceptar',
-		cancelButtonText: 'Cancelar'
-	}).then((result) => {
-		if(result.value){
-			fetch(action,config)
-			.then(respuesta => respuesta.json())
-			.then(respuesta => {
-				return alertas_ajax(respuesta);
-			});
-		}
-	});
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: texto_alerta,
+        type: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.value) {
+            fetch(action, config)
+                .then(respuesta => respuesta.json())
+                .then(respuesta => {
+                    return alertas_ajax(respuesta);
+                });
+        }
+    });
 }
 
 // Asociar evento a cada formulario
@@ -97,6 +97,10 @@ function alertas_ajax(alerta) {
             }
         });
     } else if (alerta.Alerta === "redireccionar") {
-        window.location.href = alerta.URL;
+        Swal.fire({
+            title: alerta.Titulo || "Redirigiendo...",
+        }).then(() => {
+            window.location.href = alerta.URL;
+        });
     }
 }

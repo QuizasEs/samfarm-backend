@@ -25,7 +25,7 @@ class loginController extends loginModel
                         });
                     </script>
                 ';
-                exit();
+            exit();
         }
 
         /* =verificar la integridad de los datos== */
@@ -71,6 +71,7 @@ class loginController extends loginModel
 
             $_SESSION['id_smp'] = $row['us_id'];
             $_SESSION['nombre_smp'] = $row['us_nombres'];
+            $_SESSION['usuario_smp'] = $row['us_username'];
             $_SESSION['apellido_paterno_smp'] = $row['us_apellido_paterno'];
             $_SESSION['apellido_materno_smp'] = $row['us_apellido_materno'];
             $_SESSION['sucursal_smp'] = $row['su_id'];
@@ -95,13 +96,38 @@ class loginController extends loginModel
     }
 
     /* controlador para forzar el cierre de sesion */
-    public function forzar_cierre_sesion_controller(){
+    public function forzar_cierre_sesion_controller()
+    {
         session_unset();
         session_destroy();
-        if(headers_sent()){  
-            return "<script>window.location.href='".SERVER_URL."login/';</script>";
-        } else{
-            return header("Location: ".SERVER_URL."login/");
+        if (headers_sent()) {
+            return "<script>window.location.href='" . SERVER_URL . "login/';</script>";
+        } else {
+            return header("Location: " . SERVER_URL . "login/");
         }
+    }
+    /* controlador que nos permite secarra secion */
+    public function cerrar_sesion_controller()
+    {
+        session_start(['name' => 'SMP']);
+        $token = mainModel::decryption($_POST['token']);
+        $usuario = mainModel::decryption($_POST['usuario']);
+
+        if ($token == $_SESSION['token_smp'] && $usuario == $_SESSION['usuario_smp']) {
+            session_unset();
+            session_destroy();
+            $alerta = [
+                "Alerta" => "redireccionar",
+                "URL" => SERVER_URL . "login/",
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Ocurrio un error inesperado",
+                "Texto" => "No se pudo serrar la sesion del sistema",
+                "Tipo" => "error"
+            ];
+        }
+        echo json_encode($alerta);
     }
 }
