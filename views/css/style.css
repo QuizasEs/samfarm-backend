@@ -1527,6 +1527,7 @@ nav .hamburguesa {
     width: 100%;
     height: 45px;
     border-radius: 10px;
+    ;
     background: white;
     border: 2px solid black;
     outline-style: none;
@@ -1542,6 +1543,13 @@ nav .hamburguesa {
     box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.322);
 }
 
+.bloque-login input::placeholder {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    color: gray;
+}
 
 @media (max-width: 512px) {
     .form-login-content {
@@ -1575,3 +1583,213 @@ nav .hamburguesa {
     }
 
 }
+
+
+/*****************************lista de usuarios***************************************/
+.container {
+    padding: 1rem;
+
+}
+
+.active {
+    display:flex;
+    align-self:center;
+    justify-content:center;
+    background-color: lightgreen;
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: green;
+    text-shadow: 2px 2px 4px white;
+    border: 2px solid transparent;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 10px var(--shadow-light);
+    text-wrap: nowrap;
+
+}
+
+.dark .active {
+
+    background-color: lightgreen;
+    color: rgb(0, 0, 0);
+    text-shadow: 2px 2px 4px green;
+    box-shadow: 2px 2px 10px var(--dark-shadow-dark);
+
+}
+.in-active {
+    display:flex;
+    align-self:center;
+    justify-content:center;
+    background-color: pink;
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: red;
+    text-shadow: 2px 2px 4px white;
+    border: 2px solid transparent;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 10px var(--shadow-light);
+    text-wrap: nowrap;
+}
+.dark .in-active {
+
+    background-color: pink;
+    color: black;
+    text-shadow: 2px 2px 4px rgb(253, 90, 90);
+
+    box-shadow: 2px 2px 10px var(--dark-shadow-dark);
+    text-wrap: nowrap;
+}
+.btn-editar{
+    background:var(--dark-accent-secondary);
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    padding: 5px 10px;
+    border-radius: 8px;
+    color:white;
+    text-decoration:none;
+    text-transform:uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
+    border: 2px solid transparent;
+    box-shadow: 2px 2px 10px var(--shadow-light);
+    transition: all 0.3s ease;
+}
+.dark .btn-editar{
+    background:var(--accent-primary);
+    border-radius: 8px;
+    color:white;
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
+    box-shadow: 2px 2px 10px var(--dark-shadow-dark);
+}
+
+
+.btn-editar:hover{
+    background:var(--accent-primary);
+    color:white;
+
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
+}
+.dark .btn-editar:hover{
+    background:var(--dark-accent-secondary);
+}
+
+
+
+/*default filtro*/
+.lista-header{
+    display:flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    border: 2px solid var(--border-light);
+    padding: 10px 15px;
+    margin-bottom: 2rem;
+    background-color: var(--bg-secondary);
+    border-radius: 1rem;
+    box-shadow: 50px 5px 10px var(--shadow-light);
+    justify-content: flex-end;
+    overflow:hidden;
+
+}
+.dark .lista-header{
+    border: 2px solid var(--dark-border-dark);
+    background-color: var(--dark-bg-secondary);
+    box-shadow: 50px 5px 10px var(--dark-shadow-dark);
+}
+
+.lista-header .filtro{
+    width: 300px;
+    display:flex;
+    gap:10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.lista-header .filtro input{
+    height: 40px;
+    border-radius: 10px;
+    outline-style: none;
+    border: 2px solid var(--border-light);
+    box-shadow: 2px 2px 10px var(--shadow-light);
+    padding: 5px 10px;
+    color: var(--text-secondary);
+}
+
+.dark .lista-header .filtro input{
+    border: 2px solid var(--dark-border-dark);
+    box-shadow: 2px 2px 10px var(--dark-shadow-dark);
+    color: var(--dark-text-secondarytext-secondary);
+}
+.lista-header .filtro button{
+    border: none;
+    font-size: 2rem;
+    text-shadow: 2px 2px 10px var(--shadow-light);
+    transition: all 0.3s ease;
+    background:none;
+}
+.dark .lista-header .filtro button{
+    text-shadow: 2px 2px 10px var(--dark-shadow-dark);
+    color: var(--dark-text-primary)
+}
+
+.lista-header .filtro button:hover{
+    transform: scale(1.07);
+}
+.lista-header .header-btn-usuario {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+.header-btn-usuario a{
+    background:var(--accent-primary);
+    padding: 20px;
+    border-radius: 10px;
+    color: var(--dark-text-primary);
+    text-decoration:none;
+    font-size: 1.17rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.header-btn-usuario a:hover{
+    background:var(--dark-accent-secondary);
+    color: white;
+}
+.dark .header-btn-usuario a{
+    background:var(--dark-accent-secondary);
+    padding: 20px;
+    border-radius: 10px;
+    color: var(--dark-text-primary);
+    text-decoration:none;
+    font-size: 1.17rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.dark .header-btn-usuario a:hover{
+    background:var(--accent-secondary);
+    color: white;
+}
+@media(max-width: 678px){
+    .lista-header{
+        flex-direction: column-reverse;
+        justify-content: center;
+
+        align-items:center;
+    }
+}
+
+
+
+
+/**************************************predeterminado*********************************************/
+td img{
+    width: 50px; 
+    height: 35px;
+    object-fit:content;
+}
+/**************************************lista*********************************************/
+/**************************************lista*********************************************/
+/**************************************lista*********************************************/
+/**************************************lista*********************************************/
+/**************************************lista*********************************************/

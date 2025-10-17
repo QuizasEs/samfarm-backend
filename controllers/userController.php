@@ -2,14 +2,15 @@
 if ($peticionAjax) {
     require_once "../models/userModel.php";
 } else {
-    require_once "./model/userModel.php";
+    require_once "./models/userModel.php";
 }
 
 class userController extends userModel
 {
 
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
-    public function get_user_controller(){
+    public function get_user_controller()
+    {
         /* datos personales */
         $nombres = mainModel::limpiar_cadena($_POST['Nombres_reg']);
         $apellido_paterno = mainModel::limpiar_cadena($_POST['ApellidoPaterno_reg']);
@@ -32,7 +33,7 @@ class userController extends userModel
 
         /* combertimos enteros los campos */
 
-        
+
         /* comprobar que los campos obligatorios no esten vacios */
         if ($nombres == "" || $apellido_paterno == "" || $apellido_materno == "" || $carnet == "" || $usuarioName == "" || $password == "" || $password_confirm == "" || $sucursal == "" || $rol == "") {
             $alerta = [
@@ -242,4 +243,166 @@ class userController extends userModel
             exit();
         }
     }
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
+    public function paginado_user_controller($pagina, $registros, $privilegio, $id, $url, $busqueda)
+    {
+        /* limpiamos cadenas para evitar injeccion */
+        $pagina = mainModel::limpiar_cadena($pagina);
+        $registros = mainModel::limpiar_cadena($registros);
+        $privilegio = mainModel::limpiar_cadena($privilegio);
+        $id = mainModel::limpiar_cadena($id);
+        $url = mainModel::limpiar_cadena($url);
+        $url = SERVER_URL . $url . "/";
+        $busqueda = mainModel::limpiar_cadena($busqueda);
+
+        $tabla = "";
+
+        /* validamos que el valor ingresado por url sea un numero */
+        $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
+        $inicio = ($pagina > 0) ? (($pagina * $registros) - $registros) : 0;
+
+        if (isset($busqueda) && $busqueda != "") {
+            /* busqueda */
+            $consulta = "
+                SELECT 
+                    SQL_CALC_FOUND_ROWS 
+                    u.*, 
+                    r.ro_nombre AS rol_nombre, 
+                    s.su_nombre AS sucursal_nombre
+                FROM usuarios AS u
+                LEFT JOIN roles AS r ON u.ro_id = r.ro_id
+                LEFT JOIN sucursales AS s ON u.su_id = s.su_id
+                WHERE (u.us_id != '$id' AND u.us_id != '5')
+                AND (
+                    u.us_numero_carnet LIKE '%$busqueda%' OR
+                    u.us_nombres LIKE '%$busqueda%' OR
+                    u.us_apellido_paterno LIKE '%$busqueda%' OR
+                    u.us_apellido_materno LIKE '%$busqueda%' OR
+                    u.us_telefono LIKE '%$busqueda%' OR
+                    u.us_correo LIKE '%$busqueda%' OR
+                    u.us_direccion LIKE '%$busqueda%' OR
+                    u.us_username LIKE '%$busqueda%' OR
+                    r.ro_nombre LIKE '%$busqueda%' OR
+                    s.su_nombre LIKE '%$busqueda%'
+                )
+                ORDER BY u.us_nombres ASC 
+                LIMIT $inicio, $registros
+            ";
+
+        } else {
+            /* evitamos que el usuario actual y el usuario principal sean visibles y accesibles */
+            $consulta = "
+                SELECT 
+                    SQL_CALC_FOUND_ROWS 
+                    u.*, 
+                    r.ro_nombre AS rol_nombre, 
+                    s.su_nombre AS sucursal_nombre
+                FROM usuarios AS u
+                LEFT JOIN roles AS r ON u.ro_id = r.ro_id
+                LEFT JOIN sucursales AS s ON u.su_id = s.su_id
+                WHERE u.us_id != '$id' 
+                AND u.us_id != '5'
+                ORDER BY u.us_nombres ASC 
+                LIMIT $inicio, $registros
+            ";
+        }
+
+        /* realizamos la peticion a la base de datos */
+        $conexion = mainModel::conectar();
+        $datos = $conexion->query($consulta);
+        $datos = $datos->fetchAll();
+
+        /* obtenemos la cantidad total de registro */
+        $total = $conexion->query("SELECT FOUND_ROWS()");
+        $total = (int) $total->fetchColumn();
+
+        /* numero de paginas por registros */
+        $Npaginas = ceil($total / $registros);
+
+        /* inicio de tabla */
+        $tabla .= '
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>NOMBRES</th>
+                                <th>APELLIDO PATERNO</th>
+                                <th>APELLIDO MATERMNO</th>
+                                <th>N° CARNET</th>
+                                <th>N° TELEFONO</th>
+                                <th>CORREO</th>
+                                <th>DIRECCION</th>
+                                <th>NOMBRE DE USUARIO</th>
+                                <th>CREADO EN</th>
+                                <th>ACTUALIZADO EN</th>
+                                <th>ROL</th>
+                                <th>SUCURSAL</th>
+                                <th>ESTADO</th>
+                                <th>
+                                    ACCIONES
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        ';
+
+        if ($pagina <= $Npaginas && $total >= 1) {
+            $contador = $inicio + 1;
+
+            foreach ($datos as $rows) {
+                $tabla .= '
+                    <tr>
+                        <td>' . $contador . '</td>
+                        <td>' . $rows["us_nombres"] . '</td>
+                        <td>' . $rows["us_apellido_paterno"] . '</td>
+                        <td>' . $rows["us_apellido_materno"] . '</td>
+                        <td>' . $rows["us_numero_carnet"] . '</td>
+                        <td>' . $rows["us_telefono"] . '</td>
+                        <td>' . $rows["us_correo"] . '</td>
+                        <td>' . $rows["us_direccion"] . '</td>
+                        <td>' . $rows["us_username"] . '</td>
+                        <td>' . $rows["us_creado_en"] . '</td>
+                        <td>' . $rows["us_actualizado_en"] . '</td>
+                        <td>' . $rows["rol_nombre"] . '</td>
+                        <td>' . $rows["sucursal_nombre"] . '</td>
+                        <td>' . ($rows["us_estado"] == 1 ? '<span class="active">Activo</span>' : '<span class="in-active">Inactivo</span>') . '</td>
+                        <td><a href="" class="btn-editar">Editar</a></td>
+                    </tr>
+                ';
+                $contador++;
+            }
+        } else {
+
+
+            if ($total >= 1) {
+                /* en caso que la url no sea valida de una pagina con registros mostrara  */
+                $tabla .= ' <tr><td colspan="15">  <a class="btn-primary" href="' . $url . '"> Recargar </a></td></tr> ';
+            } else {
+                /* en caso que no tenga registrados ni un registro en la base de datos mostrara  */
+                $tabla .= ' <tr><td colspan="15"> No hay registros</td></tr> ';
+            }
+        }
+
+        /* final de talbla */
+        $tabla .= '
+                        </tbody>
+                    </table>
+                </div>
+        ';
+
+        if($pagina <= $Npaginas && $total >= 1){
+            $tabla .= mainModel::paginador_tablas($pagina, $Npaginas, $url, 5);
+        }
+
+        /* devolvemos tabla */
+        return $tabla;
+    }
+
+
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
+    /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
 }

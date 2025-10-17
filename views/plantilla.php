@@ -18,6 +18,8 @@
         /* inicializa sesion */
         session_start(['name' => 'SMP']);
         include_once "inc/header.php";
+        
+        /* dividir cadenas por "/"" */
         $pagina = explode("/", $_GET['views']);
 
         require_once "./controllers/loginController.php";
@@ -46,9 +48,7 @@
 
         </main>
 
-        <!---------------------------------------------Pie de pagina--------------------------------------------------->
 
-        <?php include_once "inc/footer.php"; ?>
         <!---------------- -----------------------------Script--------------------------------------------------->
 
     <?php

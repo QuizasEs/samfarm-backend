@@ -155,6 +155,7 @@ class mainModel
         }
         $tabla .= ' </ul>
                     </nav>';
+        return $tabla;
     }
 
 

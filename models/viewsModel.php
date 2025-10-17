@@ -5,6 +5,8 @@
         protected static function get_views_model($vistas){
             $listaBlanca=[
                 "dashboard","registroUsuario",
+                "categoriaLista","laboratorioLista",
+                "presentacionLista","usuarioLista"
             ];
 
             if(in_array($vistas,$listaBlanca)){
