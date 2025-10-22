@@ -92,13 +92,14 @@ class mainModel
         return $cadena;
     }
     /* --------------------------------------funcion que verifica los datos------------------------------------------------ */
-		protected static function verificar_datos($filtro,$cadena){
-			if(preg_match("/^".$filtro."$/", $cadena)){
-				return false;
-			}else{
-				return true;
-			}
-		}
+    protected static function verificar_datos($filtro, $cadena)
+    {
+        if (preg_match("/^" . $filtro . "$/", $cadena)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     /* -----------------------------------funcion para verificar las fechas --------------------------------------------------- */
     protected static function verificar_fecha($fecha)
@@ -156,8 +157,40 @@ class mainModel
         $tabla .= ' </ul>
                     </nav>';
         return $tabla;
-    }
+    } 
 
+    
+    /* ------------------------------ obtener informacion de sucursales y roles para usuario----------------------------------- */
+    protected static function data_rol_list_model($tipo, $id)
+    {
+        if ($tipo == "Unico") {
+            $sql = mainModel::conectar()->prepare("
+            SELECT u.us_nombres, r.ro_nombre, r.ro_id   
+            FROM roles AS r
+            JOIN usuarios AS u ON u.ro_id = r.ro_id 
+            WHERE u.us_id = $id;");
+        } else if ($tipo == "Multiple") {
+            $sql = mainModel::conectar()->prepare("SELECT ro_nombre, ro_id FROM roles WHERE ro_estado = 1");
+        }
+        $sql->execute();
+        return $sql;
+    }
+    /* -----------------------------------------modelo para obtener sucursales--------------------------------------------- */
+
+    protected static function data_sucursal_list_model($tipo, $id)
+    {
+        if ($tipo == "Unico") {
+            $sql = mainModel::conectar()->prepare("
+            SELECT u.us_nombres, s.su_nombre, s.su_id   
+            FROM sucursales AS s
+            JOIN usuarios AS u ON u.su_id = s.su_id 
+            WHERE u.us_id = $id;");
+        } else if ($tipo == "Multiple") {
+            $sql = mainModel::conectar()->prepare("SELECT su_id, su_nombre FROM sucursales WHERE su_estado = 1");
+        }
+        $sql->execute();
+        return $sql;
+    }
 
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

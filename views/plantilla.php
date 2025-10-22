@@ -39,6 +39,13 @@
             <!---------------------------------------------sidebar--------------------------------------------------->
             <?php include_once "inc/sidebar.php"; ?>
             <!---------------------------------------------Cuerpo principal--------------------------------------------------->
+            <?php 
+            if ($_SESSION['rol_smp'] == 1) {
+                /* iniciamos controller usuario si se tenen el privilegio necesario */
+                require_once "./controllers/userController.php";
+                $ins_usuario = new userController();
+            }
+            ?>
             <div class="main-content">
                 <!--------------------------------------------- contenido de platillas y vistas--------------------------------------------------->
                 <?php include_once $vistas; ?>

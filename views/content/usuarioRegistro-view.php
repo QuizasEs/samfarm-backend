@@ -1,8 +1,16 @@
 <?php
-    if ($_SESSION['rol_smp'] !=1 ){/* preguntamos que si el que intenta entrar a esta vista tien un privilegio distinto de admin que sierre su sesio */
-        echo $lc->forzar_cierre_sesion_controller();
-        exit();
-    }
+if ($_SESSION['rol_smp'] != 1) {/* preguntamos que si el que intenta entrar a esta vista tien un privilegio distinto de admin que sierre su sesio */
+    echo $lc->forzar_cierre_sesion_controller();
+    exit();
+}
+require_once "./controllers/userController.php";
+/* instanciamos controlador usuariosS */
+$ins_usuario = new userController();
+
+$datos_rol = $ins_usuario->data_rol_list_controller("Multiple", 0);
+$datos_sucursal = $ins_usuario->data_sucursal_list_controller("Multiple", 0);
+
+
 ?>
 <div class="title">
     <h1>Registro de usuarios</h1>
@@ -44,7 +52,7 @@
             </div>
             <div class="form-bloque">
                 <label for="">DIRECCION DE CORREO ELECTRONICO</label>
-                <input type="email" name="Correo_reg"  maxlength="100" placeholder="ingresar correo" >
+                <input type="email" name="Correo_reg" maxlength="100" placeholder="ingresar correo">
             </div>
         </div>
 
@@ -80,18 +88,19 @@
             <div class="form-bloque">
                 <label for="">ASIGNAR SUCURSAL</label>
                 <select class="select-style" name="Sucursal_reg">
-                    <option value="1">en espera</option>
-                    <option value="2">en espera</option>
-                    <option value="3">en espera</option>
-                    <option value="4">en espera</option>
+                    <option value="">SELECCIONAR</option>
+                    <?php foreach ($datos_sucursal as $sucursal) { ?>
+                        <option value="<?php echo $sucursal['su_id'];?>"><?php echo $sucursal['su_nombre']?></option>
+                    <?php } ?>
                 </select>
             </div>
             <div class="form-bloque">
                 <label for="">ASIGNAR ROL</label>
                 <select class="select-style" name="Rol_reg">
-                    <option value="3">usuario</option>
-                    <option value="2">gerente</option>
-                    <option value="1">administrador</option>
+                    <option value="">SELECCIONAR</option>
+                    <?php foreach ($datos_rol as $rol) { ?>
+                        <option value="<?php echo $rol['ro_id']; ?>"><?php echo $rol['ro_nombre'] ?></option>
+                    <?php } ?>
                 </select>
             </div>
         </div>

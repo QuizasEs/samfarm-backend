@@ -6,7 +6,7 @@
             </div>
             <div class="nav-container">
                 <div class="nav-title">
-                    <h3>BIENVENIDO <?php echo $_SESSION['nombre_smp'];?></h3>
+                    <h3>BIENVENIDO <?php echo $_SESSION['nombre_smp']; ?></h3>
                 </div>
                 <div class="nav-content">
 
@@ -23,8 +23,8 @@
                         <ion-icon name="notifications-outline"></ion-icon>
                     </div>
                     <div class="user">
-                        <button class="btn-exit-system">
-                            <ion-icon name="contact"></ion-icon>
+                        <button class="btn-exit-system" type="submit">
+                            <ion-icon name="walk"></ion-icon>
                         </button>
                     </div>
 

@@ -28,6 +28,9 @@ function enviar_formulario_ajax(e) {
         case "delete":
             texto_alerta = "Los datos en el sistema serán borrados";
             break;
+        case "disable":
+            texto_alerta = "Quiere desabilitar estos datos en el sistema?";
+            break;
         case "update":
             texto_alerta = "Los datos en el sistema serán actualizados";
             break;

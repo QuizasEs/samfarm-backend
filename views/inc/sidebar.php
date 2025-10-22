@@ -1,6 +1,8 @@
 <?php
 /* administrador vista */
-if ( $_SESSION['rol_smp'] == 1 ) { ?>
+if ($_SESSION['rol_smp'] == 1) {
+
+?>
     <div class="sidebar">
         <ul class="sidebar-content">
 
@@ -111,9 +113,8 @@ if ( $_SESSION['rol_smp'] == 1 ) { ?>
                     <ion-icon name="arrow-dropdown"></ion-icon>
                 </div>
                 <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Registrar usuario</a></li>
-                    <li class="sub-link"><a href="#">Editar usuario</a></li>
-                    <li class="sub-link"><a href="#">Roles y permisos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioRegistro/">Registrar usuario</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL;?>usuarioLista/">Lista de usuarios</a></li>
                     <li class="sub-link"><a href="#">Actividad del usuario</a></li>
                 </ul>
             </li>
@@ -187,6 +188,15 @@ if ( $_SESSION['rol_smp'] == 1 ) { ?>
                     <li class="sub-link"><a href="#">Seguridad</a></li>
                 </ul>
             </li>
+            <!-- perfil -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <ion-icon name="contact"></ion-icon>
+                        <span><a href="<?php echo SERVER_URL . "usuarioActualizar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
+                    </div>
+                </div>
+            </li>
 
         </ul>
     </div>
@@ -194,7 +204,7 @@ if ( $_SESSION['rol_smp'] == 1 ) { ?>
 
 
     <!-- gerente vista -->
-<?php } elseif ( $_SESSION['rol_smp'] == 2 ) { ?>
+<?php } elseif ($_SESSION['rol_smp'] == 2) { ?>
 
     <div class="sidebar">
         <ul class="sidebar-content">
@@ -276,12 +286,21 @@ if ( $_SESSION['rol_smp'] == 1 ) { ?>
                     </div>
                 </div>
             </li>
+            <!-- perfil -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <ion-icon name="contact"></ion-icon>
+                        <span><a href="<?php echo SERVER_URL . "usuarioActualizar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
+                    </div>
+                </div>
+            </li>
         </ul>
     </div>
 
 
     <!-- usuario caja vista -->
-<?php } elseif ( $_SESSION['rol_smp'] == 3 ) { ?>
+<?php } elseif ($_SESSION['rol_smp'] == 3) { ?>
 
     <div class="sidebar">
         <ul class="sidebar-content">
@@ -339,6 +358,15 @@ if ( $_SESSION['rol_smp'] == 1 ) { ?>
                     <li class="sub-link"><a href="#">Editar cliente</a></li>
                     <li class="sub-link"><a href="#">Historial de compras</a></li>
                 </ul>
+            </li>
+            <!-- perfil -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <ion-icon name="contact"></ion-icon>
+                        <span><a href="<?php echo SERVER_URL . "usuarioActualizar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
+                    </div>
+                </div>
             </li>
         </ul>
     </div>

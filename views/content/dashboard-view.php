@@ -2,6 +2,9 @@
             <div class="title">
                 <h1>dashboard</h1>
             </div>
+
+            <?php if ($_SESSION['rol_smp'] == 1) {?>
+
             <!-- enlaces directos o acrotadores mas usados -->
             <div class="direct-link">
                 <div class="container-direct-links">
@@ -61,8 +64,29 @@
                             </div>
                         </a>
                     </div>
+                    <div class="direct-link-item blue">
+                        <a href="#">
+                            <div class="direct-link-text">
+                                <h3><!-- mostramos la cantidad de usuarios -->
+                                    <?php 
+                                        $total=$ins_usuario->data_user_controller("Conteo", 0); 
+                                        echo $total->rowCount();
+                                    ?>
+                                </h3>
+                                <p>Usuarios</p>
+                            </div>
+                            <div class="direct-link-image">
+                                <ion-icon name="contacts"></ion-icon>
+                            </div>
+                            <div class="direct-link-collapsed">
+                                <h3>Abrir</h3>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
+            <?php }?>
+
             <!-- resumende las compras del año actual -->
             <div class="sub-title">
                 <h2>resumen de compras diarias</h2>

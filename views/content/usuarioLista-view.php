@@ -8,7 +8,7 @@
                         <input type="text" name="" id=""><button><ion-icon name="search"></ion-icon></button>
                     </div>
                     <div class="header-btn-usuario">
-                        <a href="<?php echo SERVER_URL;?>registroUsuario/">NUEVO USUARIO</a>
+                        <a href="<?php echo SERVER_URL;?>usuarioRegistro/">NUEVO USUARIO</a>
                     </div>
                 </div>
 
