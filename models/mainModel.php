@@ -62,6 +62,7 @@ class mainModel
     /* ----------------------------------------funcion para limpiar cadenas---------------------------------------------- */
     protected static function limpiar_cadena($cadena)
     {
+        /* ANTIGUO    
         $cadena = trim($cadena);
         $cadena = stripslashes($cadena);
         $cadena = str_ireplace("<script>", "", $cadena);
@@ -79,8 +80,6 @@ class mainModel
         $cadena = str_ireplace("<?php", "", $cadena);
         $cadena = str_ireplace("?>", "", $cadena);
         $cadena = str_ireplace("--", "", $cadena);
-        $cadena = str_ireplace(">", "", $cadena);
-        $cadena = str_ireplace("<", "", $cadena);
         $cadena = str_ireplace("[", "", $cadena);
         $cadena = str_ireplace("]", "", $cadena);
         $cadena = str_ireplace("^", "", $cadena);
@@ -89,6 +88,29 @@ class mainModel
         $cadena = str_ireplace("::", "", $cadena);
         $cadena = stripslashes($cadena);
         $cadena = trim($cadena);
+        return $cadena; */
+
+        // Eliminar espacios al inicio y final
+        $cadena = trim($cadena);
+
+        // Eliminar barras invertidas
+        $cadena = stripslashes($cadena);
+
+        // Eliminar etiquetas HTML y PHP (protección contra XSS)
+        $cadena = strip_tags($cadena);
+
+        // Eliminar caracteres de control peligrosos pero mantener espacios normales
+        $cadena = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $cadena);
+
+        // Normalizar espacios múltiples a uno solo
+        $cadena = preg_replace('/\s+/', ' ', $cadena);
+
+        // Eliminar caracteres NULL
+        $cadena = str_replace("\0", '', $cadena);
+
+        // Eliminar espacios al inicio y final después de todas las limpiezas
+        $cadena = trim($cadena);
+
         return $cadena;
     }
     /* --------------------------------------funcion que verifica los datos------------------------------------------------ */
@@ -157,9 +179,9 @@ class mainModel
         $tabla .= ' </ul>
                     </nav>';
         return $tabla;
-    } 
+    }
 
-    
+
     /* ------------------------------ obtener informacion de sucursales y roles para usuario----------------------------------- */
     protected static function data_rol_list_model($tipo, $id)
     {
@@ -192,7 +214,42 @@ class mainModel
         return $sql;
     }
 
-    /* -------------------------------------------------------------------------------------- */
+    /* ----------------------------------------- recupera informacion de tablas foraneas de medicamentos--------------------------------------------- */
+
+    protected static function datos_extras_model($id)
+    {
+
+        $sql_uf = self::conectar()->prepare("
+                SELECT * FROM uso_farmacologico WHERE uf_estado = 1
+            ");
+        $sql_ff = self::conectar()->prepare("
+                SELECT * FROM forma_farmaceutica WHERE ff_estado = 1
+            ");
+        $sql_vd = self::conectar()->prepare("
+                SELECT * FROM via_de_administracion WHERE vd_estado = 1
+            ");
+        $sql_la = self::conectar()->prepare("
+                SELECT * FROM laboratorios WHERE la_estado =1    
+            ");
+        $sql_su = self::conectar()->prepare("
+                SELECT * FROM sucursales WHERE su_estado = 1
+            ");
+
+        /* ejecutamos todas las consultas */
+        $sql_uf->execute();
+        $sql_ff->execute();
+        $sql_vd->execute();
+        $sql_la->execute();
+        $sql_su->execute();
+        /* retornamos el resultado de consultas */
+        return [
+            'uso_farmacologico' => $sql_uf->fetchAll(),
+            'forma_farmaceutica' => $sql_ff->fetchAll(),
+            'via_administracion' => $sql_vd->fetchAll(),
+            'laboratorios' => $sql_la->fetchAll(),
+            'sucursales' => $sql_su->fetchAll()
+        ];
+    }
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

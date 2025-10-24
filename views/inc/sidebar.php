@@ -78,11 +78,13 @@ if ($_SESSION['rol_smp'] == 1) {
                     <ion-icon name="arrow-dropdown"></ion-icon>
                 </div>
                 <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Medicamentos</a></li>
-                    <li class="sub-link"><a href="#">Lotes y vencimientos</a></li>
-                    <li class="sub-link"><a href="#">Movimientos de stock</a></li>
-                    <li class="sub-link"><a href="#">Categorías</a></li>
-                    <li class="sub-link"><a href="#">Proveedores</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>medicamentoLista/">Medicamentos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Lotes y vencimientos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Movimientos de stock</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>viaDeAdministracionLista">Via de administracion</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Uso farmacologico</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Forma farmaceutica</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Laboratorios</a></li>
                 </ul>
             </li>
 
@@ -242,7 +244,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     <ion-icon name="arrow-dropdown"></ion-icon>
                 </div>
                 <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Medicamentos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>medicamentoLista/">Medicamentos</a></li>
                     <li class="sub-link"><a href="#">Lotes y vencimientos</a></li>
                     <li class="sub-link"><a href="#">Movimientos de stock</a></li>
                 </ul>

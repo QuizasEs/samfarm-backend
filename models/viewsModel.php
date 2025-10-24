@@ -7,7 +7,9 @@
                 "dashboard","usuarioRegistro",
                 "categoriaLista","laboratorioLista",
                 "presentacionLista","usuarioLista",
-                "usuarioActualizar",""
+                "usuarioActualizar","medicamentoRegistro",
+                "medicamentoLista","medicamentoActualizar",
+                "viaDeAdministracionLista"
             ];
 
             if(in_array($vistas,$listaBlanca)){
