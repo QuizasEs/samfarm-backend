@@ -12,12 +12,12 @@ class medicamentoController extends medicamentoModel
 {
 
     /* -----------------------------------controlador para recabar datos de los selects------------------------------------------ */
-    public function datos_extras_controller($id)
+    public function datos_extras_controller()
     {
-        $id = mainModel::decryption($id);
-        $id = mainModel::limpiar_cadena($id);
+        /* $id = mainModel::decryption($id);
+        $id = mainModel::limpiar_cadena($id); */
 
-        return mainModel::datos_extras_model($id);
+        return mainModel::datos_extras_model();
     }
 
 

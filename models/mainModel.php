@@ -216,7 +216,7 @@ class mainModel
 
     /* ----------------------------------------- recupera informacion de tablas foraneas de medicamentos--------------------------------------------- */
 
-    protected static function datos_extras_model($id)
+    protected static function datos_extras_model()
     {
 
         $sql_uf = self::conectar()->prepare("
@@ -234,6 +234,7 @@ class mainModel
         $sql_su = self::conectar()->prepare("
                 SELECT * FROM sucursales WHERE su_estado = 1
             ");
+        $sql_pr = self::conectar()->prepare("SELECT * FROM proveedores WHERE pr_estado = 1");
 
         /* ejecutamos todas las consultas */
         $sql_uf->execute();
@@ -241,17 +242,94 @@ class mainModel
         $sql_vd->execute();
         $sql_la->execute();
         $sql_su->execute();
+        $sql_pr->execute();
         /* retornamos el resultado de consultas */
         return [
             'uso_farmacologico' => $sql_uf->fetchAll(),
             'forma_farmaceutica' => $sql_ff->fetchAll(),
             'via_administracion' => $sql_vd->fetchAll(),
             'laboratorios' => $sql_la->fetchAll(),
-            'sucursales' => $sql_su->fetchAll()
+            'sucursales' => $sql_su->fetchAll(),
+            'proveedores' => $sql_pr->fetchAll()
         ];
     }
-    /* -------------------------------------------------------------------------------------- */
-    /* -------------------------------------------------------------------------------------- */
+    /* ----------------------------------------- funcion para guardar imagenes--------------------------------------------- */
+
+    public function procesar_imagen($archivo, $tipo, $img_dir)
+    {
+        // Validar formato de imagen
+        $mime_type = mime_content_type($archivo['tmp_name']);
+        if (!in_array($mime_type, ['image/jpeg', 'image/png'])) {
+            return [
+                'error' => true,
+                'alerta' => [
+                    "tipo" => "simple",
+                    "titulo" => "Error de formato",
+                    "texto" => "La imagen debe ser JPG o PNG",
+                    "icono" => "error"
+                ]
+            ];
+        }
+
+        // Validar tamaño (5MB máximo)
+        if (($archivo['size'] / 1024) > 5120) {
+            return [
+                'error' => true,
+                'alerta' => [
+                    "tipo" => "simple",
+                    "titulo" => "Archivo muy grande",
+                    "texto" => "La imagen supera el tamaño permitido (5MB)",
+                    "icono" => "error"
+                ]
+            ];
+        }
+
+        // Generar nombre único aleatorio
+        $extension = ($mime_type == 'image/jpeg') ? '.jpg' : '.png';
+        $random_id = bin2hex(random_bytes(8)); // genera una cadena única segura
+        $nombre_archivo = $tipo . "_" . $random_id . "_" . time() . $extension;
+
+        // Evitar colisiones (muy raro, pero por si acaso)
+        while (file_exists($img_dir . $nombre_archivo)) {
+            $random_id = bin2hex(random_bytes(8));
+            $nombre_archivo = $tipo . "_" . $random_id . "_" . time() . $extension;
+        }
+
+        // Mover archivo al directorio destino
+        if (!move_uploaded_file($archivo['tmp_name'], $img_dir . $nombre_archivo)) {
+            return [
+                'error' => true,
+                'alerta' => [
+                    "tipo" => "simple",
+                    "titulo" => "Error al subir",
+                    "texto" => "No se pudo guardar la imagen",
+                    "icono" => "error"
+                ]
+            ];
+        }
+
+        // Cambiar permisos
+        chmod($img_dir . $nombre_archivo, 0644);
+
+        return [
+            'error' => false,
+            'nombre' => $nombre_archivo
+        ];
+    }
+
+    /* ----------------------------------------modelo para eliminar imagen---------------------------------------------- */
+    public function eliminar_imagenes($imagenes, $img_dir)
+    {
+        foreach ($imagenes as $imagen) {
+            $ruta = $img_dir . $imagen;
+            if ($imagen != "" && is_file($ruta)) {
+                chmod($ruta, 0777);
+                unlink($ruta);
+            }
+        }
+    }
+
+
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

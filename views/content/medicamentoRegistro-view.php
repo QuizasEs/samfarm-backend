@@ -5,18 +5,18 @@ if ($_SESSION['rol_smp'] != 1) {/* preguntamos que si el que intenta entrar a es
 }
 require_once "./controllers/MedicamentoController.php";
 $ins_med = new medicamentoController();
-$datos_select = $ins_med->datos_extras_controller("Unico",1);
+$datos_select = $ins_med->datos_extras_controller();
 
 ?>
 <div class="title">
     <h1>Registro de usuarios</h1>
 </div>
-<!-- formulario de registro de usuarios -->
+<!-- formulario de registro de medicamentos -->
 <div class="registro-usaurios-container">
     <form class="form-registro-usuario FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/medicamentoAjax.php" method="POST" data-form="save" autocomplete="off">
 
         <input type="hidden" name="MedicamentoAjax" value="save">
-        <!-- DATOS PERSONALES -->
+        <!-- DATOS esenciales -->
         <div class="form-title">
             <h3>datos personales</h3>
         </div>

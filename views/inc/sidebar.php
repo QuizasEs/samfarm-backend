@@ -79,7 +79,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 </div>
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>medicamentoLista/">Medicamentos</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Lotes y vencimientos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>lotesRegistro">Registro de lotes</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>">Movimientos de stock</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>viaDeAdministracionLista">Via de administracion</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>">Uso farmacologico</a></li>
@@ -98,10 +98,11 @@ if ($_SESSION['rol_smp'] == 1) {
                     <ion-icon name="arrow-dropdown"></ion-icon>
                 </div>
                 <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Registrar compra</a></li>
-                    <li class="sub-link"><a href="#">Historial de compras</a></li>
-                    <li class="sub-link"><a href="#">Recepción de productos</a></li>
-                    <li class="sub-link"><a href="#">Gestión de proveedores</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>proveedorRegistro/">Registrar proveedor</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Registrar compra</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Historial de compras</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Recepción de productos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Gestión de proveedores</a></li>
                 </ul>
             </li>
 

@@ -9,7 +9,9 @@
                 "presentacionLista","usuarioLista",
                 "usuarioActualizar","medicamentoRegistro",
                 "medicamentoLista","medicamentoActualizar",
-                "viaDeAdministracionLista"
+                "viaDeAdministracionLista", "lotesRegistro",
+                "proveedorRegistro", "proveedorLista",
+                "proveedorActualizar","laboratorioRegistro"
             ];
 
             if(in_array($vistas,$listaBlanca)){
