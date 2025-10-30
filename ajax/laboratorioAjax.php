@@ -14,12 +14,12 @@ if(isset($_POST['LaboratorioAjax'])){
     $valor=$_POST['LaboratorioAjax'];
     
     require_once "../controllers/proveedorController.php";
-    $ins_pro = new proveedorController();
+    $ins_lab = new proveedorController();
     if ($valor == "save"){
-        echo $ins_pro->agregar_laboratorio_controller();
+        echo $ins_lab->agregar_laboratorio_controller();
     }
     if ($valor == "update"){
-
+        echo $ins_lab->actualizar_laboratorio_controller();
         
     }
 }

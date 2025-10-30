@@ -1249,6 +1249,30 @@ nav .hamburguesa {
         width: 80%;
     }
 }
+.btn-danger {
+    padding: 10px;
+    width: 300px;
+    color: white;
+    background-color: red;
+    border: 2px solid var(--border-light);
+    box-shadow: 2px 2px 10px var(--shadow-light);
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.btn-danger:hover {
+    color: black;
+    background-color: pink;
+}
+
+@media (max-width: 512px) {
+    .btn-primary {
+        width: 80%;
+    }
+}
 
 /**************************************formulario de registro de usuarios******************************/
 
@@ -1288,6 +1312,7 @@ nav .hamburguesa {
     letter-spacing: 2px;
     color: var(--accent-secondary);
     border-bottom: 2px solid var(--accent-primary);
+    text-align: center;
 
 }
 
@@ -1592,9 +1617,9 @@ nav .hamburguesa {
 }
 
 .active {
-    display:flex;
-    align-self:center;
-    justify-content:center;
+    display: flex;
+    align-self: center;
+    justify-content: center;
     background-color: lightgreen;
     padding: 5px 10px;
     border-radius: 15px;
@@ -1615,10 +1640,11 @@ nav .hamburguesa {
     box-shadow: 2px 2px 10px var(--dark-shadow-dark);
 
 }
+
 .in-active {
-    display:flex;
-    align-self:center;
-    justify-content:center;
+    display: flex;
+    align-self: center;
+    justify-content: center;
     background-color: pink;
     padding: 5px 10px;
     border-radius: 15px;
@@ -1629,6 +1655,7 @@ nav .hamburguesa {
     box-shadow: 2px 2px 10px var(--shadow-light);
     text-wrap: nowrap;
 }
+
 .dark .in-active {
 
     background-color: pink;
@@ -1638,17 +1665,18 @@ nav .hamburguesa {
     box-shadow: 2px 2px 10px var(--dark-shadow-dark);
     text-wrap: nowrap;
 }
-.btn-editar{
-    background:var(--dark-accent-secondary);
-    display:flex;
+
+.btn-editar {
+    background: var(--dark-accent-secondary);
+    display: flex;
     justify-content: center;
     align-items: center;
     align-self: center;
     padding: 5px 10px;
     border-radius: 8px;
-    color:white;
-    text-decoration:none;
-    text-transform:uppercase;
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 500;
     text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
@@ -1656,30 +1684,32 @@ nav .hamburguesa {
     box-shadow: 2px 2px 10px var(--shadow-light);
     transition: all 0.3s ease;
 }
-.dark .btn-editar{
-    background:var(--accent-primary);
+
+.dark .btn-editar {
+    background: var(--accent-primary);
     border-radius: 8px;
-    color:white;
+    color: white;
     text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
     box-shadow: 2px 2px 10px var(--dark-shadow-dark);
 }
 
 
-.btn-editar:hover{
-    background:var(--accent-primary);
-    color:white;
+.btn-editar:hover {
+    background: var(--accent-primary);
+    color: white;
 
     text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.329);
 }
-.dark .btn-editar:hover{
-    background:var(--dark-accent-secondary);
+
+.dark .btn-editar:hover {
+    background: var(--dark-accent-secondary);
 }
 
 
 
 /*default filtro*/
-.lista-header{
-    display:flex;
+.lista-header {
+    display: flex;
     flex-wrap: nowrap;
     gap: 1rem;
     border: 2px solid var(--border-light);
@@ -1689,25 +1719,26 @@ nav .hamburguesa {
     border-radius: 1rem;
     box-shadow: 50px 5px 10px var(--shadow-light);
     justify-content: flex-end;
-    overflow:hidden;
+    overflow: hidden;
 
 }
-.dark .lista-header{
+
+.dark .lista-header {
     border: 2px solid var(--dark-border-dark);
     background-color: var(--dark-bg-secondary);
     box-shadow: 50px 5px 10px var(--dark-shadow-dark);
 }
 
-.lista-header .filtro{
+.lista-header .filtro {
     width: 300px;
-    display:flex;
-    gap:10px;
+    display: flex;
+    gap: 10px;
     justify-content: center;
     align-items: center;
     flex-wrap: nowrap;
 }
 
-.lista-header .filtro input{
+.lista-header .filtro input {
     height: 40px;
     border-radius: 10px;
     outline-style: none;
@@ -1717,65 +1748,73 @@ nav .hamburguesa {
     color: var(--text-secondary);
 }
 
-.dark .lista-header .filtro input{
+.dark .lista-header .filtro input {
     border: 2px solid var(--dark-border-dark);
     box-shadow: 2px 2px 10px var(--dark-shadow-dark);
     color: var(--dark-text-secondarytext-secondary);
 }
-.lista-header .filtro button{
+
+.lista-header .filtro button {
     border: none;
     font-size: 2rem;
     text-shadow: 2px 2px 10px var(--shadow-light);
     transition: all 0.3s ease;
-    background:none;
+    background: none;
 }
-.dark .lista-header .filtro button{
+
+.dark .lista-header .filtro button {
     text-shadow: 2px 2px 10px var(--dark-shadow-dark);
     color: var(--dark-text-primary)
 }
 
-.lista-header .filtro button:hover{
+.lista-header .filtro button:hover {
     transform: scale(1.07);
 }
+
 .lista-header .header-btn-usuario {
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
-.header-btn-usuario a{
-    background:var(--accent-primary);
+
+.header-btn-usuario a {
+    background: var(--accent-primary);
     padding: 20px;
     border-radius: 10px;
     color: var(--dark-text-primary);
-    text-decoration:none;
+    text-decoration: none;
     font-size: 1.17rem;
     font-weight: 600;
     transition: all 0.3s ease;
 }
-.header-btn-usuario a:hover{
-    background:var(--dark-accent-secondary);
+
+.header-btn-usuario a:hover {
+    background: var(--dark-accent-secondary);
     color: white;
 }
-.dark .header-btn-usuario a{
-    background:var(--dark-accent-secondary);
+
+.dark .header-btn-usuario a {
+    background: var(--dark-accent-secondary);
     padding: 20px;
     border-radius: 10px;
     color: var(--dark-text-primary);
-    text-decoration:none;
+    text-decoration: none;
     font-size: 1.17rem;
     font-weight: 600;
     transition: all 0.3s ease;
 }
-.dark .header-btn-usuario a:hover{
-    background:var(--accent-secondary);
+
+.dark .header-btn-usuario a:hover {
+    background: var(--accent-secondary);
     color: white;
 }
-@media(max-width: 678px){
-    .lista-header{
+
+@media(max-width: 678px) {
+    .lista-header {
         flex-direction: column-reverse;
         justify-content: center;
 
-        align-items:center;
+        align-items: center;
     }
 }
 
@@ -1783,12 +1822,99 @@ nav .hamburguesa {
 
 
 /**************************************predeterminado*********************************************/
-td img{
-    width: 50px; 
+td img {
+    width: 50px;
     height: 35px;
-    object-fit:content;
+    object-fit: content;
 }
-/**************************************lista*********************************************/
+
+.file-label {
+    border: 2px solid red;
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    gap: 10px;
+}
+
+.file-input+etiqueta {
+    width: 300px;
+    display: flex;
+}
+
+.file-input {
+display: none;
+}
+
+
+.view-img {
+    width: 350px;
+    height: 350px;
+    border-radius: 2rem;
+    object-fit: cover;
+}
+
+/**************************************filtros*********************************************/
+.section-search{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.filters{
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 2rem;
+    
+}
+.filter-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.section-calc{
+    border: 2px solid red;
+    display: flex;
+    flex: 1;
+    min-width: 200px;
+    width: 100%;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.calc-content{
+    background: var(--dark-accent-secondary);
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    border-radius: 1rem;
+    padding: 1rem; 
+    gap: 1rem;
+}
+.calc-group{
+    display: flex;
+    justify-content: space-between
+}
+.calc-group span{
+    color: var(--dark-text-primary);
+    font-weight: 500;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+}
+
 /**************************************lista*********************************************/
 /**************************************lista*********************************************/
 /**************************************lista*********************************************/

@@ -94,3 +94,29 @@
         myChart.setOption(option);
     </script>
     <script src="<?php echo SERVER_URL; ?>views/script/alertas.js"></script>
+    <script>// Para visualizar imágenes en inputs
+        
+        const imgPic = document.getElementById('img-pic');
+        const inputFile = document.getElementById('imgLoad');
+
+        // Validar que los elementos existan antes de agregar eventos
+        if (imgPic && inputFile) {
+            inputFile.onchange = function () {
+                if (inputFile.files && inputFile.files[0]) {
+                    // Validar tamaño del archivo (5MB)
+                    if (inputFile.files[0].size > 5 * 1024 * 1024) {
+                        alert('El archivo es muy grande. Máximo 5MB.');
+                        inputFile.value = '';
+                        imgPic.style.display = 'none';
+                        return;
+                    }
+
+                    // Mostrar imagen
+                    imgPic.src = URL.createObjectURL(inputFile.files[0]);
+                    imgPic.style.display = 'block';
+                }
+            }
+        } else {
+            console.warn('Elementos de carga de imagen no encontrados en esta página');
+        }
+    </script>

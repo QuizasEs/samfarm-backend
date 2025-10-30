@@ -11,7 +11,8 @@
                 "medicamentoLista","medicamentoActualizar",
                 "viaDeAdministracionLista", "lotesRegistro",
                 "proveedorRegistro", "proveedorLista",
-                "proveedorActualizar","laboratorioRegistro"
+                "proveedorActualizar","laboratorioRegistro",
+                "laboratorioActualizar", "compraRegistrar"
             ];
 
             if(in_array($vistas,$listaBlanca)){
