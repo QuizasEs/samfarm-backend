@@ -1,70 +1,23 @@
-
             <div class="title">
-                <h1>lista laboratorios</h1>
+                <h1>LISTA DE LABORATORIOS</h1>
             </div>
-            <!---------------------------------------------lista de laboratorios--------------------------------------------------->
+            <!---------------------------------------------lista de usuarios--------------------------------------------------->
             <div class="container">
                 <div class="lista-header">
                     <div class="filtro">
                         <input type="text" name="" id=""><button><ion-icon name="search"></ion-icon></button>
                     </div>
                     <div class="header-btn-usuario">
-                        <a href="">NUEVO LABORATORIO</a>
+                        <a href="<?php echo SERVER_URL;?>laboratorioRegistro/">NUEVO LABORATORIO</a>
                     </div>
                 </div>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>laboratorio</th>
-                                <th>contacto</th>
-                                <th>logo</th>
-                                <th>ESTADO</th>
-                                <th>
-                                    ACCIONES
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>cofar srl</td>
-                                <td>12346578</td>
-                                <td><img src="../image/vita.jpg" alt="" style=""></td>
-                                <td><span class="active">activo</span></td>
-                                <td><a href="" class="btn-editar">Editar</a></td>
-                            </tr><tr>
-                                <td>1</td>
-                                <td>cofar srl</td>
-                                <td>12346578</td>
-                                <td><img src="../image/vita.jpg" alt="" style=""></td>
-                                <td><span class="active">activo</span></td>
-                                <td><a href="" class="btn-editar">Editar</a></td>
-                            </tr><tr>
-                                <td>1</td>
-                                <td>cofar srl</td>
-                                <td>12346578</td>
-                                <td><img src="../image/vita.jpg" alt="" style=""></td>
-                                <td><span class="active">activo</span></td>
-                                <td><a href="" class="btn-editar">Editar</a></td>
-                            </tr><tr>
-                                <td>1</td>
-                                <td>cofar srl</td>
-                                <td>12346578</td>
-                                <td><img src="../image/vita.jpg" alt="" style=""></td>
-                                <td><span class="active">activo</span></td>
-                                <td><a href="" class="btn-editar">Editar</a></td>
-                            </tr><tr>
-                                <td>1</td>
-                                <td>cofar srl</td>
-                                <td>12346578</td>
-                                <td><img src="../image/vita.jpg" alt="" style=""></td>
-                                <td><span class="active">activo</span></td>
-                                <td><a href="" class="btn-editar">Editar</a></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
+                <?php 
+                    require_once "./controllers/proveedorController.php";
+                    $ins_lab = new proveedorController();
+                    $pagina_actual = isset($pagina[1]) ? $pagina[1] : 1;
+                    
+                    echo $ins_lab->paginado_laboratorio_controller($pagina_actual,15,$pagina[0],"")
+                ?>
+                
+            </div>

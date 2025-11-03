@@ -47,7 +47,7 @@ class proveedorModel extends mainModel
             pr_actualizado_en = :Fecha,
             pr_estado = :Estado
         WHERE pr_id = :ID
-    ");
+        ");
 
         $sql->bindParam(":Nombre", $datos['Nombre']);
         $sql->bindParam(":ApellidoPaterno", $datos['ApellidoPaterno']);
@@ -90,5 +90,33 @@ class proveedorModel extends mainModel
             error_log("Error al insertar laboratorio: " . $e->getMessage());
             return false;
         }
+    }
+    /*  modelo para recuperar datos de laboratorios */
+    protected static function data_laboratorio_model($id)
+    {
+        $sql = mainModel::conectar()->prepare("SELECT * FROM laboratorios WHERE la_id = :ID");
+
+        $sql->bindParam(":ID", $id);
+        $sql->execute();
+        return $sql;
+    }
+    protected static function actualizar_laboratorio_model($datos)
+    {
+        $sql = mainModel::conectar()->prepare("
+        UPDATE laboratorios
+        SET
+            la_nombre_comercial = :Nombre,
+            la_logo = :Logo,
+            la_actualizado_en = :Fecha,
+            la_estado = :Estado
+        WHERE
+            la_id = :ID");
+        $sql->bindParam(":Nombre", $datos['Nombre']);
+        $sql->bindParam(":Logo", $datos['Logo']);
+        $sql->bindParam(":Fecha", $datos['Fecha']);
+        $sql->bindParam(":Estado", $datos['Estado']);
+        $sql->bindParam(":ID", $datos['ID']);
+
+        return $sql->execute();
     }
 }
