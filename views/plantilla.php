@@ -3,7 +3,6 @@
 
 <?php include "inc/head.php"; ?>
 
-
 <body class="darkmode">
     <?php
     $peticionAjax = false;
@@ -17,10 +16,6 @@
     } else {
         /* inicializa sesion */
         session_start(['name' => 'SMP']);
-        include_once "inc/header.php";
-        
-        /* dividir cadenas por "/"" */
-        $pagina = explode("/", $_GET['views']);
 
         require_once "./controllers/loginController.php";
         $lc = new loginController();
@@ -34,12 +29,17 @@
             echo $lc->forzar_cierre_sesion_controller();
             exit();
         }
+        include_once "inc/header.php";
+
+        /* dividir cadenas por "/"" */
+        $pagina = explode("/", $_GET['views']);
+
     ?>
         <main>
             <!---------------------------------------------sidebar--------------------------------------------------->
             <?php include_once "inc/sidebar.php"; ?>
             <!---------------------------------------------Cuerpo principal--------------------------------------------------->
-            <?php 
+            <?php
             if ($_SESSION['rol_smp'] == 1) {
                 /* iniciamos controller usuario si se tenen el privilegio necesario */
                 require_once "./controllers/userController.php";
@@ -49,28 +49,18 @@
             <div class="main-content">
                 <!--------------------------------------------- contenido de platillas y vistas--------------------------------------------------->
                 <?php include_once $vistas; ?>
-
-
             </div>
-
         </main>
 
-
         <!---------------- -----------------------------Script--------------------------------------------------->
-
+        <?php
+        /* ✅ MOVER ESTAS INCLUSIONES DENTRO DEL BLOQUE ELSE */
+        include_once "inc/logOut.php";
+        include_once "inc/script.php";
+        include_once "inc/footer.php";
+        ?>
     <?php
-
-    }
-    include_once "inc/logOut.php";
-    include_once "inc/script.php";
-
-
-    include_once "inc/footer.php";
+    } // CIERRE DEL BLOQUE ELSE
     ?>
-
-
-
-
 </body>
-
 </html>

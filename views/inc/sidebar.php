@@ -99,7 +99,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 </div>
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>proveedorRegistro/">Registrar proveedor</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL?>">Registrar compra</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL?>compraOrden">Registrar compra</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>">Historial de compras</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>">Recepción de productos</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL?>">Gestión de proveedores</a></li>

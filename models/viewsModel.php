@@ -12,7 +12,7 @@
                 "viaDeAdministracionLista", "lotesRegistro",
                 "proveedorRegistro", "proveedorLista",
                 "proveedorActualizar","laboratorioRegistro",
-                "laboratorioActualizar", "compraRegistro"
+                "laboratorioActualizar", "compraRegistro","compraOrden"
             ];
 
             if(in_array($vistas,$listaBlanca)){
