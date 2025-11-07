@@ -57,7 +57,7 @@ if (isset($_POST['compraAjax'])) {
         exit();
 
         // 🚀 Producción (descomentar después)
-        // echo $ins_compra->agregar_compra_controller();
+        echo $ins_compra->agregar_compra_controller();
     }
 
     if ($valor == "buscar_medicamentos") {
