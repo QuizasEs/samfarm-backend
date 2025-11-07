@@ -11,12 +11,21 @@ class mainModel
 {
 
     /* ------------------funcion de conexion a la base de datos usandos variables de SERVER.php ----------------*/
+    // Variable estática para guardar la conexión
+    private static $conexion = null;
+
     protected static function Conectar()
     {
+        // Si ya existe la conexión, la retorna
+        if (self::$conexion !== null) {
+            return self::$conexion;
+        }
+
+        // Si no existe, la crea una sola vez
         try {
-            $conexion = new PDO(SGBD . ";charset=utf8", USER, PASS);
-            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $conexion;
+            self::$conexion = new PDO(SGBD . ";charset=utf8", USER, PASS);
+            self::$conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return self::$conexion;
         } catch (PDOException $e) {
             die("❌ Error de conexión: " . $e->getMessage());
         }

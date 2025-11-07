@@ -71,144 +71,270 @@ class compraController extends compraModel
     /* agegar compra nueva controlador */
     public function agregar_compra_controller()
     {
-        session_start(['name' => 'SMP']);
-        $usuarioId = $_SESSION['id_smp'];
+        /* ========== VALIDAR Y LIMPIAR CAMPOS ========== */
 
-        /* limpiamos y validamos */
-        $numero_compra   = mainModel::limpiar_cadena($_POST['Numero_compra_reg'] ?? '');
-        $razon           = mainModel::limpiar_cadena($_POST['razon_reg'] ?? '');
-        $proveedor       = (int) mainModel::limpiar_cadena($_POST['Proveedor_reg'] ?? 0);
-        $laboratorio     = (int) mainModel::limpiar_cadena($_POST['Laboratorio_factura_reg'] ?? 0);
-        $fecha_factura   = mainModel::limpiar_cadena($_POST['Fecha_factura_reg'] ?? '');
-        $numero_factura  = mainModel::limpiar_cadena($_POST['Numero_factura_reg'] ?? '');
-        $impuestos_pct   = floatval(mainModel::limpiar_cadena($_POST['impuestos_reg'] ?? 0));
-        $lotes           = json_decode($_POST['lotes_json'] ?? '[]', true);
-        $totales         = json_decode($_POST['totales_json'] ?? '{}', true);
+        // Datos principales de compra
+        $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
+        $razon_social = mainModel::limpiar_cadena($_POST['razon_reg']);
+        $proveedor_id = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
+        $laboratorio_id = mainModel::limpiar_cadena($_POST['Laboratorio_factura_reg']);
 
-        if ($numero_compra === '' || $razon === '' || $proveedor <= 0 || $laboratorio <= 0 || $fecha_factura === '' || $numero_factura === '') {
+        // Datos de factura
+        $fecha_factura = mainModel::limpiar_cadena($_POST['Fecha_factura_reg']);
+        $numero_factura = mainModel::limpiar_cadena($_POST['Numero_factura_reg']);
+        $porcentaje_impuesto = mainModel::limpiar_cadena($_POST['impuestos_reg']);
+
+        // Datos del usuario y sucursal
+        $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
+        $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp'] ?? 1);
+
+        // Decodificar JSON de lotes y totales
+        $lotes_json = $_POST['lotes_json'] ?? '[]';
+        $totales_json = $_POST['totales_json'] ?? '{}';
+
+        $lotes = json_decode($lotes_json, true);
+        $totales = json_decode($totales_json, true);
+
+        /* ========== VALIDACIONES ========== */
+
+        // Validar campos obligatorios
+        if (
+            empty($numero_compra) || empty($razon_social) || empty($proveedor_id) ||
+            empty($laboratorio_id) || empty($fecha_factura) || empty($numero_factura)
+        ) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Campos faltantes',
-                'texto' => 'Asegúrate de completar todos los campos obligatorios.',
+                'texto' => 'Por favor completa todos los campos obligatorios (número de compra, razón social, proveedor, laboratorio, fecha y número de factura).',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
             exit();
         }
-        if (!is_array($lotes) || count($lotes) === 0) {
+
+        // Validar que haya lotes
+        if (empty($lotes) || !is_array($lotes) || count($lotes) === 0) {
             $alerta = [
                 'Alerta' => 'simple',
-                'Titulo' => 'Ocurrio Un error',
-                'texto' => 'Datos erroneos en los lotes de compra.',
+                'Titulo' => 'Sin medicamentos',
+                'texto' => 'Debes agregar al menos un medicamento con su lote a la compra.',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
             exit();
-
-        /* Totales */
-        $subtotal = floatval($totales['subtotal'] ?? 0);
-        $impuestos_valor = floatval($totales['impuestos'] ?? 0);
-        $total = floatval($totales['total'] ?? 0);
-
-        /* Registro compra */
-        $compra_datos = [
-            'co_numero' => $numero_compra,
-            'co_numero_factura' => $numero_factura,
-            'co_fecha_factura' => $fecha_factura,
-            'co_subtotal' => $subtotal,
-            'co_impuesto' => $impuestos_valor,
-            'co_total' => $total,
-            'la_id' => $laboratorio,
-            'us_id' => $usuarioId,
-            'su_id' => 1,
-            'pr_id' => $proveedor,
-            'co_razon_social' => $razon
-        ];
-
-        $co_id = compraModel::agregar_compra_model($compra_datos);
-        if ($co_id <= 0) return $this->alerta_error('Error', 'No se pudo registrar la compra.');
-
-        /* Procesamos lotes */
-        foreach ($lotes as $item) {
-            $med_id = (int) ($item['id_medicamento'] ?? $item['med_id'] ?? 0);
-            $cantidad = (int) ($item['cantidad'] ?? 0);
-            $vencimiento = $item['vencimiento'] ?? null;
-            $precioCompra = floatval($item['precioCompra'] ?? 0);
-            $precioVenta = floatval($item['precioVenta'] ?? 0);
-            $numero_lote = $item['numero'] ?? ($item['lm_numero_lote'] ?? null);
-
-            if ($med_id <= 0 || $cantidad <= 0)
-                return $this->alerta_error('Datos inválidos', 'El lote o medicamento no es válido.');
-
-            /* Insertar lote */
-            $lotes_datos = [
-                'pr_id' => $proveedor,
-                'med_id' => $med_id,
-                'su_id' => 1,
-                'lm_numero_lote' => $numero_lote ?: 'L' . time() . rand(100, 999),
-                'lm_cantidad_inicial' => $cantidad,
-                'lm_cantidad_actual' => $cantidad,
-                'lm_precio_compra' => $precioCompra,
-                'lm_precio_venta' => $precioVenta,
-                'lm_fecha_vencimiento' => $vencimiento
-            ];
-
-            $lm_id = compraModel::agregar_lote_model($lotes_datos);
-            if ($lm_id <= 0) return $this->alerta_error('Error', 'No se pudo registrar el lote.');
-
-            /* Detalle compra */
-            $detalle = [
-                'co_id' => $co_id,
-                'med_id' => $med_id,
-                'lm_id' => $lm_id,
-                'cantidad' => $cantidad,
-                'precio_unitario' => $precioCompra,
-                'descuento' => 0.00,
-                'subtotal' => round($precioCompra * $cantidad, 2)
-            ];
-            compraModel::agregar_detalle_compra_model($detalle);
-
-            /* Inventario */
-            $inv = [
-                'su_id' => 1,
-                'med_id' => $med_id,
-                'lm_id' => $lm_id,
-                'inv_cantidad' => $cantidad,
-                'inv_ultimo_precio' => $precioCompra
-            ];
-            compraModel::actualizar_inventario_model($inv);
-
-            /* Movimiento */
-            $mov = [
-                'lm_id' => $lm_id,
-                'med_id' => $med_id,
-                'su_id' => 1,
-                'us_id' => $usuarioId,
-                'mi_tipo' => 'entrada',
-                'mi_cantidad' => $cantidad,
-                'mi_unidad' => 'unidad',
-                'mi_referencia_tipo' => 'compra',
-                'mi_referencia_id' => $co_id,
-                'mi_motivo' => "Entrada por compra #{$co_id}"
-            ];
-            compraModel::agregar_movimiento_inventario_model($mov);
         }
 
-        /* Informe general (se hace una sola vez) */
-        $inf_config = json_encode([
-            'compra_id' => $co_id,
-            'subtotal' => $subtotal,
-            'impuesto' => $impuestos_valor,
-            'total' => $total,
-            'cantidad_lotes' => count($lotes)
-        ], JSON_UNESCAPED_UNICODE);
+        // Validar formato de totales
+        if (empty($totales) || !isset($totales['subtotal']) || !isset($totales['total'])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error en totales',
+                'texto' => 'Los totales de la compra no son válidos.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
 
-        compraModel::agregar_informe_compra_model([
-            'inf_nombre' => "Compra {$numero_compra} - {$co_id}",
-            'inf_usuario' => $usuarioId,
-            'inf_config' => $inf_config
-        ]);
+        // Validar porcentaje de impuesto
+        if (!is_numeric($porcentaje_impuesto) || $porcentaje_impuesto < 0 || $porcentaje_impuesto > 100) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Impuesto inválido',
+                'texto' => 'El porcentaje de impuesto debe estar entre 0 y 100.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
 
-        return $this->alerta_exito('Compra registrada', 'La compra, lotes e inventario se registraron correctamente.');
+        /* ========== PREPARAR DATOS DE COMPRA ========== */
+
+        $datos_compra = [
+            "co_numero" => $numero_compra,
+            "la_id" => $laboratorio_id,
+            "us_id" => $usuario_id,
+            "su_id" => $sucursal_id,
+            "pr_id" => $proveedor_id,
+            "co_subtotal" => $totales['subtotal'],
+            "co_impuesto" => $totales['impuestos'],
+            "co_total" => $totales['total'],
+            "co_numero_factura" => $numero_factura,
+            "co_fecha_factura" => $fecha_factura,
+            "co_razon_social" => $razon_social
+        ];
+
+        /* ========== INSERTAR COMPRA ========== */
+
+        $compra_id = compraModel::agregar_compra_model($datos_compra);
+
+        if ($compra_id <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error al registrar',
+                'texto' => 'No se pudo registrar la compra en la base de datos.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* ========== PROCESAR CADA LOTE ========== */
+
+        foreach ($lotes as $lote) {
+
+            // Limpiar datos del lote
+            $medicamento_id = mainModel::limpiar_cadena($lote['id_medicamento']);
+            $numero_lote = mainModel::limpiar_cadena($lote['numero']);
+            $cantidad = mainModel::limpiar_cadena($lote['cantidad']);
+            $fecha_vencimiento = mainModel::limpiar_cadena($lote['vencimiento']);
+            $precio_compra = mainModel::limpiar_cadena($lote['precioCompra']);
+            $precio_venta = mainModel::limpiar_cadena($lote['precioVenta']);
+
+            // Validar datos del lote
+            if (empty($medicamento_id) || empty($cantidad) || empty($precio_compra)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Datos incompletos',
+                    'texto' => 'Uno de los lotes tiene datos incompletos (medicamento, cantidad o precio).',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            // Calcular subtotal del lote (sin descuento por ahora)
+            $subtotal_lote = $cantidad * $precio_compra;
+
+            /* ========== INSERTAR LOTE MEDICAMENTO ========== */
+
+            $datos_lote = [
+                "pr_id" => $proveedor_id,
+                "med_id" => $medicamento_id,
+                "su_id" => $sucursal_id,
+                "lm_numero_lote" => $numero_lote,
+                "lm_cantidad_inicial" => $cantidad,
+                "lm_cantidad_actual" => $cantidad,
+                "lm_precio_compra" => $precio_compra,
+                "lm_precio_venta" => $precio_venta,
+                "lm_fecha_vencimiento" => $fecha_vencimiento
+            ];
+
+            $lote_id = compraModel::agregar_lote_model($datos_lote);
+
+            if ($lote_id <= 0) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error al registrar lote',
+                    'texto' => 'No se pudo registrar el lote del medicamento en la base de datos.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            /* ========== INSERTAR DETALLE DE COMPRA ========== */
+
+            $datos_detalle = [
+                "co_id" => $compra_id,
+                "med_id" => $medicamento_id,
+                "lm_id" => $lote_id,
+                "cantidad" => $cantidad,
+                "precio_unitario" => $precio_compra,
+                "descuento" => 0.00, // Sin descuento por ahora
+                "subtotal" => $subtotal_lote
+            ];
+
+            $detalle_resultado = compraModel::agregar_detalle_compra_model($datos_detalle);
+
+            if ($detalle_resultado->rowCount() <= 0) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error en detalle',
+                    'texto' => 'No se pudo registrar el detalle de la compra.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            /* ========== ACTUALIZAR/CREAR INVENTARIO ========== */
+
+            $datos_inventario = [
+                "su_id" => $sucursal_id,
+                "med_id" => $medicamento_id,
+                "lm_id" => $lote_id,
+                "inv_cantidad" => $cantidad,
+                "inv_ultimo_precio" => $precio_compra
+            ];
+
+            compraModel::actualizar_inventario_model($datos_inventario);
+
+            /* ========== REGISTRAR MOVIMIENTO DE INVENTARIO ========== */
+
+            $datos_movimiento = [
+                "lm_id" => $lote_id,
+                "med_id" => $medicamento_id,
+                "su_id" => $sucursal_id,
+                "us_id" => $usuario_id,
+                "mi_tipo" => "entrada",
+                "mi_cantidad" => $cantidad,
+                "mi_unidad" => "unidad",
+                "mi_referencia_tipo" => "compra",
+                "mi_referencia_id" => $compra_id,
+                "mi_motivo" => "Compra #{$numero_compra} - Lote: {$numero_lote}"
+            ];
+
+            compraModel::agregar_movimiento_inventario_model($datos_movimiento);
+        }
+        /* ========== REGISTRAR INFORME DE COMPRA ========== */
+
+        $config_informe = [
+            "compra_id" => $compra_id,
+            "numero_compra" => $numero_compra,
+            "proveedor_id" => $proveedor_id,
+            "laboratorio_id" => $laboratorio_id,
+            "sucursal_id" => $sucursal_id,
+            "fecha_factura" => $fecha_factura,
+            "numero_factura" => $numero_factura,
+            "razon_social" => $razon_social,
+            "subtotal" => $totales['subtotal'],
+            "impuestos" => $totales['impuestos'],
+            "total" => $totales['total'],
+            "cantidad_lotes" => count($lotes),
+            "lotes" => array_map(function ($lote) {
+                return [
+                    "medicamento_id" => $lote['id_medicamento'],
+                    "numero_lote" => $lote['numero'],
+                    "cantidad" => $lote['cantidad'],
+                    "precio_compra" => $lote['precioCompra'],
+                    "precio_venta" => $lote['precioVenta'],
+                    "vencimiento" => $lote['vencimiento']
+                ];
+            }, $lotes)
+        ];
+
+        $datos_informe = [
+            "inf_nombre" => "Compra {$numero_compra} - {$razon_social}",
+            "inf_tipo" => "compra",
+            "inf_usuario" => $usuario_id,
+            "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
+        ];
+
+        compraModel::agregar_informe_compra_model($datos_informe);
+
+        /* ========== RESPUESTA EXITOSA ========== */
+
+        
+
+
+        $alerta = [
+            'Alerta' => 'recargar',
+            'Titulo' => 'Compra registrada',
+            'texto' => "La compra {$numero_compra} se registró correctamente con {$totales['cantidadLotes']} lote(s) de medicamentos.",
+            'Tipo' => 'success'
+        ];
+        echo json_encode($alerta);
+        exit();
     }
 }

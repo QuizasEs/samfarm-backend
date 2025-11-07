@@ -126,5 +126,8 @@ class compraModel extends mainModel
         $sql->bindParam(":inf_nombre", $datos['inf_nombre']);
         $sql->bindParam(":inf_usuario", $datos['inf_usuario']);
         $sql->bindParam(":inf_config", $datos['inf_config']);
+
+        $sql->execute(); // ← FALTABA ESTO
+        return $sql;
     }
 }
