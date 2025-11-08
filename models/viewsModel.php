@@ -12,7 +12,8 @@
                 "viaDeAdministracionLista", "lotesRegistro",
                 "proveedorRegistro", "proveedorLista",
                 "proveedorActualizar","laboratorioRegistro",
-                "laboratorioActualizar", "compraRegistro","compraOrden"
+                "laboratorioActualizar", "compraRegistro","compraOrden",
+                "loteActivar","loteLista","",
             ];
 
             if(in_array($vistas,$listaBlanca)){

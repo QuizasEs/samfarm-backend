@@ -53,9 +53,11 @@ class compraModel extends mainModel
     {
         $sql = mainModel::conectar()->prepare("
             INSERT INTO lote_medicamento
-            (pr_id, med_id, su_id, lm_numero_lote, lm_cantidad_inicial, lm_cantidad_actual, lm_precio_compra, lm_precio_venta, lm_fecha_ingreso, lm_fecha_vencimiento)
+            (pr_id, med_id, su_id, lm_numero_lote, lm_cantidad_inicial, lm_cantidad_actual, 
+            lm_precio_compra, lm_precio_venta, lm_fecha_ingreso, lm_fecha_vencimiento, lm_estado)
             VALUES
-            (:pr_id, :med_id, :su_id, :lm_numero_lote, :lm_cantidad_inicial, :lm_cantidad_actual, :lm_precio_compra, :lm_precio_venta, NOW(), :lm_fecha_vencimiento)
+            (:pr_id, :med_id, :su_id, :lm_numero_lote, :lm_cantidad_inicial, :lm_cantidad_actual,
+            :lm_precio_compra, :lm_precio_venta, NOW(), :lm_fecha_vencimiento, 'en_espera')
         ");
         $sql->bindParam(":pr_id", $datos['pr_id']);
         $sql->bindParam(":med_id", $datos['med_id']);
@@ -66,9 +68,22 @@ class compraModel extends mainModel
         $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);
         $sql->bindParam(":lm_precio_venta", $datos['lm_precio_venta']);
         $sql->bindParam(":lm_fecha_vencimiento", $datos['lm_fecha_vencimiento']);
-
         $sql->execute();
         return (int) mainModel::conectar()->lastInsertId();
+    }
+    /* registrar historial de lote  */
+    public static function registrar_historial_Lote_model($datos)
+    {
+        $sql = mainModel::conectar()->prepare("
+            INSERT INTO historial_lote (lm_id, us_id, hl_accion, hl_descripcion)
+            VALUES (:lm_id, :us_id, :hl_accion, :hl_descripcion)
+        ");
+        $sql->bindParam(":lm_id", $datos['lm_id']);
+        $sql->bindParam(":us_id", $datos['us_id']);
+        $sql->bindParam(":hl_accion", $datos['hl_accion']);
+        $sql->bindParam(":hl_descripcion", $datos['hl_descripcion']);
+        $sql->execute();
+        return $sql;
     }
     /* insertar y/o actualizar inventario  */
 

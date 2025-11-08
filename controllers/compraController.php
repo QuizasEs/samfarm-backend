@@ -232,6 +232,27 @@ class compraController extends compraModel
                 echo json_encode($alerta);
                 exit();
             }
+            /* insertar historial de lote */
+            $historial = [
+                "lm_id" => $lote_id,
+                "us_id" => $usuario_id,
+                "hl_accion" => "creacion",
+                "hl_descripcion" => "Lote creado automáticamente por compra #{$numero_compra} en estado 'en_espera'."
+            ];
+            $hi = compraModel::registrar_historial_Lote_model($historial);
+            if ($hi->rowCount() <= 0) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error al registrar historial',
+                    'texto' => 'No se pudo registrar el historial del lote.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+
+
 
             /* ========== INSERTAR DETALLE DE COMPRA ========== */
 
@@ -260,7 +281,7 @@ class compraController extends compraModel
 
             /* ========== ACTUALIZAR/CREAR INVENTARIO ========== */
 
-            $datos_inventario = [
+            /* $datos_inventario = [
                 "su_id" => $sucursal_id,
                 "med_id" => $medicamento_id,
                 "lm_id" => $lote_id,
@@ -269,10 +290,10 @@ class compraController extends compraModel
             ];
 
             compraModel::actualizar_inventario_model($datos_inventario);
-
+ */
             /* ========== REGISTRAR MOVIMIENTO DE INVENTARIO ========== */
 
-            $datos_movimiento = [
+            /* $datos_movimiento = [
                 "lm_id" => $lote_id,
                 "med_id" => $medicamento_id,
                 "su_id" => $sucursal_id,
@@ -285,7 +306,7 @@ class compraController extends compraModel
                 "mi_motivo" => "Compra #{$numero_compra} - Lote: {$numero_lote}"
             ];
 
-            compraModel::agregar_movimiento_inventario_model($datos_movimiento);
+            compraModel::agregar_movimiento_inventario_model($datos_movimiento); */
         }
         /* ========== REGISTRAR INFORME DE COMPRA ========== */
 
@@ -325,7 +346,7 @@ class compraController extends compraModel
 
         /* ========== RESPUESTA EXITOSA ========== */
 
-        
+
 
 
         $alerta = [
