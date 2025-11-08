@@ -580,6 +580,14 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             ModalManager.cerrarModal(); // Ocultar modal al inicio
+            const modal = document.getElementById("modalLote");
+            if (modal) {
+                modal.addEventListener("click", (event) => {
+                    if (event.target === modal) {
+                        ModalManager.cerrarModal();
+                    }
+                });
+            }
         });
     </script>
     <!-- calcular impuestos y totales -->
@@ -720,7 +728,8 @@
             }
         });
     </script>
-    <script> /* validar porcentaje de 0 a 100% */
+    <script>
+        /* validar porcentaje de 0 a 100% */
         // AGREGAR ESTE SCRIPT EN TU FORMULARIO
         function validarPorcentaje(input) {
             let valor = parseFloat(input.value);
