@@ -7,6 +7,7 @@ if ($peticionAjax) {
 
 class loginController extends loginModel
 {
+    
     /* controlador para iniciar sesion */
     public function iniciar_sesion_controller()
     {

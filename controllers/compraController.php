@@ -58,7 +58,7 @@ class compraController extends compraModel
                     m.med_principio_activo LIKE '$busqueda' OR
                     m.med_accion_farmacologica LIKE '$busqueda' OR
                     m.med_presentacion LIKE '$busqueda' OR
-                    m.med_descripcion LIKE '$busqueda'  /* ← QUITAR LA COMA EXTRA */
+                    m.med_descripcion LIKE '$busqueda'
                 )
             ";
         }

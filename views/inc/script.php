@@ -666,7 +666,7 @@
     <script>
         // 📤 ENVÍO DE FORMULARIO CON LOTES
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('.FormularioAjax');
+            const form = document.querySelector('.formCompra');
 
             if (form) {
                 form.addEventListener('submit', function(e) {
@@ -729,6 +729,7 @@
         });
     </script>
     <script>
+        // perminte manejar los inputs con porcentaje obligandolo a estar dentro del parametro 100%
         /* validar porcentaje de 0 a 100% */
         // AGREGAR ESTE SCRIPT EN TU FORMULARIO
         function validarPorcentaje(input) {
@@ -758,5 +759,175 @@
                     validarPorcentaje(this);
                 });
             }
+        });
+    </script>
+    <script>
+        /* Permite manejar el listado de códigos de barras antes de su registro a un lote asociado */
+        document.addEventListener("DOMContentLoaded", () => {
+            const listaCodigos = document.getElementById("lista-codigos");
+            const btnAgregar = document.getElementById("btn-agregar-codigo");
+            const form = document.querySelector(".formCodigos"); // Solo formularios con clase formCodigos
+
+            // Modal
+            const modal = document.getElementById("modal-codigo");
+            const inputCodigo = document.getElementById("input-codigo");
+            const btnGuardar = document.getElementById("btn-guardar-codigo");
+            const btnCancelar = document.getElementById("btn-cancelar-codigo");
+
+            let codigos = [];
+
+            // Seguridad: si faltan elementos, no continuar
+            if (!modal || !inputCodigo || !btnGuardar || !btnCancelar) {
+                console.warn("Script modal-codigo: faltan elementos requeridos en el DOM.");
+                return;
+            }
+
+            // Solo continuar si existe el formulario con clase formCodigos
+            if (!form) {
+                console.warn("No se encontró formulario con clase 'formCodigos'");
+                return;
+            }
+
+            // Abrir modal
+            if (btnAgregar) {
+                btnAgregar.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    inputCodigo.value = "";
+                    modal.style.display = "flex";
+                    inputCodigo.focus();
+                });
+            }
+
+            // Cerrar modal (botón cancelar)
+            btnCancelar.addEventListener("click", () => {
+                modal.style.display = "none";
+            });
+
+            // Cerrar modal al hacer click fuera del contenido
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
+            // Cerrar modal con Escape
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" || e.key === "Esc") {
+                    if (modal.style.display === "flex") {
+                        modal.style.display = "none";
+                    }
+                }
+            });
+
+            // Guardar código
+            btnGuardar.addEventListener("click", () => {
+                const nuevoCodigo = inputCodigo.value.trim();
+
+                if (nuevoCodigo === "") {
+                    alert("Debe ingresar un código válido.");
+                    return;
+                }
+
+                if (!codigos.includes(nuevoCodigo)) {
+                    codigos.push(nuevoCodigo);
+                    actualizarInputsOcultos(); // Actualizar inputs inmediatamente
+                    renderCodigos();
+                    modal.style.display = "none";
+                } else {
+                    alert("Este código ya fue agregado.");
+                }
+            });
+
+            // Renderizar lista de códigos
+            function renderCodigos() {
+                if (!listaCodigos) return;
+
+                listaCodigos.innerHTML = "";
+
+                if (codigos.length === 0) {
+                    listaCodigos.innerHTML = '<p style="text-align: center; color: #999;">No hay códigos registrados</p>';
+                    return;
+                }
+
+                codigos.forEach((codigo, index) => {
+                    const item = document.createElement("div");
+                    item.className = "codigo-item";
+                    item.innerHTML = `
+                <div class="lista_codigo">
+                    <span>${codigo}</span>
+                    <button type="button" class="btn eliminar warning" data-index="${index}">
+                        <ion-icon name="trash-outline"></ion-icon>Eliminar
+                    </button>
+                </div>
+            `;
+                    listaCodigos.appendChild(item);
+                });
+
+                // Eliminar código con SweetAlert2
+                const botones = listaCodigos.querySelectorAll(".btn.eliminar");
+                botones.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const idx = parseInt(btn.dataset.index, 10);
+                        if (isNaN(idx)) return;
+
+                        Swal.fire({
+                            title: '¿Eliminar código?',
+                            text: `¿Estás seguro de eliminar el código "${codigos[idx]}"?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Sí, eliminar',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                codigos.splice(idx, 1);
+                                actualizarInputsOcultos(); // Actualizar inputs inmediatamente
+                                renderCodigos();
+                            }
+                        });
+                    });
+                });
+            }
+
+            // Función para actualizar inputs ocultos dinámicamente
+            function actualizarInputsOcultos() {
+                // Eliminar todos los inputs previos
+                const inputsPrevios = form.querySelectorAll("input[name^='codigos']");
+                inputsPrevios.forEach(input => input.remove());
+
+                // Crear inputs ocultos para cada código en el array
+                codigos.forEach((codigo, i) => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = `codigos[${i}]`; // Formato de array para PHP
+                    input.value = codigo;
+                    form.appendChild(input);
+                });
+
+                console.log(`✅ Inputs actualizados: ${codigos.length} códigos`);
+            }
+
+            // Validar antes de enviar el formulario
+            form.addEventListener("submit", (e) => {
+                // Verificar que el formulario tenga la clase correcta
+                if (!form.classList.contains('formCodigos')) {
+                    console.warn("El formulario no tiene la clase 'formCodigos'. Envío cancelado.");
+                    e.preventDefault();
+                    return;
+                }
+
+                // Actualizar inputs ocultos una última vez antes de enviar
+                actualizarInputsOcultos();
+
+                console.log("📤 Enviando formulario con códigos:", codigos);
+                console.log("📋 Total de códigos:", codigos.length);
+
+                // El formulario continúa su envío normal (POST)
+                // No se previene el submit, los datos se envían automáticamente
+            });
+
+            // Inicializar vista vacía
+            renderCodigos();
         });
     </script>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 08, 2025 at 03:10 PM
+-- Generation Time: Nov 10, 2025 at 06:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -83,9 +83,27 @@ INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apelli
 CREATE TABLE `codigo_barras` (
   `cb_id` bigint(20) NOT NULL,
   `cb_codigo` varchar(255) NOT NULL,
-  `la_id` bigint(20) UNSIGNED NOT NULL,
+  `lm_id` bigint(20) UNSIGNED NOT NULL,
   `cb_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `codigo_barras`
+--
+
+INSERT INTO `codigo_barras` (`cb_id`, `cb_codigo`, `lm_id`, `cb_creado_en`) VALUES
+(1, '434234', 4, '2025-11-10 00:43:53'),
+(2, '234234', 4, '2025-11-10 00:43:53'),
+(3, '14235135', 15, '2025-11-10 00:45:41'),
+(4, '23534534523', 15, '2025-11-10 00:45:41'),
+(5, '5234534523', 15, '2025-11-10 00:45:41'),
+(6, '123123', 14, '2025-11-10 00:52:00'),
+(7, '5345456345', 14, '2025-11-10 00:52:00'),
+(8, '6785678567', 14, '2025-11-10 00:52:00'),
+(9, '63464356345', 14, '2025-11-10 00:52:00'),
+(10, '23423423423', 6, '2025-11-10 00:59:07'),
+(11, '435545645645', 6, '2025-11-10 00:59:07'),
+(12, '7686867867', 6, '2025-11-10 00:59:07');
 
 -- --------------------------------------------------------
 
@@ -122,7 +140,9 @@ INSERT INTO `compras` (`co_id`, `co_numero`, `co_fecha`, `la_id`, `us_id`, `su_i
 (1, 'COMP-001-2024', '2024-01-15 08:00:00', 1, 1, 1, 1, 180.00, 25.20, 205.20, 'FAC-001-2024', '2024-01-15', 'compra', '123456789', 'Farmacorp S.A.', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
 (2, 'COMP-002-2024', '2024-01-10 10:15:00', 2, 1, 1, 2, 176.00, 24.64, 200.64, 'FAC-002-2024', '2024-01-10', 'compra', '123456790', 'Droguería Inti', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
 (3, 'COMP-003-2024', '2024-03-01 14:20:00', 3, 1, 1, 3, 600.00, 84.00, 684.00, 'FAC-003-2024', '2024-03-01', 'compra', '123456791', 'Laboratorios Bolivia', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
-(4, 'COMP-2025-0001', '2025-11-07 20:36:36', 3, 1, 1, 2, 536.00, 69.68, 605.68, '13123123', '2025-11-22', 'compra', NULL, 'sofir', '2025-11-07 20:36:36', '2025-11-07 20:36:36', 1);
+(4, 'COMP-2025-0001', '2025-11-07 20:36:36', 3, 1, 1, 2, 536.00, 69.68, 605.68, '13123123', '2025-11-22', 'compra', NULL, 'sofir', '2025-11-07 20:36:36', '2025-11-07 20:36:36', 1),
+(5, 'COMP-2025-0001', '2025-11-09 18:08:19', 3, 1, 1, 3, 6448.00, 838.24, 7286.24, '242323423', '2025-11-23', 'compra', NULL, 'dweesfs', '2025-11-09 18:08:19', '2025-11-09 18:08:19', 1),
+(6, 'COMP-2025-0001', '2025-11-09 18:31:07', 2, 1, 1, 2, 5850.00, 760.50, 6610.50, '324232323', '2025-11-22', 'compra', NULL, 'sfsdfsd', '2025-11-09 18:31:07', '2025-11-09 18:31:07', 1);
 
 -- --------------------------------------------------------
 
@@ -151,7 +171,10 @@ INSERT INTO `detalle_compra` (`dc_id`, `co_id`, `med_id`, `lm_id`, `dc_cantidad`
 (2, 2, 2, 3, 80, 2.20, 0.00, 176.00, 1),
 (3, 3, 3, 4, 50, 12.00, 0.00, 600.00, 1),
 (4, 4, 10, 11, 14, 16.00, 0.00, 224.00, 1),
-(5, 4, 1, 12, 12, 26.00, 0.00, 312.00, 1);
+(5, 4, 1, 12, 12, 26.00, 0.00, 312.00, 1),
+(6, 5, 7, 13, 234, 25.00, 0.00, 5850.00, 1),
+(7, 5, 2, 14, 23, 26.00, 0.00, 598.00, 1),
+(8, 6, 10, 15, 234, 25.00, 0.00, 5850.00, 1);
 
 -- --------------------------------------------------------
 
@@ -266,7 +289,19 @@ CREATE TABLE `historial_lote` (
 
 INSERT INTO `historial_lote` (`hl_id`, `lm_id`, `us_id`, `hl_accion`, `hl_descripcion`, `hl_fecha`) VALUES
 (1, 11, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-07 20:36:36'),
-(2, 12, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-07 20:36:36');
+(2, 12, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-07 20:36:36'),
+(3, 13, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:08:19'),
+(4, 14, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:08:19'),
+(5, 15, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:31:07'),
+(9, 1, 1, 'activacion', 'Activacion de lote: LOTE-001-2024', '2025-11-10 00:37:42'),
+(11, 2, 1, 'activacion', 'Activacion de lote: LOTE-002-2024', '2025-11-10 00:40:03'),
+(12, 4, 1, 'activacion', 'Activacion de lote: LOTE-004-2024', '2025-11-10 00:43:53'),
+(13, 15, 1, 'activacion', 'Activacion de lote: MED-15', '2025-11-10 00:45:41'),
+(14, 14, 1, 'activacion', 'Activacion de lote: MED-14', '2025-11-10 00:52:00'),
+(15, 13, 1, 'activacion', 'Activacion de lote: MED-13', '2025-11-10 00:53:20'),
+(16, 12, 1, 'activacion', 'Activacion de lote: MED-12', '2025-11-10 00:54:37'),
+(17, 7, 1, 'activacion', 'Activacion de lote: LOTE-007-2024', '2025-11-10 00:55:43'),
+(18, 6, 1, 'activacion', 'Activacion de lote: LOTE-006-2024', '2025-11-10 00:59:07');
 
 -- --------------------------------------------------------
 
@@ -291,7 +326,9 @@ INSERT INTO `informes` (`inf_id`, `inf_nombre`, `inf_tipo`, `inf_usuario`, `inf_
 (1, 'Stock Mínimo', 'stock', 1, '{\"filtro_stock\": \"minimo\", \"sucursal_id\": 1}', '2025-11-06 11:06:10'),
 (2, 'Ventas Mensuales', 'ventas', 1, '{\"mes\": 3, \"anio\": 2024, \"sucursal_id\": 1}', '2025-11-06 11:06:10'),
 (3, 'Productos Más Vendidos', 'ventas', 1, '{\"orden\": \"cantidad\", \"limite\": 10, \"periodo\": \"mes\"}', '2025-11-06 11:06:10'),
-(4, 'Compra COMP-2025-0001 - sofir', 'compra', 1, '{\"compra_id\":4,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"13123123\",\"razon_social\":\"sofir\",\"subtotal\":\"536.00\",\"impuestos\":\"69.68\",\"total\":\"605.68\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"10\",\"numero_lote\":\"MED-11\",\"cantidad\":14,\"precio_compra\":16,\"precio_venta\":167,\"vencimiento\":\"2025-11-12\"},{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-12\",\"cantidad\":12,\"precio_compra\":26,\"precio_venta\":37,\"vencimiento\":\"2025-11-27\"}]}', '2025-11-07 20:36:36');
+(4, 'Compra COMP-2025-0001 - sofir', 'compra', 1, '{\"compra_id\":4,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"13123123\",\"razon_social\":\"sofir\",\"subtotal\":\"536.00\",\"impuestos\":\"69.68\",\"total\":\"605.68\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"10\",\"numero_lote\":\"MED-11\",\"cantidad\":14,\"precio_compra\":16,\"precio_venta\":167,\"vencimiento\":\"2025-11-12\"},{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-12\",\"cantidad\":12,\"precio_compra\":26,\"precio_venta\":37,\"vencimiento\":\"2025-11-27\"}]}', '2025-11-07 20:36:36'),
+(5, 'Compra COMP-2025-0001 - dweesfs', 'compra', 1, '{\"compra_id\":5,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-23\",\"numero_factura\":\"242323423\",\"razon_social\":\"dweesfs\",\"subtotal\":\"6448.00\",\"impuestos\":\"838.24\",\"total\":\"7286.24\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"7\",\"numero_lote\":\"MED-13\",\"cantidad\":234,\"precio_compra\":25,\"precio_venta\":267,\"vencimiento\":\"2025-11-22\"},{\"medicamento_id\":\"2\",\"numero_lote\":\"MED-14\",\"cantidad\":23,\"precio_compra\":26,\"precio_venta\":27,\"vencimiento\":\"2025-11-12\"}]}', '2025-11-09 18:08:19'),
+(6, 'Compra COMP-2025-0001 - sfsdfsd', 'compra', 1, '{\"compra_id\":6,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"2\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"324232323\",\"razon_social\":\"sfsdfsd\",\"subtotal\":\"5850.00\",\"impuestos\":\"760.50\",\"total\":\"6610.50\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"10\",\"numero_lote\":\"MED-15\",\"cantidad\":234,\"precio_compra\":25,\"precio_venta\":26,\"vencimiento\":\"2025-11-26\"}]}', '2025-11-09 18:31:07');
 
 -- --------------------------------------------------------
 
@@ -318,16 +355,15 @@ CREATE TABLE `inventarios` (
 --
 
 INSERT INTO `inventarios` (`inv_id`, `med_id`, `su_id`, `lm_id`, `inv_cantidad`, `inv_reservado`, `inv_minimo`, `inv_maximo`, `inv_ultimo_precio`, `inv_actualizado_en`, `inv_creado_en`) VALUES
-(1, 1, 1, 1, 85, 0, 20, 200, 2.50, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(2, 1, 1, 2, 150, 0, 20, 200, 2.50, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(3, 2, 1, 3, 60, 0, 15, 150, 3.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(4, 3, 1, 4, 35, 0, 10, 100, 15.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(5, 4, 1, 5, 95, 0, 25, 200, 4.50, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(6, 5, 1, 6, 42, 0, 10, 100, 12.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(7, 6, 1, 7, 90, 0, 20, 150, 8.50, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(8, 7, 1, 8, 25, 0, 5, 80, 18.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(9, 8, 1, 9, 18, 0, 5, 50, 35.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(10, 9, 1, 10, 55, 0, 15, 120, 22.00, '2025-11-06 11:06:06', '2025-11-06 11:06:06');
+(14, 1, 1, 1, 0, 0, 0, 0, 1.80, '2025-11-10 00:37:42', '2025-11-10 00:37:42'),
+(16, 1, 1, 2, 0, 0, 0, 0, 1.75, '2025-11-10 00:40:03', '2025-11-10 00:40:03'),
+(17, 3, 1, 4, 0, 0, 0, 0, 12.00, '2025-11-10 00:43:53', '2025-11-10 00:43:53'),
+(18, 10, 1, 15, 0, 0, 0, 0, 25.00, '2025-11-10 00:45:41', '2025-11-10 00:45:41'),
+(19, 2, 1, 14, 0, 0, 0, 0, 26.00, '2025-11-10 00:52:00', '2025-11-10 00:52:00'),
+(20, 7, 1, 13, 0, 0, 0, 0, 25.00, '2025-11-10 00:53:20', '2025-11-10 00:53:20'),
+(21, 1, 1, 12, 0, 0, 0, 0, 26.00, '2025-11-10 00:54:37', '2025-11-10 00:54:37'),
+(22, 6, 1, 7, 0, 0, 0, 0, 6.80, '2025-11-10 00:55:43', '2025-11-10 00:55:43'),
+(23, 5, 1, 6, 30000, 0, 3000, 60000, 9.50, '2025-11-10 00:59:07', '2025-11-10 00:59:07');
 
 -- --------------------------------------------------------
 
@@ -388,18 +424,21 @@ CREATE TABLE `lote_medicamento` (
 --
 
 INSERT INTO `lote_medicamento` (`lm_id`, `med_id`, `pc_id`, `su_id`, `pr_id`, `lm_numero_lote`, `lm_cantidad_inicial`, `lm_cantidad_actual`, `lm_precio_compra`, `lm_precio_venta`, `lm_fecha_ingreso`, `lm_fecha_vencimiento`, `lm_estado`, `lm_creado_en`, `lm_actualizado_en`) VALUES
-(1, 1, NULL, 1, 1, 'LOTE-001-2024', 100, 85, 1.80, 2.50, '2024-01-15 08:00:00', '2025-12-31', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(2, 1, NULL, 1, 1, 'LOTE-002-2024', 150, 150, 1.75, 2.50, '2024-02-20 09:30:00', '2026-01-31', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
+(1, 1, NULL, 1, 1, 'LOTE-001-2024', 100, 85, 1.80, 3.00, '2024-01-15 08:00:00', '2025-12-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:37:42'),
+(2, 1, NULL, 1, 1, 'LOTE-002-2024', 150, 150, 1.75, 2.50, '2024-02-20 09:30:00', '2026-01-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:40:03'),
 (3, 2, NULL, 1, 2, 'LOTE-003-2024', 80, 60, 2.20, 3.00, '2024-01-10 10:15:00', '2025-11-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(4, 3, NULL, 1, 3, 'LOTE-004-2024', 50, 35, 12.00, 15.00, '2024-03-01 14:20:00', '2025-09-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
+(4, 3, NULL, 1, 3, 'LOTE-004-2024', 50, 35, 12.00, 15.00, '2024-03-01 14:20:00', '2025-09-30', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:43:53'),
 (5, 4, NULL, 1, 4, 'LOTE-005-2024', 120, 95, 3.20, 4.50, '2024-02-15 11:45:00', '2026-02-28', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(6, 5, NULL, 1, 5, 'LOTE-006-2024', 60, 42, 9.50, 12.00, '2024-01-25 16:30:00', '2025-10-31', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(7, 6, NULL, 1, 1, 'LOTE-007-2024', 90, 90, 6.80, 8.50, '2024-03-10 08:45:00', '2026-03-31', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
+(6, 5, NULL, 1, 5, 'LOTE-006-2024', 60, 42, 9.50, 12.00, '2024-01-25 16:30:00', '2025-10-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:59:07'),
+(7, 6, NULL, 1, 1, 'LOTE-007-2024', 90, 90, 6.80, 8.50, '2024-03-10 08:45:00', '2026-03-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:55:43'),
 (8, 7, NULL, 1, 2, 'LOTE-008-2024', 40, 25, 14.50, 18.00, '2024-02-05 13:15:00', '2025-12-15', 'activo', '2025-11-06 11:06:06', '2025-11-07 21:09:48'),
 (9, 8, NULL, 1, 3, 'LOTE-009-2024', 30, 18, 28.00, 35.00, '2024-01-30 15:20:00', '2025-11-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
 (10, 9, NULL, 1, 4, 'LOTE-010-2024', 70, 55, 17.50, 22.00, '2024-03-05 10:00:00', '2026-04-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
 (11, 10, NULL, 1, 2, 'MED-11', 14, 14, 16.00, 167.00, '2025-11-07 20:36:36', '2025-11-12', 'en_espera', '2025-11-07 20:36:36', '2025-11-07 20:36:36'),
-(12, 1, NULL, 1, 2, 'MED-12', 12, 12, 26.00, 37.00, '2025-11-07 20:36:36', '2025-11-27', 'en_espera', '2025-11-07 20:36:36', '2025-11-07 20:36:36');
+(12, 1, NULL, 1, 2, 'MED-12', 12, 12, 26.00, 37.00, '2025-11-07 20:36:36', '2025-11-27', 'activo', '2025-11-07 20:36:36', '2025-11-10 00:54:37'),
+(13, 7, NULL, 1, 3, 'MED-13', 234, 234, 25.00, 267.00, '2025-11-09 18:08:19', '2025-11-22', 'activo', '2025-11-09 18:08:19', '2025-11-10 00:53:20'),
+(14, 2, NULL, 1, 3, 'MED-14', 23, 23, 26.00, 30.00, '2025-11-09 18:08:19', '2025-11-12', 'activo', '2025-11-09 18:08:19', '2025-11-10 00:52:00'),
+(15, 10, NULL, 1, 2, 'MED-15', 234, 234, 25.00, 29.00, '2025-11-09 18:31:07', '2025-11-26', 'activo', '2025-11-09 18:31:07', '2025-11-10 00:45:41');
 
 -- --------------------------------------------------------
 
@@ -509,7 +548,6 @@ CREATE TABLE `movimiento_inventario` (
   `mi_tipo` varchar(30) NOT NULL,
   `mi_cantidad` int(11) NOT NULL,
   `mi_unidad` varchar(30) DEFAULT 'unidad',
-  `mi_fecha` datetime NOT NULL DEFAULT current_timestamp(),
   `mi_referencia_tipo` varchar(30) DEFAULT NULL,
   `mi_referencia_id` bigint(20) DEFAULT NULL,
   `mi_motivo` text DEFAULT NULL,
@@ -521,13 +559,22 @@ CREATE TABLE `movimiento_inventario` (
 -- Dumping data for table `movimiento_inventario`
 --
 
-INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_fecha`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
-(1, 1, 1, 1, 1, 'ingreso', 100, 'unidad', '2025-11-06 11:06:09', 'compra', 1, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(2, 1, 1, 1, 1, 'salida', 15, 'unidad', '2025-11-06 11:06:09', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
-(3, 3, 2, 1, 1, 'ingreso', 80, 'unidad', '2025-11-06 11:06:09', 'compra', 2, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(4, 3, 2, 1, 1, 'salida', 20, 'unidad', '2025-11-06 11:06:09', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
-(5, 4, 3, 1, 1, 'ingreso', 50, 'unidad', '2025-11-06 11:06:09', 'compra', 3, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(6, 4, 3, 1, 1, 'salida', 15, 'unidad', '2025-11-06 11:06:09', 'venta', 3, 'Venta al público', '2025-11-06 11:06:09', 1);
+INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
+(1, 1, 1, 1, 1, 'ingreso', 100, 'unidad', 'compra', 1, 'Compra inicial', '2025-11-06 11:06:09', 1),
+(2, 1, 1, 1, 1, 'salida', 15, 'unidad', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
+(3, 3, 2, 1, 1, 'ingreso', 80, 'unidad', 'compra', 2, 'Compra inicial', '2025-11-06 11:06:09', 1),
+(4, 3, 2, 1, 1, 'salida', 20, 'unidad', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
+(5, 4, 3, 1, 1, 'ingreso', 50, 'unidad', 'compra', 3, 'Compra inicial', '2025-11-06 11:06:09', 1),
+(6, 4, 3, 1, 1, 'salida', 15, 'unidad', 'venta', 3, 'Venta al público', '2025-11-06 11:06:09', 1),
+(7, 1, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 1, 'Activación del lote LOTE-001-2024', '2025-11-10 00:37:42', 1),
+(8, 2, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 2, 'Activación del lote LOTE-002-2024', '2025-11-10 00:40:03', 1),
+(9, 4, 3, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 4, 'Activación del lote LOTE-004-2024', '2025-11-10 00:43:53', 1),
+(10, 15, 10, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 15, 'Activación del lote MED-15', '2025-11-10 00:45:41', 1),
+(11, 14, 2, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 14, 'Activación del lote MED-14', '2025-11-10 00:52:00', 1),
+(12, 13, 7, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 13, 'Activación del lote MED-13', '2025-11-10 00:53:20', 1),
+(13, 12, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 12, 'Activación del lote MED-12', '2025-11-10 00:54:37', 1),
+(14, 7, 6, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 7, 'Activación del lote LOTE-007-2024', '2025-11-10 00:55:43', 1),
+(15, 6, 5, 1, 1, 'entrada', 30000, 'unidad', 'ingreso y activacion de lote', 6, 'Activación del lote LOTE-006-2024', '2025-11-10 00:59:07', 1);
 
 -- --------------------------------------------------------
 
@@ -537,7 +584,6 @@ INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id
 
 CREATE TABLE `presentacion_cantidad` (
   `pc_id` bigint(20) UNSIGNED NOT NULL,
-  `med_id` bigint(20) UNSIGNED NOT NULL,
   `pc_nombre` varchar(100) NOT NULL,
   `pc_cantidad` int(11) NOT NULL,
   `pc_unidad_base` varchar(50) DEFAULT 'unidad',
@@ -774,7 +820,7 @@ ALTER TABLE `clientes`
 --
 ALTER TABLE `codigo_barras`
   ADD PRIMARY KEY (`cb_id`),
-  ADD KEY `la_id` (`la_id`);
+  ADD KEY `la_id` (`lm_id`);
 
 --
 -- Indexes for table `compras`
@@ -908,8 +954,7 @@ ALTER TABLE `movimiento_inventario`
 -- Indexes for table `presentacion_cantidad`
 --
 ALTER TABLE `presentacion_cantidad`
-  ADD PRIMARY KEY (`pc_id`),
-  ADD KEY `fk_presentacion_cantidad_medicamento` (`med_id`);
+  ADD PRIMARY KEY (`pc_id`);
 
 --
 -- Indexes for table `proveedores`
@@ -985,19 +1030,19 @@ ALTER TABLE `clientes`
 -- AUTO_INCREMENT for table `codigo_barras`
 --
 ALTER TABLE `codigo_barras`
-  MODIFY `cb_id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `cb_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `detalle_venta`
@@ -1021,19 +1066,19 @@ ALTER TABLE `forma_farmaceutica`
 -- AUTO_INCREMENT for table `historial_lote`
 --
 ALTER TABLE `historial_lote`
-  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `informes`
 --
 ALTER TABLE `informes`
-  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `laboratorios`
@@ -1045,7 +1090,7 @@ ALTER TABLE `laboratorios`
 -- AUTO_INCREMENT for table `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
-  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `medicamento`
@@ -1069,7 +1114,7 @@ ALTER TABLE `movimiento_caja`
 -- AUTO_INCREMENT for table `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `presentacion_cantidad`
@@ -1133,7 +1178,7 @@ ALTER TABLE `caja`
 -- Constraints for table `codigo_barras`
 --
 ALTER TABLE `codigo_barras`
-  ADD CONSTRAINT `fk_codigo_barras_laboratorio` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_codigo_barras_lote_medicamento` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `compras`
@@ -1233,12 +1278,6 @@ ALTER TABLE `movimiento_inventario`
   ADD CONSTRAINT `fk_mi_med` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mi_su` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mi_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Constraints for table `presentacion_cantidad`
---
-ALTER TABLE `presentacion_cantidad`
-  ADD CONSTRAINT `fk_presentacion_cantidad_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `usuarios`

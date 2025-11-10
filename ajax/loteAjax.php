@@ -1,0 +1,66 @@
+
+<?php
+// Indicamos que esta petición viene vía AJAX
+$peticionAjax = true;
+
+// Importamos la configuración general
+require_once "../config/APP.php";
+
+// Forzamos salida JSON
+header('Content-Type: application/json; charset=utf-8');
+
+// ✅ VALIDACIÓN DE SEGURIDAD (igual que userAjax.php)
+if (isset($_POST['loteAjax'])) {
+
+    // Iniciamos sesión para validar permisos
+    session_start(['name' => 'SMP']);
+
+    // Verificar que el usuario tenga sesión activa y permisos
+    if (!isset($_SESSION['id_smp']) || $_SESSION['rol_smp'] != 1) {
+        // Sesión inválida o sin permisos
+        session_unset();
+        session_destroy();
+
+        echo json_encode([
+            "Alerta" => "simple",
+            "Titulo" => "Sesión expirada",
+            "texto" => "Por favor vuelva a iniciar sesión",
+            "Tipo" => "error"
+        ]);
+        exit();
+    }
+
+    // ✅ Sesión válida, procesar petición
+    $valor = $_POST['loteAjax'];
+
+    require_once "../controllers/loteController.php";
+    $ins_lote = new loteController();
+
+    if ($valor == "active") {
+        // 🐛 DEBUG
+        /* $debug = [
+            'Alerta' => 'simple',
+            'Titulo' => 'DEBUG - Datos recibidos',
+            'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
+            'Tipo' => 'info'
+        ];
+        echo json_encode($debug);
+        exit(); */
+
+        // 🚀 Producción (descomentar después)
+        echo $ins_lote->agregar_lote_controller();
+    }
+} else {
+    //  Petición inválida - cerrar sesión
+    session_start(['name' => 'SMP']);
+    session_unset();
+    session_destroy();
+
+    echo json_encode([
+        "Alerta" => "simple",
+        "Titulo" => "Acceso denegado",
+        "texto" => "Petición no autorizada",
+        "Tipo" => "error"
+    ]);
+    exit();
+}

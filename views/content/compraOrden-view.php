@@ -14,7 +14,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 </div>
 
 <div class="container">
-    <form class="form FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/compraAjax.php" method="POST"
+    <form class="form FormularioAjax formCompra" action="<?php echo SERVER_URL; ?>ajax/compraAjax.php" method="POST"
         data-form="save" autocomplete="off">
 
         <input type="hidden" name="compraAjax" value="save">
