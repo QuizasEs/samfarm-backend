@@ -293,6 +293,7 @@
             const listaLotes = []; // 🧾 Almacenamiento temporal
             const contenedorLista = document.getElementById("items-compra");
 
+
             // 🔢 Control de numeración de lotes
             let contadorLote = 0;
             let numeroLoteActual = null; // Número que se mostrará en el modal
@@ -364,6 +365,11 @@
                 const vencimiento = document.getElementById("fecha_vencimiento").value;
                 const precioCompra = parseFloat(document.getElementById("precio_compra").value);
                 const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
+                const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 1;
+                const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 1;
+                const sucursal = document.getElementById("Sucursal_reg").value || null;
+                const activar = document.getElementById("cb5").checked;
+
 
                 if (!numero) {
                     alert("⚠️ Error: No se pudo generar el número de lote.");
@@ -412,9 +418,13 @@
                 return {
                     numero,
                     cantidad,
+                    cantidad_blister: cantidadBlister,
+                    cantidad_unidades: cantidadUnidades,
                     vencimiento,
                     precioCompra,
-                    precioVenta
+                    precioVenta,
+                    sucursal,
+                    activar_lote: activar
                 };
             }
 
@@ -728,6 +738,8 @@
             }
         });
     </script>
+
+
     <script>
         // perminte manejar los inputs con porcentaje obligandolo a estar dentro del parametro 100%
         /* validar porcentaje de 0 a 100% */

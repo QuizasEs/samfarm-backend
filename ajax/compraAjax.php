@@ -47,17 +47,17 @@ if (isset($_POST['compraAjax'])) {
 
     if ($valor == "save") {
         // 🐛 DEBUG
-        /* $debug = [
+        $debug = [
             'Alerta' => 'simple',
             'Titulo' => 'DEBUG - Datos recibidos',
             'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
             'Tipo' => 'info'
         ];
         echo json_encode($debug);
-        exit(); */
+        exit();
 
         // 🚀 Producción (descomentar después)
-        echo $ins_compra->agregar_compra_controller();
+        //echo $ins_compra->agregar_compra_controller();
     }
 
     if ($valor == "buscar_medicamentos") {

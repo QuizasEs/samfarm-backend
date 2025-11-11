@@ -2330,6 +2330,124 @@ td img {
     }
 }
 /* ***************************Botones***************************** */
+.checkbox-wraper .tgl {
+    display: none;
+}
+
+.checkbox-wraper .tgl,
+.checkbox-wraper .tgl:after,
+.checkbox-wraper .tgl:before,
+.checkbox-wraper .tgl *,
+.checkbox-wraper .tgl *:after,
+.checkbox-wraper .tgl *:before,
+.checkbox-wraper .tgl+.tgl-btn {
+    box-sizing: border-box;
+}
+
+.checkbox-wraper .tgl::-moz-selection,
+.checkbox-wraper .tgl:after::-moz-selection,
+.checkbox-wraper .tgl:before::-moz-selection,
+.checkbox-wraper .tgl *::-moz-selection,
+.checkbox-wraper .tgl *:after::-moz-selection,
+.checkbox-wraper .tgl *:before::-moz-selection,
+.checkbox-wraper .tgl+.tgl-btn::-moz-selection,
+.checkbox-wraper .tgl::selection,
+.checkbox-wraper .tgl:after::selection,
+.checkbox-wraper .tgl:before::selection,
+.checkbox-wraper .tgl *::selection,
+.checkbox-wraper .tgl *:after::selection,
+.checkbox-wraper .tgl *:before::selection,
+.checkbox-wraper .tgl+.tgl-btn::selection {
+    background: none;
+}
+
+.checkbox-wraper .tgl+.tgl-btn {
+    outline: 0;
+    display: block;
+    width: 4em;
+    height: 2em;
+    position: relative;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.checkbox-wraper .tgl+.tgl-btn:after,
+.checkbox-wraper .tgl+.tgl-btn:before {
+    position: relative;
+    display: block;
+    content: "";
+    width: 50%;
+    height: 100%;
+}
+
+.checkbox-wraper .tgl+.tgl-btn:after {
+    left: 0;
+}
+
+.checkbox-wraper .tgl+.tgl-btn:before {
+    display: none;
+}
+
+.checkbox-wraper .tgl:checked+.tgl-btn:after {
+    left: 50%;
+}
+
+.checkbox-wraper .tgl-flip+.tgl-btn {
+    padding: 2px;
+    transition: all 0.2s ease;
+    font-family: sans-serif;
+    perspective: 100px;
+}
+
+.checkbox-wraper .tgl-flip+.tgl-btn:after,
+.checkbox-wraper .tgl-flip+.tgl-btn:before {
+    display: inline-block;
+    transition: all 0.4s ease;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    line-height: 2em;
+    font-weight: bold;
+    color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 4px;
+}
+
+.checkbox-wraper .tgl-flip+.tgl-btn:after {
+    content: attr(data-tg-on);
+    background: #02C66F;
+    transform: rotateY(-180deg);
+}
+
+.checkbox-wraper .tgl-flip+.tgl-btn:before {
+    background: #FF3A19;
+    content: attr(data-tg-off);
+}
+
+.checkbox-wraper .tgl-flip+.tgl-btn:active:before {
+    transform: rotateY(-20deg);
+}
+
+.checkbox-wraper .tgl-flip:checked+.tgl-btn:before {
+    transform: rotateY(180deg);
+}
+
+.checkbox-wraper .tgl-flip:checked+.tgl-btn:after {
+    transform: rotateY(0);
+    left: 0;
+    background: #7FC6A6;
+}
+
+.checkbox-wraper .tgl-flip:checked+.tgl-btn:active:after {
+    transform: rotateY(20deg);
+}
 .form-buttons{
     display: flex;
     justify-content: center;

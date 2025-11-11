@@ -279,34 +279,7 @@ class compraController extends compraModel
                 exit();
             }
 
-            /* ========== ACTUALIZAR/CREAR INVENTARIO ========== */
-
-            /* $datos_inventario = [
-                "su_id" => $sucursal_id,
-                "med_id" => $medicamento_id,
-                "lm_id" => $lote_id,
-                "inv_cantidad" => $cantidad,
-                "inv_ultimo_precio" => $precio_compra
-            ];
-
-            compraModel::actualizar_inventario_model($datos_inventario);
- */
-            /* ========== REGISTRAR MOVIMIENTO DE INVENTARIO ========== */
-
-            /* $datos_movimiento = [
-                "lm_id" => $lote_id,
-                "med_id" => $medicamento_id,
-                "su_id" => $sucursal_id,
-                "us_id" => $usuario_id,
-                "mi_tipo" => "entrada",
-                "mi_cantidad" => $cantidad,
-                "mi_unidad" => "unidad",
-                "mi_referencia_tipo" => "compra",
-                "mi_referencia_id" => $compra_id,
-                "mi_motivo" => "Compra #{$numero_compra} - Lote: {$numero_lote}"
-            ];
-
-            compraModel::agregar_movimiento_inventario_model($datos_movimiento); */
+        
         }
         /* ========== REGISTRAR INFORME DE COMPRA ========== */
 

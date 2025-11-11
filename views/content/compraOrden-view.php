@@ -8,6 +8,8 @@ $ins_med = new medicamentoController();
 $datos_select = $ins_med->datos_extras_controller();
 $ultimo_lote = $ins_med->ultimo_lote_controller();
 $ultima_compra = $ins_med->ultima_compra_controller();
+
+
 ?>
 <div class="title">
     <h1>Registrar Compra</h1>
@@ -20,7 +22,8 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" name="compraAjax" value="save">
         <input type="hidden" id="ultimo_lote_valor" value="<?php echo $ultimo_lote ?? 0; ?>">
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
-        
+        <input type="hidden" id="Sucursal_reg" class="Sucursal_reg" name="Sucursal_reg" value="<?php echo $_SESSION['sucursal_smp']?>" >
+
         <script>
             document.querySelector('.FormularioAjax').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -85,6 +88,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
         </div>
 
+
         <!-- DATOS DE FACTURA -->
         <div class="form-title">
             <h3>datos de factura</h3>
@@ -101,8 +105,8 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             <div class="form-bloque">
                 <label for="impuestos_reg">Impuestos %*</label>
                 <small>de 0% a 100%</small>
-                <input type="number" name="impuestos_reg" id="impuestos_reg" min="0" max="100" step="0.01" 
-                    placeholder="0" required oninput="validarPorcentaje(this)">
+                <input type="number" name="impuestos_reg" id="impuestos_reg" min="0" max="100" step="0.01"
+                    placeholder="0"  oninput="validarPorcentaje(this)">
             </div>
         </div>
 
@@ -149,7 +153,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque-search">
                 <label for="buscarMedicamento">Buscar</label>
-                <input type="text" name="termino" id="buscarMedicamento" placeholder="Buscar medicamento..." 
+                <input type="text" name="termino" id="buscarMedicamento" placeholder="Buscar medicamento..."
                     onkeyup="SearchManager.buscarMedicamentos()">
             </div>
         </div>
@@ -229,7 +233,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad" class="required">Cantidad</label>
+                                <label for="cantidad" class="required">Paquetes o Cajas</label>
                                 <input type="number" name="Cantidad_reg" id="cantidad" min="1" required>
                             </div>
                         </div>
@@ -237,6 +241,20 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                             <div class="modal-bloque">
                                 <label for="fecha_vencimiento" class="required">Vencimiento</label>
                                 <input type="date" name="Vencimiento_reg" id="fecha_vencimiento" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label for="cantidad" class="required">Blisters por caja </label>
+                                <input type="number" name="Cantidad_blister_reg" id="cantidad_blister" min="1" placeholder="si aplica">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label for="fecha_vencimiento" class="required">Unidades por blister </label>
+                                <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" placeholder="si aplica">
                             </div>
                         </div>
                     </div>
@@ -253,6 +271,16 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                                 <label for="precio_venta_reg" class="required">Precio Venta</label>
                                 <input type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" required>
                             </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="">Activar este Lote?</label>
+                            <div class="checkbox-wraper">
+                                <input class="tgl tgl-flip" id="cb5" type="checkbox" />
+                                <label class="tgl-btn" data-tg-off="Nop" data-tg-on="SI!" for="cb5"></label>
+                            </div>
+
                         </div>
                     </div>
 

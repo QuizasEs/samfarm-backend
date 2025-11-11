@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 10, 2025 at 06:23 AM
+-- Generation Time: Nov 11, 2025 at 09:29 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -36,13 +36,6 @@ CREATE TABLE `caja` (
   `caja_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `caja`
---
-
-INSERT INTO `caja` (`caja_id`, `su_id`, `caja_nombre`, `caja_saldo_inicial`, `caja_activa`, `caja_creado_en`) VALUES
-(1, 1, 'Caja Principal', 1000.00, 1, '2025-11-06 11:06:09');
-
 -- --------------------------------------------------------
 
 --
@@ -62,48 +55,6 @@ CREATE TABLE `clientes` (
   `cl_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `cl_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `clientes`
---
-
-INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apellido_materno`, `cl_telefono`, `cl_correo`, `cl_direccion`, `cl_carnet`, `cl_creado_en`, `cl_actualizado_en`, `cl_estado`) VALUES
-(1, 'Juan', 'Pérez', 'García', '71234567', 'juan.perez@email.com', 'Av. Siempre Viva 123', '1234567', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(2, 'María', 'López', 'Martínez', '71234568', 'maria.lopez@email.com', 'Calle Falsa 456', '1234568', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(3, 'Carlos', 'Rodríguez', 'Silva', '71234569', 'carlos.rodriguez@email.com', 'Av. Libertador 789', '1234569', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(4, 'Ana', 'Gómez', 'Vargas', '71234570', 'ana.gomez@email.com', 'Calle Real 321', '1234570', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(5, 'Luis', 'Fernández', 'Castro', '71234571', 'luis.fernandez@email.com', 'Av. Bolívar 654', '1234571', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `codigo_barras`
---
-
-CREATE TABLE `codigo_barras` (
-  `cb_id` bigint(20) NOT NULL,
-  `cb_codigo` varchar(255) NOT NULL,
-  `lm_id` bigint(20) UNSIGNED NOT NULL,
-  `cb_creado_en` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `codigo_barras`
---
-
-INSERT INTO `codigo_barras` (`cb_id`, `cb_codigo`, `lm_id`, `cb_creado_en`) VALUES
-(1, '434234', 4, '2025-11-10 00:43:53'),
-(2, '234234', 4, '2025-11-10 00:43:53'),
-(3, '14235135', 15, '2025-11-10 00:45:41'),
-(4, '23534534523', 15, '2025-11-10 00:45:41'),
-(5, '5234534523', 15, '2025-11-10 00:45:41'),
-(6, '123123', 14, '2025-11-10 00:52:00'),
-(7, '5345456345', 14, '2025-11-10 00:52:00'),
-(8, '6785678567', 14, '2025-11-10 00:52:00'),
-(9, '63464356345', 14, '2025-11-10 00:52:00'),
-(10, '23423423423', 6, '2025-11-10 00:59:07'),
-(11, '435545645645', 6, '2025-11-10 00:59:07'),
-(12, '7686867867', 6, '2025-11-10 00:59:07');
 
 -- --------------------------------------------------------
 
@@ -132,18 +83,6 @@ CREATE TABLE `compras` (
   `co_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `compras`
---
-
-INSERT INTO `compras` (`co_id`, `co_numero`, `co_fecha`, `la_id`, `us_id`, `su_id`, `pr_id`, `co_subtotal`, `co_impuesto`, `co_total`, `co_numero_factura`, `co_fecha_factura`, `co_tipo_documento`, `co_nit_proveedor`, `co_razon_social`, `co_creado_en`, `co_actualizado_en`, `co_estado`) VALUES
-(1, 'COMP-001-2024', '2024-01-15 08:00:00', 1, 1, 1, 1, 180.00, 25.20, 205.20, 'FAC-001-2024', '2024-01-15', 'compra', '123456789', 'Farmacorp S.A.', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
-(2, 'COMP-002-2024', '2024-01-10 10:15:00', 2, 1, 1, 2, 176.00, 24.64, 200.64, 'FAC-002-2024', '2024-01-10', 'compra', '123456790', 'Droguería Inti', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
-(3, 'COMP-003-2024', '2024-03-01 14:20:00', 3, 1, 1, 3, 600.00, 84.00, 684.00, 'FAC-003-2024', '2024-03-01', 'compra', '123456791', 'Laboratorios Bolivia', '2025-11-06 11:06:07', '2025-11-06 11:06:07', 1),
-(4, 'COMP-2025-0001', '2025-11-07 20:36:36', 3, 1, 1, 2, 536.00, 69.68, 605.68, '13123123', '2025-11-22', 'compra', NULL, 'sofir', '2025-11-07 20:36:36', '2025-11-07 20:36:36', 1),
-(5, 'COMP-2025-0001', '2025-11-09 18:08:19', 3, 1, 1, 3, 6448.00, 838.24, 7286.24, '242323423', '2025-11-23', 'compra', NULL, 'dweesfs', '2025-11-09 18:08:19', '2025-11-09 18:08:19', 1),
-(6, 'COMP-2025-0001', '2025-11-09 18:31:07', 2, 1, 1, 2, 5850.00, 760.50, 6610.50, '324232323', '2025-11-22', 'compra', NULL, 'sfsdfsd', '2025-11-09 18:31:07', '2025-11-09 18:31:07', 1);
-
 -- --------------------------------------------------------
 
 --
@@ -162,20 +101,6 @@ CREATE TABLE `detalle_compra` (
   `dc_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `detalle_compra`
---
-
-INSERT INTO `detalle_compra` (`dc_id`, `co_id`, `med_id`, `lm_id`, `dc_cantidad`, `dc_precio_unitario`, `dc_descuento`, `dc_subtotal`, `dc_estado`) VALUES
-(1, 1, 1, 1, 100, 1.80, 0.00, 180.00, 1),
-(2, 2, 2, 3, 80, 2.20, 0.00, 176.00, 1),
-(3, 3, 3, 4, 50, 12.00, 0.00, 600.00, 1),
-(4, 4, 10, 11, 14, 16.00, 0.00, 224.00, 1),
-(5, 4, 1, 12, 12, 26.00, 0.00, 312.00, 1),
-(6, 5, 7, 13, 234, 25.00, 0.00, 5850.00, 1),
-(7, 5, 2, 14, 23, 26.00, 0.00, 598.00, 1),
-(8, 6, 10, 15, 234, 25.00, 0.00, 5850.00, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -188,24 +113,31 @@ CREATE TABLE `detalle_venta` (
   `med_id` bigint(20) UNSIGNED NOT NULL,
   `lm_id` bigint(20) UNSIGNED DEFAULT NULL,
   `dv_cantidad` int(11) NOT NULL,
+  `dv_unidad` varchar(30) DEFAULT 'unidad',
   `dv_precio_unitario` decimal(12,2) NOT NULL,
   `dv_descuento` decimal(12,2) NOT NULL DEFAULT 0.00,
   `dv_subtotal` decimal(14,2) NOT NULL,
   `dv_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `detalle_venta`
+-- Table structure for table `devoluciones`
 --
 
-INSERT INTO `detalle_venta` (`dv_id`, `ve_id`, `med_id`, `lm_id`, `dv_cantidad`, `dv_precio_unitario`, `dv_descuento`, `dv_subtotal`, `dv_estado`) VALUES
-(1, 1, 1, 1, 10, 2.50, 0.00, 25.00, 1),
-(2, 1, 2, 3, 5, 3.00, 0.50, 14.50, 1),
-(3, 1, 4, 5, 2, 4.50, 0.00, 9.00, 1),
-(4, 2, 1, 1, 8, 2.50, 0.00, 20.00, 1),
-(5, 2, 5, 6, 1, 12.00, 4.00, 8.00, 1),
-(6, 3, 3, 4, 3, 15.00, 0.00, 45.00, 1),
-(7, 3, 6, 7, 2, 8.50, 0.00, 17.00, 1);
+CREATE TABLE `devoluciones` (
+  `dev_id` bigint(20) UNSIGNED NOT NULL,
+  `ve_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `fa_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `su_id` bigint(20) UNSIGNED NOT NULL,
+  `us_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `dev_total` decimal(14,2) NOT NULL DEFAULT 0.00,
+  `dev_cantidad` int(11) NOT NULL DEFAULT 0,
+  `dev_motivo` varchar(255) DEFAULT NULL,
+  `dev_fecha` datetime NOT NULL DEFAULT current_timestamp(),
+  `dev_estado` enum('pendiente','aceptada','rechazada') NOT NULL DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -228,14 +160,23 @@ CREATE TABLE `factura` (
   `fa_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `factura`
+-- Table structure for table `facturacion_electronica`
 --
 
-INSERT INTO `factura` (`fa_id`, `ve_id`, `cl_id`, `us_id`, `su_id`, `fa_numero`, `fa_fecha_emision`, `fa_monto_total`, `fa_codigo_control`, `fa_cuf`, `fa_estado`, `fa_creado_en`) VALUES
-(1, 1, 1, 1, 1, 'FAC-001-2024', '2024-03-20 09:15:00', 51.87, 'ABC123XYZ', 'CUF001234567890', 1, '2025-11-06 11:06:09'),
-(2, 2, 2, 1, 1, 'FAC-002-2024', '2024-03-21 10:30:00', 31.92, 'DEF456UVW', 'CUF001234567891', 1, '2025-11-06 11:06:09'),
-(3, 3, 3, 1, 1, 'FAC-003-2024', '2024-03-22 14:45:00', 71.25, 'GHI789RST', 'CUF001234567892', 1, '2025-11-06 11:06:09');
+CREATE TABLE `facturacion_electronica` (
+  `fe_id` bigint(20) UNSIGNED NOT NULL,
+  `fa_id` bigint(20) UNSIGNED NOT NULL,
+  `fe_cuf` varchar(255) DEFAULT NULL,
+  `fe_qr` text DEFAULT NULL,
+  `fe_estado_siat` varchar(50) DEFAULT NULL,
+  `fe_ticket` varchar(255) DEFAULT NULL,
+  `fe_fecha_envio` datetime DEFAULT NULL,
+  `fe_payload` longtext DEFAULT NULL,
+  `fe_creado_en` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -283,26 +224,6 @@ CREATE TABLE `historial_lote` (
   `hl_fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `historial_lote`
---
-
-INSERT INTO `historial_lote` (`hl_id`, `lm_id`, `us_id`, `hl_accion`, `hl_descripcion`, `hl_fecha`) VALUES
-(1, 11, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-07 20:36:36'),
-(2, 12, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-07 20:36:36'),
-(3, 13, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:08:19'),
-(4, 14, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:08:19'),
-(5, 15, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-09 18:31:07'),
-(9, 1, 1, 'activacion', 'Activacion de lote: LOTE-001-2024', '2025-11-10 00:37:42'),
-(11, 2, 1, 'activacion', 'Activacion de lote: LOTE-002-2024', '2025-11-10 00:40:03'),
-(12, 4, 1, 'activacion', 'Activacion de lote: LOTE-004-2024', '2025-11-10 00:43:53'),
-(13, 15, 1, 'activacion', 'Activacion de lote: MED-15', '2025-11-10 00:45:41'),
-(14, 14, 1, 'activacion', 'Activacion de lote: MED-14', '2025-11-10 00:52:00'),
-(15, 13, 1, 'activacion', 'Activacion de lote: MED-13', '2025-11-10 00:53:20'),
-(16, 12, 1, 'activacion', 'Activacion de lote: MED-12', '2025-11-10 00:54:37'),
-(17, 7, 1, 'activacion', 'Activacion de lote: LOTE-007-2024', '2025-11-10 00:55:43'),
-(18, 6, 1, 'activacion', 'Activacion de lote: LOTE-006-2024', '2025-11-10 00:59:07');
-
 -- --------------------------------------------------------
 
 --
@@ -318,18 +239,6 @@ CREATE TABLE `informes` (
   `inf_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `informes`
---
-
-INSERT INTO `informes` (`inf_id`, `inf_nombre`, `inf_tipo`, `inf_usuario`, `inf_config`, `inf_creado_en`) VALUES
-(1, 'Stock Mínimo', 'stock', 1, '{\"filtro_stock\": \"minimo\", \"sucursal_id\": 1}', '2025-11-06 11:06:10'),
-(2, 'Ventas Mensuales', 'ventas', 1, '{\"mes\": 3, \"anio\": 2024, \"sucursal_id\": 1}', '2025-11-06 11:06:10'),
-(3, 'Productos Más Vendidos', 'ventas', 1, '{\"orden\": \"cantidad\", \"limite\": 10, \"periodo\": \"mes\"}', '2025-11-06 11:06:10'),
-(4, 'Compra COMP-2025-0001 - sofir', 'compra', 1, '{\"compra_id\":4,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"13123123\",\"razon_social\":\"sofir\",\"subtotal\":\"536.00\",\"impuestos\":\"69.68\",\"total\":\"605.68\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"10\",\"numero_lote\":\"MED-11\",\"cantidad\":14,\"precio_compra\":16,\"precio_venta\":167,\"vencimiento\":\"2025-11-12\"},{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-12\",\"cantidad\":12,\"precio_compra\":26,\"precio_venta\":37,\"vencimiento\":\"2025-11-27\"}]}', '2025-11-07 20:36:36'),
-(5, 'Compra COMP-2025-0001 - dweesfs', 'compra', 1, '{\"compra_id\":5,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-23\",\"numero_factura\":\"242323423\",\"razon_social\":\"dweesfs\",\"subtotal\":\"6448.00\",\"impuestos\":\"838.24\",\"total\":\"7286.24\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"7\",\"numero_lote\":\"MED-13\",\"cantidad\":234,\"precio_compra\":25,\"precio_venta\":267,\"vencimiento\":\"2025-11-22\"},{\"medicamento_id\":\"2\",\"numero_lote\":\"MED-14\",\"cantidad\":23,\"precio_compra\":26,\"precio_venta\":27,\"vencimiento\":\"2025-11-12\"}]}', '2025-11-09 18:08:19'),
-(6, 'Compra COMP-2025-0001 - sfsdfsd', 'compra', 1, '{\"compra_id\":6,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"2\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"324232323\",\"razon_social\":\"sfsdfsd\",\"subtotal\":\"5850.00\",\"impuestos\":\"760.50\",\"total\":\"6610.50\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"10\",\"numero_lote\":\"MED-15\",\"cantidad\":234,\"precio_compra\":25,\"precio_venta\":26,\"vencimiento\":\"2025-11-26\"}]}', '2025-11-09 18:31:07');
-
 -- --------------------------------------------------------
 
 --
@@ -340,30 +249,16 @@ CREATE TABLE `inventarios` (
   `inv_id` bigint(20) UNSIGNED NOT NULL,
   `med_id` bigint(20) UNSIGNED NOT NULL,
   `su_id` bigint(20) UNSIGNED NOT NULL,
-  `lm_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `inv_cantidad` int(11) NOT NULL DEFAULT 0,
-  `inv_reservado` int(11) NOT NULL DEFAULT 0,
+  `inv_total_cajas` int(11) NOT NULL DEFAULT 0,
+  `inv_total_unidades` bigint(20) NOT NULL DEFAULT 0,
+  `inv_total_valorado` decimal(14,2) DEFAULT 0.00,
   `inv_minimo` int(11) DEFAULT 0,
   `inv_maximo` int(11) DEFAULT NULL,
-  `inv_ultimo_precio` decimal(12,2) DEFAULT NULL,
+  `inv_codigo_barras` varchar(255) DEFAULT NULL,
+  `inv_stock_alerta` tinyint(1) NOT NULL DEFAULT 0,
   `inv_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `inv_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `inventarios`
---
-
-INSERT INTO `inventarios` (`inv_id`, `med_id`, `su_id`, `lm_id`, `inv_cantidad`, `inv_reservado`, `inv_minimo`, `inv_maximo`, `inv_ultimo_precio`, `inv_actualizado_en`, `inv_creado_en`) VALUES
-(14, 1, 1, 1, 0, 0, 0, 0, 1.80, '2025-11-10 00:37:42', '2025-11-10 00:37:42'),
-(16, 1, 1, 2, 0, 0, 0, 0, 1.75, '2025-11-10 00:40:03', '2025-11-10 00:40:03'),
-(17, 3, 1, 4, 0, 0, 0, 0, 12.00, '2025-11-10 00:43:53', '2025-11-10 00:43:53'),
-(18, 10, 1, 15, 0, 0, 0, 0, 25.00, '2025-11-10 00:45:41', '2025-11-10 00:45:41'),
-(19, 2, 1, 14, 0, 0, 0, 0, 26.00, '2025-11-10 00:52:00', '2025-11-10 00:52:00'),
-(20, 7, 1, 13, 0, 0, 0, 0, 25.00, '2025-11-10 00:53:20', '2025-11-10 00:53:20'),
-(21, 1, 1, 12, 0, 0, 0, 0, 26.00, '2025-11-10 00:54:37', '2025-11-10 00:54:37'),
-(22, 6, 1, 7, 0, 0, 0, 0, 6.80, '2025-11-10 00:55:43', '2025-11-10 00:55:43'),
-(23, 5, 1, 6, 30000, 0, 3000, 60000, 9.50, '2025-11-10 00:59:07', '2025-11-10 00:59:07');
 
 -- --------------------------------------------------------
 
@@ -377,23 +272,22 @@ CREATE TABLE `laboratorios` (
   `la_logo` varchar(255) DEFAULT NULL,
   `la_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `la_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `la_estado` tinyint(1) NOT NULL DEFAULT 1,
-  `pr_id` bigint(20) UNSIGNED DEFAULT NULL
+  `la_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `laboratorios`
 --
 
-INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_creado_en`, `la_actualizado_en`, `la_estado`, `pr_id`) VALUES
-(1, 'Bayer', 'bayer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 1),
-(2, 'Pfizer', 'pfizer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 2),
-(3, 'Roche', 'roche.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 3),
-(4, 'Novartis', 'novartis.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 4),
-(5, 'GSK', 'gsk.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 5),
-(6, 'Sanofi', 'sanofi.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 1),
-(7, 'Merck', 'merck.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 2),
-(8, 'AstraZeneca', 'astrazeneca.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1, 3);
+INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_creado_en`, `la_actualizado_en`, `la_estado`) VALUES
+(1, 'Bayer', 'bayer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(2, 'Pfizer', 'pfizer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(3, 'Roche', 'roche.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(4, 'Novartis', 'novartis.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(5, 'GSK', 'gsk.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(6, 'Sanofi', 'sanofi.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(7, 'Merck', 'merck.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
+(8, 'AstraZeneca', 'astrazeneca.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1);
 
 -- --------------------------------------------------------
 
@@ -404,41 +298,25 @@ INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_cread
 CREATE TABLE `lote_medicamento` (
   `lm_id` bigint(20) UNSIGNED NOT NULL,
   `med_id` bigint(20) UNSIGNED NOT NULL,
-  `pc_id` bigint(20) UNSIGNED DEFAULT NULL,
   `su_id` bigint(20) UNSIGNED NOT NULL,
   `pr_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `pr_id_compra` bigint(20) UNSIGNED DEFAULT NULL,
   `lm_numero_lote` varchar(200) DEFAULT NULL,
-  `lm_cantidad_inicial` int(11) NOT NULL DEFAULT 0,
-  `lm_cantidad_actual` int(11) NOT NULL DEFAULT 0,
+  `lm_cant_caja` int(11) NOT NULL DEFAULT 0 COMMENT 'cajas ingresadas en este registro',
+  `lm_cant_blister` int(11) NOT NULL DEFAULT 1 COMMENT 'blisters por caja (1 si no aplica)',
+  `lm_cant_unidad` int(11) NOT NULL DEFAULT 1 COMMENT 'unidades por blister (1 si no aplica)',
+  `lm_total_unidades` bigint(20) GENERATED ALWAYS AS (`lm_cant_caja` * `lm_cant_blister` * `lm_cant_unidad`) STORED,
+  `lm_cant_actual_cajas` int(11) NOT NULL DEFAULT 0,
+  `lm_cant_actual_unidades` bigint(20) NOT NULL DEFAULT 0,
   `lm_precio_compra` decimal(12,2) DEFAULT NULL,
   `lm_precio_venta` decimal(12,2) DEFAULT NULL,
   `lm_fecha_ingreso` datetime NOT NULL DEFAULT current_timestamp(),
   `lm_fecha_vencimiento` date DEFAULT NULL,
   `lm_estado` enum('en_espera','activo','terminado','caducado','devuelto','bloqueado') NOT NULL DEFAULT 'en_espera',
   `lm_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
-  `lm_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `lm_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `lm_origen_id` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'si este registro proviene de la división/transferencia de otro lm_id'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `lote_medicamento`
---
-
-INSERT INTO `lote_medicamento` (`lm_id`, `med_id`, `pc_id`, `su_id`, `pr_id`, `lm_numero_lote`, `lm_cantidad_inicial`, `lm_cantidad_actual`, `lm_precio_compra`, `lm_precio_venta`, `lm_fecha_ingreso`, `lm_fecha_vencimiento`, `lm_estado`, `lm_creado_en`, `lm_actualizado_en`) VALUES
-(1, 1, NULL, 1, 1, 'LOTE-001-2024', 100, 85, 1.80, 3.00, '2024-01-15 08:00:00', '2025-12-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:37:42'),
-(2, 1, NULL, 1, 1, 'LOTE-002-2024', 150, 150, 1.75, 2.50, '2024-02-20 09:30:00', '2026-01-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:40:03'),
-(3, 2, NULL, 1, 2, 'LOTE-003-2024', 80, 60, 2.20, 3.00, '2024-01-10 10:15:00', '2025-11-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(4, 3, NULL, 1, 3, 'LOTE-004-2024', 50, 35, 12.00, 15.00, '2024-03-01 14:20:00', '2025-09-30', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:43:53'),
-(5, 4, NULL, 1, 4, 'LOTE-005-2024', 120, 95, 3.20, 4.50, '2024-02-15 11:45:00', '2026-02-28', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(6, 5, NULL, 1, 5, 'LOTE-006-2024', 60, 42, 9.50, 12.00, '2024-01-25 16:30:00', '2025-10-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:59:07'),
-(7, 6, NULL, 1, 1, 'LOTE-007-2024', 90, 90, 6.80, 8.50, '2024-03-10 08:45:00', '2026-03-31', 'activo', '2025-11-06 11:06:06', '2025-11-10 00:55:43'),
-(8, 7, NULL, 1, 2, 'LOTE-008-2024', 40, 25, 14.50, 18.00, '2024-02-05 13:15:00', '2025-12-15', 'activo', '2025-11-06 11:06:06', '2025-11-07 21:09:48'),
-(9, 8, NULL, 1, 3, 'LOTE-009-2024', 30, 18, 28.00, 35.00, '2024-01-30 15:20:00', '2025-11-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(10, 9, NULL, 1, 4, 'LOTE-010-2024', 70, 55, 17.50, 22.00, '2024-03-05 10:00:00', '2026-04-30', 'en_espera', '2025-11-06 11:06:06', '2025-11-06 11:06:06'),
-(11, 10, NULL, 1, 2, 'MED-11', 14, 14, 16.00, 167.00, '2025-11-07 20:36:36', '2025-11-12', 'en_espera', '2025-11-07 20:36:36', '2025-11-07 20:36:36'),
-(12, 1, NULL, 1, 2, 'MED-12', 12, 12, 26.00, 37.00, '2025-11-07 20:36:36', '2025-11-27', 'activo', '2025-11-07 20:36:36', '2025-11-10 00:54:37'),
-(13, 7, NULL, 1, 3, 'MED-13', 234, 234, 25.00, 267.00, '2025-11-09 18:08:19', '2025-11-22', 'activo', '2025-11-09 18:08:19', '2025-11-10 00:53:20'),
-(14, 2, NULL, 1, 3, 'MED-14', 23, 23, 26.00, 30.00, '2025-11-09 18:08:19', '2025-11-12', 'activo', '2025-11-09 18:08:19', '2025-11-10 00:52:00'),
-(15, 10, NULL, 1, 2, 'MED-15', 234, 234, 25.00, 29.00, '2025-11-09 18:31:07', '2025-11-26', 'activo', '2025-11-09 18:31:07', '2025-11-10 00:45:41');
 
 -- --------------------------------------------------------
 
@@ -455,6 +333,8 @@ CREATE TABLE `medicamento` (
   `med_descripcion` text DEFAULT NULL,
   `med_precio_unitario` decimal(12,2) NOT NULL DEFAULT 0.00,
   `med_precio_caja` decimal(12,2) DEFAULT NULL,
+  `med_codigo_barras` varchar(255) DEFAULT NULL,
+  `med_version_comercial` varchar(100) DEFAULT NULL,
   `med_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `med_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `uf_id` bigint(20) UNSIGNED DEFAULT NULL,
@@ -469,17 +349,17 @@ CREATE TABLE `medicamento` (
 -- Dumping data for table `medicamento`
 --
 
-INSERT INTO `medicamento` (`med_id`, `med_nombre_quimico`, `med_principio_activo`, `med_accion_farmacologica`, `med_presentacion`, `med_descripcion`, `med_precio_unitario`, `med_precio_caja`, `med_creado_en`, `med_actualizado_en`, `uf_id`, `ff_id`, `vd_id`, `la_id`, `su_id`, `us_id`) VALUES
-(1, 'Paracetamol', 'Paracetamol', 'Analgésico y antipirético', 'Tabletas 500mg x 10', 'Analgésico para dolor leve a moderado', 2.50, 25.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 1, 1, 1, 1, 1, 1),
-(2, 'Ibuprofeno', 'Ibuprofeno', 'Antiinflamatorio no esteroideo', 'Tabletas 400mg x 20', 'Antiinflamatorio y analgésico', 3.00, 60.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 3, 1, 1, 2, 1, 1),
-(3, 'Amoxicilina', 'Amoxicilina', 'Antibiótico de amplio espectro', 'Cápsulas 500mg x 12', 'Antibiótico para infecciones bacterianas', 15.00, 180.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 2, 2, 1, 3, 1, 1),
-(4, 'Loratadina', 'Loratadina', 'Antihistamínico', 'Tabletas 10mg x 10', 'Para alergias y rinitis', 4.50, 45.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 4, 1, 1, 4, 1, 1),
-(5, 'Omeprazol', 'Omeprazol', 'Inhibidor de bomba de protones', 'Cápsulas 20mg x 14', 'Para úlceras y reflujo gastroesofágico', 12.00, 168.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 8, 2, 1, 5, 1, 1),
-(6, 'Metformina', 'Metformina', 'Hipoglucemiante oral', 'Tabletas 850mg x 30', 'Para diabetes tipo 2', 8.50, 255.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 6, 1, 1),
-(7, 'Atorvastatina', 'Atorvastatina', 'Hipolipemiante', 'Tabletas 20mg x 30', 'Para reducir colesterol', 18.00, 540.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 7, 1, 1),
-(8, 'Salbutamol', 'Salbutamol', 'Broncodilatador', 'Spray 100mcg x 200 dosis', 'Para asma y broncoespasmo', 35.00, 35.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 10, 9, 10, 8, 1, 1),
-(9, 'Losartán', 'Losartán', 'Antihipertensivo', 'Tabletas 50mg x 30', 'Para hipertensión arterial', 22.00, 660.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 1, 1, 1),
-(10, 'Diazepam', 'Diazepam', 'Ansiolítico y relajante muscular', 'Tabletas 5mg x 20', 'Para ansiedad y espasmos musculares', 6.50, 130.00, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 9, 1, 1, 2, 1, 1);
+INSERT INTO `medicamento` (`med_id`, `med_nombre_quimico`, `med_principio_activo`, `med_accion_farmacologica`, `med_presentacion`, `med_descripcion`, `med_precio_unitario`, `med_precio_caja`, `med_codigo_barras`, `med_version_comercial`, `med_creado_en`, `med_actualizado_en`, `uf_id`, `ff_id`, `vd_id`, `la_id`, `su_id`, `us_id`) VALUES
+(1, 'Paracetamol', 'Paracetamol', 'Analgésico y antipirético', 'Tabletas 500mg x 10', 'Analgésico para dolor leve a moderado', 2.50, 25.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 1, 1, 1, 1, 1, 1),
+(2, 'Ibuprofeno', 'Ibuprofeno', 'Antiinflamatorio no esteroideo', 'Tabletas 400mg x 20', 'Antiinflamatorio y analgésico', 3.00, 60.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 3, 1, 1, 2, 1, 1),
+(3, 'Amoxicilina', 'Amoxicilina', 'Antibiótico de amplio espectro', 'Cápsulas 500mg x 12', 'Antibiótico para infecciones bacterianas', 15.00, 180.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 2, 2, 1, 3, 1, 1),
+(4, 'Loratadina', 'Loratadina', 'Antihistamínico', 'Tabletas 10mg x 10', 'Para alergias y rinitis', 4.50, 45.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 4, 1, 1, 4, 1, 1),
+(5, 'Omeprazol', 'Omeprazol', 'Inhibidor de bomba de protones', 'Cápsulas 20mg x 14', 'Para úlceras y reflujo gastroesofágico', 12.00, 168.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 8, 2, 1, 5, 1, 1),
+(6, 'Metformina', 'Metformina', 'Hipoglucemiante oral', 'Tabletas 850mg x 30', 'Para diabetes tipo 2', 8.50, 255.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 6, 1, 1),
+(7, 'Atorvastatina', 'Atorvastatina', 'Hipolipemiante', 'Tabletas 20mg x 30', 'Para reducir colesterol', 18.00, 540.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 7, 1, 1),
+(8, 'Salbutamol', 'Salbutamol', 'Broncodilatador', 'Spray 100mcg x 200 dosis', 'Para asma y broncoespasmo', 35.00, 35.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 10, 9, 10, 8, 1, 1),
+(9, 'Losartán', 'Losartán', 'Antihipertensivo', 'Tabletas 50mg x 30', 'Para hipertensión arterial', 22.00, 660.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 1, 1, 1),
+(10, 'Diazepam', 'Diazepam', 'Ansiolítico y relajante muscular', 'Tabletas 5mg x 20', 'Para ansiedad y espasmos musculares', 6.50, 130.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 9, 1, 1, 2, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -498,14 +378,6 @@ CREATE TABLE `merma` (
   `me_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `merma`
---
-
-INSERT INTO `merma` (`me_id`, `med_id`, `lm_id`, `su_id`, `us_id`, `me_cantidad`, `me_motivo`, `me_fecha`) VALUES
-(1, 1, 1, 1, 1, 2, 'Producto dañado en almacén', '2025-11-06 11:06:10'),
-(2, 2, 3, 1, 1, 1, 'Caducidad próxima', '2025-11-06 11:06:10');
-
 -- --------------------------------------------------------
 
 --
@@ -523,15 +395,6 @@ CREATE TABLE `movimiento_caja` (
   `mc_referencia_id` bigint(20) DEFAULT NULL,
   `mc_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `movimiento_caja`
---
-
-INSERT INTO `movimiento_caja` (`mc_id`, `caja_id`, `us_id`, `mc_tipo`, `mc_monto`, `mc_concepto`, `mc_referencia_tipo`, `mc_referencia_id`, `mc_fecha`) VALUES
-(1, 1, 1, 'ingreso', 51.87, 'Venta VENT-001-2024', 'venta', 1, '2025-11-06 11:06:09'),
-(2, 1, 1, 'ingreso', 31.92, 'Venta VENT-002-2024', 'venta', 2, '2025-11-06 11:06:09'),
-(3, 1, 1, 'ingreso', 71.25, 'Venta VENT-003-2024', 'venta', 3, '2025-11-06 11:06:09');
 
 -- --------------------------------------------------------
 
@@ -553,42 +416,6 @@ CREATE TABLE `movimiento_inventario` (
   `mi_motivo` text DEFAULT NULL,
   `mi_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `mi_estado` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `movimiento_inventario`
---
-
-INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
-(1, 1, 1, 1, 1, 'ingreso', 100, 'unidad', 'compra', 1, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(2, 1, 1, 1, 1, 'salida', 15, 'unidad', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
-(3, 3, 2, 1, 1, 'ingreso', 80, 'unidad', 'compra', 2, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(4, 3, 2, 1, 1, 'salida', 20, 'unidad', 'venta', 1, 'Venta al público', '2025-11-06 11:06:09', 1),
-(5, 4, 3, 1, 1, 'ingreso', 50, 'unidad', 'compra', 3, 'Compra inicial', '2025-11-06 11:06:09', 1),
-(6, 4, 3, 1, 1, 'salida', 15, 'unidad', 'venta', 3, 'Venta al público', '2025-11-06 11:06:09', 1),
-(7, 1, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 1, 'Activación del lote LOTE-001-2024', '2025-11-10 00:37:42', 1),
-(8, 2, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 2, 'Activación del lote LOTE-002-2024', '2025-11-10 00:40:03', 1),
-(9, 4, 3, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 4, 'Activación del lote LOTE-004-2024', '2025-11-10 00:43:53', 1),
-(10, 15, 10, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 15, 'Activación del lote MED-15', '2025-11-10 00:45:41', 1),
-(11, 14, 2, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 14, 'Activación del lote MED-14', '2025-11-10 00:52:00', 1),
-(12, 13, 7, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 13, 'Activación del lote MED-13', '2025-11-10 00:53:20', 1),
-(13, 12, 1, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 12, 'Activación del lote MED-12', '2025-11-10 00:54:37', 1),
-(14, 7, 6, 1, 1, 'entrada', 0, 'unidad', 'ingreso y activacion de lote', 7, 'Activación del lote LOTE-007-2024', '2025-11-10 00:55:43', 1),
-(15, 6, 5, 1, 1, 'entrada', 30000, 'unidad', 'ingreso y activacion de lote', 6, 'Activación del lote LOTE-006-2024', '2025-11-10 00:59:07', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `presentacion_cantidad`
---
-
-CREATE TABLE `presentacion_cantidad` (
-  `pc_id` bigint(20) UNSIGNED NOT NULL,
-  `pc_nombre` varchar(100) NOT NULL,
-  `pc_cantidad` int(11) NOT NULL,
-  `pc_unidad_base` varchar(50) DEFAULT 'unidad',
-  `pc_estado` enum('activo','inactivo') DEFAULT 'activo',
-  `pc_fecha_creacion` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -621,6 +448,19 @@ INSERT INTO `proveedores` (`pr_id`, `pr_nombres`, `pr_apellido_paterno`, `pr_ape
 (4, 'Laboratorios Bolivia', NULL, NULL, '23456791', '123456791', 'Av. Petrolera 321, Zona Sur', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
 (5, 'Distribuidora Salud', NULL, NULL, '23456792', '123456792', 'Calle Mercado 654, Zona Norte', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
 (6, 'MediBol', NULL, NULL, '23456793', '123456793', 'Av. Circunvalación 987, Zona Este', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `proveedores_laboratorio`
+--
+
+CREATE TABLE `proveedores_laboratorio` (
+  `pl_id` bigint(20) UNSIGNED NOT NULL,
+  `pr_id` bigint(20) UNSIGNED NOT NULL,
+  `la_id` bigint(20) UNSIGNED NOT NULL,
+  `pl_fecha_creado` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -757,15 +597,6 @@ CREATE TABLE `ventas` (
   `ve_numero_control` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `ventas`
---
-
-INSERT INTO `ventas` (`ve_id`, `ve_numero_documento`, `ve_fecha_emision`, `cl_id`, `us_id`, `su_id`, `ve_subtotal`, `ve_impuesto`, `ve_total`, `ve_creado_en`, `ve_actualizado_en`, `ve_estado`, `ve_tipo_documento`, `ve_estado_documento`, `ve_numero_control`) VALUES
-(1, 'VENT-001-2024', '2024-03-20 09:15:00', 1, 1, 1, 45.50, 6.37, 51.87, '2025-11-06 11:06:08', '2025-11-06 11:06:08', 1, 'venta', 'emitida', NULL),
-(2, 'VENT-002-2024', '2024-03-21 10:30:00', 2, 1, 1, 28.00, 3.92, 31.92, '2025-11-06 11:06:08', '2025-11-06 11:06:08', 1, 'venta', 'emitida', NULL),
-(3, 'VENT-003-2024', '2024-03-22 14:45:00', 3, 1, 1, 62.50, 8.75, 71.25, '2025-11-06 11:06:08', '2025-11-06 11:06:08', 1, 'venta', 'emitida', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -816,13 +647,6 @@ ALTER TABLE `clientes`
   ADD KEY `ix_clientes_carnet` (`cl_carnet`);
 
 --
--- Indexes for table `codigo_barras`
---
-ALTER TABLE `codigo_barras`
-  ADD PRIMARY KEY (`cb_id`),
-  ADD KEY `la_id` (`lm_id`);
-
---
 -- Indexes for table `compras`
 --
 ALTER TABLE `compras`
@@ -851,6 +675,16 @@ ALTER TABLE `detalle_venta`
   ADD KEY `ix_dv_lm` (`lm_id`);
 
 --
+-- Indexes for table `devoluciones`
+--
+ALTER TABLE `devoluciones`
+  ADD PRIMARY KEY (`dev_id`),
+  ADD KEY `fk_dev_ve` (`ve_id`),
+  ADD KEY `fk_dev_fa` (`fa_id`),
+  ADD KEY `fk_dev_su` (`su_id`),
+  ADD KEY `fk_dev_us` (`us_id`);
+
+--
 -- Indexes for table `factura`
 --
 ALTER TABLE `factura`
@@ -859,6 +693,13 @@ ALTER TABLE `factura`
   ADD KEY `fk_factura_cliente` (`cl_id`),
   ADD KEY `fk_factura_usuario` (`us_id`),
   ADD KEY `fk_factura_sucursal` (`su_id`);
+
+--
+-- Indexes for table `facturacion_electronica`
+--
+ALTER TABLE `facturacion_electronica`
+  ADD PRIMARY KEY (`fe_id`),
+  ADD KEY `fk_fe_fa` (`fa_id`);
 
 --
 -- Indexes for table `forma_farmaceutica`
@@ -887,17 +728,15 @@ ALTER TABLE `informes`
 --
 ALTER TABLE `inventarios`
   ADD PRIMARY KEY (`inv_id`),
-  ADD UNIQUE KEY `ux_inv_su_med_lm` (`su_id`,`med_id`,`lm_id`),
-  ADD KEY `ix_inv_med` (`med_id`),
-  ADD KEY `fk_inv_lm` (`lm_id`);
+  ADD UNIQUE KEY `ux_inv_su_med` (`su_id`,`med_id`),
+  ADD KEY `ix_inv_med` (`med_id`);
 
 --
 -- Indexes for table `laboratorios`
 --
 ALTER TABLE `laboratorios`
   ADD PRIMARY KEY (`la_id`),
-  ADD UNIQUE KEY `ux_laboratorios_nombre` (`la_nombre_comercial`),
-  ADD KEY `fk_laboratorios_pr` (`pr_id`);
+  ADD UNIQUE KEY `ux_laboratorios_nombre` (`la_nombre_comercial`);
 
 --
 -- Indexes for table `lote_medicamento`
@@ -908,7 +747,7 @@ ALTER TABLE `lote_medicamento`
   ADD KEY `ix_lm_su` (`su_id`),
   ADD KEY `ix_lm_pr` (`pr_id`),
   ADD KEY `ix_lm_numero` (`lm_numero_lote`),
-  ADD KEY `fk_lote_presentacion` (`pc_id`);
+  ADD KEY `fk_lm_origen` (`lm_origen_id`);
 
 --
 -- Indexes for table `medicamento`
@@ -951,17 +790,20 @@ ALTER TABLE `movimiento_inventario`
   ADD KEY `ix_mi_us` (`us_id`);
 
 --
--- Indexes for table `presentacion_cantidad`
---
-ALTER TABLE `presentacion_cantidad`
-  ADD PRIMARY KEY (`pc_id`);
-
---
 -- Indexes for table `proveedores`
 --
 ALTER TABLE `proveedores`
   ADD PRIMARY KEY (`pr_id`),
   ADD KEY `ix_proveedores_nit` (`pr_nit`);
+
+--
+-- Indexes for table `proveedores_laboratorio`
+--
+ALTER TABLE `proveedores_laboratorio`
+  ADD PRIMARY KEY (`pl_id`),
+  ADD UNIQUE KEY `ux_pl_pr_la` (`pr_id`,`la_id`),
+  ADD KEY `fk_pl_pr` (`pr_id`),
+  ADD KEY `fk_pl_la` (`la_id`);
 
 --
 -- Indexes for table `roles`
@@ -1018,43 +860,49 @@ ALTER TABLE `via_de_administracion`
 -- AUTO_INCREMENT for table `caja`
 --
 ALTER TABLE `caja`
-  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `codigo_barras`
---
-ALTER TABLE `codigo_barras`
-  MODIFY `cb_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `devoluciones`
+--
+ALTER TABLE `devoluciones`
+  MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `factura`
 --
 ALTER TABLE `factura`
-  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `facturacion_electronica`
+--
+ALTER TABLE `facturacion_electronica`
+  MODIFY `fe_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `forma_farmaceutica`
@@ -1066,19 +914,19 @@ ALTER TABLE `forma_farmaceutica`
 -- AUTO_INCREMENT for table `historial_lote`
 --
 ALTER TABLE `historial_lote`
-  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `informes`
 --
 ALTER TABLE `informes`
-  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `laboratorios`
@@ -1090,7 +938,7 @@ ALTER TABLE `laboratorios`
 -- AUTO_INCREMENT for table `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
-  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `medicamento`
@@ -1102,31 +950,31 @@ ALTER TABLE `medicamento`
 -- AUTO_INCREMENT for table `merma`
 --
 ALTER TABLE `merma`
-  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
-  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
--- AUTO_INCREMENT for table `presentacion_cantidad`
---
-ALTER TABLE `presentacion_cantidad`
-  MODIFY `pc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `proveedores`
 --
 ALTER TABLE `proveedores`
   MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `proveedores_laboratorio`
+--
+ALTER TABLE `proveedores_laboratorio`
+  MODIFY `pl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -1156,7 +1004,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT for table `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `via_de_administracion`
@@ -1173,12 +1021,6 @@ ALTER TABLE `via_de_administracion`
 --
 ALTER TABLE `caja`
   ADD CONSTRAINT `fk_caja_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `codigo_barras`
---
-ALTER TABLE `codigo_barras`
-  ADD CONSTRAINT `fk_codigo_barras_lote_medicamento` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `compras`
@@ -1206,6 +1048,15 @@ ALTER TABLE `detalle_venta`
   ADD CONSTRAINT `fk_dv_venta` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `devoluciones`
+--
+ALTER TABLE `devoluciones`
+  ADD CONSTRAINT `fk_dev_fa` FOREIGN KEY (`fa_id`) REFERENCES `factura` (`fa_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_dev_su` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_dev_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_dev_ve` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `factura`
 --
 ALTER TABLE `factura`
@@ -1213,6 +1064,12 @@ ALTER TABLE `factura`
   ADD CONSTRAINT `fk_factura_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_factura_usuario` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_factura_venta` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `facturacion_electronica`
+--
+ALTER TABLE `facturacion_electronica`
+  ADD CONSTRAINT `fk_fe_fa` FOREIGN KEY (`fa_id`) REFERENCES `factura` (`fa_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `historial_lote`
@@ -1231,24 +1088,17 @@ ALTER TABLE `informes`
 -- Constraints for table `inventarios`
 --
 ALTER TABLE `inventarios`
-  ADD CONSTRAINT `fk_inv_lm` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_inv_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_inv_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `laboratorios`
---
-ALTER TABLE `laboratorios`
-  ADD CONSTRAINT `fk_laboratorios_proveedores` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
   ADD CONSTRAINT `fk_lm_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_lm_origen` FOREIGN KEY (`lm_origen_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_lm_proveedor` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_lm_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_lote_presentacion` FOREIGN KEY (`pc_id`) REFERENCES `presentacion_cantidad` (`pc_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_lm_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `medicamento`
@@ -1271,6 +1121,13 @@ ALTER TABLE `merma`
   ADD CONSTRAINT `fk_me_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
+-- Constraints for table `movimiento_caja`
+--
+ALTER TABLE `movimiento_caja`
+  ADD CONSTRAINT `fk_mc_caja` FOREIGN KEY (`caja_id`) REFERENCES `caja` (`caja_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_mc_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
@@ -1278,6 +1135,13 @@ ALTER TABLE `movimiento_inventario`
   ADD CONSTRAINT `fk_mi_med` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mi_su` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mi_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `proveedores_laboratorio`
+--
+ALTER TABLE `proveedores_laboratorio`
+  ADD CONSTRAINT `fk_pl_la` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pl_pr` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `usuarios`
