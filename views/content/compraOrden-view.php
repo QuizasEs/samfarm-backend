@@ -22,7 +22,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" name="compraAjax" value="save">
         <input type="hidden" id="ultimo_lote_valor" value="<?php echo $ultimo_lote ?? 0; ?>">
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
-        <input type="hidden" id="Sucursal_reg" class="Sucursal_reg" name="Sucursal_reg" value="<?php echo $_SESSION['sucursal_smp']?>" >
 
         <script>
             document.querySelector('.FormularioAjax').addEventListener('submit', function(e) {
@@ -106,7 +105,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <label for="impuestos_reg">Impuestos %*</label>
                 <small>de 0% a 100%</small>
                 <input type="number" name="impuestos_reg" id="impuestos_reg" min="0" max="100" step="0.01"
-                    placeholder="0"  oninput="validarPorcentaje(this)">
+                    placeholder="0" oninput="validarPorcentaje(this)">
             </div>
         </div>
 

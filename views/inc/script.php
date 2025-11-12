@@ -367,7 +367,6 @@
                 const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
                 const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 1;
                 const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 1;
-                const sucursal = document.getElementById("Sucursal_reg").value || null;
                 const activar = document.getElementById("cb5").checked;
 
 
@@ -423,7 +422,6 @@
                     vencimiento,
                     precioCompra,
                     precioVenta,
-                    sucursal,
                     activar_lote: activar
                 };
             }

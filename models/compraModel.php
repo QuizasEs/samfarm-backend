@@ -8,10 +8,10 @@ class compraModel extends mainModel
     public static function agregar_compra_model($datos): int
     {
         $sql = mainModel::conectar()->prepare("
-        INSERT INTO compras
-            (co_numero, co_fecha, la_id, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
+            INSERT INTO compras
+                (co_numero, co_fecha, la_id, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
             VALUES
-            (:co_numero, NOW(), :la_id, :us_id, :su_id, :pr_id, :co_subtotal, :co_impuesto, :co_total, :co_numero_factura, :co_fecha_factura, :co_razon_social)
+                (:co_numero, NOW(), :la_id, :us_id, :su_id, :pr_id, :co_subtotal, :co_impuesto, :co_total, :co_numero_factura, :co_fecha_factura, :co_razon_social)
         ");
         $sql->bindParam(":co_numero", $datos['co_numero']);
         $sql->bindParam(":la_id", $datos['la_id']);
@@ -32,10 +32,10 @@ class compraModel extends mainModel
     public static function agregar_detalle_compra_model($item)
     {
         $sql = mainModel::conectar()->prepare("
-        INSERT INTO detalle_compra
-            (co_id, med_id, lm_id, dc_cantidad, dc_precio_unitario, dc_descuento, dc_subtotal)
+            INSERT INTO detalle_compra
+                (co_id, med_id, lm_id, dc_cantidad, dc_precio_unitario, dc_descuento, dc_subtotal)
             VALUES
-            (:co_id, :med_id, :lm_id, :cantidad, :precio_unitario, :descuento, :subtotal)
+                (:co_id, :med_id, :lm_id, :cantidad, :precio_unitario, :descuento, :subtotal)
         ");
         $sql->bindParam(":co_id", $item['co_id']);
         $sql->bindParam(":med_id", $item['med_id']);
@@ -53,21 +53,33 @@ class compraModel extends mainModel
     {
         $sql = mainModel::conectar()->prepare("
             INSERT INTO lote_medicamento
-            (pr_id, med_id, su_id, lm_numero_lote, lm_cantidad_inicial, lm_cantidad_actual, 
+            (pr_id, pr_id_compra, med_id, su_id, lm_numero_lote,
+            lm_cant_caja, lm_cant_blister, lm_cant_unidad, lm_total_unidades,
+            lm_cant_actual_cajas, lm_cant_actual_unidades,
             lm_precio_compra, lm_precio_venta, lm_fecha_ingreso, lm_fecha_vencimiento, lm_estado)
             VALUES
-            (:pr_id, :med_id, :su_id, :lm_numero_lote, :lm_cantidad_inicial, :lm_cantidad_actual,
-            :lm_precio_compra, :lm_precio_venta, NOW(), :lm_fecha_vencimiento, 'en_espera')
+            (:pr_id, :pr_id_compra, :med_id, :su_id, :lm_numero_lote,
+            :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad, :lm_total_unidades,
+            :lm_cant_actual_cajas, :lm_cant_actual_unidades,
+            :lm_precio_compra, :lm_precio_venta, NOW(), :lm_fecha_vencimiento, :lm_estado)
         ");
+
         $sql->bindParam(":pr_id", $datos['pr_id']);
+        $sql->bindParam(":pr_id_compra", $datos['pr_id_compra']); // referencia a la compra
         $sql->bindParam(":med_id", $datos['med_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
         $sql->bindParam(":lm_numero_lote", $datos['lm_numero_lote']);
-        $sql->bindParam(":lm_cantidad_inicial", $datos['lm_cantidad_inicial']);
-        $sql->bindParam(":lm_cantidad_actual", $datos['lm_cantidad_actual']);
+        $sql->bindParam(":lm_cant_caja", $datos['lm_cant_caja']);
+        $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
+        $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
+        $sql->bindParam(":lm_total_unidades", $datos['lm_total_unidades']);
+        $sql->bindParam(":lm_cant_actual_cajas", $datos['lm_cant_actual_cajas']);
+        $sql->bindParam(":lm_cant_actual_unidades", $datos['lm_cant_actual_unidades']);
         $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);
         $sql->bindParam(":lm_precio_venta", $datos['lm_precio_venta']);
         $sql->bindParam(":lm_fecha_vencimiento", $datos['lm_fecha_vencimiento']);
+        $sql->bindParam(":lm_estado", $datos['lm_estado']);
+
         $sql->execute();
         return (int) mainModel::conectar()->lastInsertId();
     }
@@ -90,19 +102,21 @@ class compraModel extends mainModel
     public static function actualizar_inventario_model($datos)
     {
         $sql = mainModel::conectar()->prepare(
-            "INSERT INTO inventarios (su_id, med_id, lm_id, inv_cantidad, inv_reservado, inv_minimo, inv_maximo, inv_ultimo_precio)
-                VALUES (:su_id, :med_id, :lm_id, :inv_cantidad, 0, 0, NULL, :inv_ultimo_precio)
-                ON DUPLICATE KEY UPDATE
-                    inv_cantidad = inv_cantidad + VALUES(inv_cantidad),
-                    inv_ultimo_precio = VALUES(inv_ultimo_precio),
-                    inv_actualizado_en = NOW()"
+            "INSERT INTO inventarios (su_id, med_id, inv_total_cajas, inv_total_unidades, inv_total_valorado, inv_creado_en, inv_actualizado_en)
+            VALUES (:su_id, :med_id, :inv_total_cajas, :inv_total_unidades, :inv_total_valorado, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+                inv_total_cajas = inv_total_cajas + VALUES(inv_total_cajas),
+                inv_total_unidades = inv_total_unidades + VALUES(inv_total_unidades),
+                inv_total_valorado = inv_total_valorado + VALUES(inv_total_valorado),
+                inv_actualizado_en = NOW()
+            "
         );
 
         $sql->bindParam(":su_id", $datos['su_id']);
         $sql->bindParam(":med_id", $datos['med_id']);
-        $sql->bindParam(":lm_id", $datos['lm_id']);
-        $sql->bindParam(":inv_cantidad", $datos['inv_cantidad']);
-        $sql->bindParam(":inv_ultimo_precio", $datos['inv_ultimo_precio']);
+        $sql->bindParam(":inv_total_cajas", $datos['inv_total_cajas']);
+        $sql->bindParam(":inv_total_unidades", $datos['inv_total_unidades']);
+        $sql->bindParam(":inv_total_valorado", $datos['inv_total_valorado']);
 
         $sql->execute();
         return $sql;
@@ -110,12 +124,14 @@ class compraModel extends mainModel
     /* insertar movimientos para inventario modelo */
     public static function agregar_movimiento_inventario_model($datos)
     {
-        $sql = mainModel::conectar()->prepare("
-        INSERT INTO movimiento_inventario
-            (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_fecha, mi_referencia_tipo, mi_referencia_id, mi_motivo)
+        $db = mainModel::conectar();
+        $sql = $db->prepare("
+            INSERT INTO movimiento_inventario
+                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_fecha, mi_referencia_tipo, mi_referencia_id, mi_motivo)
             VALUES
-            (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, NOW(), :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
+                (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, NOW(), :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
         ");
+
         $sql->bindParam(":lm_id", $datos['lm_id']);
         $sql->bindParam(":med_id", $datos['med_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
@@ -130,19 +146,21 @@ class compraModel extends mainModel
         $sql->execute();
         return $sql;
     }
+
+
     /* registrar un informe en informes ocn el tipo "compra" */
     public static function agregar_informe_compra_model($datos)
     {
         $sql = mainModel::conectar()->prepare(
             "INSERT INTO informes (inf_nombre, inf_tipo, inf_usuario, inf_config)
             VALUES (:inf_nombre, 'compra', :inf_usuario, :inf_config)
-        "
+            "
         );
         $sql->bindParam(":inf_nombre", $datos['inf_nombre']);
         $sql->bindParam(":inf_usuario", $datos['inf_usuario']);
         $sql->bindParam(":inf_config", $datos['inf_config']);
 
-        $sql->execute(); // ← FALTABA ESTO
+        $sql->execute();
         return $sql;
     }
 }
