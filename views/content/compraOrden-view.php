@@ -246,13 +246,13 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad" class="required">Blisters por caja </label>
+                                <label for="cantidad" >Blisters por caja </label>
                                 <input type="number" name="Cantidad_blister_reg" id="cantidad_blister" min="1" placeholder="si aplica">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="fecha_vencimiento" class="required">Unidades por blister </label>
+                                <label for="fecha_vencimiento" >Unidades por blister </label>
                                 <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" placeholder="si aplica">
                             </div>
                         </div>
@@ -261,13 +261,13 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="precio_compra" class="required">Precio Compra</label>
+                                <label for="precio_compra" class="required">Precio Compra por caja</label>
                                 <input type="number" name="Precio_compra_reg" id="precio_compra" step="0.01" min="0.01" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="precio_venta_reg" class="required">Precio Venta</label>
+                                <label for="precio_venta_reg" class="required">Precio Venta por unidad</label>
                                 <input type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" required>
                             </div>
                         </div>

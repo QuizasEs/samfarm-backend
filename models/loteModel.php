@@ -11,12 +11,15 @@ class loteModel extends mainModel
             SELECT 
                 lm.lm_id,
                 lm.med_id,
-                lm.pc_id,
                 lm.su_id,
                 lm.pr_id,
                 lm.lm_numero_lote,
-                lm.lm_cantidad_inicial,
-                lm.lm_cantidad_actual,
+                lm.lm_cant_caja,
+                lm.lm_cant_blister,
+                lm.lm_cant_unidad,
+                lm.lm_total_unidades,
+                lm.lm_cant_actual_cajas,
+                lm.lm_cant_actual_unidades,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_fecha_ingreso,
@@ -24,23 +27,33 @@ class loteModel extends mainModel
                 lm.lm_estado,
                 lm.lm_creado_en,
                 lm.lm_actualizado_en,
+                lm.lm_origen_id,
                 m.med_nombre_quimico AS med_nombre,
+                m.med_principio_activo,
                 m.med_presentacion,
+                m.med_accion_farmacologica,
                 m.med_precio_unitario,
+                m.med_precio_caja,
+                m.med_codigo_barras,
+                m.med_version_comercial,
                 ff.ff_nombre AS forma_farmaceutica,
-                pc.pc_nombre AS presentacion_nombre,
-                pc.pc_cantidad AS presentacion_cantidad,
+                uf.uf_nombre AS uso_farmacologico,
+                vd.vd_nombre AS via_administracion,
+                la.la_nombre_comercial AS laboratorio_nombre,
                 p.pr_nombres AS proveedor_nombres,
                 p.pr_apellido_paterno AS proveedor_apellido,
                 s.su_nombre AS sucursal_nombre
             FROM lote_medicamento lm
             LEFT JOIN medicamento m ON lm.med_id = m.med_id
             LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
-            LEFT JOIN presentacion_cantidad pc ON lm.pc_id = pc.pc_id
+            LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
+            LEFT JOIN via_de_administracion vd ON m.vd_id = vd.vd_id
+            LEFT JOIN laboratorios la ON m.la_id = la.la_id
             LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             LEFT JOIN sucursales s ON lm.su_id = s.su_id
             WHERE lm.lm_id = :ID
-            LIMIT 1
+            LIMIT 1;
+
         ");
         $sql->bindParam(":ID", $id);
         $sql->execute();

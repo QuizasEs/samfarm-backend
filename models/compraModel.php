@@ -127,9 +127,9 @@ class compraModel extends mainModel
         $db = mainModel::conectar();
         $sql = $db->prepare("
             INSERT INTO movimiento_inventario
-                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_fecha, mi_referencia_tipo, mi_referencia_id, mi_motivo)
+                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad,  mi_referencia_tipo, mi_referencia_id, mi_motivo)
             VALUES
-                (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, NOW(), :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
+                (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
         ");
 
         $sql->bindParam(":lm_id", $datos['lm_id']);

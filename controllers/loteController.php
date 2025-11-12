@@ -42,8 +42,8 @@ class loteController extends loteModel
                 m.med_principio_activo,
                 p.pr_nombres,
                 s.su_nombre,
-                lm.lm_cantidad_inicial,
-                lm.lm_cantidad_actual,
+                lm.lm_cant_caja AS lm_cantidad_inicial,
+                lm.lm_cant_actual_unidades AS lm_cantidad_actual,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_fecha_ingreso,
@@ -63,7 +63,7 @@ class loteController extends loteModel
             )
             ORDER BY lm.lm_fecha_ingreso DESC 
             LIMIT $inicio, $registros
-        ";
+            ";
         } else {
             $consulta = "
             SELECT 
@@ -74,8 +74,8 @@ class loteController extends loteModel
                 m.med_principio_activo,
                 p.pr_nombres,
                 s.su_nombre,
-                lm.lm_cantidad_inicial,
-                lm.lm_cantidad_actual,
+                lm.lm_cant_caja AS lm_cantidad_inicial,
+                lm.lm_cant_actual_unidades AS lm_cantidad_actual,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_fecha_ingreso,
@@ -90,7 +90,7 @@ class loteController extends loteModel
             WHERE lm.lm_estado IN ('en_espera', 'activo')
             ORDER BY lm.lm_fecha_ingreso DESC 
             LIMIT $inicio, $registros
-        ";
+            ";
         }
 
         /* realizamos la peticion a la base de datos */
@@ -155,6 +155,14 @@ class loteController extends loteModel
                         $estado_class = 'estado-caducado';
                         $estado_texto = 'Caducado';
                         break;
+                    case 'devuelto':
+                        $estado_class = 'estado-devuelto';
+                        $estado_texto = 'Devuelto';
+                        break;
+                    case 'bloqueado':
+                        $estado_class = 'estado-bloqueado';
+                        $estado_texto = 'Bloqueado';
+                        break;
                     default:
                         $estado_class = 'estado-desconocido';
                         $estado_texto = ucfirst($rows['lm_estado']);
@@ -173,10 +181,10 @@ class loteController extends loteModel
                 }
 
                 $tabla .= '
-                    <tr>
-                        <td>' . $contador . '</td>
-                        <td>
-                            ' . ($rows['lm_estado'] == "en_espera"
+                <tr>
+                    <td>' . $contador . '</td>
+                    <td>
+                        ' . ($rows['lm_estado'] == "en_espera"
                     ? '<a href="' . SERVER_URL . 'loteActivar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn-editar">Activar</a>'
                     : '<span class="badge-' . $rows['lm_estado'] . '">' . $estado_texto . '</span>') . '
                         </td>
@@ -190,7 +198,6 @@ class loteController extends loteModel
                         <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
                         <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
                         <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
-                        
                     </tr>
                 ';
                 $contador++;
@@ -209,8 +216,8 @@ class loteController extends loteModel
         /* final de tabla */
         $tabla .= '
                 </tbody>
-            </table>
-        </div>
+                </table>
+            </div>
         ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
@@ -221,11 +228,12 @@ class loteController extends loteModel
         /* devolvemos tabla */
         return $tabla;
     }
+
     public function agregar_lote_controller()
     {
         /* recibimos los datos del formulario */
         $id = $_POST['id'];
-        
+
         $cantidad = mainModel::limpiar_cadena($_POST['Cantidad_real_reg']);
         $precio_venta = mainModel::limpiar_cadena($_POST['Precio_venta_reg']);
         $observacion = mainModel::limpiar_cadena($_POST['Observacion_reg']);
@@ -260,7 +268,7 @@ class loteController extends loteModel
         $id = mainModel::limpiar_cadena($id);
 
         /* iniciamos sesion */
-        
+
 
         $usuario_id = $_SESSION['id_smp'];
         $sucursal_id = $_SESSION['sucursal_smp'];

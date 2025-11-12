@@ -290,42 +290,49 @@
             const modal = document.getElementById("modalLote");
             const modalNombre = document.getElementById("modalMedicamentoNombre");
             const modalId = document.getElementById("modalMedicamentoId");
-            const listaLotes = []; // 🧾 Almacenamiento temporal
+            const listaLotes = [];
             const contenedorLista = document.getElementById("items-compra");
 
-
-            // 🔢 Control de numeración de lotes
             let contadorLote = 0;
-            let numeroLoteActual = null; // Número que se mostrará en el modal
+            let numeroLoteActual = null;
 
-            /** 🎯 Inicializa el contador desde el último lote en BD */
+            /** 🎯 Inicializa contador */
             function inicializarContador() {
                 const ultimoLoteInput = document.getElementById("ultimo_lote_valor");
                 if (ultimoLoteInput && ultimoLoteInput.value) {
                     contadorLote = parseInt(ultimoLoteInput.value) || 0;
                 }
-                console.log('✅ Contador inicializado en:', contadorLote);
             }
 
-            /** 🔢 Genera el siguiente número de lote */
+            /** 🔢 Genera número de lote */
             function generarNumeroLote() {
                 const nuevoNumero = contadorLote + listaLotes.length + 1;
                 numeroLoteActual = `MED-${nuevoNumero}`;
-                console.log('🔢 Número de lote generado:', numeroLoteActual);
                 return numeroLoteActual;
             }
 
-            /** 🔄 Reorganiza los números de lote después de eliminar */
-            function reorganizarNumerosLote() {
-                // Reorganizar números de lote secuencialmente desde la base
-                listaLotes.forEach((lote, index) => {
-                    const nuevoNumero = contadorLote + index + 1;
-                    lote.numero = `MED-${nuevoNumero}`;
+            /** 🧹 Limpia todos los campos */
+            function limpiarCampos() {
+                const campos = [
+                    "cantidad",
+                    "fecha_vencimiento",
+                    "precio_compra",
+                    "precio_venta_reg",
+                    "cantidad_blister",
+                    "cantidad_unidades"
+                ];
+
+                campos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = "";
                 });
-                console.log('🔄 Lotes reorganizados:', listaLotes.map(l => l.numero));
+
+                // Reiniciar checkbox
+                const check = document.getElementById("cb5");
+                if (check) check.checked = false;
             }
 
-            /** 🔓 Abre el modal con los datos del medicamento */
+            /** 🔓 Abre el modal */
             function abrirModal(id, nombre) {
                 if (!modal) return;
                 modal.style.display = "flex";
@@ -333,12 +340,10 @@
                 modalNombre.textContent = nombre;
                 limpiarCampos();
 
-                // Generar y mostrar el número de lote automáticamente
                 const numeroLoteInput = document.getElementById("numero_lote");
                 if (numeroLoteInput) {
                     const nuevoNumero = generarNumeroLote();
                     numeroLoteInput.value = nuevoNumero;
-                    console.log('📝 Modal abierto con lote:', nuevoNumero);
                 }
             }
 
@@ -346,73 +351,35 @@
             function cerrarModal() {
                 if (!modal) return;
                 modal.style.display = "none";
-                numeroLoteActual = null; // Resetear el número temporal
-                console.log('❌ Modal cerrado');
+                numeroLoteActual = null;
             }
 
-            /** 🧹 Limpia los campos del modal */
-            function limpiarCampos() {
-                document.getElementById("cantidad").value = "";
-                document.getElementById("fecha_vencimiento").value = "";
-                document.getElementById("precio_compra").value = "";
-                document.getElementById("precio_venta_reg").value = "";
-            }
-
-            /** 🧮 Valida los campos antes de agregar */
+            /** 🧮 Valida campos */
             function validarCampos() {
                 const numero = document.getElementById("numero_lote").value.trim();
                 const cantidad = parseInt(document.getElementById("cantidad").value);
                 const vencimiento = document.getElementById("fecha_vencimiento").value;
                 const precioCompra = parseFloat(document.getElementById("precio_compra").value);
                 const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
-                const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 1;
-                const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 1;
-                const activar = document.getElementById("cb5").checked;
 
+                // Campos opcionales
+                const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 0;
+                const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 0;
+                const activar = document.getElementById("cb5").checked ? 1 : 0;
 
-                if (!numero) {
-                    alert("⚠️ Error: No se pudo generar el número de lote.");
-                    return false;
-                }
+                if (!numero) return alert("⚠️ No se pudo generar el número de lote."), false;
+                if (!cantidad || cantidad <= 0) return alert("⚠️ La cantidad debe ser mayor a 0."), false;
+                if (!vencimiento) return alert("⚠️ Ingrese la fecha de vencimiento."), false;
 
-                if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
-                    alert("⚠️ La cantidad debe ser mayor a 0.");
-                    return false;
-                }
-
-                if (!vencimiento) {
-                    alert("⚠️ Por favor, ingrese la fecha de vencimiento.");
-                    return false;
-                }
-
-                // Validar que la fecha no sea pasada
                 const fechaVenc = new Date(vencimiento);
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
+                if (fechaVenc < hoy) return alert("⚠️ La fecha de vencimiento no puede ser anterior a hoy."), false;
 
-                if (fechaVenc < hoy) {
-                    alert("⚠️ La fecha de vencimiento no puede ser anterior a hoy.");
-                    return false;
-                }
+                if (!precioCompra || precioCompra <= 0) return alert("⚠️ Precio de compra inválido."), false;
+                if (!precioVenta || precioVenta <= 0) return alert("⚠️ Precio de venta inválido."), false;
 
-                if (!precioCompra || isNaN(precioCompra) || precioCompra <= 0) {
-                    alert("⚠️ El precio de compra debe ser mayor a 0.");
-                    return false;
-                }
-
-                if (!precioVenta || isNaN(precioVenta) || precioVenta <= 0) {
-                    alert("⚠️ El precio de venta debe ser mayor a 0.");
-                    return false;
-                }
-
-                if (precioVenta <= precioCompra) {
-                    const confirmacion = confirm(
-                        `⚠️ ADVERTENCIA: El precio de venta (${precioVenta.toFixed(2)}) es menor o igual al precio de compra (${precioCompra.toFixed(2)}). ¿Desea continuar de todas formas?`
-                    );
-                    if (!confirmacion) {
-                        return false;
-                    }
-                }
+                // Se elimina restricción de precioVenta <= precioCompra
 
                 return {
                     numero,
@@ -426,7 +393,7 @@
                 };
             }
 
-            /** Agrega un nuevo lote a la lista temporal */
+            /** ➕ Agrega lote */
             function agregarLote() {
                 const datos = validarCampos();
                 if (!datos) return;
@@ -434,126 +401,72 @@
                 const id = modalId.value;
                 const nombre = modalNombre.textContent;
 
-                // Guardamos el lote
                 listaLotes.push({
                     id_medicamento: id,
                     nombre,
                     ...datos
                 });
 
-                console.log('Lote agregado:', datos.numero);
-                console.log('Total de lotes:', listaLotes.length);
-
                 renderizarLista();
                 actualizarTotales();
                 cerrarModal();
             }
 
-            /** 🖼️ Renderiza la lista de lotes agregados */
+            /** 🖼️ Renderiza lotes */
             function renderizarLista() {
                 if (listaLotes.length === 0) {
-                    contenedorLista.innerHTML = "<p style='text-align:center; padding: 20px; color: #666;'> No hay lotes agregados aún.</p>";
+                    contenedorLista.innerHTML = "<p style='text-align:center; padding: 20px; color: #666;'>No hay lotes agregados aún.</p>";
                     return;
                 }
 
-                const rows = listaLotes.map((lote, i) => `
+                contenedorLista.innerHTML = listaLotes.map((lote, i) => `
             <div class="item-lote" style="padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="flex: 1;">
                         <strong style="font-size: 16px; color: #333;">${i + 1}. ${lote.nombre}</strong><br>
                         <div style="margin-top: 8px; font-size: 14px; color: #666;">
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
+                            <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
+                            <span style="margin-left: 15px;"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
+                            <span style="margin-left: 15px;"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
                         </div>
                         <div style="margin-top: 5px; font-size: 14px; color: #666;">
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                            <span style="display: inline-block; margin-right: 15px;"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+                            <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
+                            <span style="margin-left: 15px;"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
+                            <span style="margin-left: 15px;"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
                         </div>
                     </div>
                     <div>
-                        <a href="javascript:void(0)" 
-                           class="btn warning btn-sm" 
-                           onclick="ModalManager.eliminarLote(${i})"
-                           style="padding: 8px 15px; font-size: 13px;">
+                        <a href="javascript:void(0)" class="btn warning btn-sm" onclick="ModalManager.eliminarLote(${i})">
                             <ion-icon name="trash-outline"></ion-icon> Eliminar
                         </a>
                     </div>
                 </div>
             </div>
         `).join("");
-
-                contenedorLista.innerHTML = rows;
             }
 
-            /** 📅 Formatea la fecha para mejor visualización */
             function formatearFecha(fecha) {
-                const [year, month, day] = fecha.split('-');
-                return `${day}/${month}/${year}`;
+                const [y, m, d] = fecha.split('-');
+                return `${d}/${m}/${y}`;
             }
 
-            /** 💰 Actualiza los totales de la compra */
             function actualizarTotales() {
-                const subtotal = listaLotes.reduce((total, lote) => {
-                    return total + (lote.cantidad * lote.precioCompra);
-                }, 0);
-
-                const impuestos = subtotal * 0.13; // 13% de impuestos (ajustar según necesidad)
+                const subtotal = listaLotes.reduce((t, l) => t + (l.cantidad * l.precioCompra), 0);
+                const impuestos = subtotal * 0.13;
                 const total = subtotal + impuestos;
 
-                // Actualizar en el DOM
-                const elementoSubtotal = document.getElementById("subtotal");
-                const elementoImpuestos = document.getElementById("impuestos");
-                const elementoTotal = document.getElementById("total");
-
-                if (elementoSubtotal) elementoSubtotal.textContent = `Bs. ${subtotal.toFixed(2)}`;
-                if (elementoImpuestos) elementoImpuestos.textContent = `Bs. ${impuestos.toFixed(2)}`;
-                if (elementoTotal) elementoTotal.textContent = `Bs. ${total.toFixed(2)}`;
+                document.getElementById("subtotal").textContent = `Bs. ${subtotal.toFixed(2)}`;
+                document.getElementById("impuestos").textContent = `Bs. ${impuestos.toFixed(2)}`;
+                document.getElementById("total").textContent = `Bs. ${total.toFixed(2)}`;
             }
 
-            /** ❌ Elimina un lote por índice */
-            function eliminarLote(index) {
-                if (!confirm(`¿Está seguro de eliminar el lote ${listaLotes[index].numero}?`)) {
-                    return;
-                }
-
-                console.log('🗑️ Eliminando lote:', listaLotes[index].numero);
-                listaLotes.splice(index, 1);
-
-                // Reorganizar números de lote para no dejar huecos
-                reorganizarNumerosLote();
-
-                console.log('📊 Total de lotes después de eliminar:', listaLotes.length);
-
+            function eliminarLote(i) {
+                if (!confirm(`¿Eliminar el lote ${listaLotes[i].numero}?`)) return;
+                listaLotes.splice(i, 1);
                 renderizarLista();
                 actualizarTotales();
             }
 
-            /** 🧰 Devuelve la lista temporal (para enviar al servidor) */
-            function obtenerLotes() {
-                return listaLotes;
-            }
-
-            /** 🔍 Obtiene información de totales */
-            function obtenerTotales() {
-                const subtotal = listaLotes.reduce((total, lote) => {
-                    return total + (lote.cantidad * lote.precioCompra);
-                }, 0);
-
-                const impuestos = subtotal * 0.13;
-                const total = subtotal + impuestos;
-
-                return {
-                    subtotal: subtotal.toFixed(2),
-                    impuestos: impuestos.toFixed(2),
-                    total: total.toFixed(2),
-                    cantidadLotes: listaLotes.length
-                };
-            }
-
-
-            /** 🚀 Inicializar al cargar */
             inicializarContador();
 
             return {
@@ -561,23 +474,30 @@
                 cerrarModal,
                 agregarLote,
                 eliminarLote,
-                obtenerLotes,
-                obtenerTotales
+                obtenerLotes: () => listaLotes,
+                obtenerTotales: () => {
+                    const subtotal = listaLotes.reduce((t, l) => t + (l.cantidad * l.precioCompra), 0);
+                    const impuestos = subtotal * 0.13;
+                    return {
+                        subtotal: subtotal.toFixed(2),
+                        impuestos: impuestos.toFixed(2),
+                        total: (subtotal + impuestos).toFixed(2),
+                        cantidadLotes: listaLotes.length
+                    };
+                }
             };
         })();
 
-        /* ======================================================
-           🧩 CONEXIÓN CON SearchManager
-           Reutilizamos el handleSelectItem existente
-        ====================================================== */
-
+        /* ================================
+           Conexión con SearchManager
+        ================================ */
         function handleSelectItem(button) {
-            const id = button.getAttribute("data-id");
-            const nombre = button.getAttribute("data-nombre");
-            ModalManager.abrirModal(id, nombre);
+            ModalManager.abrirModal(
+                button.getAttribute("data-id"),
+                button.getAttribute("data-nombre")
+            );
         }
 
-        // Reemplazamos los onclick del modal
         function cerrarModal() {
             ModalManager.cerrarModal();
         }
@@ -587,17 +507,16 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            ModalManager.cerrarModal(); // Ocultar modal al inicio
+            ModalManager.cerrarModal();
             const modal = document.getElementById("modalLote");
             if (modal) {
-                modal.addEventListener("click", (event) => {
-                    if (event.target === modal) {
-                        ModalManager.cerrarModal();
-                    }
+                modal.addEventListener("click", e => {
+                    if (e.target === modal) ModalManager.cerrarModal();
                 });
             }
         });
     </script>
+
     <!-- calcular impuestos y totales -->
     <script>
         // REEMPLAZAR todo el TotalManager con esta versión corregida:

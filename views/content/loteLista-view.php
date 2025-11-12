@@ -7,8 +7,8 @@
                     <div class="filtro">
                         <select class="select" name="" id="">
                             <option value="">en espera</option>
-                            <option value=""></option>
-                            <option value=""></option>
+                            <option value="">activo</option>
+                            <option value="">caducado</option>
                         </select>
                         <input type="text" name="" id="">
                         <button><ion-icon name="search"></ion-icon></button>

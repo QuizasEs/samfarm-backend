@@ -51,8 +51,8 @@ if ($datos->rowCount() == 1) {
                     <span ><?php echo $lote['forma_farmaceutica']?></span>
                 </div>
                 <div class="form-label-row">
-                    <span class="label-info">Cantidad total</span>
-                    <span ><?php echo $lote['lm_cantidad_inicial']?></span>
+                    <span class="label-info">Cantidad inicial</span>
+                    <span ><?php echo $lote['lm_cant_actual_cajas']?> Paquetes</span>
                 </div>
                 <div class="form-label-row">
                     <span class="label-info">Fecha de vencimiento</span>
