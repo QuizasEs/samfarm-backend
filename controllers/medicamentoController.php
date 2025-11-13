@@ -611,8 +611,10 @@ class medicamentoController extends medicamentoModel
         $sql = mainModel::ejecutar_consulta_simple("
             SELECT * FROM `lote_medicamento` ORDER BY lm_id DESC LIMIT 1
         ");
+
+
         $data = $sql->fetch();
-        return $data['lm_numero_lote'];
+        return $data['lm_numero_lote'] ?? 0;
     }
     /* -----------------------------------controlador para optener ultimos datos de  compra----------------------------------------- */
 

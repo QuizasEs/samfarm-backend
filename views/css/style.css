@@ -102,6 +102,11 @@ main {
 
 footer {}
 
+/* Asegura que SweetAlert siempre esté encima de los modales locales */
+.swal2-container {
+    z-index: 10000 !important;
+}
+
 /**************************************swich******************************/
 
 /* The switch - the box around the slider */

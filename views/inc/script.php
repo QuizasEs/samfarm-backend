@@ -290,62 +290,65 @@
             const modal = document.getElementById("modalLote");
             const modalNombre = document.getElementById("modalMedicamentoNombre");
             const modalId = document.getElementById("modalMedicamentoId");
-            const listaLotes = [];
             const contenedorLista = document.getElementById("items-compra");
+            const listaLotes = [];
 
             let contadorLote = 0;
-            let numeroLoteActual = null;
 
-            /** 🎯 Inicializa contador */
+            /** 🧮 Inicializa el contador de lote */
             function inicializarContador() {
                 const ultimoLoteInput = document.getElementById("ultimo_lote_valor");
-                if (ultimoLoteInput && ultimoLoteInput.value) {
-                    const patron = /^MED-(\d+)$/;
-                    const match = ultimoLoteInput.value.match(patron);
+                const valor = ultimoLoteInput ? ultimoLoteInput.value.trim() : "";
 
-                    if (!match) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Ocurrió  hola un error, no podemos procesar el número de lote asignado. Por favor contáctese con el encargado para solucionar este problema.'
-                        });
-                        contadorLote = 0;
-                        return;
-                    }
-
-                    contadorLote = parseInt(match[1]) || 0;
+                if (!valor || valor === "0") {
+                    console.warn("⚠️ No se encontró número de lote anterior. Se inicia desde MED-0000.");
+                    contadorLote = 0;
+                    return;
                 }
+
+                const patron = /^MED-(\d+)$/;
+                const match = valor.match(patron);
+
+                if (!match) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Número de lote inválido",
+                        text: "El número de lote anterior no tiene un formato válido. Se iniciará desde MED-0000.",
+                        timer: 4000,
+                        showConfirmButton: false
+                    });
+                    contadorLote = 0;
+                    return;
+                }
+
+                contadorLote = parseInt(match[1]) || 0;
             }
 
-            /** 🔢 Genera número de lote */
+            /** 🔢 Genera un número de lote único y formateado */
             function generarNumeroLote() {
                 const nuevoNumero = contadorLote + listaLotes.length + 1;
-                return `MED-${nuevoNumero}`;
+                return `MED-${String(nuevoNumero).padStart(4, "0")}`;
             }
 
-
-            /** 🧹 Limpia todos los campos */
+            /** 🧹 Limpia campos del modal */
             function limpiarCampos() {
-                const campos = [
+                [
                     "cantidad",
                     "fecha_vencimiento",
                     "precio_compra",
                     "precio_venta_reg",
                     "cantidad_blister",
                     "cantidad_unidades"
-                ];
-
-                campos.forEach(id => {
+                ].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = "";
                 });
 
-                // Reiniciar checkbox
                 const check = document.getElementById("cb5");
                 if (check) check.checked = false;
             }
 
-            /** 🔓 Abre el modal */
+            /** 🔓 Abre el modal de lote */
             function abrirModal(id, nombre) {
                 if (!modal) return;
                 modal.style.display = "flex";
@@ -355,44 +358,55 @@
 
                 const numeroLoteInput = document.getElementById("numero_lote");
                 if (numeroLoteInput) {
-                    const nuevoNumero = generarNumeroLote();
-                    numeroLoteInput.value = nuevoNumero;
+                    numeroLoteInput.value = generarNumeroLote();
                 }
             }
 
-            /** 🔒 Cierra el modal */
+            /** 🔒 Cierra modal */
             function cerrarModal() {
-                if (!modal) return;
-                modal.style.display = "none";
-                numeroLoteActual = null;
+                if (modal) modal.style.display = "none";
             }
 
-            /** 🧮 Valida campos */
+            /** ✅ Valida datos antes de agregar lote */
             function validarCampos() {
                 const numero = document.getElementById("numero_lote").value.trim();
                 const cantidad = parseInt(document.getElementById("cantidad").value);
                 const vencimiento = document.getElementById("fecha_vencimiento").value;
                 const precioCompra = parseFloat(document.getElementById("precio_compra").value);
                 const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
-
-                // Campos opcionales
                 const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 0;
                 const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 0;
                 const activar = document.getElementById("cb5").checked ? 1 : 0;
 
-                if (!numero) return alert("⚠️ No se pudo generar el número de lote."), false;
-                if (!cantidad || cantidad <= 0) return alert("⚠️ La cantidad debe ser mayor a 0."), false;
-                if (!vencimiento) return alert("⚠️ Ingrese la fecha de vencimiento."), false;
+                if (!numero) {
+                    alert("No se pudo generar el número de lote.");
+                    return false;
+                }
+                if (!cantidad || cantidad <= 0) {
+                    alert("La cantidad debe ser mayor a 0.");
+                    return false;
+                }
+                if (!vencimiento) {
+                    alert("Debe ingresar una fecha de vencimiento.");
+                    return false;
+                }
 
                 const fechaVenc = new Date(vencimiento);
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
-                if (fechaVenc < hoy) return alert("⚠️ La fecha de vencimiento no puede ser anterior a hoy."), false;
+                if (fechaVenc < hoy) {
+                    alert("La fecha de vencimiento no puede ser anterior a hoy.");
+                    return false;
+                }
 
-                if (!precioCompra || precioCompra <= 0) return alert("⚠️ Precio de compra inválido."), false;
-                if (!precioVenta || precioVenta <= 0) return alert("⚠️ Precio de venta inválido."), false;
-
-                // Se elimina restricción de precioVenta <= precioCompra
+                if (!precioCompra || precioCompra <= 0) {
+                    alert("Precio de compra inválido.");
+                    return false;
+                }
+                if (!precioVenta || precioVenta <= 0) {
+                    alert("Precio de venta inválido.");
+                    return false;
+                }
 
                 return {
                     numero,
@@ -406,7 +420,7 @@
                 };
             }
 
-            /** ➕ Agrega lote */
+            /** ➕ Agrega un nuevo lote */
             function agregarLote() {
                 const datos = validarCampos();
                 if (!datos) return;
@@ -425,7 +439,7 @@
                 cerrarModal();
             }
 
-            /** 🖼️ Renderiza lotes */
+            /** 🧾 Renderiza todos los lotes */
             function renderizarLista() {
                 if (listaLotes.length === 0) {
                     contenedorLista.innerHTML = "<p style='text-align:center; padding: 20px; color: #666;'>No hay lotes agregados aún.</p>";
@@ -433,36 +447,41 @@
                 }
 
                 contenedorLista.innerHTML = listaLotes.map((lote, i) => `
-            <div class="item-lote" style="padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="flex: 1;">
-                        <strong style="font-size: 16px; color: #333;">${i + 1}. ${lote.nombre}</strong><br>
-                        <div style="margin-top: 8px; font-size: 14px; color: #666;">
-                            <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
-                            <span style="margin-left: 15px;"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
-                            <span style="margin-left: 15px;"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
-                        </div>
-                        <div style="margin-top: 5px; font-size: 14px; color: #666;">
-                            <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
-                            <span style="margin-left: 15px;"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                            <span style="margin-left: 15px;"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
-                        </div>
+        <div class="item-lote" style="padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <strong style="font-size: 16px; color: #333;">${i + 1}. ${lote.nombre}</strong>
+                    <span style="margin-left: 10px; font-size: 13px; font-weight: bold; color:${lote.activar_lote ? '#28a745' : '#dc3545'};">
+                        [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
+                    </span>
+                    <br>
+                    <div style="margin-top: 8px; font-size: 14px; color: #666;">
+                        <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
+                        <span style="margin-left: 15px;"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
+                        <span style="margin-left: 15px;"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
                     </div>
-                    <div>
-                        <a href="javascript:void(0)" class="btn warning btn-sm" onclick="ModalManager.eliminarLote(${i})">
-                            <ion-icon name="trash-outline"></ion-icon> Eliminar
-                        </a>
+                    <div style="margin-top: 5px; font-size: 14px; color: #666;">
+                        <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
+                        <span style="margin-left: 15px;"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
+                        <span style="margin-left: 15px;"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
                     </div>
                 </div>
+                <div>
+                    <a href="javascript:void(0)" class="btn warning btn-sm" onclick="ModalManager.eliminarLote(${i})">
+                        <ion-icon name="trash-outline"></ion-icon> Eliminar
+                    </a>
+                </div>
             </div>
-        `).join("");
+        </div>
+    `).join("");
             }
 
             function formatearFecha(fecha) {
-                const [y, m, d] = fecha.split('-');
+                const [y, m, d] = fecha.split("-");
                 return `${d}/${m}/${y}`;
             }
 
+            /** 💰 Actualiza subtotales */
             function actualizarTotales() {
                 const subtotal = listaLotes.reduce((t, l) => t + (l.cantidad * l.precioCompra), 0);
                 const impuestos = subtotal * 0.13;
@@ -473,37 +492,36 @@
                 document.getElementById("total").textContent = `Bs. ${total.toFixed(2)}`;
             }
 
+            /** ❌ Eliminar lote */
             function eliminarLote(i) {
                 Swal.fire({
-                    title: '¿Estás seguro?',
+                    title: "¿Estás seguro?",
                     text: `¿Deseas eliminar el lote ${listaLotes[i].numero}?`,
-                    icon: 'warning',
+                    icon: "warning",
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar"
+                }).then(result => {
                     if (result.isConfirmed) {
                         listaLotes.splice(i, 1);
                         recalcularNumerosLote();
                         renderizarLista();
                         actualizarTotales();
-                        Swal.fire(
-                            '¡Eliminado!',
-                            'El lote ha sido eliminado.',
-                            'success'
-                        );
+                        Swal.fire("¡Eliminado!", "El lote ha sido eliminado.", "success");
                     }
                 });
             }
-            /* recalcula dinamicamente */
+
+            /** ♻️ Recalcula los números después de eliminar o agregar */
             function recalcularNumerosLote() {
                 listaLotes.forEach((lote, index) => {
-                    lote.numero = `MED-${contadorLote + index + 1}`;
+                    lote.numero = `MED-${String(contadorLote + index + 1).padStart(4, "0")}`;
                 });
             }
 
+            // 🚀 Inicialización
             inicializarContador();
 
             return {
@@ -525,9 +543,7 @@
             };
         })();
 
-        /* ================================
-           Conexión con SearchManager
-        ================================ */
+        /** 🌐 Vinculación externa */
         function handleSelectItem(button) {
             ModalManager.abrirModal(
                 button.getAttribute("data-id"),
@@ -553,6 +569,8 @@
             }
         });
     </script>
+
+
 
     <!-- calcular impuestos y totales -->
     <script>
@@ -679,42 +697,65 @@
     <!--  para el numero de compra de manera automatica -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ultimaCompraValor = document.getElementById('ultima_campra_valor').value;
+            const inputUltimaCompra = document.getElementById('ultima_campra_valor');
             const inputNumeroCompra = document.getElementById('numero_compra');
 
-            if (inputNumeroCompra && inputNumeroCompra.value === '') {
-                const patron = /^COMP-(\d{4})-(\d+)$/;
-                const match = ultimaCompraValor.match(patron);
+            // 🧩 Validar existencia de los elementos
+            if (!inputNumeroCompra) {
+                console.error('❌ No se encontró el campo #numero_compra en el DOM.');
+                return;
+            }
 
-                if (!match) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Ocurrió un error, no podemos procesar el número de compra asignado. Por favor contáctese con el encargado para solucionar este problema.'
-                    });
-                    return;
-                }
+            const ultimaCompraValor = (inputUltimaCompra && inputUltimaCompra.value.trim()) || '';
+            const añoActual = new Date().getFullYear().toString();
+            let nuevoNumero = 1; // Valor inicial por defecto
 
+            // 🧮 Intentar extraer número si existe un formato válido
+            const patron = /^COMP-(\d{4})-(\d+)$/;
+            const match = ultimaCompraValor.match(patron);
+
+            if (match) {
                 const añoAnterior = match[1];
                 const numeroAnterior = parseInt(match[2]);
-                const añoActual = new Date().getFullYear().toString();
 
-                let nuevoNumero;
                 if (añoAnterior === añoActual) {
                     nuevoNumero = numeroAnterior + 1;
                 } else {
+                    // Si cambió el año, reinicia la secuencia
                     nuevoNumero = 1;
                 }
+            } else {
+                // Si el valor está vacío, es 0 o no cumple el patrón
+                if (!ultimaCompraValor || ultimaCompraValor === '0') {
+                    console.warn('⚠️ No se detectó número de compra anterior. Se inicia desde COMP-' + añoActual + '-0001.');
+                } else {
+                    // Si el valor es inválido y no está vacío, avisamos al usuario
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atención',
+                        text: 'El número de compra anterior no tiene un formato válido. Se iniciará desde COMP-' + añoActual + '-0001.',
+                        timer: 4000,
+                        showConfirmButton: false
+                    });
+                }
+            }
 
-                const numeroFormateado = String(nuevoNumero).padStart(4, '0');
-                inputNumeroCompra.value = `COMP-${añoActual}-${numeroFormateado}`;
+            // 🧾 Formatear número final
+            const numeroFormateado = String(nuevoNumero).padStart(4, '0');
+            const nuevoCodigo = `COMP-${añoActual}-${numeroFormateado}`;
+
+            // Asignar solo si el campo está vacío
+            if (inputNumeroCompra.value.trim() === '') {
+                inputNumeroCompra.value = nuevoCodigo;
+                console.log('✅ Número de compra generado:', nuevoCodigo);
             }
         });
     </script>
+
     <!-- script para tablas y filtrado -->
-    <script>
+    <!--     <script>
         const SERVER_URL = '<?php echo SERVER_URL; ?>';
-    </script>
+    </script> -->
     <script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>
     <script>
         // perminte manejar los inputs con porcentaje obligandolo a estar dentro del parametro 100%

@@ -218,10 +218,18 @@ class loteController extends loteModel
                     <td>
                         ' .
                     ($rows['lm_estado'] == "en_espera"
-                        ? '<a href="' . SERVER_URL . 'loteActivar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn-editar">Activar</a>'
+                        ? '<a href="#" 
+                                class="btn-editar btn-activar-lote" 
+                                data-id="' . $rows['lm_id'] . '" 
+                                data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
+                                title="Activar lote">
+                                Activar
+                            </a>'
                         : '<span class="badge-' . $rows['lm_estado'] . '">' . $estado_texto . '</span>')
                     . '
                     </td>
+
+
                     <td class="buttons">
                         <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
                     </td>
@@ -362,5 +370,215 @@ class loteController extends loteModel
             echo json_encode($alerta);
             exit();
         }
+    }
+    public function Activar_lote_controller($id)
+    {
+        /* validamos la id */
+        $id = (int) $id;
+        if ($id <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'El lote no existe en el sistema',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+        /* revisamos que quien intenta activar el lote tenga permisos para la accion */
+        $rol = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol == 1 || $rol == 2) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No cuenta con los privilegios necesarios para realizar esta accion',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+        /* recuperamos la informacion del lote */
+        $datos = self::datos_lote_model(mainModel::encryption($id));
+        /* verificamos el retorno de informacion */
+        if ($datos->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Ocurrio un error inesperado!',
+                'texto' => 'El lote no existe',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+        $lote = $datos->fetch();
+
+        /* verificamos que el es estado del lote */
+        if ($lote['lm_estado'] !== 'en_espera') {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Ocurrio un error inesperado!',
+                'texto' => 'Este lote ya se encuentra activado o no es posible su activacion',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+        /* preparamos lote activacion */
+        $datos_lote = [
+            'lm_estado' => 'activo',
+            'lm_id' => $id,
+            'parametro' => 'en_espera'
+        ];
+        /* insertamos y actualizamos */
+        $lote_up = loteModel::activar_lote_model($datos_lote);
+
+        if ($lote_up->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Ocurrio un error inesperado!',
+                'texto' => 'No pudimos activar el lote',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+        /* datos del lote para su historial, movimiento e inventario */
+        $usuario_id = $_SESSION['id_smp'];
+        $usuario_name = $_SESSION['name_smp'];
+        $med_id = (int)$lote['med_id'];
+        $su_id = (int)$lote['su_id'];
+        $precio_compra = $lote['lm_precio_compra'];
+        $precio_venta = $lote['lm_precio_venta'];
+        $cantidad_cajas = (int)$lote['lm_cant_actual_cajas'];
+        $cantidad_blister = (int)$lote['lm_cant_blister'];
+        $cantidad_unidades = (int)$lote['lm_cant_actual_unidades'];
+        $cantidad_actual_cajas = $cantidad_cajas;
+        $cantidad_actual_unidades = $cantidad_cajas * $cantidad_blister * $cantidad_unidades;
+        $total_unidades = $cantidad_actual_unidades;
+        $subtotal_lote = $cantidad_cajas * $precio_compra;
+
+        /* preparamos el historial */
+        $datos_historial = [
+            "lm_id" => $id,
+            "us_id" => $usuario_id,
+            "hl_accion" => "activacion",
+            "hl_descripcion" => "Lote activado por" . $usuario_name
+        ];
+        $historial_resultado = loteModel::registrar_historial_lote_model($datos_historial);
+
+        if ($historial_resultado->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error al registrar historial',
+                'texto' => 'No se pudo registrar el historial del lote.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* preparamos datos para ctualizar inventario */
+        $datos_inventario = [
+            "su_id" => $su_id,
+            "med_id" => $med_id,
+            "inv_total_cajas" => $cantidad_actual_cajas,
+            "inv_total_unidades" => $cantidad_actual_unidades,
+            // valoramos según subtotal de compra (precio_compra * cajas)
+            "inv_total_valorado" => $subtotal_lote
+        ];
+
+        /* insertamos el inventario */
+        $inventario_resultado = loteModel::actualizar_inventario_model($datos_inventario);
+
+        if ($inventario_resultado->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error inventario',
+                'texto' => 'No se pudo actualizar el inventario.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* preparamos los datos de mivimeinto inventario */
+        $datos_moviemiento = [
+            "lm_id" => $id,
+            "med_id" => $med_id,
+            "su_id" => $su_id,
+            "us_id" => $usuario_id,
+            "mi_tipo" => "entrada",
+            "mi_cantidad" => $cantidad_actual_unidades,
+            "mi_unidad" => "unidad",
+            "mi_referencia_tipo" => "activacion",
+            "mi_referencia_id" => $id,
+            "mi_motivo" => "Ingreso por Activacion de lote {$lote['lm_numero_lote']}"
+        ];
+
+        /* insertamos movimiento */
+
+        $movimiento_resultado = loteModel::registro_movimiento_inventario_model($datos_moviemiento);
+
+        /* verificamos */
+        if ($movimiento_resultado->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error movimiento',
+                'texto' => 'No se pudo registrar el movimiento de inventario.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* informe */
+        $config_informe = [
+            "tipo_informe"       => "activacion_lote",
+            "lote_id"            => $id,
+            "numero_lote"        => $lote['lm_numero_lote'],
+            "medicamento_id"     => $med_id,
+            "medicamento_nombre" => $lote['med_nombre_comercial'] ?? $lote['med_nombre_quimico'] ?? 'No especificado',
+            "sucursal_id"        => $su_id,
+            "usuario_id"         => $usuario_id,
+            "usuario_nombre"     => $usuario_name,
+            "fecha_activacion"   => date("Y-m-d H:i:s"),
+            "precio_compra"      => (float) $precio_compra,
+            "precio_venta"       => (float) $precio_venta,
+            "cantidad_cajas"     => $cantidad_cajas,
+            "cantidad_unidades"  => $cantidad_actual_unidades,
+            "subtotal_lote"      => $subtotal_lote,
+            "observaciones"      => "Activación inicial del lote e ingreso a inventario."
+        ];
+
+        $datos_informe = [
+            "inf_nombre"  => "Activación de Lote #".$lote['lm_numero_lote']." (".($lote['med_nombre_comercial'] ?? $lote['med_nombre_quimico']).")",
+            "inf_usuario" => $usuario_id,
+            "inf_config"  => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
+        ];
+
+        /* insertamos informe */
+
+        $informe_result = compraModel::agregar_informe_compra_model($datos_informe);
+
+        if ($informe_result->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Ocurrió un error inesperado',
+                'texto' => 'No se pudo registrar el informe.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $alerta = [
+            'Alerta' => 'recargar',
+            'Titulo' => 'Lote activado',
+            'texto' => 'El lote se activó correctamente y se generó el informe de activación.',
+            'Tipo' => 'success'
+        ];
+        echo json_encode($alerta);
+        exit();
     }
 }
