@@ -1,24 +1,24 @@
 Array
 (
     [compraAjax] => save
-    [Numero_compra_reg] => COMP-2025-0001
-    [razon_reg] => 35345345
+    [Numero_compra_reg] => COMP-2025-0002
+    [razon_reg] => tyu
     [Proveedor_reg] => 4
-    [Laboratorio_factura_reg] => 5
-    [Fecha_factura_reg] => 2025-11-30
-    [Numero_factura_reg] => 345
-    [impuestos_reg] => 
+    [Laboratorio_factura_reg] => 3
+    [Fecha_factura_reg] => 2025-11-29
+    [Numero_factura_reg] => 456456
+    [impuestos_reg] => 1
     [Form_reg] => 
     [Via_reg] => 
     [Laboratorio_reg] => 
     [Uso_reg] => 
-    [termino] => g
-    [Cantidad_reg] => 50
-    [Vencimiento_reg] => 2025-11-21
+    [termino] => p
+    [Cantidad_reg] => 5
+    [Vencimiento_reg] => 2025-11-28
     [Cantidad_blister_reg] => 
     [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 80
-    [precio_venta_reg] => 90
-    [lotes_json] => [{"id_medicamento":"10","nombre":"Diazepam","numero":"MED-12","cantidad":50,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-11-21","precioCompra":80,"precioVenta":90,"activar_lote":1}]
-    [totales_json] => {"subtotal":"4000.00","impuestos":"520.00","total":"4520.00","cantidadLotes":1}
+    [Precio_compra_reg] => 5
+    [precio_venta_reg] => 9
+    [lotes_json] => [{"id_medicamento":"8","nombre":"Salbutamol","numero":"MED-14","cantidad":9,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-11-21","precioCompra":4,"precioVenta":5,"activar_lote":0},{"id_medicamento":"1","nombre":"Paracetamol","numero":"MED-15","cantidad":5,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-11-28","precioCompra":5,"precioVenta":9,"activar_lote":0}]
+    [totales_json] => {"subtotal":"61.00","impuestos":"7.93","total":"68.93","cantidadLotes":2}
 )

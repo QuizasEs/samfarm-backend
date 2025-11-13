@@ -36,7 +36,39 @@ if (isset($_POST['loteAjax'])) {
     require_once "../controllers/loteController.php";
     $ins_lote = new loteController();
 
+    if ($valor === "listar") {
+        // obtener parámetros
+        $pagina   = isset($_POST['pagina']) ? (int) $_POST['pagina'] : 1;
+        $registros = isset($_POST['registros']) ? (int) $_POST['registros'] : 10;
+        $busqueda = isset($_POST['busqueda']) ? $ins_lote->limpiar_cadena($_POST['busqueda']) : '';
+        $select1  = isset($_POST['select1']) ? $ins_lote->limpiar_cadena($_POST['select1']) : '';
+        $select2  = isset($_POST['select2']) ? $ins_lote->limpiar_cadena($_POST['select2']) : '';
+        $select3  = isset($_POST['select3']) ? $ins_lote->limpiar_cadena($_POST['select3']) : '';
+
+        // Llamada al controlador. Asegúrate que el método acepte los nuevos parámetros.
+        $html = $ins_lote->paginado_lote_controller($pagina, $registros, "loteLista", $busqueda, $select1, $select2, $select3);
+
+        // devolver HTML directamente
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
+        exit();
+    }
+
     if ($valor == "active") {
+        // 🐛 DEBUG
+        $debug = [
+            'Alerta' => 'simple',
+            'Titulo' => 'DEBUG - Datos recibidos',
+            'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
+            'Tipo' => 'info'
+        ];
+        echo json_encode($debug);
+        exit();
+
+        // 🚀 Producción (descomentar después)
+        //echo $ins_lote->agregar_lote_controller();
+    }
+    if ($valor == "update") {
         // 🐛 DEBUG
         /* $debug = [
             'Alerta' => 'simple',
@@ -48,7 +80,7 @@ if (isset($_POST['loteAjax'])) {
         exit(); */
 
         // 🚀 Producción (descomentar después)
-        echo $ins_lote->agregar_lote_controller();
+        echo $ins_lote->actualizar_lote_controller();
     }
 } else {
     //  Petición inválida - cerrar sesión

@@ -59,98 +59,48 @@ class loteModel extends mainModel
         $sql->execute();
         return $sql;
     }
-    protected static function activar_lote_model($datos)
+    
+    protected static function actualizar_lote_model($datos)
     {
-        /* en casoq que se requirea */
-        /* lm_cantidad_actual = :Cantidad, */
-        $sql = mainModel::conectar()->prepare("
-            UPDATE lote_medicamento
-                SET
-                    
-                    lm_precio_venta = :PrecioVenta,
-                    lm_estado = 'activo',
-                    lm_actualizado_en = NOW()
-                WHERE lm_id = :ID
-            ");
-        /* $sql->bindParam(":Cantidad", $datos['Cantidad'], PDO::PARAM_INT); */
-        $sql->bindParam(":PrecioVenta", $datos['PrecioVenta']);
-        $sql->bindParam(":ID", $datos['ID'], PDO::PARAM_INT);
-        $sql->execute();
-        return $sql;
-    }
-    /* registrar historial de lote */
-    protected static function registrar_hitorial_lote_model($datos)
-    {
-        $sql = mainModel::conectar()->prepare("
-            INSERT INTO historial_lote (lm_id, us_id, hl_accion, hl_descripcion)
-            VALUES (:lm_id, :us_id, :hl_accion, :hl_descripcion)
-        ");
-        $sql->bindParam(":lm_id",   $datos['LoteID']);
-        $sql->bindParam(":us_id", $datos['UsuarioID']);
-        $sql->bindParam(":hl_accion", $datos['Accion']);
-        $sql->bindParam(":hl_descripcion", $datos['Descripcion']);
-        $sql->execute();
-        return $sql;
-    }
-    /* insertar y/o actualizar inventario  */
+        $sql = self::conectar()->prepare("
+        UPDATE lote_medicamento
+        SET
+            lm_cant_blister = :lm_cant_blister,
+            lm_cant_unidad = :lm_cant_unidad,
+            lm_precio_compra = :lm_precio_compra,
+            lm_precio_venta = :lm_precio_venta,
+            lm_fecha_vencimiento = :lm_fecha_vencimiento,
+            lm_actualizado_en = NOW(),
+            lm_origen_id = :lm_origen_id
+        WHERE lm_id = :ID
+    ");
 
-    protected static function actualizar_inventario_model($datos)
-    {
-        $sql = mainModel::conectar()->prepare("
-        INSERT INTO `inventarios`
-        (`med_id`, `su_id`, `lm_id`, `inv_cantidad`, `inv_minimo`, 
-        `inv_maximo`, `inv_ultimo_precio`, `inv_actualizado_en`, `inv_creado_en`) 
-        VALUES 
-        (:med_id,:su_id,:lm_id,:inv_cantidad,:inv_minimo,:inv_maximo,
-        :inv_ultimo_precio,NOW(),NOW())
-        "
-        );
-
-        $sql->bindParam(":med_id", $datos['MedID']);
-        $sql->bindParam(":su_id", $datos['SuID']);
-        $sql->bindParam(":lm_id", $datos['LoteID']);
-        $sql->bindParam(":inv_cantidad", $datos['Cantidad']);
-        $sql->bindParam(':inv_minimo', $datos['CantidadMinima']);
-        $sql->bindParam(':inv_maximo', $datos['CantidadMaxima']);
-        $sql->bindParam(":inv_ultimo_precio", $datos['UltimoPrecio']);
+        $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
+        $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
+        $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);
+        $sql->bindParam(":lm_precio_venta", $datos['lm_precio_venta']);
+        $sql->bindParam(":lm_fecha_vencimiento", $datos['lm_fecha_vencimiento']);
+        $sql->bindParam(":lm_origen_id", $datos['lm_origen_id']);
+        $sql->bindParam(":ID", $datos['ID']);
 
         $sql->execute();
         return $sql;
     }
-    /* registrar movimiento de inventario */
-    protected static function registrar_movimiento_inventario_model($datos)
+
+    /* Registro en historial_lote */
+    protected static function registrar_historial_lote_model($datos)
     {
-        $sql = mainModel::conectar()->prepare("
-        INSERT INTO movimiento_inventario
-            (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_referencia_tipo, mi_referencia_id, mi_motivo)
-            VALUES
-            (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
-        ");
-        $sql->bindParam(":lm_id", $datos['LoteID']);
-        $sql->bindParam(":med_id", $datos['MedID']);
-        $sql->bindParam(":su_id", $datos['SucursalID']);
-        $sql->bindParam(":us_id", $datos['UsuarioID']);
-        $sql->bindParam(":mi_tipo", $datos['Tipo']);
-        $sql->bindParam(":mi_cantidad", $datos['Cantidad']);
-        $sql->bindParam(":mi_unidad", $datos['Unidad']);
-        $sql->bindParam(":mi_referencia_tipo", $datos['RefTipo']);
-        $sql->bindParam(":mi_referencia_id", $datos['RefID']);
-        $sql->bindParam(":mi_motivo", $datos['Motivo']);
+        $sql = self::conectar()->prepare("
+        INSERT INTO historial_lote (lm_id, us_id, hl_accion, hl_descripcion, hl_fecha)
+        VALUES (:lm_id, :us_id, :hl_accion, :hl_descripcion, NOW())
+    ");
+
+        $sql->bindParam(":lm_id", $datos['lm_id']);
+        $sql->bindParam(":us_id", $datos['us_id']);
+        $sql->bindParam(":hl_accion", $datos['hl_accion']);
+        $sql->bindParam(":hl_descripcion", $datos['hl_descripcion']);
 
         $sql->execute();
         return $sql;
-    }
-    protected static function registrar_codigo_model($datos){
-        $sql = mainModel::conectar()->prepare("
-            INSERT INTO `codigo_barras`
-            ( `cb_codigo`, `lm_id`, `cb_creado_en`) 
-            VALUES
-            (:cb_codigo,:lm_id, NOW())
-        ");
-        $sql->bindParam(":cb_codigo",$datos['cb_codigo']);
-        $sql->bindParam(":lm_id",$datos['lm_id']);
-        $sql->execute();
-        return $sql;
-
     }
 }

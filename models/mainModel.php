@@ -69,7 +69,7 @@ class mainModel
     }
 
     /* ----------------------------------------funcion para limpiar cadenas---------------------------------------------- */
-    protected static function limpiar_cadena($cadena)
+    public function limpiar_cadena($cadena)
     {
         /* ANTIGUO    
         $cadena = trim($cadena);
@@ -189,6 +189,51 @@ class mainModel
                     </nav>';
         return $tabla;
     }
+    protected static function paginador_tablas_main($pagina, $Npaginas, $url, $botones)
+    {
+        $tabla = '<nav aria-label="Page navigation example">
+                    <ul class="custom-pagination">';
+        if ($pagina == 1) {
+            $tabla .= '<li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>';
+        } else {
+            $prev = $pagina - 1;
+            $tabla .= '<li class="page-item">
+                        <a class="page-link" href="' . $url . $prev . '/" data-page="' . $prev . '" tabindex="-1">Previous</a>
+                    </li>';
+        }
+
+        $ci = 0;
+        for ($i = $pagina; $i <= $Npaginas; $i++) {
+            if ($i >= $botones) {
+                break;
+            }
+
+            if ($pagina == $i) {
+                $tabla .= '<li class="page-item active"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
+            } else {
+                $tabla .= '<li class="page-item"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
+            }
+            $ci++;
+        }
+
+        if ($pagina == $Npaginas) {
+            $tabla .= '<li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Next</a>
+                    </li>';
+        } else {
+            $next = $pagina + 1;
+            $tabla .= '<li class="page-item">
+                        <a class="page-link" href="' . $url . $next . '/" data-page="' . $next . '" tabindex="-1">Next</a>
+                    </li>';
+        }
+        $tabla .= ' </ul>
+                </nav>';
+        return $tabla;
+    }
+
+
 
 
     /* ------------------------------ obtener informacion de sucursales y roles para usuario----------------------------------- */

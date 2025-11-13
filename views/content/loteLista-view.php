@@ -1,30 +1,19 @@
-            <div class="title">
-                <h1>LISTA DE inventarios</h1>
-            </div>
-            <!---------------------------------------------lista de usuarios--------------------------------------------------->
-            <div class="container">
-                <div class="lista-header">
-                    <div class="filtro">
-                        <select class="select" name="" id="">
-                            <option value="">en espera</option>
-                            <option value="">activo</option>
-                            <option value="">caducado</option>
-                        </select>
-                        <input type="text" name="" id="">
-                        <button><ion-icon name="search"></ion-icon></button>
+<div class="container tabla-dinamica" 
+     data-ajax-table="true"
+     data-ajax-url="ajax/loteAjax.php"
+     data-ajax-param="loteAjax"
+     data-ajax-registros="10">
 
-                        
-                    </div>
-                    
-                    
-                </div>
+    <form class="filtro-dinamico">
+        <select name="select1">
+            <option value="">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="caducado">Caducado</option>
+        </select>
 
-                <?php 
-                    require_once "./controllers/loteController.php";
-                    $ins_lote = new loteController();
-                    $pagina_actual = isset($pagina[1]) ? $pagina[1] : 1;
-                    
-                    echo $ins_lote->paginado_lote_controller($pagina_actual,15,$pagina[0],"")
-                ?>
-                
-            </div>
+        <input type="text" name="busqueda" id="filtroBusqueda" placeholder="Buscar por nombre o lote...">
+        <button type="button" class="btn-search"><ion-icon name="search"></ion-icon></button>
+    </form>
+
+    <div class="tabla-contenedor"></div>
+</div>

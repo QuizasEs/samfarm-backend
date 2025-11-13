@@ -608,21 +608,23 @@ class medicamentoController extends medicamentoModel
     /* -----------------------------------controlador saber el ultimo id de lote------------------------------------------ */
     public function ultimo_lote_controller()
     {
-        $sql = mainModel::ejecutar_consulta_simple("SELECT MAX(lm_id) AS ultimo_id FROM lote_medicamento");
+        $sql = mainModel::ejecutar_consulta_simple("
+            SELECT * FROM `lote_medicamento` ORDER BY lm_id DESC LIMIT 1
+        ");
         $data = $sql->fetch();
-        return $data ? intval($data['ultimo_id']) : 0;
+        return $data['lm_numero_lote'];
     }
     /* -----------------------------------controlador para optener ultimos datos de  compra----------------------------------------- */
 
     public function ultima_compra_controller()
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT MAX(co_id) AS ultimo_id FROM compras
+            SELECT * FROM `compras` ORDER BY co_id DESC LIMIT 1
         ");
         $sql->execute();
 
         $resultado = $sql->fetch();
-        return $resultado['ultimo'] ?? 0;
+        return $resultado['co_numero'] ?? 0;
     }
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */

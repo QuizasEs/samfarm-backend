@@ -300,16 +300,29 @@
             function inicializarContador() {
                 const ultimoLoteInput = document.getElementById("ultimo_lote_valor");
                 if (ultimoLoteInput && ultimoLoteInput.value) {
-                    contadorLote = parseInt(ultimoLoteInput.value) || 0;
+                    const patron = /^MED-(\d+)$/;
+                    const match = ultimoLoteInput.value.match(patron);
+
+                    if (!match) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió  hola un error, no podemos procesar el número de lote asignado. Por favor contáctese con el encargado para solucionar este problema.'
+                        });
+                        contadorLote = 0;
+                        return;
+                    }
+
+                    contadorLote = parseInt(match[1]) || 0;
                 }
             }
 
             /** 🔢 Genera número de lote */
             function generarNumeroLote() {
                 const nuevoNumero = contadorLote + listaLotes.length + 1;
-                numeroLoteActual = `MED-${nuevoNumero}`;
-                return numeroLoteActual;
+                return `MED-${nuevoNumero}`;
             }
+
 
             /** 🧹 Limpia todos los campos */
             function limpiarCampos() {
@@ -406,7 +419,7 @@
                     nombre,
                     ...datos
                 });
-
+                recalcularNumerosLote();
                 renderizarLista();
                 actualizarTotales();
                 cerrarModal();
@@ -461,10 +474,34 @@
             }
 
             function eliminarLote(i) {
-                if (!confirm(`¿Eliminar el lote ${listaLotes[i].numero}?`)) return;
-                listaLotes.splice(i, 1);
-                renderizarLista();
-                actualizarTotales();
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: `¿Deseas eliminar el lote ${listaLotes[i].numero}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        listaLotes.splice(i, 1);
+                        recalcularNumerosLote();
+                        renderizarLista();
+                        actualizarTotales();
+                        Swal.fire(
+                            '¡Eliminado!',
+                            'El lote ha sido eliminado.',
+                            'success'
+                        );
+                    }
+                });
+            }
+            /* recalcula dinamicamente */
+            function recalcularNumerosLote() {
+                listaLotes.forEach((lote, index) => {
+                    lote.numero = `MED-${contadorLote + index + 1}`;
+                });
             }
 
             inicializarContador();
@@ -642,21 +679,43 @@
     <!--  para el numero de compra de manera automatica -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ultimaCompra = parseInt(document.getElementById('ultima_campra_valor').value) || 0;
+            const ultimaCompraValor = document.getElementById('ultima_campra_valor').value;
             const inputNumeroCompra = document.getElementById('numero_compra');
 
             if (inputNumeroCompra && inputNumeroCompra.value === '') {
-                const año = new Date().getFullYear();
-                const nuevoNumero = ultimaCompra + 1;
-                const numeroFormateado = String(nuevoNumero).padStart(4, '0');
+                const patron = /^COMP-(\d{4})-(\d+)$/;
+                const match = ultimaCompraValor.match(patron);
 
-                // Formato: COMP-2025-0001
-                inputNumeroCompra.value = `COMP-${año}-${numeroFormateado}`;
+                if (!match) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error, no podemos procesar el número de compra asignado. Por favor contáctese con el encargado para solucionar este problema.'
+                    });
+                    return;
+                }
+
+                const añoAnterior = match[1];
+                const numeroAnterior = parseInt(match[2]);
+                const añoActual = new Date().getFullYear().toString();
+
+                let nuevoNumero;
+                if (añoAnterior === añoActual) {
+                    nuevoNumero = numeroAnterior + 1;
+                } else {
+                    nuevoNumero = 1;
+                }
+
+                const numeroFormateado = String(nuevoNumero).padStart(4, '0');
+                inputNumeroCompra.value = `COMP-${añoActual}-${numeroFormateado}`;
             }
         });
     </script>
-
-
+    <!-- script para tablas y filtrado -->
+    <script>
+        const SERVER_URL = '<?php echo SERVER_URL; ?>';
+    </script>
+    <script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>
     <script>
         // perminte manejar los inputs con porcentaje obligandolo a estar dentro del parametro 100%
         /* validar porcentaje de 0 a 100% */
@@ -690,7 +749,7 @@
             }
         });
     </script>
-    <script>
+    <!--     <script>
         /* Permite manejar el listado de códigos de barras antes de su registro a un lote asociado */
         document.addEventListener("DOMContentLoaded", () => {
             const listaCodigos = document.getElementById("lista-codigos");
@@ -859,4 +918,4 @@
             // Inicializar vista vacía
             renderCodigos();
         });
-    </script>
+    </script> -->
