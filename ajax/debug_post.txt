@@ -1,24 +1,24 @@
 Array
 (
     [compraAjax] => save
-    [Numero_compra_reg] => COMP-2025-0001
-    [razon_reg] => jose
-    [Proveedor_reg] => 1
-    [Laboratorio_factura_reg] => 7
-    [Fecha_factura_reg] => 2025-11-30
-    [Numero_factura_reg] => 242342323423
-    [impuestos_reg] => 
+    [Numero_compra_reg] => COMP-2025-0002
+    [razon_reg] => afasdfsad
+    [Proveedor_reg] => 5
+    [Laboratorio_factura_reg] => 4
+    [Fecha_factura_reg] => 2025-11-22
+    [Numero_factura_reg] => 2424234
+    [impuestos_reg] => 10
     [Form_reg] => 
     [Via_reg] => 
     [Laboratorio_reg] => 
     [Uso_reg] => 
-    [termino] => h
-    [Cantidad_reg] => 6
-    [Vencimiento_reg] => 2025-11-28
-    [Cantidad_blister_reg] => 
-    [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 7
-    [precio_venta_reg] => 4
-    [lotes_json] => [{"id_medicamento":"5","nombre":"Omeprazol","numero":"MED-0001","cantidad":6,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-11-28","precioCompra":7,"precioVenta":4,"activar_lote":0}]
-    [totales_json] => {"subtotal":"42.00","impuestos":"5.46","total":"47.46","cantidadLotes":1}
+    [termino] => ibupro
+    [Cantidad_reg] => 100
+    [Vencimiento_reg] => 2025-11-27
+    [Cantidad_blister_reg] => 10
+    [Cantidad_unidades_reg] => 6
+    [Precio_compra_reg] => 50
+    [precio_venta_reg] => 0.50
+    [lotes_json] => [{"id_medicamento":"1","nombre":"Paracetamol","numero":"MED-0005","cantidad":10,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-11-21","precioCompra":50,"precioVenta":55,"activar_lote":0},{"id_medicamento":"2","nombre":"Ibuprofeno","numero":"MED-0006","cantidad":100,"cantidad_blister":10,"cantidad_unidades":6,"vencimiento":"2025-11-27","precioCompra":50,"precioVenta":0.5,"activar_lote":0}]
+    [totales_json] => {"subtotal":"5500.00","impuestos":"715.00","total":"6215.00","cantidadLotes":2}
 )

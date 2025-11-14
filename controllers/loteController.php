@@ -12,6 +12,10 @@ class loteController extends loteModel
     /* entrega datos de lote de una id especifica */
     public function datos_lote_controller($id)
     {
+        if (is_numeric($id)) {
+            $id = mainModel::limpiar_cadena($id);
+            return loteModel::datos_lote_model($id);
+        }
         $id = mainModel::decryption($id);
         $id = mainModel::limpiar_cadena($id);
         return loteModel::datos_lote_model($id);
@@ -40,11 +44,11 @@ class loteController extends loteModel
         if (isset($busqueda) && $busqueda != '') {
             $b = $busqueda;
             $whereParts[] = "(
-            lm.lm_numero_lote LIKE '%$b%' OR
-            m.med_nombre_quimico LIKE '%$b%' OR
-            m.med_principio_activo LIKE '%$b%' OR
-            p.pr_nombres LIKE '%$b%'
-        )";
+                lm.lm_numero_lote LIKE '%$b%' OR
+                m.med_nombre_quimico LIKE '%$b%' OR
+                m.med_principio_activo LIKE '%$b%' OR
+                p.pr_nombres LIKE '%$b%'
+            )";
         }
 
         // filtro select1 (ej: estado)
@@ -93,31 +97,31 @@ class loteController extends loteModel
 
         // Consulta principal con SQL_CALC_FOUND_ROWS
         $consulta = "
-        SELECT 
-            SQL_CALC_FOUND_ROWS 
-            lm.lm_id,
-            lm.lm_numero_lote,
-            m.med_nombre_quimico,
-            m.med_principio_activo,
-            p.pr_nombres,
-            s.su_nombre,
-            lm.lm_cant_caja AS lm_cantidad_inicial,
-            lm.lm_cant_actual_unidades AS lm_cantidad_actual,
-            lm.lm_precio_compra,
-            lm.lm_precio_venta,
-            lm.lm_fecha_ingreso,
-            lm.lm_fecha_vencimiento,
-            lm.lm_estado,
-            lm.lm_creado_en,
-            lm.lm_actualizado_en
-        FROM lote_medicamento lm
-        INNER JOIN medicamento m ON lm.med_id = m.med_id
-        INNER JOIN sucursales s ON lm.su_id = s.su_id
-        LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
-        $whereSQL
-        ORDER BY lm.lm_fecha_ingreso DESC 
-        LIMIT $inicio, $registros
-    ";
+            SELECT 
+                SQL_CALC_FOUND_ROWS 
+                lm.lm_id,
+                lm.lm_numero_lote,
+                m.med_nombre_quimico,
+                m.med_principio_activo,
+                p.pr_nombres,
+                s.su_nombre,
+                lm.lm_cant_caja AS lm_cantidad_inicial,
+                lm.lm_cant_actual_unidades AS lm_cantidad_actual,
+                lm.lm_precio_compra,
+                lm.lm_precio_venta,
+                lm.lm_fecha_ingreso,
+                lm.lm_fecha_vencimiento,
+                lm.lm_estado,
+                lm.lm_creado_en,
+                lm.lm_actualizado_en
+            FROM lote_medicamento lm
+            INNER JOIN medicamento m ON lm.med_id = m.med_id
+            INNER JOIN sucursales s ON lm.su_id = s.su_id
+            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            $whereSQL
+            ORDER BY lm.lm_fecha_ingreso DESC 
+            LIMIT $inicio, $registros
+        ";
 
         $conexion = mainModel::conectar();
         $datosStmt = $conexion->query($consulta);
@@ -130,27 +134,27 @@ class loteController extends loteModel
 
         // inicio de tabla (igual que tu versión)
         $tabla .= '
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>N°</th>
-                        <th>N° LOTE</th>
-                        <th>MEDICAMENTO</th>
-                        <th>PROVEEDOR</th>
-                        <th>SUCURSAL</th>
-                        <th>CANT. INICIAL</th>
-                        <th>CANT. ACTUAL</th>
-                        <th>PRECIO COMPRA</th>
-                        <th>PRECIO VENTA</th>
-                        <th>FECHA INGRESO</th>
-                        <th>FECHA VENCIMIENTO</th>
-                        <th>ESTADO</th>
-                        <th>ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-    ';
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>N° LOTE</th>
+                                <th>MEDICAMENTO</th>
+                                <th>PROVEEDOR</th>
+                                <th>SUCURSAL</th>
+                                <th>CANT. INICIAL</th>
+                                <th>CANT. ACTUAL</th>
+                                <th>PRECIO COMPRA</th>
+                                <th>PRECIO VENTA</th>
+                                <th>FECHA INGRESO</th>
+                                <th>FECHA VENCIMIENTO</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $contador = $inicio + 1;
@@ -203,38 +207,38 @@ class loteController extends loteModel
                 }
 
                 $tabla .= '
-                <tr>
-                    <td>' . $contador . '</td>
-                    <td>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</td>
-                    <td>' . $rows['med_nombre_quimico'] . '<br><small>' . $rows['med_principio_activo'] . '</small></td>
-                    <td>' . ($rows['pr_nombres'] ?? 'N/A') . '</td>
-                    <td>' . $rows['su_nombre'] . '</td>
-                    <td>' . $rows['lm_cantidad_inicial'] . '</td>
-                    <td><strong>' . $rows['lm_cantidad_actual'] . '</strong></td>
-                    <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
-                    <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
-                    <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
-                    <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
-                    <td>
-                        ' .
+                        <tr>
+                            <td>' . $contador . '</td>
+                            <td>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</td>
+                            <td>' . $rows['med_nombre_quimico'] . '<br><small>' . $rows['med_principio_activo'] . '</small></td>
+                            <td>' . ($rows['pr_nombres'] ?? 'N/A') . '</td>
+                            <td>' . $rows['su_nombre'] . '</td>
+                            <td>' . $rows['lm_cantidad_inicial'] . '</td>
+                            <td><strong>' . $rows['lm_cantidad_actual'] . '</strong></td>
+                            <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
+                            <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
+                            <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
+                            <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
+                            <td>
+                                ' .
                     ($rows['lm_estado'] == "en_espera"
                         ? '<a href="#" 
-                                class="btn-editar btn-activar-lote" 
-                                data-id="' . $rows['lm_id'] . '" 
-                                data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
-                                title="Activar lote">
-                                Activar
-                            </a>'
+                                        class="btn-editar btn-activar-lote" 
+                                        data-id="' . $rows['lm_id'] . '" 
+                                        data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
+                                        title="Activar lote">
+                                        Activar
+                                    </a>'
                         : '<span class="badge-' . $rows['lm_estado'] . '">' . $estado_texto . '</span>')
                     . '
-                    </td>
+                            </td>
 
 
-                    <td class="buttons">
-                        <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
-                    </td>
-                </tr>
-            ';
+                            <td class="buttons">
+                                <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
+                            </td>
+                        </tr>
+                    ';
                 $contador++;
             }
             $reg_final = $contador - 1;
@@ -247,10 +251,10 @@ class loteController extends loteModel
         }
 
         $tabla .= '
-            </tbody>
-            </table>
-        </div>
-    ';
+                    </tbody>
+                    </table>
+                </div>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $tabla .= '<p>Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
@@ -371,10 +375,10 @@ class loteController extends loteModel
             exit();
         }
     }
-    public function Activar_lote_controller($id)
+    public function activar_lote_controller()
     {
         /* validamos la id */
-        $id = (int) $id;
+        $id = $_POST['id'];
         if ($id <= 0) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -388,7 +392,8 @@ class loteController extends loteModel
         /* revisamos que quien intenta activar el lote tenga permisos para la accion */
         $rol = $_SESSION['rol_smp'] ?? 0;
 
-        if ($rol == 1 || $rol == 2) {
+
+        if (!in_array($rol, [1, 2])) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -399,7 +404,7 @@ class loteController extends loteModel
             exit();
         }
         /* recuperamos la informacion del lote */
-        $datos = self::datos_lote_model(mainModel::encryption($id));
+        $datos = self::datos_lote_model($id);
         /* verificamos el retorno de informacion */
         if ($datos->rowCount() <= 0) {
             $alerta = [
@@ -445,7 +450,7 @@ class loteController extends loteModel
         }
         /* datos del lote para su historial, movimiento e inventario */
         $usuario_id = $_SESSION['id_smp'];
-        $usuario_name = $_SESSION['name_smp'];
+        $usuario_name = $_SESSION['nombre_smp'];
         $med_id = (int)$lote['med_id'];
         $su_id = (int)$lote['su_id'];
         $precio_compra = $lote['lm_precio_compra'];
@@ -456,14 +461,14 @@ class loteController extends loteModel
         $cantidad_actual_cajas = $cantidad_cajas;
         $cantidad_actual_unidades = $cantidad_cajas * $cantidad_blister * $cantidad_unidades;
         $total_unidades = $cantidad_actual_unidades;
-        $subtotal_lote = $cantidad_cajas * $precio_compra;
+        $subtotal_lote = $cantidad_unidades * $precio_compra;
 
         /* preparamos el historial */
         $datos_historial = [
             "lm_id" => $id,
             "us_id" => $usuario_id,
             "hl_accion" => "activacion",
-            "hl_descripcion" => "Lote activado por" . $usuario_name
+            "hl_descripcion" => "Lote activado por " . $usuario_name
         ];
         $historial_resultado = loteModel::registrar_historial_lote_model($datos_historial);
 
@@ -503,7 +508,7 @@ class loteController extends loteModel
         }
 
         /* preparamos los datos de mivimeinto inventario */
-        $datos_moviemiento = [
+        $datos_movimiento = [
             "lm_id" => $id,
             "med_id" => $med_id,
             "su_id" => $su_id,
@@ -518,7 +523,7 @@ class loteController extends loteModel
 
         /* insertamos movimiento */
 
-        $movimiento_resultado = loteModel::registro_movimiento_inventario_model($datos_moviemiento);
+        $movimiento_resultado = loteModel::registro_movimiento_inventario_model($datos_movimiento);
 
         /* verificamos */
         if ($movimiento_resultado->rowCount() <= 0) {
@@ -538,7 +543,7 @@ class loteController extends loteModel
             "lote_id"            => $id,
             "numero_lote"        => $lote['lm_numero_lote'],
             "medicamento_id"     => $med_id,
-            "medicamento_nombre" => $lote['med_nombre_comercial'] ?? $lote['med_nombre_quimico'] ?? 'No especificado',
+            "medicamento_nombre" => $lote['med_nombre'] ?? 'No especificado',
             "sucursal_id"        => $su_id,
             "usuario_id"         => $usuario_id,
             "usuario_nombre"     => $usuario_name,
@@ -552,14 +557,15 @@ class loteController extends loteModel
         ];
 
         $datos_informe = [
-            "inf_nombre"  => "Activación de Lote #".$lote['lm_numero_lote']." (".($lote['med_nombre_comercial'] ?? $lote['med_nombre_quimico']).")",
+            "inf_nombre"  => "Activación de Lote #" . $lote['lm_numero_lote'] . " (" . ($lote['med_nombre'] ?? 'Nombre no disponible') . ")",
             "inf_usuario" => $usuario_id,
             "inf_config"  => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
         ];
 
+
         /* insertamos informe */
 
-        $informe_result = compraModel::agregar_informe_compra_model($datos_informe);
+        $informe_result = loteModel::agregar_informe_compra_model($datos_informe);
 
         if ($informe_result->rowCount() <= 0) {
             $alerta = [

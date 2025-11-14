@@ -55,18 +55,19 @@ if (isset($_POST['loteAjax'])) {
     }
 
     if ($valor == "active") {
+
         // 🐛 DEBUG
-        $debug = [
+        /* $debug = [
             'Alerta' => 'simple',
             'Titulo' => 'DEBUG - Datos recibidos',
             'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
             'Tipo' => 'info'
         ];
         echo json_encode($debug);
-        exit();
+        exit(); */
 
         // 🚀 Producción (descomentar después)
-        //echo $ins_lote->agregar_lote_controller();
+        echo $ins_lote->activar_lote_controller();
     }
     if ($valor == "update") {
         // 🐛 DEBUG
