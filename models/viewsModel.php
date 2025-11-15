@@ -13,7 +13,7 @@
                 "proveedorRegistro", "proveedorLista",
                 "proveedorActualizar","laboratorioRegistro",
                 "laboratorioActualizar", "compraRegistro","compraOrden",
-                "loteActualizar","loteLista","",
+                "loteActualizar","loteLista","caja",
             ];
 
             if(in_array($vistas,$listaBlanca)){
