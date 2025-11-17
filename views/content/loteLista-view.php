@@ -49,7 +49,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title">📦<span> Activar lote</span></div>
-            <a class="close" onclick="cerrarModal()">×</a>
+            <a class="close" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></a>
         </div>
         <div class="modal-group">
             <h3>Activar lote</h3>

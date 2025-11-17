@@ -1,7 +1,5 @@
 <?php
 if ($_SESSION['rol_smp'] != 1) {
-    echo "aqui no";
-    exit();
 }
 require_once "./controllers/MedicamentoController.php";
 $ins_med = new medicamentoController();
@@ -218,7 +216,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-title">📦 Agregar Lote - <span id="modalMedicamentoNombre">Paracetamol</span></div>
-                    <a class="close" onclick="cerrarModal()">×</a>
+                    <a class="close" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></a>
                 </div>
 
                 <input type="hidden" id="modalMedicamentoId" value="1">

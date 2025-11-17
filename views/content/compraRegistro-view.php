@@ -167,7 +167,7 @@
                     <div class="modal-title">📦 Agregar Lote - <span
                             id="modalMedicamentoNombre">Paracetamol</span>
                     </div>
-                    <a class="close" onclick="cerrarModal()">×</a>
+                    <a class="close" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></a>
                 </div>
 
 

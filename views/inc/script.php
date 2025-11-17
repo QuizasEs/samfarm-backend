@@ -752,10 +752,6 @@
     });
 </script>
 
-<!-- script para tablas y filtrado -->
-<!--     <script>
-    const SERVER_URL = '<?php echo SERVER_URL; ?>';
-</script> -->
 <script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>
 <script>
     // perminte manejar los inputs con porcentaje obligandolo a estar dentro del parametro 100%
