@@ -32,7 +32,7 @@ class clienteController extends clienteModel
             exit();
         }
         /* verificamos la integridad de los datos  */
-        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}", $nombre)) {
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombre)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Ocurrió un error inesperado',

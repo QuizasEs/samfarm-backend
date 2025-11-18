@@ -8,6 +8,30 @@ if ($peticionAjax) {
 
 class ventaController extends ventaModel
 {
+    /* controlador que busca al cliente */
+    public function buscar_cliente_controller($termino)
+    {
+        if (!isset($_SESSION['sucursal_smp'])) {
+            return json_encode([
+                "error" => true,
+                "mensaje" => "No se ha asignado una sucursal"
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Limpiar cadena
+        $termino = mainModel::limpiar_cadena($termino);
+
+        if (strlen($termino) < 1) {
+            return json_encode([], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Buscar en el modelo
+        $rows = self::buscar_cliente_model($termino);
+
+        return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
+    }
+
+
 
     public function buscar_medicamento_controller($termino, $filtros = [])
     {

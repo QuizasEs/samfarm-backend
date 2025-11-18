@@ -1,11 +1,5 @@
 Array
 (
-    [ventaAjax] => save
-    [venta_items_json] => [{"med_id":"4","cantidad":1,"precio":523,"subtotal":523}]
-    [subtotal_venta] => 523.00
-    [total_venta] => 590.99
-    [cambio_venta] => 309.01
-    [dinero_recibido_venta] => 900
-    [metodo_pago_venta] => efectivo
-    [documento_venta] => nota de venta
+    [ventaAjax] => buscar_cliente
+    [termino] => 123
 )

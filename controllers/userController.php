@@ -49,7 +49,7 @@ class userController extends userModel
 
         /* verificar la integridad de los datos (patern) */
         /* nombres */
-        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}", $nombres)) {
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "ocurrio un error inesperado",

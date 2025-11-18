@@ -4,7 +4,32 @@ require_once "mainModel.php";
 
 class ventaModel extends mainModel
 {
-    /* buscar medicamentos */
+    /* modelo que se encarga de ejecutar la consulta de busqueda de cliente */
+    protected static function buscar_cliente_model($termino)
+    {
+        $sql = mainModel::conectar()->prepare("
+            SELECT *
+            FROM clientes
+            WHERE 
+                cl_estado = 1 AND 
+                (
+                    cl_nombres LIKE :term OR
+                    cl_apellido_paterno LIKE :term OR
+                    cl_apellido_materno LIKE :term OR
+                    cl_telefono LIKE :term OR
+                    cl_carnet  LIKE :term
+                )
+            ORDER BY cl_nombres ASC
+            LIMIT 10
+        ");
+
+        $sql->bindValue(":term", "%$termino%");
+        $sql->execute();
+
+        return $sql->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     /* buscar medicamentos con stock disponible en sucursal */
     protected static function buscar_medicamento_model($termino, $sucursal_id, $filtros = [])
     {

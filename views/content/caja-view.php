@@ -49,7 +49,19 @@ $datos_select = $ins_med->datos_extras_controller();
                         </a>
 
                     </div>
+                    <div id="resultado_clientes" class="resultado-busqueda"></div>
 
+
+                    <div id="cliente_seleccionado_container" class="cliente-seleccionado-container" style="display: none;">
+                        <div class="cliente-seleccionado">
+                            <ion-icon name="person-outline"></ion-icon>
+                            <span id="cliente_nombre_texto"></span>
+                            <button type="button" id="quitar_cliente_btn" class="btn-remove">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                        <input type="hidden" id="cliente_id_seleccionado" name="cliente_id">
+                    </div>
                     <div class="ventas-metodo">
                         <select class="select-filtro" name="metodo_pago_venta" id="metodo_pago_venta">
                             <option value="">Metodo</option>
@@ -171,7 +183,7 @@ $datos_select = $ins_med->datos_extras_controller();
                 <div class="modal-group">
                     <div class="row">
                         <label class="required">Nombres</label>
-                        <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                        <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                     </div>
 
                     <div class="row">
@@ -781,3 +793,322 @@ $datos_select = $ins_med->datos_extras_controller();
         };
     })();
 </script>
+
+<!-- script cliente -->
+<script>
+    // Script mejorado para búsqueda de clientes
+    (function() {
+        const URL_CLI = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
+        const inputCliente = document.getElementById("buscar_cliente_venta");
+        let resultadoClientes = document.getElementById("resultado_clientes");
+
+        let clienteSeleccionado = null;
+        let debounceCliente = null;
+
+        // Verificar si el contenedor existe, si no, crearlo
+        if (!resultadoClientes) {
+            resultadoClientes = document.createElement('div');
+            resultadoClientes.id = 'resultado_clientes';
+            resultadoClientes.className = 'resultado-busqueda';
+        }
+
+        // CRÍTICO: Encontrar el contenedor correcto (.ventas-cliente)
+        const ventasClienteContainer = inputCliente.closest('.ventas-cliente');
+
+        if (ventasClienteContainer) {
+            // Asegurar position relative en el contenedor
+            ventasClienteContainer.style.position = 'relative';
+
+            // Insertar el dropdown como hijo directo del contenedor
+            if (!ventasClienteContainer.contains(resultadoClientes)) {
+                ventasClienteContainer.appendChild(resultadoClientes);
+            }
+        } else if (inputCliente.parentElement) {
+            // Fallback: usar el padre directo
+            inputCliente.parentElement.style.position = 'relative';
+            if (!inputCliente.parentElement.contains(resultadoClientes)) {
+                inputCliente.parentElement.appendChild(resultadoClientes);
+            }
+        }
+
+        // Aplicar estilos críticos al contenedor
+        resultadoClientes.style.cssText = `
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 0 0 4px 4px;
+        margin-top: 0;
+    `;
+
+        console.log("📍 Contenedor de resultados posicionado en:", ventasClienteContainer || inputCliente.parentElement);
+
+        // Obtener contenedor de cliente seleccionado
+        const clienteSeleccionadoContainer = document.getElementById('cliente_seleccionado_container');
+        const clienteNombreTexto = document.getElementById('cliente_nombre_texto');
+        const quitarClienteBtn = document.getElementById('quitar_cliente_btn');
+        const clienteIdHidden = document.getElementById('cliente_id_seleccionado');
+
+        // Event listener para búsqueda en tiempo real (sin botón)
+        if (inputCliente) {
+            inputCliente.addEventListener("input", function() {
+                const termino = this.value.trim();
+                clearTimeout(debounceCliente);
+
+                console.log("⌨️ Escribiendo:", termino);
+
+                if (termino.length < 1) {
+                    resultadoClientes.innerHTML = "";
+                    resultadoClientes.style.display = "none";
+                    return;
+                }
+
+                // Buscar después de 250ms (búsqueda en tiempo real)
+                debounceCliente = setTimeout(() => {
+                    console.log("🚀 Iniciando búsqueda automática");
+                    buscarClientes(termino);
+                }, 250);
+            });
+
+            inputCliente.addEventListener("focus", function() {
+                if (this.value.trim().length > 0 && resultadoClientes.innerHTML) {
+                    resultadoClientes.style.display = "block";
+                }
+            });
+
+            // Prevenir que el Enter envíe el formulario desde este input
+            inputCliente.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    // Si hay un resultado visible, seleccionar el primero
+                    const primerResultado = resultadoClientes.querySelector('.cliente-item');
+                    if (primerResultado && resultadoClientes.style.display === "block") {
+                        seleccionarCliente(primerResultado);
+                    }
+                }
+            });
+        }
+
+        async function buscarClientes(termino) {
+            console.log("🔍 Buscando clientes:", termino);
+
+            const formData = new FormData();
+            formData.append("ventaAjax", "buscar_cliente");
+            formData.append("termino", termino);
+
+            try {
+                const response = await fetch(URL_CLI, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+                console.log("📥 Respuesta:", text);
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("❌ Error parseando JSON:", e);
+                    data = [];
+                }
+
+                console.log("✅ Datos parseados:", data);
+                mostrarResultadosClientes(data);
+
+            } catch (error) {
+                console.error("❌ Error buscando clientes:", error);
+                resultadoClientes.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
+                resultadoClientes.style.display = "block";
+            }
+        }
+
+        function mostrarResultadosClientes(clientes) {
+            console.log("📋 Mostrando resultados:", clientes);
+
+            if (!clientes || clientes.length === 0) {
+                resultadoClientes.innerHTML = '<div class="search-results-item no-results">No se encontraron clientes</div>';
+                resultadoClientes.style.display = "block";
+                return;
+            }
+
+            // Generar HTML usando la misma estructura que medicamentos
+            const html = clientes.map(cli => {
+                const nombreCompleto = `${cli.cl_nombres || ''} ${cli.cl_apellido_paterno || ''} ${cli.cl_apellido_materno || ''}`.trim();
+                const carnet = cli.cl_carnet || 'Sin CI';
+                const telefono = cli.cl_telefono ? ` · ${cli.cl_telefono}` : '';
+
+                return `
+                <div class="search-results-item cliente-item" 
+                    data-id="${cli.cl_id}" 
+                    data-nombre="${escapeHtml(nombreCompleto)}">
+                    <div class="search-result-name">
+                        <ion-icon name="person-circle-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>
+                        ${escapeHtml(nombreCompleto)}
+                    </div>
+                    <div class="search-result-details">CI: ${escapeHtml(carnet)}${escapeHtml(telefono)}</div>
+                </div>`;
+            }).join('');
+
+            resultadoClientes.innerHTML = html;
+            resultadoClientes.style.display = "block";
+
+            console.log("✅ HTML insertado, display:", resultadoClientes.style.display);
+
+            // Agregar event listeners a los items
+            resultadoClientes.querySelectorAll('.cliente-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    seleccionarCliente(this);
+                });
+            });
+        }
+
+        function seleccionarCliente(item) {
+            const id = item.dataset.id;
+            const nombre = item.dataset.nombre;
+
+            console.log("👤 Cliente seleccionado:", {
+                id,
+                nombre
+            });
+
+            // Guardar cliente seleccionado
+            clienteSeleccionado = {
+                id,
+                nombre
+            };
+
+            // Mostrar en la interfaz
+            if (clienteNombreTexto) clienteNombreTexto.textContent = nombre;
+            if (clienteIdHidden) clienteIdHidden.value = id;
+            if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "block";
+
+            // Limpiar búsqueda
+            resultadoClientes.innerHTML = "";
+            resultadoClientes.style.display = "none";
+            if (inputCliente) inputCliente.value = "";
+        }
+
+        // Quitar cliente seleccionado
+        if (quitarClienteBtn) {
+            quitarClienteBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                clienteSeleccionado = null;
+                if (clienteIdHidden) clienteIdHidden.value = "";
+                if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "none";
+                if (inputCliente) {
+                    inputCliente.value = "";
+                    inputCliente.focus();
+                }
+            });
+        }
+
+        // Cerrar resultados al hacer click fuera
+        document.addEventListener("click", function(e) {
+            if (resultadoClientes &&
+                resultadoClientes.style.display === "block" &&
+                !inputCliente.contains(e.target) &&
+                !resultadoClientes.contains(e.target)) {
+                resultadoClientes.style.display = "none";
+            }
+        });
+
+        // Asegurar que el formulario envíe el cliente_id
+        const formVenta = document.querySelector('.form.FormularioAjax');
+        if (formVenta) {
+            formVenta.addEventListener('submit', function(e) {
+                if (clienteSeleccionado && clienteIdHidden) {
+                    clienteIdHidden.value = clienteSeleccionado.id;
+                }
+            });
+        }
+
+        // Función helper para escapar HTML
+        function escapeHtml(text) {
+            if (text == null) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Exponer funciones globalmente si es necesario
+        window.ClienteBusqueda = {
+            seleccionarCliente,
+            clienteSeleccionado: () => clienteSeleccionado
+        };
+
+        console.log("✅ Script de búsqueda de clientes inicializado");
+    })();
+</script>
+<style>
+    /* Asegurar posicionamiento correcto para dropdown de clientes */
+
+
+.resultado-busqueda {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
+    margin-top: 0;
+}
+
+/* Estilos para los items de resultado */
+.search-results-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.search-results-item:hover {
+    background-color: #f5f5f5;
+}
+
+.search-results-item:last-child {
+    border-bottom: none;
+}
+
+.search-results-item.no-results {
+    cursor: default;
+    color: #666;
+    text-align: center;
+}
+
+.search-result-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+    color: #333;
+}
+
+.search-result-details {
+    font-size: 0.8rem;
+    color: #666;
+}
+</style>

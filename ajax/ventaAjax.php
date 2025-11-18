@@ -19,14 +19,14 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
 // Forzamos salida JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// ✅ VALIDACIÓN DE SEGURIDAD (igual que userAjax.php)
+//  VALIDACIÓN DE SEGURIDAD (igual que userAjax.php)
 if (isset($_POST['ventaAjax'])) {
 
     // Iniciamos sesión para validar permisos
     session_start(['name' => 'SMP']);
 
     // Verificar que el usuario tenga sesión activa y permisos
-    if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1,2,3])) {
+    if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
         // Sesión inválida o sin permisos
         session_unset();
         session_destroy();
@@ -39,9 +39,9 @@ if (isset($_POST['ventaAjax'])) {
         ]);
         exit();
     }
-    
 
-    // ✅ Sesión válida, procesar petición
+
+    //  Sesión válida, procesar petición
     $valor = $_POST['ventaAjax'];
 
     require_once "../controllers/ventaController.php";
@@ -61,7 +61,7 @@ if (isset($_POST['ventaAjax'])) {
         // 🚀 Producción (descomentar después)
 
     }
-    if($valor === 'buscar'){
+    if ($valor === 'buscar') {
         $termino = $_POST['termino'] ?? '';
         $filtros = [
             'linea' => $_POST['linea'] ?? null,
@@ -69,17 +69,23 @@ if (isset($_POST['ventaAjax'])) {
             'funcion' => $_POST['funcion'] ?? null,
             'via' => $_POST['via'] ?? null
         ];
-        echo $ins_venta->buscar_medicamento_controller($termino,$filtros);
+        echo $ins_venta->buscar_medicamento_controller($termino, $filtros);
         exit();
     }
-    if($valor === 'mas_vendidos'){
+    if ($valor === 'mas_vendidos') {
         $limit = $_POST['limit'] ?? 5;
         echo $ins_venta->mas_vendidos_controller($limit);
         exit();
     }
+    if ($valor === "buscar_cliente") {
 
+        $termino = $_POST['termino'] ?? '';
+
+        echo $ins_venta->buscar_cliente_controller($termino);
+        exit();
+    }
 } else {
-    // ❌ Petición inválida - cerrar sesión
+    //  Petición inválida - cerrar sesión
     session_start(['name' => 'SMP']);
     session_unset();
     session_destroy();

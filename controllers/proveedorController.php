@@ -31,7 +31,7 @@ class proveedorController extends proveedorModel
         }
 
         /* verificamos la integridad de los datos */
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $nombre)) {
+        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+' ]{3,100}", $nombre)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Ocurrió un error inesperado',
@@ -302,7 +302,7 @@ class proveedorController extends proveedorModel
         }
 
         /* verificamos la integridad de los datos */
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $nombres)) {
+        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+' ]{3,100}", $nombres)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Ocurrió un error inesperado',
