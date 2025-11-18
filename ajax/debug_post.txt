@@ -1,5 +1,5 @@
 Array
 (
-    [ventaAjax] => buscar_cliente
-    [termino] => 123
+    [ventaAjax] => mas_vendidos
+    [limit] => 5
 )

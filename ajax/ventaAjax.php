@@ -49,17 +49,20 @@ if (isset($_POST['ventaAjax'])) {
 
     if ($valor == "save") {
         // 🐛 DEBUG
-        $debug = [
+        /* $debug = [
             'Alerta' => 'simple',
             'Titulo' => 'DEBUG - Datos recibidos',
             'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
             'Tipo' => 'info'
         ];
         echo json_encode($debug);
-        exit();
+        exit(); */
 
         // 🚀 Producción (descomentar después)
-
+        echo $ins_venta->registrar_venta_controller();
+    }
+    if($valor == "cerrar-caja"){
+        echo $ins_venta->cerrar_caja_controller();
     }
     if ($valor === 'buscar') {
         $termino = $_POST['termino'] ?? '';
@@ -83,6 +86,9 @@ if (isset($_POST['ventaAjax'])) {
 
         echo $ins_venta->buscar_cliente_controller($termino);
         exit();
+    }
+    if ($valor === "new-caja"){
+        echo $ins_venta->abrir_caja_controller();
     }
 } else {
     //  Petición inválida - cerrar sesión

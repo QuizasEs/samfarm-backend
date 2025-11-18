@@ -884,3 +884,807 @@
         }
     });
 </script>
+
+
+<!-- script que maneja el modal de agregar nuevo cliente -->
+<script>
+    (function() {
+        // Estado interno
+        let modal = null;
+        let initialized = false;
+
+        function initIfNeeded() {
+            if (initialized) return;
+            modal = document.getElementById('modalCliente');
+            // Si todavía no existe, esperar al DOMContentLoaded
+            if (!modal) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    modal = document.getElementById('modalCliente');
+                    setupModal();
+                }, {
+                    once: true
+                });
+                initialized = true; // marcaremos inicializado para no agregar más listeners aquí
+                return;
+            }
+            setupModal();
+        }
+
+        function setupModal() {
+            if (!modal) return; // nada que hacer si no existe
+            // cerrar al click fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    api.cerrarModal();
+                }
+            });
+
+            // Si tienes un botón con clase .close dentro, lo conectamos si existe
+            const closeBtns = modal.querySelectorAll('.close, [data-close="modalCliente"]');
+            closeBtns.forEach(btn => btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                api.cerrarModal();
+            }));
+
+            initialized = true;
+        }
+
+        // Funciones públicas que aseguran init
+        function abrirModal() {
+            initIfNeeded();
+            if (!modal) {
+                console.warn('ModalCliente: #modalCliente no encontrado al intentar abrir.');
+                return;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            initIfNeeded();
+            if (!modal) {
+                // intento fallback: cerrar cualquier modal visible
+                const visible = Array.from(document.querySelectorAll('.modal')).find(m => window.getComputedStyle(m).display !== 'none');
+                if (visible) visible.style.display = 'none';
+                return;
+            }
+            modal.style.display = 'none';
+        }
+
+        // API que exponemos
+        const api = {
+            abrirModal,
+            cerrarModal,
+            // nombres alternativos para compatibilidad
+            abrirModalCliente: abrirModal,
+            cerrarModalCliente: cerrarModal
+        };
+
+        // Exponer en window
+        window.ModalCliente = api;
+
+        // También crear funciones globales para onclick antiguos
+        if (typeof window.abrirModal !== 'function') {
+            window.abrirModal = () => {
+                try {
+                    window.ModalCliente.abrirModal();
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+        }
+        if (typeof window.cerrarModal !== 'function') {
+            window.cerrarModal = () => {
+                try {
+                    window.ModalCliente.cerrarModal();
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+        }
+
+        // Intentar inicializar ahora si el elemento ya está en DOM
+        if (document.readyState === 'loading') {
+            // DOM aún no listo; initIfNeeded will attach DOMContentLoaded listener
+            initIfNeeded();
+        } else {
+            // DOM ready
+            initIfNeeded();
+        }
+
+    })();
+</script>
+
+<!-- script que manea ja busqueda de medicamentos lista de compras y envio por post -->
+<script>
+    (function() {
+        // 🔒 VERIFICAR que el formulario de ventas existe en esta vista
+        const formVenta = document.getElementById('form-venta-caja');
+        if (!formVenta) {
+            console.log('⚠️ Formulario de venta no encontrado, script no se ejecuta');
+            return; // Salir inmediatamente si no es la vista correcta
+        }
+
+        console.log('✅ Script de ventas inicializado');
+
+        const URL_MED = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
+        let cart = [];
+        let debounce = null;
+
+        function $(s) {
+            // Buscar solo dentro del formulario de venta
+            return formVenta.querySelector(s);
+        }
+
+        function $all(s) {
+            // Buscar solo dentro del formulario de venta
+            return Array.from(formVenta.querySelectorAll(s));
+        }
+
+        function ensureHidden(name, id) {
+            let el = formVenta.querySelector('input[name="' + name + '"]');
+            if (!el) {
+                el = document.createElement('input');
+                el.type = 'hidden';
+                el.name = name;
+                if (id) el.id = id;
+                formVenta.appendChild(el);
+            }
+            return el;
+        }
+
+        const itemsHidden = ensureHidden('venta_items_json', 'venta_items_json');
+        const subtotalHidden = ensureHidden('subtotal_venta', 'subtotal_venta');
+        const totalHidden = ensureHidden('total_venta', 'total_venta');
+        const cambioHidden = ensureHidden('cambio_venta', 'cambio_venta');
+        const dineroHidden = ensureHidden('dinero_recibido_venta', 'dinero_recibido_venta');
+
+        const medSearch = $('#med_search') || $('.caja-filtro-search input');
+        const filtro_linea = $('#filtro_linea');
+        const filtro_presentacion = $('#filtro_presentacion');
+        const filtro_funcion = $('#filtro_funcion');
+        const filtro_via = $('#filtro_via');
+
+        let resultsContainer = $('#med_search_results');
+        if (!resultsContainer && medSearch) {
+            resultsContainer = document.createElement('div');
+            resultsContainer.id = 'med_search_results';
+            resultsContainer.className = 'search-results-dropdown';
+
+            resultsContainer.style.cssText = `
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+
+            const parent = medSearch.parentElement;
+            parent.style.position = 'relative';
+            parent.appendChild(resultsContainer);
+        }
+
+        const tablaBody = $('#tabla_items_venta');
+        const tablaMasVendidos = $('#tabla_mas_vendidos');
+        const inputDinero = $('#input_dinero_recibido');
+        const subtotalText = $('#subtotal_texto');
+        const totalText = $('#total_texto');
+        const cambioText = $('#cambio_texto');
+
+        function formatMoney(n) {
+            return Number(n || 0).toFixed(2);
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/[&<>"'`]/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": "&#39;",
+                    '`': '&#96;'
+                })[m];
+            });
+        }
+
+        function renderCart() {
+            if (!tablaBody) return;
+
+            tablaBody.innerHTML = '';
+
+            if (cart.length === 0) {
+                tablaBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:12px">No hay medicamentos en la lista</td></tr>';
+            } else {
+                cart.forEach((it, i) => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.med = it.med_id;
+                    tr.innerHTML =
+                        '<td>' + (i + 1) + '</td>' +
+                        '<td>' + escapeHtml(it.nombre) + '</td>' +
+                        '<td>' + escapeHtml(it.presentacion || '') + '</td>' +
+                        '<td><div class="table-cantidad">' +
+                        '<button type="button" class="qty-dec" data-med="' + it.med_id + '">' +
+                        '<ion-icon name="remove-outline"></ion-icon>' +
+                        '</button>' +
+                        '<input type="number" class="qty-input" data-med="' + it.med_id + '" value="' + it.cantidad + '" min="1">' +
+                        '<button type="button" class="qty-inc" data-med="' + it.med_id + '">' +
+                        '<ion-icon name="add-outline"></ion-icon>' +
+                        '</button>' +
+                        '</div></td>' +
+                        '<td>' + formatMoney(it.precio) + '</td>' +
+                        '<td>' + formatMoney(it.precio * it.cantidad) + '</td>';
+
+                    tablaBody.appendChild(tr);
+                });
+            }
+
+            itemsHidden.value = JSON.stringify(cart.map(i => ({
+                med_id: i.med_id,
+                cantidad: i.cantidad,
+                precio: Number(i.precio),
+                subtotal: Number((i.precio * i.cantidad).toFixed(2))
+            })));
+
+            updateTotals();
+            attachQtyEvents();
+        }
+
+        function attachQtyEvents() {
+            $all('.qty-inc').forEach(b => {
+                b.onclick = function() {
+                    changeQty(this.dataset.med, 1);
+                };
+            });
+            $all('.qty-dec').forEach(b => {
+                b.onclick = function() {
+                    changeQty(this.dataset.med, -1);
+                };
+            });
+            $all('.qty-input').forEach(i => {
+                i.onchange = function() {
+                    setQty(this.dataset.med, parseInt(this.value) || 0);
+                };
+            });
+        }
+
+        function changeQty(id, delta) {
+            const idx = cart.findIndex(c => String(c.med_id) === String(id));
+            if (idx === -1) return;
+            const item = cart[idx];
+            const nuevo = item.cantidad + delta;
+            if (nuevo <= 0) {
+                Swal.fire({
+                    title: '¿Eliminar medicamento?',
+                    text: 'La cantidad llegaría a 0. ¿Deseas eliminarlo?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then(r => {
+                    if (r.isConfirmed) {
+                        cart.splice(idx, 1);
+                        renderCart();
+                    } else {
+                        renderCart();
+                    }
+                });
+                return;
+            }
+            if (item.stock != null && nuevo > item.stock) {
+                Swal.fire('Sin stock', 'No hay stock suficiente', 'warning');
+                return;
+            }
+            item.cantidad = nuevo;
+            renderCart();
+        }
+
+        function setQty(id, val) {
+            const idx = cart.findIndex(c => String(c.med_id) === String(id));
+            if (idx === -1) return;
+            const item = cart[idx];
+            if (val <= 0) {
+                Swal.fire({
+                    title: 'Cantidad 0',
+                    text: '¿Eliminar este medicamento?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then(r => {
+                    if (r.isConfirmed) {
+                        cart.splice(idx, 1);
+                        renderCart();
+                    } else {
+                        item.cantidad = 1;
+                        renderCart();
+                    }
+                });
+                return;
+            }
+            if (item.stock != null && val > item.stock) {
+                Swal.fire('Sin stock', 'No hay suficiente stock', 'warning');
+                renderCart();
+                return;
+            }
+            item.cantidad = val;
+            renderCart();
+        }
+
+        function updateTotals() {
+            const subtotal = cart.reduce((s, i) => s + (i.precio * i.cantidad), 0);
+            const total = subtotal;
+            subtotalHidden.value = subtotal.toFixed(2);
+            totalHidden.value = total.toFixed(2);
+            if (subtotalText) subtotalText.textContent = 'Bs. ' + formatMoney(subtotal);
+            if (totalText) totalText.textContent = 'Bs. ' + formatMoney(total);
+            const dinero = Number(inputDinero ? inputDinero.value : 0);
+            const cambio = dinero - total;
+            cambioHidden.value = (cambio > 0 ? cambio : 0).toFixed(2);
+            if (cambioText) cambioText.textContent = (isNaN(cambio) ? '0.00' : formatMoney(Math.max(0, cambio)));
+            if (dineroHidden) dineroHidden.value = dinero;
+        }
+
+        function addItem(m) {
+            const idx = cart.findIndex(c => String(c.med_id) === String(m.med_id));
+            if (idx !== -1) {
+                const ex = cart[idx];
+                if (m.stock != null && ex.cantidad + 1 > m.stock) {
+                    Swal.fire('Sin stock', 'No hay stock suficiente', 'warning');
+                    return;
+                }
+                ex.cantidad += 1;
+            } else {
+                cart.push({
+                    med_id: m.med_id,
+                    nombre: m.nombre,
+                    presentacion: m.presentacion || '',
+                    linea: m.linea || '',
+                    precio: parseFloat(m.precio) || 0,
+                    cantidad: 1,
+                    stock: m.stock != null ? Number(m.stock) : null
+                });
+            }
+            renderCart();
+        }
+
+        function doSearch(term) {
+            if (!term || term.trim().length < 1) {
+                if (resultsContainer) resultsContainer.innerHTML = '';
+                return;
+            }
+            const body = new URLSearchParams();
+            body.append('ventaAjax', 'buscar');
+            body.append('termino', term);
+            if (filtro_linea && filtro_linea.value) body.append('linea', filtro_linea.value);
+            if (filtro_presentacion && filtro_presentacion.value) body.append('presentacion', filtro_presentacion.value);
+            if (filtro_funcion && filtro_funcion.value) body.append('funcion', filtro_funcion.value);
+            if (filtro_via && filtro_via.value) body.append('via', filtro_via.value);
+            fetch(URL_MED, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
+            }).then(r => r.json()).then(json => {
+                renderResults(json || []);
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+
+        function renderResults(items) {
+            if (!resultsContainer) return;
+
+            if (!items || items.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-results-item no-results">No se encontraron resultados</div>';
+                resultsContainer.style.display = 'block';
+                return;
+            }
+
+            resultsContainer.innerHTML = items.map(it => {
+                const nombre = escapeHtml(it.nombre || '');
+                const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
+                const via = escapeHtml(it.linea || 'Sin vía');
+                const precio = formatMoney(it.precio_venta || 0);
+
+                return `<div class="search-results-item" 
+                data-id="${it.med_id}" 
+                data-nombre="${nombre}" 
+                data-presentacion="${presentacion}" 
+                data-linea="${via}"
+                data-precio="${it.precio_venta || 0}"
+                data-stock="${it.stock || 0}">
+                <div class="search-result-name">${nombre}</div>
+                <div class="search-result-details">${via} · ${presentacion} · Bs. ${precio}</div>
+            </div>`;
+            }).join('');
+
+            resultsContainer.style.display = 'block';
+
+            resultsContainer.querySelectorAll('.search-results-item:not(.no-results)').forEach(el => {
+                el.addEventListener('click', () => {
+                    addItem({
+                        med_id: el.dataset.id,
+                        nombre: el.dataset.nombre,
+                        presentacion: el.dataset.presentacion,
+                        linea: el.dataset.linea,
+                        precio: parseFloat(el.dataset.precio || 0),
+                        stock: Number(el.dataset.stock || 0)
+                    });
+                    resultsContainer.innerHTML = '';
+                    resultsContainer.style.display = 'none';
+                    if (medSearch) medSearch.value = '';
+                });
+            });
+        }
+
+        if (medSearch) {
+            medSearch.addEventListener('input', e => {
+                const term = e.target.value.trim();
+                clearTimeout(debounce);
+
+                if (term.length === 0) {
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '';
+                        resultsContainer.style.display = 'none';
+                    }
+                    return;
+                }
+
+                debounce = setTimeout(() => doSearch(term), 250);
+            });
+
+            medSearch.addEventListener('focus', function() {
+                if (this.value.trim().length > 0 && resultsContainer && resultsContainer.innerHTML) {
+                    resultsContainer.style.display = 'block';
+                }
+            });
+        }
+
+        [filtro_linea, filtro_presentacion, filtro_funcion, filtro_via].forEach(sel => {
+            if (sel) sel.addEventListener('change', () => {
+                if (medSearch && medSearch.value) doSearch(medSearch.value);
+            });
+        });
+
+        function loadMostSold() {
+            const body = new URLSearchParams();
+            body.append('ventaAjax', 'mas_vendidos');
+            body.append('limit', '5');
+            fetch(URL_MED, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
+            }).then(r => r.json()).then(json => {
+                if (!tablaMasVendidos) return;
+                tablaMasVendidos.innerHTML = (json || []).map((it, i) =>
+                    '<tr data-id="' + it.med_id + '"><td>' + (i + 1) + '</td><td>' + escapeHtml(it.nombre) + '</td><td>Bs. ' + formatMoney(it.precio_venta) + '</td><td><a href="#" class="btn caja btn-add" data-id="' + it.med_id + '" data-nombre="' + escapeHtml(it.nombre) + '" data-precio="' + it.precio_venta + '">agregar</a></td></tr>'
+                ).join('');
+                tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => b.addEventListener('click', e => {
+                    e.preventDefault();
+                    const el = e.currentTarget;
+                    addItem({
+                        med_id: el.dataset.id,
+                        nombre: el.dataset.nombre,
+                        presentacion: '',
+                        linea: '',
+                        precio: parseFloat(el.dataset.precio || 0),
+                        stock: null
+                    });
+                }));
+            }).catch(err => console.error(err));
+        }
+
+        if (inputDinero) inputDinero.addEventListener('input', updateTotals);
+
+        // Validación solo para este formulario específico
+        formVenta.addEventListener('submit', function(e) {
+            if (cart.length === 0) {
+                e.preventDefault();
+                Swal.fire('Carrito vacío', 'Agrega al menos un medicamento para realizar la venta.', 'warning');
+                return;
+            }
+            itemsHidden.value = JSON.stringify(cart.map(i => ({
+                med_id: i.med_id,
+                cantidad: i.cantidad,
+                precio: Number(i.precio),
+                subtotal: Number((i.precio * i.cantidad).toFixed(2))
+            })));
+            updateTotals();
+        });
+
+        loadMostSold();
+        renderCart();
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (resultsContainer &&
+                !resultsContainer.contains(e.target) &&
+                e.target !== medSearch) {
+                resultsContainer.style.display = 'none';
+            }
+        });
+
+        window.VentaCaja = {
+            addItem,
+            cart,
+            renderCart,
+            updateTotals
+        };
+    })();
+</script>
+
+<!-- script cliente -->
+<script>
+    // Script mejorado para búsqueda de clientes
+    (function() {
+        const URL_CLI = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
+        const inputCliente = document.getElementById("buscar_cliente_venta");
+        let resultadoClientes = document.getElementById("resultado_clientes");
+
+        let clienteSeleccionado = null;
+        let debounceCliente = null;
+
+        // Verificar si el contenedor existe, si no, crearlo
+        if (!resultadoClientes) {
+            resultadoClientes = document.createElement('div');
+            resultadoClientes.id = 'resultado_clientes';
+            resultadoClientes.className = 'resultado-busqueda';
+        }
+
+        // CRÍTICO: Encontrar el contenedor correcto (.ventas-cliente)
+        const ventasClienteContainer = inputCliente.closest('.ventas-cliente');
+
+        if (ventasClienteContainer) {
+            // Asegurar position relative en el contenedor
+            ventasClienteContainer.style.position = 'relative';
+
+            // Insertar el dropdown como hijo directo del contenedor
+            if (!ventasClienteContainer.contains(resultadoClientes)) {
+                ventasClienteContainer.appendChild(resultadoClientes);
+            }
+        } else if (inputCliente.parentElement) {
+            // Fallback: usar el padre directo
+            inputCliente.parentElement.style.position = 'relative';
+            if (!inputCliente.parentElement.contains(resultadoClientes)) {
+                inputCliente.parentElement.appendChild(resultadoClientes);
+            }
+        }
+
+        // Aplicar estilos críticos al contenedor
+        resultadoClientes.style.cssText = `
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 0 0 4px 4px;
+        margin-top: 0;
+    `;
+
+        console.log("📍 Contenedor de resultados posicionado en:", ventasClienteContainer || inputCliente.parentElement);
+
+        // Obtener contenedor de cliente seleccionado
+        const clienteSeleccionadoContainer = document.getElementById('cliente_seleccionado_container');
+        const clienteNombreTexto = document.getElementById('cliente_nombre_texto');
+        const quitarClienteBtn = document.getElementById('quitar_cliente_btn');
+        const clienteIdHidden = document.getElementById('cliente_id_seleccionado');
+
+        // Event listener para búsqueda en tiempo real (sin botón)
+        if (inputCliente) {
+            inputCliente.addEventListener("input", function() {
+                const termino = this.value.trim();
+                clearTimeout(debounceCliente);
+
+                console.log("⌨️ Escribiendo:", termino);
+
+                if (termino.length < 1) {
+                    resultadoClientes.innerHTML = "";
+                    resultadoClientes.style.display = "none";
+                    return;
+                }
+
+                // Buscar después de 250ms (búsqueda en tiempo real)
+                debounceCliente = setTimeout(() => {
+                    console.log("🚀 Iniciando búsqueda automática");
+                    buscarClientes(termino);
+                }, 250);
+            });
+
+            inputCliente.addEventListener("focus", function() {
+                if (this.value.trim().length > 0 && resultadoClientes.innerHTML) {
+                    resultadoClientes.style.display = "block";
+                }
+            });
+
+            // Prevenir que el Enter envíe el formulario desde este input
+            inputCliente.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    // Si hay un resultado visible, seleccionar el primero
+                    const primerResultado = resultadoClientes.querySelector('.cliente-item');
+                    if (primerResultado && resultadoClientes.style.display === "block") {
+                        seleccionarCliente(primerResultado);
+                    }
+                }
+            });
+        }
+
+        async function buscarClientes(termino) {
+            console.log("🔍 Buscando clientes:", termino);
+
+            const formData = new FormData();
+            formData.append("ventaAjax", "buscar_cliente");
+            formData.append("termino", termino);
+
+            try {
+                const response = await fetch(URL_CLI, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+                console.log("📥 Respuesta:", text);
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("❌ Error parseando JSON:", e);
+                    data = [];
+                }
+
+                console.log("✅ Datos parseados:", data);
+                mostrarResultadosClientes(data);
+
+            } catch (error) {
+                console.error("❌ Error buscando clientes:", error);
+                resultadoClientes.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
+                resultadoClientes.style.display = "block";
+            }
+        }
+
+        function mostrarResultadosClientes(clientes) {
+            console.log("📋 Mostrando resultados:", clientes);
+
+            if (!clientes || clientes.length === 0) {
+                resultadoClientes.innerHTML = '<div class="search-results-item no-results">No se encontraron clientes</div>';
+                resultadoClientes.style.display = "block";
+                return;
+            }
+
+            // Generar HTML usando la misma estructura que medicamentos
+            const html = clientes.map(cli => {
+                const nombreCompleto = `${cli.cl_nombres || ''} ${cli.cl_apellido_paterno || ''} ${cli.cl_apellido_materno || ''}`.trim();
+                const carnet = cli.cl_carnet || 'Sin CI';
+                const telefono = cli.cl_telefono ? ` · ${cli.cl_telefono}` : '';
+
+                return `
+                <div class="search-results-item cliente-item" 
+                    data-id="${cli.cl_id}" 
+                    data-nombre="${escapeHtml(nombreCompleto)}">
+                    <div class="search-result-name">
+                        <ion-icon name="person-circle-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>
+                        ${escapeHtml(nombreCompleto)}
+                    </div>
+                    <div class="search-result-details">CI: ${escapeHtml(carnet)}${escapeHtml(telefono)}</div>
+                </div>`;
+            }).join('');
+
+            resultadoClientes.innerHTML = html;
+            resultadoClientes.style.display = "block";
+
+            console.log("✅ HTML insertado, display:", resultadoClientes.style.display);
+
+            // Agregar event listeners a los items
+            resultadoClientes.querySelectorAll('.cliente-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    seleccionarCliente(this);
+                });
+            });
+        }
+
+        function seleccionarCliente(item) {
+            const id = item.dataset.id;
+            const nombre = item.dataset.nombre;
+
+            console.log("👤 Cliente seleccionado:", {
+                id,
+                nombre
+            });
+
+            // Guardar cliente seleccionado
+            clienteSeleccionado = {
+                id,
+                nombre
+            };
+
+            // Mostrar en la interfaz
+            if (clienteNombreTexto) clienteNombreTexto.textContent = nombre;
+            if (clienteIdHidden) clienteIdHidden.value = id;
+            if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "block";
+
+            // Limpiar búsqueda
+            resultadoClientes.innerHTML = "";
+            resultadoClientes.style.display = "none";
+            if (inputCliente) inputCliente.value = "";
+        }
+
+        // Quitar cliente seleccionado
+        if (quitarClienteBtn) {
+            quitarClienteBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                clienteSeleccionado = null;
+                if (clienteIdHidden) clienteIdHidden.value = "";
+                if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "none";
+                if (inputCliente) {
+                    inputCliente.value = "";
+                    inputCliente.focus();
+                }
+            });
+        }
+
+        // Cerrar resultados al hacer click fuera
+        document.addEventListener("click", function(e) {
+            if (resultadoClientes &&
+                resultadoClientes.style.display === "block" &&
+                !inputCliente.contains(e.target) &&
+                !resultadoClientes.contains(e.target)) {
+                resultadoClientes.style.display = "none";
+            }
+        });
+
+        // Asegurar que el formulario envíe el cliente_id
+        const formVenta = document.querySelector('.form.FormularioAjax');
+        if (formVenta) {
+            formVenta.addEventListener('submit', function(e) {
+                if (clienteSeleccionado && clienteIdHidden) {
+                    clienteIdHidden.value = clienteSeleccionado.id;
+                }
+            });
+        }
+
+        // Función helper para escapar HTML
+        function escapeHtml(text) {
+            if (text == null) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Exponer funciones globalmente si es necesario
+        window.ClienteBusqueda = {
+            seleccionarCliente,
+            clienteSeleccionado: () => clienteSeleccionado
+        };
+
+        console.log("✅ Script de búsqueda de clientes inicializado");
+    })();
+</script>
