@@ -88,18 +88,99 @@ class loteModel extends mainModel
     }
     protected static function activar_lote_model($datos)
     {
-        $sql = self::conectar()->prepare("
-            UPDATE `lote_medicamento` SET
-                `lm_estado`=:lm_estado,
-                `lm_actualizado_en`=NOW()
-            WHERE lm_id = :ID and lm_estado = :parametro
-        ");
-        $sql->bindParam(":lm_estado", $datos['lm_estado']);
-        $sql->bindParam(":ID", $datos['lm_id']);
-        $sql->bindParam(":parametro", $datos['parametro']);
+        $db = self::conectar();
 
-        $sql->execute();
-        return $sql;
+        try {
+            $db->beginTransaction();
+
+            // 1) Obtener información completa del lote
+            $consulta_lote = $db->prepare("
+            SELECT lm.*, m.med_nombre_quimico
+            FROM lote_medicamento lm
+            INNER JOIN medicamento m ON m.med_id = lm.med_id
+            WHERE lm.lm_id = :lm_id AND lm.lm_estado = :parametro
+        ");
+            $consulta_lote->execute([
+                ':lm_id' => $datos['lm_id'],
+                ':parametro' => $datos['parametro']
+            ]);
+
+            if ($consulta_lote->rowCount() <= 0) {
+                throw new Exception("Lote no encontrado o no está en estado '{$datos['parametro']}'");
+            }
+
+            $lote = $consulta_lote->fetch(PDO::FETCH_ASSOC);
+            $med_id = (int)$lote['med_id'];
+            $su_id = (int)$lote['su_id'];
+            $lm_cant_actual_cajas = (int)$lote['lm_cant_actual_cajas'];
+            $lm_cant_actual_unidades = (int)$lote['lm_cant_actual_unidades'];
+            $lm_precio_compra = (float)$lote['lm_precio_compra'];
+            $subtotal_lote = $lm_cant_actual_cajas * $lm_precio_compra;
+            $numero_lote = $lote['lm_numero_lote'];
+
+            // 2) Actualizar estado del lote a 'activo'
+            $sql = $db->prepare("
+            UPDATE `lote_medicamento` 
+            SET `lm_estado` = :lm_estado,
+                `lm_actualizado_en` = NOW()
+            WHERE lm_id = :ID AND lm_estado = :parametro
+        ");
+            $sql->execute([
+                ':lm_estado' => $datos['lm_estado'],
+                ':ID' => $datos['lm_id'],
+                ':parametro' => $datos['parametro']
+            ]);
+
+            if ($sql->rowCount() <= 0) {
+                throw new Exception("No se pudo actualizar el estado del lote");
+            }
+
+            // 3) ✅ ACTUALIZAR INVENTARIO CONSOLIDADO (ESTO FALTABA)
+            $datos_inventario = [
+                "su_id" => $su_id,
+                "med_id" => $med_id,
+                "inv_total_cajas" => $lm_cant_actual_cajas,
+                "inv_total_unidades" => $lm_cant_actual_unidades,
+                "inv_total_valorado" => $subtotal_lote
+            ];
+
+            $inv_result = self::actualizar_inventario_model($datos_inventario);
+
+            if (!$inv_result) {
+                throw new Exception("No se pudo actualizar el inventario consolidado");
+            }
+
+            // 4) ✅ REGISTRAR MOVIMIENTO DE INVENTARIO (ESTO FALTABA)
+            $datos_movimiento = [
+                "lm_id" => $datos['lm_id'],
+                "med_id" => $med_id,
+                "su_id" => $su_id,
+                "us_id" => $datos['us_id'],
+                "mi_tipo" => "entrada",
+                "mi_cantidad" => $lm_cant_actual_unidades,
+                "mi_unidad" => "unidad",
+                "mi_referencia_tipo" => "activacion_lote",
+                "mi_referencia_id" => $datos['lm_id'],
+                "mi_motivo" => "Activación manual de lote {$numero_lote}"
+            ];
+
+            $mov_result = self::registro_movimiento_inventario_model($datos_movimiento);
+
+            if ($mov_result->rowCount() <= 0) {
+                throw new Exception("No se pudo registrar el movimiento de inventario");
+            }
+
+            // 5) Commit de la transacción
+            $db->commit();
+
+            error_log("LOTE ACTIVADO CORRECTAMENTE: lm_id={$datos['lm_id']}, med_id={$med_id}, unidades={$lm_cant_actual_unidades}");
+
+            return $sql;
+        } catch (Exception $e) {
+            $db->rollBack();
+            error_log("ERROR en activar_lote_model: " . $e->getMessage());
+            return false;
+        }
     }
 
     /* Registro en historial_lote */

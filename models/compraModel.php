@@ -28,6 +28,7 @@ class compraModel extends mainModel
         $sql->execute();
         return (int) mainModel::conectar()->lastInsertId();
     }
+
     /* registrar detalle de compra */
     public static function agregar_detalle_compra_model($item)
     {
@@ -65,7 +66,7 @@ class compraModel extends mainModel
         ");
 
         $sql->bindParam(":pr_id", $datos['pr_id']);
-        $sql->bindParam(":pr_id_compra", $datos['pr_id_compra']); // referencia a la compra
+        $sql->bindParam(":pr_id_compra", $datos['pr_id_compra']);
         $sql->bindParam(":med_id", $datos['med_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
         $sql->bindParam(":lm_numero_lote", $datos['lm_numero_lote']);
@@ -83,7 +84,8 @@ class compraModel extends mainModel
         $sql->execute();
         return (int) mainModel::conectar()->lastInsertId();
     }
-    /* registrar historial de lote  */
+
+    /* registrar historial de lote */
     public static function registrar_historial_Lote_model($datos)
     {
         $sql = mainModel::conectar()->prepare("
@@ -97,37 +99,55 @@ class compraModel extends mainModel
         $sql->execute();
         return $sql;
     }
-    /* insertar y/o actualizar inventario  */
 
+    /**************************************************************************
+     * ACTUALIZAR INVENTARIO - CORREGIDO
+     * - Usa ON DUPLICATE KEY UPDATE (requiere UNIQUE KEY en su_id,med_id)
+     * - Si existe: SUMA las cantidades
+     * - Si no existe: CREA el registro
+     **************************************************************************/
     public static function actualizar_inventario_model($datos)
     {
-        $sql = mainModel::conectar()->prepare(
-            "INSERT INTO inventarios (su_id, med_id, inv_total_cajas, inv_total_unidades, inv_total_valorado, inv_creado_en, inv_actualizado_en)
-            VALUES (:su_id, :med_id, :inv_total_cajas, :inv_total_unidades, :inv_total_valorado, NOW(), NOW())
-            ON DUPLICATE KEY UPDATE
-                inv_total_cajas = inv_total_cajas + VALUES(inv_total_cajas),
-                inv_total_unidades = inv_total_unidades + VALUES(inv_total_unidades),
-                inv_total_valorado = inv_total_valorado + VALUES(inv_total_valorado),
-                inv_actualizado_en = NOW()
-            "
-        );
+        $db = mainModel::conectar();
 
-        $sql->bindParam(":su_id", $datos['su_id']);
-        $sql->bindParam(":med_id", $datos['med_id']);
-        $sql->bindParam(":inv_total_cajas", $datos['inv_total_cajas']);
-        $sql->bindParam(":inv_total_unidades", $datos['inv_total_unidades']);
-        $sql->bindParam(":inv_total_valorado", $datos['inv_total_valorado']);
+        try {
+            $sql = $db->prepare("
+                INSERT INTO inventarios 
+                (su_id, med_id, inv_total_cajas, inv_total_unidades, inv_total_valorado, inv_creado_en, inv_actualizado_en)
+                VALUES 
+                (:su_id, :med_id, :inv_total_cajas, :inv_total_unidades, :inv_total_valorado, NOW(), NOW())
+                ON DUPLICATE KEY UPDATE
+                    inv_total_cajas = inv_total_cajas + VALUES(inv_total_cajas),
+                    inv_total_unidades = inv_total_unidades + VALUES(inv_total_unidades),
+                    inv_total_valorado = inv_total_valorado + VALUES(inv_total_valorado),
+                    inv_actualizado_en = NOW()
+            ");
 
-        $sql->execute();
-        return $sql;
+            $sql->bindParam(":su_id", $datos['su_id'], PDO::PARAM_INT);
+            $sql->bindParam(":med_id", $datos['med_id'], PDO::PARAM_INT);
+            $sql->bindParam(":inv_total_cajas", $datos['inv_total_cajas'], PDO::PARAM_INT);
+            $sql->bindParam(":inv_total_unidades", $datos['inv_total_unidades'], PDO::PARAM_INT);
+            $sql->bindParam(":inv_total_valorado", $datos['inv_total_valorado']);
+
+            $sql->execute();
+
+            // Log para debugging
+            error_log("INVENTARIO ACTUALIZADO: med_id={$datos['med_id']}, su_id={$datos['su_id']}, +{$datos['inv_total_unidades']} unidades, +{$datos['inv_total_cajas']} cajas");
+
+            return $sql;
+        } catch (PDOException $e) {
+            error_log("ERROR en actualizar_inventario_model: " . $e->getMessage());
+            return false;
+        }
     }
-    /* insertar movimientos para inventario modelo */
+
+    /* insertar movimientos para inventario */
     public static function agregar_movimiento_inventario_model($datos)
     {
         $db = mainModel::conectar();
         $sql = $db->prepare("
             INSERT INTO movimiento_inventario
-                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad,  mi_referencia_tipo, mi_referencia_id, mi_motivo)
+                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_referencia_tipo, mi_referencia_id, mi_motivo)
             VALUES
                 (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)
         ");
@@ -147,15 +167,13 @@ class compraModel extends mainModel
         return $sql;
     }
 
-
-    /* registrar un informe en informes ocn el tipo "compra" */
+    /* registrar un informe en informes con el tipo "compra" */
     public static function agregar_informe_compra_model($datos)
     {
-        $sql = mainModel::conectar()->prepare(
-            "INSERT INTO informes (inf_nombre, inf_tipo, inf_usuario, inf_config)
+        $sql = mainModel::conectar()->prepare("
+            INSERT INTO informes (inf_nombre, inf_tipo, inf_usuario, inf_config)
             VALUES (:inf_nombre, 'compra', :inf_usuario, :inf_config)
-            "
-        );
+        ");
         $sql->bindParam(":inf_nombre", $datos['inf_nombre']);
         $sql->bindParam(":inf_usuario", $datos['inf_usuario']);
         $sql->bindParam(":inf_config", $datos['inf_config']);

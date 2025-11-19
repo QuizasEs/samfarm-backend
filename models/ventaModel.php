@@ -538,6 +538,119 @@ class ventaModel extends mainModel
         return "F-" . $sucursal_id . "-" . date('YmdHis') . "-" . rand(100, 999);
     }
 
+
+    /**************************************************************************
+     * DESCONTAR DEL INVENTARIO CONSOLIDADO (MÉTODO DIRECTO)
+     * - Más eficiente que recalcular todo
+     * - Actualiza directamente restando las unidades vendidas
+     **************************************************************************/
+    public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades)
+    {
+        if ($cantidad_unidades <= 0) return false;
+        $db = mainModel::conectar();
+
+        try {
+            // 1) Verificar si existe inventario
+            $check_stmt = $db->prepare("
+                SELECT inv_id, inv_total_unidades, inv_total_cajas 
+                FROM inventarios 
+                WHERE med_id = :med_id AND su_id = :su_id
+            ");
+            $check_stmt->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+            $check_stmt->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
+            $check_stmt->execute();
+            $inv = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+            // 2) Si NO existe, crearlo primero recalculando desde lotes
+            if (!$inv) {
+                $recalc_ok = self::recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id);
+                if (!$recalc_ok) {
+                    error_log("ERROR: No se pudo crear inventario inicial para med_id={$med_id}, su_id={$sucursal_id}");
+                    return false;
+                }
+
+                // Volver a consultar después de crear
+                $check_stmt->execute();
+                $inv = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$inv) {
+                    error_log("ERROR: Inventario no existe después de recalcular para med_id={$med_id}");
+                    return false;
+                }
+            }
+
+            // 3) Bloquear fila para actualización
+            $lock_stmt = $db->prepare("
+                SELECT inv_id, inv_total_unidades, inv_total_cajas 
+                FROM inventarios 
+                WHERE inv_id = :inv_id 
+                FOR UPDATE
+            ");
+            $lock_stmt->bindParam(":inv_id", $inv['inv_id'], PDO::PARAM_INT);
+            $lock_stmt->execute();
+            $inv = $lock_stmt->fetch(PDO::FETCH_ASSOC);
+
+            $inv_id = (int)$inv['inv_id'];
+            $unidades_antes = (int)$inv['inv_total_unidades'];
+
+            // 4) Validar stock suficiente
+            if ($unidades_antes < $cantidad_unidades) {
+                error_log("ERROR: Stock insuficiente en inventario. med_id={$med_id}, disponible={$unidades_antes}, requerido={$cantidad_unidades}");
+                return false;
+            }
+
+            // 5) Calcular nuevas cantidades
+            $unidades_despues = $unidades_antes - $cantidad_unidades;
+
+            // 6) Obtener factor de conversión para cajas
+            $stmt2 = $db->prepare("
+                SELECT lm_cant_blister, lm_cant_unidad 
+                FROM lote_medicamento 
+                WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0 
+                LIMIT 1
+            ");
+            $stmt2->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+            $stmt2->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
+            $stmt2->execute();
+            $ref = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+            if ($ref) {
+                $blister = max(1, (int)$ref['lm_cant_blister']);
+                $por_unidad = max(1, (int)$ref['lm_cant_unidad']);
+                $unidades_por_caja = $blister * $por_unidad;
+            } else {
+                $unidades_por_caja = 1;
+            }
+
+            $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
+
+            // 7) Actualizar inventario
+            $upd = $db->prepare("
+                UPDATE inventarios 
+                SET inv_total_unidades = :unidades_despues, 
+                    inv_total_cajas = :cajas_despues, 
+                    inv_actualizado_en = NOW()
+                WHERE inv_id = :inv_id
+            ");
+            $upd->bindParam(":unidades_despues", $unidades_despues, PDO::PARAM_INT);
+            $upd->bindParam(":cajas_despues", $cajas_despues, PDO::PARAM_INT);
+            $upd->bindParam(":inv_id", $inv_id, PDO::PARAM_INT);
+            $upd->execute();
+
+            $rows_affected = $upd->rowCount();
+
+            if ($rows_affected > 0) {
+                error_log("SUCCESS: Inventario actualizado. med_id={$med_id}, unidades: {$unidades_antes} -> {$unidades_despues}, cajas: -> {$cajas_despues}");
+                return true;
+            } else {
+                error_log("WARNING: UPDATE no afectó filas. med_id={$med_id}, inv_id={$inv_id}");
+                return false;
+            }
+        } catch (PDOException $e) {
+            error_log("ERROR PDO en descontar_inventario_consolidado_model: " . $e->getMessage());
+            return false;
+        }
+    }
     /**************************************************************************
      * generar_pdf_factura_model (usa libs/pdf_factura.php)
      **************************************************************************/

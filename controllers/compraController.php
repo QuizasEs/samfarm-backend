@@ -71,19 +71,14 @@ class compraController extends compraModel
     /* agegar compra nueva controlador */
     public function agregar_compra_controller()
     {
-
         /* validamos y limpiamos cadena entrante */
-
         $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
         $razon_social = mainModel::limpiar_cadena($_POST['razon_reg']);
         $proveedor_id = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
         $laboratorio_id = mainModel::limpiar_cadena($_POST['Laboratorio_factura_reg']);
-
         $fecha_factura = mainModel::limpiar_cadena($_POST['Fecha_factura_reg']);
         $numero_factura = mainModel::limpiar_cadena($_POST['Numero_factura_reg']);
-
         $impuesto = mainModel::limpiar_cadena($_POST['impuestos_reg'] ?? 0);
-
         $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
         $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp']);
 
@@ -101,7 +96,7 @@ class compraController extends compraModel
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Campos faltantes',
-                'texto' => 'Por favor completa todos los campos obligatorios (número de compra, razón social, proveedor, laboratorio, fecha y número de factura).',
+                'texto' => 'Por favor completa todos los campos obligatorios.',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
@@ -133,7 +128,6 @@ class compraController extends compraModel
         }
 
         /* preparamos datos para el registro de compra */
-
         $datos_compra = [
             "co_numero" => $numero_compra,
             "la_id" => $laboratorio_id,
@@ -149,7 +143,6 @@ class compraController extends compraModel
         ];
 
         /* insertamos compra */
-
         $compra_id = compraModel::agregar_compra_model($datos_compra);
 
         if ($compra_id <= 0) {
@@ -163,19 +156,17 @@ class compraController extends compraModel
             exit();
         }
 
-        /* procesamos lote dentro de un bucle para su inserción */
-
+        /* procesamos cada lote */
         foreach ($lotes as $lote) {
-            /* limpiamos cadena entrante */
+            /* limpiamos datos del lote */
             $medicamento_id = mainModel::limpiar_cadena($lote['id_medicamento'] ?? '');
             $numero_lote = mainModel::limpiar_cadena($lote['numero'] ?? '');
-            $cantidad_cajas = isset($lote['cantidad']) ? (int) $lote['cantidad'] : 0; // cajas
+            $cantidad_cajas = isset($lote['cantidad']) ? (int)$lote['cantidad'] : 0;
             $cantidad_blister = isset($lote['cantidad_blister']) && (int)$lote['cantidad_blister'] > 0 ? (int)$lote['cantidad_blister'] : 1;
             $cantidad_unidades = isset($lote['cantidad_unidades']) && (int)$lote['cantidad_unidades'] > 0 ? (int)$lote['cantidad_unidades'] : 1;
             $fecha_vencimiento = mainModel::limpiar_cadena($lote['vencimiento'] ?? null);
-            $precio_compra = is_numeric($lote['precioCompra']) ? $lote['precioCompra'] : 0;
-            $precio_venta = is_numeric($lote['precioVenta']) ? $lote['precioVenta'] : 0;
-            // Convertir 1/0 o true/false a booleano
+            $precio_compra = is_numeric($lote['precioCompra']) ? (float)$lote['precioCompra'] : 0;
+            $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
 
             /* Validar datos del lote */
@@ -183,25 +174,24 @@ class compraController extends compraModel
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Datos incompletos',
-                    'texto' => 'Uno de los lotes tiene datos incompletos (medicamento, cantidad o precio).',
+                    'texto' => 'Uno de los lotes tiene datos incompletos.',
                     'Tipo' => 'error'
                 ];
                 echo json_encode($alerta);
                 exit();
             }
 
-            /* realizamos cálculos operacionales */
-            $subtotal_lote = $cantidad_cajas * $precio_compra;
+            /* cálculos de cantidades */
             $lm_cant_caja = $cantidad_cajas;
             $lm_cant_blister = $cantidad_blister;
             $lm_cant_unidad = $cantidad_unidades;
+            $lm_total_unidades = $lm_cant_caja * $lm_cant_blister * $lm_cant_unidad;
             $lm_cant_actual_cajas = $lm_cant_caja;
-            $lm_cant_actual_unidades = $lm_cant_caja * $lm_cant_blister * $lm_cant_unidad;
-            $lm_total_unidades = $lm_cant_actual_unidades;
+            $lm_cant_actual_unidades = $lm_total_unidades;
+            $subtotal_lote = $cantidad_cajas * $precio_compra;
             $lm_estado = $activar_lote ? 'activo' : 'en_espera';
 
-            /* alistamos datos de lote medicamento */
-
+            /* datos de lote medicamento */
             $datos_lote = [
                 "pr_id" => $proveedor_id,
                 "pr_id_compra" => $compra_id,
@@ -226,25 +216,22 @@ class compraController extends compraModel
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Error al registrar lote',
-                    'texto' => 'No se pudo registrar el lote del medicamento en la base de datos.',
+                    'texto' => 'No se pudo registrar el lote del medicamento.',
                     'Tipo' => 'error'
                 ];
                 echo json_encode($alerta);
                 exit();
             }
 
-            /* insertamos el historial de lote */
-
+            /* historial de creación del lote */
             $historial = [
                 "lm_id" => $lote_id,
                 "us_id" => $usuario_id,
                 "hl_accion" => "creacion",
-                "hl_descripcion" => "Lote creado automáticamente por compra #{$numero_compra} en estado '{$lm_estado}'."
+                "hl_descripcion" => "Lote creado por compra #{$numero_compra} en estado '{$lm_estado}'."
             ];
 
             $historial_result = compraModel::registrar_historial_Lote_model($historial);
-
-            /* verificamos que se registró correctamente */
 
             if ($historial_result->rowCount() <= 0) {
                 $alerta = [
@@ -257,18 +244,16 @@ class compraController extends compraModel
                 exit();
             }
 
-            /* insertamos detalle de compra */
+            /* detalle de compra */
             $datos_detalle = [
                 "co_id" => $compra_id,
                 "med_id" => $medicamento_id,
                 "lm_id" => $lote_id,
                 "cantidad" => $lm_cant_actual_unidades,
                 "precio_unitario" => $precio_compra,
-                "descuento" => 0.00, // Sin descuento por ahora
+                "descuento" => 0.00,
                 "subtotal" => $subtotal_lote
             ];
-
-            /* insertamos detalle de compra */
 
             $detalle_result = compraModel::agregar_detalle_compra_model($datos_detalle);
 
@@ -283,23 +268,21 @@ class compraController extends compraModel
                 exit();
             }
 
+            /* SI EL LOTE SE ACTIVA EN LA COMPRA */
             if ($lm_estado === 'activo') {
-                /* actualizamos inventario en caso que el lote se registró como activo */
-                /* realizamos operaciones */
+                /* actualizar inventario consolidado */
                 $datos_inventario = [
                     "su_id" => $sucursal_id,
                     "med_id" => $medicamento_id,
                     "inv_total_cajas" => $lm_cant_actual_cajas,
                     "inv_total_unidades" => $lm_cant_actual_unidades,
-                    // valoramos según subtotal de compra (precio_compra * cajas)
                     "inv_total_valorado" => $subtotal_lote
                 ];
 
-                /* insertamos */
                 $inv_result = compraModel::actualizar_inventario_model($datos_inventario);
 
-                // Validación corregida - el método retorna PDOStatement
-                if (!$inv_result || $inv_result->rowCount() < 0) {
+                // CORRECCIÓN: Validación simplificada
+                if (!$inv_result) {
                     $alerta = [
                         'Alerta' => 'simple',
                         'Titulo' => 'Error inventario',
@@ -310,7 +293,7 @@ class compraController extends compraModel
                     exit();
                 }
 
-                /* registramos el movimiento de inventario */
+                /* registrar movimiento de inventario */
                 $datos_movimiento = [
                     "lm_id" => $lote_id,
                     "med_id" => $medicamento_id,
@@ -337,17 +320,16 @@ class compraController extends compraModel
                     exit();
                 }
 
-                /* registrar el historial del lote indicando activación */
+                /* historial de activación */
                 $datos_historial_activacion = [
                     "lm_id" => $lote_id,
                     "us_id" => $usuario_id,
                     "hl_accion" => "activacion",
-                    "hl_descripcion" => "Lote activado automáticamente al registrarse la compra #{$numero_compra}."
+                    "hl_descripcion" => "Lote activado automáticamente al registrar compra #{$numero_compra}."
                 ];
 
                 $historial_activacion_result = compraModel::registrar_historial_Lote_model($datos_historial_activacion);
 
-                /* verificamos que se registró correctamente - CORRECCIÓN AQUÍ */
                 if ($historial_activacion_result->rowCount() <= 0) {
                     $alerta = [
                         'Alerta' => 'simple',
@@ -359,9 +341,9 @@ class compraController extends compraModel
                     exit();
                 }
             }
-        } /* fin foreach */
+        } /* fin foreach lotes */
 
-        /* preparamos el informe de compra */
+        /* preparar informe de compra */
         $config_informe = [
             "compra_id" => $compra_id,
             "numero_compra" => $numero_compra,
@@ -394,27 +376,24 @@ class compraController extends compraModel
             "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
         ];
 
-        /* insertamos informe */
-
         $informe_result = compraModel::agregar_informe_compra_model($datos_informe);
 
         if ($informe_result->rowCount() <= 0) {
             $alerta = [
                 'Alerta' => 'simple',
-                'Titulo' => 'Ocurrió un error inesperado',
-                'texto' => 'No se pudo registrar el informe.',
-                'Tipo' => 'error'
+                'Titulo' => 'Advertencia',
+                'texto' => 'Compra registrada pero no se pudo crear el informe.',
+                'Tipo' => 'warning'
             ];
             echo json_encode($alerta);
             exit();
         }
 
-        /* respuesta si fue exitoso el registro de compra */
-
+        /* respuesta exitosa */
         $alerta = [
             'Alerta' => 'recargar',
             'Titulo' => 'Compra registrada',
-            'texto' => "La compra {$numero_compra} se registró correctamente con {$totales['cantidadLotes']} lote(s) de medicamentos.",
+            'texto' => "La compra {$numero_compra} se registró correctamente con " . count($lotes) . " lote(s).",
             'Tipo' => 'success'
         ];
         echo json_encode($alerta);

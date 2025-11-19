@@ -112,13 +112,6 @@ class ventaController extends ventaModel
             $respuesta = self::consulta_caja_model($datos);
 
             if ($respuesta->rowCount() <= 0) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Ocurrio un error inesperado!',
-                    'texto' => 'No tienes permitido esta accion',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
                 return false;
             } else {
                 // RETORNAR LA RESPUESTA CUANDO HAY REGISTROS
@@ -355,11 +348,30 @@ class ventaController extends ventaModel
                     $remaining -= $take;
                 } // end lotes
 
+
                 if ($remaining > 0) throw new Exception("Stock inconsistente después de consumir lotes");
 
-                // Actualizar inventario consolidado (recalcula sumatoria de lotes)
-                $inv_ok = self::recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id);
-                if (!$inv_ok) throw new Exception("No se pudo actualizar inventario consolidado");
+                // ✅ DESCUENTO DEL INVENTARIO CONSOLIDADO CON MEJOR MANEJO DE ERRORES
+                $inv_ok = self::descontar_inventario_consolidado_model($med_id, $sucursal_id, $unidades_requeridas);
+
+                if (!$inv_ok) {
+                    // Log detallado del error
+                    error_log("ERROR: Falló descuento inventario consolidado. med_id={$med_id}, su_id={$sucursal_id}, unidades={$unidades_requeridas}");
+
+                    // Intentar recalcular como fallback
+                    error_log("Intentando recalcular inventario como fallback...");
+                    $inv_ok = self::recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id);
+
+                    if (!$inv_ok) {
+                        // Obtener nombre del medicamento para mensaje más claro
+                        $med_stmt = mainModel::conectar()->prepare("SELECT med_nombre_quimico FROM medicamento WHERE med_id = :med_id");
+                        $med_stmt->execute([':med_id' => $med_id]);
+                        $med_data = $med_stmt->fetch(PDO::FETCH_ASSOC);
+                        $med_nombre = $med_data ? $med_data['med_nombre_quimico'] : "ID: {$med_id}";
+
+                        throw new Exception("No se pudo actualizar inventario para: {$med_nombre}");
+                    }
+                }
             } // end foreach items
 
             // Registrar movimiento de caja (venta)
