@@ -14,9 +14,9 @@ function enviar_formulario_ajax(e) {
     let config = {
         method: method,
         headers: encabezados,
-        mode: 'cors',
-        cache: 'no-cache',
-        body: data
+        mode: "cors",
+        cache: "no-cache",
+        body: data,
     };
 
     let texto_alerta;
@@ -35,7 +35,8 @@ function enviar_formulario_ajax(e) {
             texto_alerta = "Los datos en el sistema serán actualizados";
             break;
         case "search":
-            texto_alerta = "Se eliminará el término de búsqueda y se deberá ingresar uno nuevo";
+            texto_alerta =
+                "Se eliminará el término de búsqueda y se deberá ingresar uno nuevo";
             break;
         case "loans":
             texto_alerta = "¿Desea remover los datos seleccionados?";
@@ -46,19 +47,19 @@ function enviar_formulario_ajax(e) {
     }
 
     Swal.fire({
-        title: '¿Estás seguro?',
+        title: "¿Estás seguro?",
         text: texto_alerta,
-        type: 'question',
+        type: "question",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Aceptar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
     }).then((result) => {
         if (result.value) {
             fetch(action, config)
-                .then(respuesta => respuesta.json())
-                .then(respuesta => {
+                .then((respuesta) => respuesta.json())
+                .then((respuesta) => {
                     return alertas_ajax(respuesta);
                 });
         }
@@ -66,25 +67,43 @@ function enviar_formulario_ajax(e) {
 }
 
 // Asociar evento a cada formulario
-formularios_ajax.forEach(formulario => {
+formularios_ajax.forEach((formulario) => {
     formulario.addEventListener("submit", enviar_formulario_ajax);
 });
 
 // funcion para manera los mensajes de las alertas
 function alertas_ajax(alerta) {
+    // ✅ ABRIR PDF AUTOMÁTICAMENTE (SI EXISTE)
+    if (alerta.pdf_url) {
+        let ventana = window.open(alerta.pdf_url, "_blank");
+
+        // Verificar si fue bloqueado
+        if (!ventana || ventana.closed || typeof ventana.closed == "undefined") {
+            Swal.fire({
+                title: "Pop-up bloqueado",
+                html: `Tu navegador bloqueó la ventana del PDF.<br><br>
+                   <a href="${alerta.pdf_url}" target="_blank" class="btn btn-primary">
+                       Clic aquí para abrir el PDF
+                   </a>`,
+                icon: "warning",
+                confirmButtonText: "Entendido",
+            });
+        }
+    }
+
     if (alerta.Alerta === "simple") {
         Swal.fire({
             title: alerta.Titulo,
             text: alerta.texto,
             icon: alerta.Tipo,
-            confirmButtonText: "Aceptar"
+            confirmButtonText: "Aceptar",
         });
     } else if (alerta.Alerta === "recargar") {
         Swal.fire({
             title: alerta.Titulo,
             text: alerta.texto,
             icon: alerta.Tipo,
-            confirmButtonText: "Aceptar"
+            confirmButtonText: "Aceptar",
         }).then((result) => {
             if (result.isConfirmed) location.reload();
         });
@@ -93,7 +112,7 @@ function alertas_ajax(alerta) {
             title: alerta.Titulo,
             text: alerta.texto,
             icon: alerta.Tipo,
-            confirmButtonText: "Aceptar"
+            confirmButtonText: "Aceptar",
         }).then((result) => {
             if (result.isConfirmed) {
                 document.querySelector(".FormularioAjax").reset();
@@ -102,6 +121,9 @@ function alertas_ajax(alerta) {
     } else if (alerta.Alerta === "redireccionar") {
         Swal.fire({
             title: alerta.Titulo || "Redirigiendo...",
+            text: alerta.texto,
+            icon: alerta.Tipo || "info",
+            confirmButtonText: "Aceptar",
         }).then(() => {
             window.location.href = alerta.URL;
         });

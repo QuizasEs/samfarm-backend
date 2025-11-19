@@ -1,73 +1,81 @@
 <?php
+// libs/pdf_factura.php
+require_once __DIR__ . '/fpdf.php';
 
-
-require_once __DIR__ . '/facturas/fpdf.php'; // si usas distribución clásica FPDF
-
-class NotaVentaPDF {
-    protected $pdf;
-    public function __construct(){
-        $this->pdf = new FPDF('P','mm','A4');
-        $this->pdf->SetAutoPageBreak(true,10);
-    }
-
+class PDFFacturaGenerator {
     /**
-     * Genera y envía PDF al navegador (o lo guarda en servidor)
-     * $config should contain:
-     * - empresa: ['ce_nombre','ce_nit','ce_direccion','ce_telefono','ce_correo','ce_logo']
-     * - venta: ['ve_numero_documento','ve_fecha','items'=>[], 'subtotal','total','metodo_pago']
-     * - usuario: nombre
+     * generate($data, $outputPath)
+     * $data = [ 'empresa' => [...], 'factura' => [...], 'items' => [...] ]
      */
-    public function render($config, $outputMode = 'I', $filename = 'nota_venta.pdf') {
-        $empresa = $config['empresa'] ?? [];
-        $venta = $config['venta'] ?? [];
+    public function generate($data, $outputPath)
+    {
+        // Cambia tamaño aquí:
+        // Por defecto A4:
+        $pdf = new FPDF('P', 'mm', 'A4');
+        // Para ticket térmico ancho 80mm, usar:
+        // $pdf = new FPDF('P', 'mm', array(80, 220));
+        // Para papel carta usa 'Letter': new FPDF('P','mm','Letter')
 
-        $this->pdf->AddPage();
-        // Header empresa
-        if (!empty($empresa['ce_logo']) && file_exists($empresa['ce_logo'])) {
-            $this->pdf->Image($empresa['ce_logo'],10,8,30);
+        $pdf->AddPage();
+        $pdf->SetAutoPageBreak(true, 10);
+
+        $empresa = $data['empresa'] ?? [];
+        $factura = $data['factura'] ?? [];
+        $items = $data['items'] ?? [];
+
+        // Logo
+        if (!empty($empresa['ce_logo'])) {
+            $logo_path = __DIR__ . '/../' . ltrim($empresa['ce_logo'], '/');
+            if (file_exists($logo_path)) {
+                $pdf->Image($logo_path, 10, 8, 30);
+            }
         }
-        $this->pdf->SetFont('Arial','B',12);
-        $this->pdf->Cell(0,6, $empresa['ce_nombre'] ?? 'Nombre Empresa',0,1,'R');
-        $this->pdf->SetFont('Arial','',9);
-        $this->pdf->Cell(0,5, 'NIT: '.($empresa['ce_nit'] ?? ''),0,1,'R');
-        $this->pdf->Cell(0,5, $empresa['ce_direccion'] ?? '',0,1,'R');
-        $this->pdf->Ln(8);
 
-        // Título y datos venta
-        $this->pdf->SetFont('Arial','B',11);
-        $this->pdf->Cell(0,6, 'NOTA DE VENTA',0,1,'C');
-        $this->pdf->SetFont('Arial','',9);
-        $this->pdf->Cell(0,5, 'Nº: '.($venta['ve_numero_documento'] ?? ''),0,1,'L');
-        $this->pdf->Cell(0,5, 'Fecha: '.($venta['ve_fecha'] ?? date('Y-m-d H:i:s')),0,1,'L');
-        $this->pdf->Cell(0,5, 'Usuario: '.($venta['usuario'] ?? ''),0,1,'L');
-        $this->pdf->Ln(6);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 6, $empresa['ce_nombre'] ?? 'Nombre Empresa', 0, 1, 'R');
+        $pdf->SetFont('Arial', '', 9);
+        if (!empty($empresa['ce_nit'])) $pdf->Cell(0, 5, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'R');
+        if (!empty($empresa['ce_direccion'])) $pdf->Cell(0, 5, $empresa['ce_direccion'], 0, 1, 'R');
+        if (!empty($empresa['ce_telefono'])) $pdf->Cell(0, 5, 'Tel: ' . $empresa['ce_telefono'], 0, 1, 'R');
+
+        $pdf->Ln(6);
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->Cell(0, 6, strtoupper($factura['ve_tipo_documento'] ?? 'NOTA DE VENTA'), 0, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(0, 5, 'Nº: ' . ($factura['fa_numero'] ?? ''), 0, 1, 'L');
+        $pdf->Cell(0, 5, 'Fecha: ' . ($factura['fa_fecha_emision'] ?? ''), 0, 1, 'L');
+        $pdf->Cell(0, 5, 'Cliente: ' . (($factura['cl_nombres'] ?? '') . ' ' . ($factura['cl_apellido_paterno'] ?? '')), 0, 1, 'L');
+        $pdf->Ln(4);
 
         // Tabla items
-        $this->pdf->SetFont('Arial','B',9);
-        $this->pdf->Cell(10,7,'#',1,0,'C');
-        $this->pdf->Cell(90,7,'Producto',1,0,'L');
-        $this->pdf->Cell(20,7,'Cant',1,0,'C');
-        $this->pdf->Cell(30,7,'P.Unit',1,0,'R');
-        $this->pdf->Cell(30,7,'Subtotal',1,1,'R');
-        $this->pdf->SetFont('Arial','',9);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(10, 7, '#', 1, 0, 'C');
+        $pdf->Cell(90, 7, 'Producto', 1, 0, 'L');
+        $pdf->Cell(20, 7, 'Cant', 1, 0, 'C');
+        $pdf->Cell(30, 7, 'P.Unit', 1, 0, 'R');
+        $pdf->Cell(30, 7, 'Subtotal', 1, 1, 'R');
 
-        $i=1;
-        foreach($venta['items'] as $it){
-            $this->pdf->Cell(10,6,$i++,1,0,'C');
-            $this->pdf->Cell(90,6,substr($it['nombre'] ?? 'Producto',0,50),1,0,'L');
-            $this->pdf->Cell(20,6,$it['cantidad'],1,0,'C');
-            $this->pdf->Cell(30,6,number_format($it['precio'],2),1,0,'R');
-            $this->pdf->Cell(30,6,number_format($it['subtotal'],2),1,1,'R');
+        $pdf->SetFont('Arial', '', 9);
+        $i = 1;
+        foreach ($items as $it) {
+            $pdf->Cell(10, 6, $i++, 1, 0, 'C');
+            $pdf->Cell(90, 6, substr($it['med_nombre_quimico'] ?? 'Producto', 0, 50), 1, 0, 'L');
+            $pdf->Cell(20, 6, $it['dv_cantidad'], 1, 0, 'C');
+            $pdf->Cell(30, 6, number_format($it['dv_precio_unitario'], 2), 1, 0, 'R');
+            $pdf->Cell(30, 6, number_format($it['dv_subtotal'], 2), 1, 1, 'R');
         }
 
-        $this->pdf->Ln(4);
-        $this->pdf->SetFont('Arial','B',10);
-        $this->pdf->Cell(150,7,'SUBTOTAL',0,0,'R');
-        $this->pdf->Cell(30,7,number_format($venta['subtotal'] ?? 0,2),0,1,'R');
-        $this->pdf->Cell(150,7,'TOTAL',0,0,'R');
-        $this->pdf->Cell(30,7,number_format($venta['total'] ?? 0,2),0,1,'R');
+        $pdf->Ln(4);
+        $pdf->SetFont('Arial', 'B', 10);
+        $total_monto = $factura['fa_monto_total'] ?? ($factura['ve_total'] ?? 0);
+        $pdf->Cell(150, 7, 'TOTAL', 0, 0, 'R');
+        $pdf->Cell(30, 7, number_format($total_monto, 2), 0, 1, 'R');
 
-        // Output
-        $this->pdf->Output($outputMode, $filename);
+        $pdf->Ln(8);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(0, 5, 'Gracias por su compra.', 0, 1, 'C');
+
+        $pdf->Output('F', $outputPath);
     }
 }

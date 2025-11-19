@@ -156,12 +156,12 @@ class ventaController extends ventaModel
 
         /* Verificar si ya existe una caja abierta para este usuario/sucursal */
         $check_sql = mainModel::conectar()->prepare("
-        SELECT caja_id 
-        FROM caja 
-        WHERE us_id = :us_id 
-        AND su_id = :su_id 
-        AND caja_activa = 1
-    ");
+            SELECT caja_id 
+            FROM caja 
+            WHERE us_id = :us_id 
+            AND su_id = :su_id 
+            AND caja_activa = 1
+        ");
         $check_sql->bindParam(":us_id", $usuario_id);
         $check_sql->bindParam(":su_id", $sucursal_id);
         $check_sql->execute();
@@ -177,7 +177,6 @@ class ventaController extends ventaModel
             exit();
         }
 
-        /* Preparar datos - SIN ESPACIO en "us_id" */
         $datos_caja = [
             "su_id" => $sucursal_id,
             "us_id" => $usuario_id,
@@ -213,17 +212,15 @@ class ventaController extends ventaModel
 
     public function registrar_venta_controller()
     {
-        // Validar sesión, sucursal y caja activa
         if (!isset($_SESSION['id_smp']) || !isset($_SESSION['sucursal_smp'])) {
             $alerta = ['Alerta' => 'simple', 'Titulo' => 'Sesion invalida', 'texto' => 'No hay sesion valida', 'Tipo' => 'error'];
             echo json_encode($alerta);
             exit();
         }
-        // Obtener caja activa del usuario
-        $usuario_id = (int) $_SESSION['id_smp'];
-        $sucursal_id = (int) $_SESSION['sucursal_smp'];
+        $usuario_id = (int)$_SESSION['id_smp'];
+        $sucursal_id = (int)$_SESSION['sucursal_smp'];
 
-        // Consulta la caja activa
+        // Obtener caja activa
         $caja_stmt = self::consulta_caja_model(['us_id' => $usuario_id, 'su_id' => $sucursal_id]);
         if ($caja_stmt->rowCount() <= 0) {
             $alerta = ['Alerta' => 'simple', 'Titulo' => 'Caja cerrada', 'texto' => 'No tienes una caja activa', 'Tipo' => 'error'];
@@ -233,167 +230,210 @@ class ventaController extends ventaModel
         $caja = $caja_stmt->fetch(PDO::FETCH_ASSOC);
         $caja_id = (int)$caja['caja_id'];
 
-        // Limpiar y validar POST
+        // Leer POST
         $venta_items_json = $_POST['venta_items_json'] ?? '[]';
         $venta_items = json_decode($venta_items_json, true);
         $subtotal = isset($_POST['subtotal_venta']) ? (float) $_POST['subtotal_venta'] : 0.0;
         $total = isset($_POST['total_venta']) ? (float) $_POST['total_venta'] : 0.0;
         $dinero_recibido = isset($_POST['dinero_recibido_venta']) ? (float) $_POST['dinero_recibido_venta'] : 0.0;
-        $cambio = isset($_POST['cambio_venta']) ? (float) $_POST['cambio_venta'] : 0.0;
         $cliente_id = isset($_POST['cliente_id']) && is_numeric($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
         $metodo_pago = mainModel::limpiar_cadena($_POST['metodo_pago_venta'] ?? '');
-        $documento = mainModel::limpiar_cadena($_POST['documento_venta'] ?? '');
+        $documento = mainModel::limpiar_cadena($_POST['documento_venta'] ?? 'nota de venta');
 
-        // Validaciones básicas
+        // Validaciones
         if (!is_array($venta_items) || count($venta_items) === 0) {
             $alerta = ['Alerta' => 'simple', 'Titulo' => 'Sin productos', 'texto' => 'Debes agregar al menos un producto', 'Tipo' => 'error'];
             echo json_encode($alerta);
             exit();
         }
         if ($total <= 0 || $subtotal <= 0) {
-            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Totales invalidos', 'texto' => 'Los totales calculados son invalidos', 'Tipo' => 'error'];
-            echo json_encode($alerta);
-            exit();
-        }
-        $ve_numero_documento = self::generar_numero_venta_model($sucursal_id);
-
-        $datos_venta = [
-            "ve_numero_documento" => $ve_numero_documento,
-            "cl_id" => $cliente_id,
-            "us_id" => $usuario_id,
-            "su_id" => $sucursal_id,
-            "ve_subtotal" => $subtotal,
-            "ve_impuesto" => 0.00, // si aplicas impuesto, calcularlo
-            "ve_total" => $total,
-            "ve_tipo_documento" => $documento ?: 'venta',
-            "caja_id" => $caja_id
-        ];
-
-        // Insertar venta
-        $ve_id = self::guardar_venta_model($datos_venta);
-        if ($ve_id <= 0) {
-            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error BD', 'texto' => 'No se pudo registrar la venta', 'Tipo' => 'error'];
+            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Totales inválidos', 'texto' => 'Los totales calculados son inválidos', 'Tipo' => 'error'];
             echo json_encode($alerta);
             exit();
         }
 
-        // Procesar cada item: insertar detalle, actualizar lote y registrar movimiento inventario
-        foreach ($venta_items as $item) {
-            // Esperamos: med_id, cantidad, precio, (opcional) lm_id
-            $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
-            $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 0;
-            $precio_unitario = isset($item['precio']) ? (float)$item['precio'] : 0.0;
-            $lm_id = isset($item['lm_id']) && is_numeric($item['lm_id']) ? (int)$item['lm_id'] : null;
-            $subtotal_item = $cantidad * $precio_unitario;
+        // Iniciar transacción
+        $db = mainModel::conectar();
+        try {
+            $db->beginTransaction();
 
-            if ($med_id <= 0 || $cantidad <= 0 || $precio_unitario <= 0) {
-                // saltar o abortar dependiendo de tu política; aquí abortamos todo
-                $alerta = ['Alerta' => 'simple', 'Titulo' => 'Item inválido', 'texto' => 'Uno de los items tiene datos inválidos', 'Tipo' => 'error'];
-                echo json_encode($alerta);
-                exit();
-            }
-
-            // Insertar detalle
-            $detalle = [
-                "ve_id" => $ve_id,
-                "med_id" => $med_id,
-                "lm_id" => $lm_id,
-                "dv_cantidad" => $cantidad,
-                "dv_unidad" => 'unidad',
-                "dv_precio_unitario" => $precio_unitario,
-                "dv_descuento" => 0.00,
-                "dv_subtotal" => $subtotal_item
-            ];
-            $det_res = self::agregar_detalle_venta_model($detalle);
-            if (!$det_res || $det_res->rowCount() <= 0) {
-                $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error detalle', 'texto' => 'No se pudo registrar detalle de venta', 'Tipo' => 'error'];
-                echo json_encode($alerta);
-                exit();
-            }
-
-            // Actualizar lote (restar unidades) si lm_id proporcionado
-            if ($lm_id) {
-                $upd = self::actualizar_lote_stock_model($lm_id, $cantidad);
-                if (!$upd) {
-                    $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error lote', 'texto' => "No se pudo actualizar stock del lote {$lm_id}", 'Tipo' => 'error'];
-                    echo json_encode($alerta);
-                    exit();
-                }
-            }
-
-            // Registrar movimiento_inventario tipo 'salida'
-            $mov_inv = [
-                "lm_id" => $lm_id,
-                "med_id" => $med_id,
-                "su_id" => $sucursal_id,
+            // Generar número de documento y registrar venta
+            $ve_numero_documento = self::generar_numero_venta_model($sucursal_id);
+            $datos_venta = [
+                "ve_numero_documento" => $ve_numero_documento,
+                "cl_id" => $cliente_id,
                 "us_id" => $usuario_id,
-                "mi_tipo" => "salida",
-                "mi_cantidad" => $cantidad,
-                "mi_unidad" => "unidad",
-                "mi_referencia_type" => "venta",
-                "mi_referencia_id" => $ve_id,
-                "mi_motivo" => "Venta #{$ve_numero_documento}"
+                "su_id" => $sucursal_id,
+                "ve_subtotal" => $subtotal,
+                "ve_impuesto" => 0.00,
+                "ve_total" => $total,
+                "ve_tipo_documento" => $documento,
+                "caja_id" => $caja_id
             ];
-            $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
-            if (!$mov_res || $mov_res->rowCount() <= 0) {
-                $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error mov inventario', 'texto' => 'No se pudo registrar movimiento de inventario', 'Tipo' => 'error'];
-                echo json_encode($alerta);
-                exit();
-            }
-        } // fin foreach items
+            $ve_id = self::guardar_venta_model($datos_venta);
+            if ($ve_id <= 0) throw new Exception("No se pudo registrar la venta");
 
-        // Registrar movimiento caja (mc_tipo = 'venta')
-        $mc = [
-            "caja_id" => $caja_id,
-            "us_id" => $usuario_id,
-            "mc_tipo" => "venta",
-            "mc_monto" => $total,
-            "mc_concepto" => "Venta {$ve_numero_documento}",
-            "mc_referencia_tipo" => "venta",
-            "mc_referencia_id" => $ve_id
-        ];
-        $mc_res = self::registrar_movimiento_caja_model($mc);
-        if (!$mc_res || $mc_res->rowCount() <= 0) {
-            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error caja', 'texto' => 'No se pudo registrar movimiento en caja', 'Tipo' => 'error'];
+            // Procesar items: cada item puede referirse a unidades, blister o caja.
+            // Estructura esperada por item:
+            // { med_id, cantidad, tipo: 'unidad'|'blister'|'caja', precio, descuento }
+            foreach ($venta_items as $item) {
+                $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
+                $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 0;
+                $tipo = isset($item['tipo']) ? $item['tipo'] : 'unidad'; // default unidad
+                $precio_unitario = isset($item['precio']) ? (float)$item['precio'] : 0.0;
+                $descuento_item = isset($item['descuento']) ? (float)$item['descuento'] : 0.00;
+
+                if ($med_id <= 0 || $cantidad <= 0 || $precio_unitario <= 0) {
+                    throw new Exception("Ítem inválido");
+                }
+
+                // Convertir cantidad a unidades según tipo usando lotes (si possible).
+                // Para convertir a unidades exactas, usamos el primer lote disponible (solo para factor caja/blister).
+                $unidades_requeridas = $cantidad;
+                if ($tipo === 'caja' || $tipo === 'blister') {
+                    // Obtener factor (unidades por tipo) preferentemente desde un lote activo.
+                    $ref = self::obtener_factor_unidades_por_tipo_model($med_id, $sucursal_id);
+                    if (!$ref) throw new Exception("No hay lotes para determinar factor de unidad");
+                    $unidades_por_caja = $ref['unidades_por_caja'];
+                    if ($tipo === 'caja') {
+                        $unidades_requeridas = $cantidad * $unidades_por_caja;
+                    } else { // blister
+                        $unidades_por_blister = $ref['unidades_por_blister'];
+                        $unidades_requeridas = $cantidad * $unidades_por_blister;
+                    }
+                }
+                // Verificar stock total en lotes (suma)
+                $stock_total = self::sumar_stock_lotes_med_sucursal_model($med_id, $sucursal_id);
+                if ($stock_total < $unidades_requeridas) {
+                    throw new Exception("Stock insuficiente para med_id {$med_id}. Disponible: {$stock_total}, Requerido: {$unidades_requeridas}");
+                }
+
+                // Consumir unidades por lotes (PEPS FIFO)
+                $remaining = $unidades_requeridas;
+                $lotes = self::obtener_lotes_activos_por_med_sucursal_model($med_id, $sucursal_id);
+                foreach ($lotes as $lm) {
+                    if ($remaining <= 0) break;
+                    $lm_id = (int)$lm['lm_id'];
+                    $lm_disp = (int)$lm['lm_cant_actual_unidades'];
+                    if ($lm_disp <= 0) continue;
+                    $take = min($lm_disp, $remaining);
+
+                    // Insert detalle_venta para este lote
+                    $detalle = [
+                        "ve_id" => $ve_id,
+                        "med_id" => $med_id,
+                        "lm_id" => $lm_id,
+                        "dv_cantidad" => $take,
+                        "dv_unidad" => 'unidad',
+                        "dv_precio_unitario" => $precio_unitario,
+                        "dv_descuento" => $descuento_item,
+                        "dv_subtotal" => $take * $precio_unitario - $descuento_item
+                    ];
+                    $det_res = self::agregar_detalle_venta_model($detalle);
+                    if (!$det_res || $det_res->rowCount() <= 0) throw new Exception("No se pudo registrar detalle de venta");
+
+                    // Actualizar lote (unidades y cajas según factor)
+                    $ok = self::descontar_unidades_lote_model($lm_id, $take);
+                    if (!$ok) throw new Exception("No se pudo actualizar lote {$lm_id}");
+
+                    // Registrar movimiento_inventario
+                    $mov_inv = [
+                        "lm_id" => $lm_id,
+                        "med_id" => $med_id,
+                        "su_id" => $sucursal_id,
+                        "us_id" => $usuario_id,
+                        "mi_tipo" => "salida",
+                        "mi_cantidad" => $take,
+                        "mi_unidad" => "unidad",
+                        "mi_referencia_tipo" => "venta",
+                        "mi_referencia_id" => $ve_id,
+                        "mi_motivo" => "Venta {$ve_numero_documento} (lm_id {$lm_id})"
+                    ];
+                    $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
+                    if (!$mov_res || $mov_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_inventario");
+
+                    $remaining -= $take;
+                } // end lotes
+
+                if ($remaining > 0) throw new Exception("Stock inconsistente después de consumir lotes");
+
+                // Actualizar inventario consolidado (recalcula sumatoria de lotes)
+                $inv_ok = self::recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id);
+                if (!$inv_ok) throw new Exception("No se pudo actualizar inventario consolidado");
+            } // end foreach items
+
+            // Registrar movimiento de caja (venta)
+            $mc = [
+                "caja_id" => $caja_id,
+                "us_id" => $usuario_id,
+                "mc_tipo" => "venta",
+                "mc_monto" => $total,
+                "mc_concepto" => "Venta {$ve_numero_documento}",
+                "mc_referencia_tipo" => "venta",
+                "mc_referencia_id" => $ve_id
+            ];
+            $mc_res = self::registrar_movimiento_caja_model($mc);
+            if (!$mc_res || $mc_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_caja");
+
+            // Registrar factura
+            $fa_numero = self::generar_numero_factura_model($sucursal_id);
+            $datos_factura = [
+                "ve_id" => $ve_id,
+                "cl_id" => $cliente_id,
+                "us_id" => $usuario_id,
+                "su_id" => $sucursal_id,
+                "fa_numero" => $fa_numero,
+                "fa_monto_total" => $total
+            ];
+            $fa_id = self::insertar_factura_model($datos_factura);
+            if ($fa_id <= 0) throw new Exception("No se pudo insertar factura");
+
+            // Registrar informe (nota_venta)
+            $config_informe = [
+                "ve_id" => $ve_id,
+                "fa_id" => $fa_id,
+                "ve_numero_documento" => $ve_numero_documento,
+                "fa_numero" => $fa_numero,
+                "usuario_id" => $usuario_id,
+                "sucursal_id" => $sucursal_id,
+                "items" => $venta_items,
+                "subtotal" => $subtotal,
+                "total" => $total,
+                "metodo_pago" => $metodo_pago
+            ];
+            $informe_data = [
+                "inf_nombre" => "Nota Venta {$fa_numero}",
+                "inf_usuario" => $usuario_id,
+                "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
+            ];
+            $informe_res = self::agregar_informe_venta_model($informe_data);
+            if (!$informe_res || $informe_res->rowCount() <= 0) {
+                // No crítico: informamos en logs pero continuamos
+            }
+
+            // Generar PDF y commit
+            $pdf_url = self::generar_pdf_factura_model($fa_id);
+            if (!$pdf_url) {
+                // No abortamos la transacción por PDF, pero avisamos. (Si prefieres abortar, lanza excepción)
+            }
+
+            $db->commit();
+
+            // Responder con URL del PDF (frontend debe abrir con window.open)
+            echo json_encode([
+                'Alerta' => 'recargar',
+                'Titulo' => 'Venta registrada',
+                'texto' => 'La venta se registró correctamente',
+                'Tipo' => 'success',
+                'pdf_url' => $pdf_url
+            ]);
+            exit();
+        } catch (Exception $e) {
+            $db->rollBack();
+            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Error proceso venta', 'texto' => $e->getMessage(), 'Tipo' => 'error'];
             echo json_encode($alerta);
             exit();
         }
-
-        // Registrar informe (nota de venta) en tabla informes para su posterior descarga/imprimir
-        $config_informe = [
-            "ve_id" => $ve_id,
-            "ve_numero_documento" => $ve_numero_documento,
-            "usuario_id" => $usuario_id,
-            "sucursal_id" => $sucursal_id,
-            "cliente_id" => $cliente_id,
-            "items" => $venta_items,
-            "subtotal" => $subtotal,
-            "total" => $total,
-            "metodo_pago" => $metodo_pago
-        ];
-
-        $informe_data = [
-            "inf_nombre" => "Nota Venta {$ve_numero_documento}",
-            "inf_usuario" => $usuario_id,
-            "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
-        ];
-
-        $informe_res = self::agregar_informe_venta_model($informe_data);
-        // no abortamos si falla informe, pero lo logueamos
-        if (!$informe_res || $informe_res->rowCount() <= 0) {
-            // opcional: registrar log de error
-        }
-
-        // Generar PDF con FPDF (archivo separado)
-        // Se recomienda abrir en nueva ventana/descarga desde frontend con reporte id o nombre.
-        $alerta = [
-            'Alerta' => 'recargar',
-            'Titulo' => 'Venta registrada',
-            'texto' => "La venta {$ve_numero_documento} se registró correctamente",
-            'Tipo' => 'success'
-        ];
-        echo json_encode($alerta);
-        exit();
     }
 
     /* cerrar caja controller */
@@ -453,7 +493,13 @@ class ventaController extends ventaModel
 
         // Opcional: generar informe/resumen de cierre en informes o PDF
 
-        $alerta = ['Alerta' => 'recargar', 'Titulo' => 'Caja cerrada', 'texto' => "Caja cerrada. Teórico: {$teorico}, Contado: {$total_contado}", 'Tipo' => 'success'];
+        $alerta = [
+            'Alerta' => 'recargar',
+            'Titulo' => 'Caja cerrada',
+            'texto' => "Caja cerrada. Teórico: {$teorico}, Contado: {$total_contado}",
+            '
+        Tipo' => 'success'
+        ];
         echo json_encode($alerta);
         exit();
     }

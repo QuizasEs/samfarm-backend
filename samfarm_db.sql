@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Nov 18, 2025 at 10:48 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 19-11-2025 a las 02:52:33
+-- Versión del servidor: 10.4.27-MariaDB
+-- Versión de PHP: 7.4.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `samfarm_db`
+-- Base de datos: `samfarm_db`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `caja`
+-- Estructura de tabla para la tabla `caja`
 --
 
 CREATE TABLE `caja` (
@@ -41,17 +41,17 @@ CREATE TABLE `caja` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `caja`
+-- Volcado de datos para la tabla `caja`
 --
 
 INSERT INTO `caja` (`caja_id`, `su_id`, `us_id`, `caja_nombre`, `caja_saldo_inicial`, `caja_saldo_final`, `caja_activa`, `caja_creado_en`, `caja_cerrado_en`, `caja_observacion`) VALUES
-(1, 1, 1, 'Principal', 200.00, 30.00, 0, '2025-11-18 02:28:08', '2025-11-18 02:28:08', 'nada'),
-(2, 1, 1, 'Caja admin', 45645.00, NULL, 1, '2025-11-18 03:53:57', NULL, NULL);
+(1, 1, 1, 'Principal', '200.00', '30.00', 0, '2025-11-18 02:28:08', '2025-11-18 02:28:08', 'nada'),
+(4, 1, 1, 'Caja admin', '100.00', NULL, 1, '2025-11-18 10:36:11', NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `clientes`
+-- Estructura de tabla para la tabla `clientes`
 --
 
 CREATE TABLE `clientes` (
@@ -69,7 +69,7 @@ CREATE TABLE `clientes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `clientes`
+-- Volcado de datos para la tabla `clientes`
 --
 
 INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apellido_materno`, `cl_telefono`, `cl_correo`, `cl_direccion`, `cl_carnet`, `cl_creado_en`, `cl_actualizado_en`, `cl_estado`) VALUES
@@ -79,12 +79,13 @@ INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apelli
 (4, 'juan', 'quiroga', '', '', '', '', '', '2025-11-16 18:36:47', '2025-11-16 18:36:47', 1),
 (5, 'teodoro', 'jasinto', '', '', '', '', '', '2025-11-16 18:37:19', '2025-11-16 18:37:19', 1),
 (6, 'teodoro', 'gusman', '', '', '', '', '', '2025-11-16 18:37:45', '2025-11-16 18:37:45', 1),
-(7, 'jorge', 'gusman', '', '', '', '', '', '2025-11-16 18:38:13', '2025-11-16 18:38:13', 1);
+(7, 'jorge', 'gusman', '', '', '', '', '', '2025-11-16 18:38:13', '2025-11-16 18:38:13', 1),
+(8, 'Fabricio', 'romero', '', '', '', '', '0000000000', '2025-11-18 10:31:15', '2025-11-18 10:31:15', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `compras`
+-- Estructura de tabla para la tabla `compras`
 --
 
 CREATE TABLE `compras` (
@@ -109,17 +110,43 @@ CREATE TABLE `compras` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `compras`
+-- Volcado de datos para la tabla `compras`
 --
 
 INSERT INTO `compras` (`co_id`, `co_numero`, `co_fecha`, `la_id`, `us_id`, `su_id`, `pr_id`, `co_subtotal`, `co_impuesto`, `co_total`, `co_numero_factura`, `co_fecha_factura`, `co_tipo_documento`, `co_nit_proveedor`, `co_razon_social`, `co_creado_en`, `co_actualizado_en`, `co_estado`) VALUES
-(1, 'COMP-2025-0001', '2025-11-13 13:55:49', 7, 1, 1, 1, 42.00, 5.46, 47.46, '242342323423', '2025-11-30', 'compra', NULL, 'jose', '2025-11-13 13:55:49', '2025-11-13 13:55:49', 1),
-(2, 'COMP-2025-0002', '2025-11-16 13:30:17', 2, 1, 1, 3, 54756.00, 7118.28, 61874.28, '2342', '2025-11-22', 'compra', NULL, 'fsdfsdf', '2025-11-16 13:30:17', '2025-11-16 13:30:17', 1);
+(1, 'COMP-2025-0001', '2025-11-13 13:55:49', 7, 1, 1, 1, '42.00', '5.46', '47.46', '242342323423', '2025-11-30', 'compra', NULL, 'jose', '2025-11-13 13:55:49', '2025-11-13 13:55:49', 1),
+(2, 'COMP-2025-0002', '2025-11-16 13:30:17', 2, 1, 1, 3, '54756.00', '7118.28', '61874.28', '2342', '2025-11-22', 'compra', NULL, 'fsdfsdf', '2025-11-16 13:30:17', '2025-11-16 13:30:17', 1),
+(3, 'COMP-2025-0003', '2025-11-18 10:26:29', 4, 1, 1, 1, '100.00', '13.00', '113.00', '12312312', '2025-11-28', 'compra', NULL, 'jose', '2025-11-18 10:26:29', '2025-11-18 10:26:29', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `detalle_compra`
+-- Estructura de tabla para la tabla `configuracion_empresa`
+--
+
+CREATE TABLE `configuracion_empresa` (
+  `ce_id` bigint(20) UNSIGNED NOT NULL,
+  `ce_nombre` varchar(150) NOT NULL,
+  `ce_nit` varchar(50) DEFAULT NULL,
+  `ce_direccion` varchar(250) DEFAULT NULL,
+  `ce_telefono` varchar(50) DEFAULT NULL,
+  `ce_correo` varchar(120) DEFAULT NULL,
+  `ce_logo` varchar(200) DEFAULT NULL,
+  `ce_creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ce_actualizado_en` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `configuracion_empresa`
+--
+
+INSERT INTO `configuracion_empresa` (`ce_id`, `ce_nombre`, `ce_nit`, `ce_direccion`, `ce_telefono`, `ce_correo`, `ce_logo`, `ce_creado_en`, `ce_actualizado_en`) VALUES
+(1, 'SAMFARM - Sistema de Gestión Farmacéutica', '123456789', 'Av. Principal #123, La Paz, Bolivia', '591-2-1234567', 'contacto@samfarm.com', NULL, '2025-11-19 01:22:36', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_compra`
 --
 
 CREATE TABLE `detalle_compra` (
@@ -135,17 +162,18 @@ CREATE TABLE `detalle_compra` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `detalle_compra`
+-- Volcado de datos para la tabla `detalle_compra`
 --
 
 INSERT INTO `detalle_compra` (`dc_id`, `co_id`, `med_id`, `lm_id`, `dc_cantidad`, `dc_precio_unitario`, `dc_descuento`, `dc_subtotal`, `dc_estado`) VALUES
-(1, 1, 5, 1, 6, 7.00, 0.00, 42.00, 1),
-(2, 2, 4, 2, 234, 234.00, 0.00, 54756.00, 1);
+(1, 1, 5, 1, 6, '7.00', '0.00', '42.00', 1),
+(2, 2, 4, 2, 234, '234.00', '0.00', '54756.00', 1),
+(3, 3, 4, 3, 400, '10.00', '0.00', '100.00', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `detalle_venta`
+-- Estructura de tabla para la tabla `detalle_venta`
 --
 
 CREATE TABLE `detalle_venta` (
@@ -161,10 +189,21 @@ CREATE TABLE `detalle_venta` (
   `dv_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `detalle_venta`
+--
+
+INSERT INTO `detalle_venta` (`dv_id`, `ve_id`, `med_id`, `lm_id`, `dv_cantidad`, `dv_unidad`, `dv_precio_unitario`, `dv_descuento`, `dv_subtotal`, `dv_estado`) VALUES
+(1, 1, 4, NULL, 10, 'unidad', '1.00', '0.00', '10.00', 1),
+(14, 14, 5, 1, 1, 'unidad', '4.00', '0.00', '4.00', 1),
+(15, 15, 4, 2, 10, 'unidad', '1.00', '0.00', '10.00', 1),
+(16, 16, 4, 2, 10, 'unidad', '1.00', '0.00', '10.00', 1),
+(17, 17, 4, 2, 1, 'unidad', '1.00', '0.00', '1.00', 1);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `devoluciones`
+-- Estructura de tabla para la tabla `devoluciones`
 --
 
 CREATE TABLE `devoluciones` (
@@ -183,7 +222,7 @@ CREATE TABLE `devoluciones` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `factura`
+-- Estructura de tabla para la tabla `factura`
 --
 
 CREATE TABLE `factura` (
@@ -201,10 +240,20 @@ CREATE TABLE `factura` (
   `fa_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `factura`
+--
+
+INSERT INTO `factura` (`fa_id`, `ve_id`, `cl_id`, `us_id`, `su_id`, `fa_numero`, `fa_fecha_emision`, `fa_monto_total`, `fa_codigo_control`, `fa_cuf`, `fa_estado`, `fa_creado_en`) VALUES
+(13, 14, 3, 1, 1, 'F-1-20251118212524-321', '2025-11-18 21:25:24', '4.00', NULL, NULL, 1, '2025-11-18 21:25:24'),
+(14, 15, 7, 1, 1, 'F-1-20251118213518-763', '2025-11-18 21:35:18', '10.00', NULL, NULL, 1, '2025-11-18 21:35:18'),
+(15, 16, NULL, 1, 1, 'F-1-20251118213900-238', '2025-11-18 21:39:00', '10.00', NULL, NULL, 1, '2025-11-18 21:39:00'),
+(16, 17, NULL, 1, 1, 'F-1-20251118213932-712', '2025-11-18 21:39:32', '1.00', NULL, NULL, 1, '2025-11-18 21:39:32');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `facturacion_electronica`
+-- Estructura de tabla para la tabla `facturacion_electronica`
 --
 
 CREATE TABLE `facturacion_electronica` (
@@ -222,7 +271,7 @@ CREATE TABLE `facturacion_electronica` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `forma_farmaceutica`
+-- Estructura de tabla para la tabla `forma_farmaceutica`
 --
 
 CREATE TABLE `forma_farmaceutica` (
@@ -235,7 +284,7 @@ CREATE TABLE `forma_farmaceutica` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `forma_farmaceutica`
+-- Volcado de datos para la tabla `forma_farmaceutica`
 --
 
 INSERT INTO `forma_farmaceutica` (`ff_id`, `ff_nombre`, `ff_imagen`, `ff_creado_en`, `ff_actualizado_en`, `ff_estado`) VALUES
@@ -253,7 +302,7 @@ INSERT INTO `forma_farmaceutica` (`ff_id`, `ff_nombre`, `ff_imagen`, `ff_creado_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `historial_lote`
+-- Estructura de tabla para la tabla `historial_lote`
 --
 
 CREATE TABLE `historial_lote` (
@@ -266,19 +315,22 @@ CREATE TABLE `historial_lote` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `historial_lote`
+-- Volcado de datos para la tabla `historial_lote`
 --
 
 INSERT INTO `historial_lote` (`hl_id`, `lm_id`, `us_id`, `hl_accion`, `hl_descripcion`, `hl_fecha`) VALUES
 (1, 1, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-13 13:55:49'),
 (2, 2, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0002 en estado \'en_espera\'.', '2025-11-16 13:30:17'),
 (3, 1, 1, 'activacion', 'Lote activado por admin', '2025-11-17 14:35:47'),
-(4, 2, 1, 'activacion', 'Lote activado por admin', '2025-11-17 14:57:06');
+(4, 2, 1, 'activacion', 'Lote activado por admin', '2025-11-17 14:57:06'),
+(5, 3, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0003 en estado \'en_espera\'.', '2025-11-18 10:26:29'),
+(6, 2, 1, 'ajuste', 'Actualización de datos del lote (cantidades/precios/fecha de vencimiento)', '2025-11-18 10:27:23'),
+(7, 3, 1, 'activacion', 'Lote activado por admin', '2025-11-18 10:27:56');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `informes`
+-- Estructura de tabla para la tabla `informes`
 --
 
 CREATE TABLE `informes` (
@@ -291,19 +343,26 @@ CREATE TABLE `informes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `informes`
+-- Volcado de datos para la tabla `informes`
 --
 
 INSERT INTO `informes` (`inf_id`, `inf_nombre`, `inf_tipo`, `inf_usuario`, `inf_config`, `inf_creado_en`) VALUES
 (1, 'Compra COMP-2025-0001 - jose', 'compra', 1, '{\"compra_id\":1,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"1\",\"laboratorio_id\":\"7\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-30\",\"numero_factura\":\"242342323423\",\"razon_social\":\"jose\",\"subtotal\":\"42.00\",\"impuestos\":\"5.46\",\"total\":\"47.46\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"5\",\"numero_lote\":\"MED-0001\",\"cantidad\":6,\"precio_compra\":7,\"precio_venta\":4,\"vencimiento\":\"2025-11-28\",\"activar_lote\":0}]}', '2025-11-13 13:55:49'),
 (2, 'Compra COMP-2025-0002 - fsdfsdf', 'compra', 1, '{\"compra_id\":2,\"numero_compra\":\"COMP-2025-0002\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"2\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"2342\",\"razon_social\":\"fsdfsdf\",\"subtotal\":\"54756.00\",\"impuestos\":\"7118.28\",\"total\":\"61874.28\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"4\",\"numero_lote\":\"MED-0002\",\"cantidad\":234,\"precio_compra\":234,\"precio_venta\":523,\"vencimiento\":\"2025-12-03\",\"activar_lote\":0}]}', '2025-11-16 13:30:17'),
 (3, 'Activación de Lote #MED-0001 (Omeprazol)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"1\",\"numero_lote\":\"MED-0001\",\"medicamento_id\":5,\"medicamento_nombre\":\"Omeprazol\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-17 14:35:47\",\"precio_compra\":7,\"precio_venta\":4,\"cantidad_cajas\":6,\"cantidad_unidades\":36,\"subtotal_lote\":42,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-17 14:35:47'),
-(4, 'Activación de Lote #MED-0002 (Loratadina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"2\",\"numero_lote\":\"MED-0002\",\"medicamento_id\":4,\"medicamento_nombre\":\"Loratadina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-17 14:57:06\",\"precio_compra\":234,\"precio_venta\":523,\"cantidad_cajas\":234,\"cantidad_unidades\":54756,\"subtotal_lote\":54756,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-17 14:57:06');
+(4, 'Activación de Lote #MED-0002 (Loratadina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"2\",\"numero_lote\":\"MED-0002\",\"medicamento_id\":4,\"medicamento_nombre\":\"Loratadina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-17 14:57:06\",\"precio_compra\":234,\"precio_venta\":523,\"cantidad_cajas\":234,\"cantidad_unidades\":54756,\"subtotal_lote\":54756,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-17 14:57:06'),
+(5, 'Compra COMP-2025-0003 - jose', 'compra', 1, '{\"compra_id\":3,\"numero_compra\":\"COMP-2025-0003\",\"proveedor_id\":\"1\",\"laboratorio_id\":\"4\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-28\",\"numero_factura\":\"12312312\",\"razon_social\":\"jose\",\"subtotal\":\"100.00\",\"impuestos\":\"13.00\",\"total\":\"113.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"4\",\"numero_lote\":\"MED-0003\",\"cantidad\":10,\"precio_compra\":10,\"precio_venta\":1,\"vencimiento\":\"2025-12-07\",\"activar_lote\":0}]}', '2025-11-18 10:26:29'),
+(6, 'Activación de Lote #MED-0003 (Loratadina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"3\",\"numero_lote\":\"MED-0003\",\"medicamento_id\":4,\"medicamento_nombre\":\"Loratadina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-18 10:27:56\",\"precio_compra\":10,\"precio_venta\":1,\"cantidad_cajas\":10,\"cantidad_unidades\":16000,\"subtotal_lote\":4000,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-18 10:27:56'),
+(7, 'Nota Venta SU1-1763476327', 'nota_venta', 1, '{\"ve_id\":1,\"ve_numero_documento\":\"SU1-1763476327\",\"usuario_id\":1,\"sucursal_id\":1,\"cliente_id\":8,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"efectivo\"}', '2025-11-18 10:32:07'),
+(20, 'Nota Venta F-1-20251118212524-321', 'nota_venta', 1, '{\"ve_id\":14,\"fa_id\":13,\"ve_numero_documento\":\"SU1-1763515524\",\"fa_numero\":\"F-1-20251118212524-321\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"cantidad\":1,\"precio\":4,\"subtotal\":4}],\"subtotal\":4,\"total\":4,\"metodo_pago\":\"efectivo\"}', '2025-11-18 21:25:24'),
+(21, 'Nota Venta F-1-20251118213518-763', 'nota_venta', 1, '{\"ve_id\":15,\"fa_id\":14,\"ve_numero_documento\":\"SU1-1763516118\",\"fa_numero\":\"F-1-20251118213518-763\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"efectivo\"}', '2025-11-18 21:35:18'),
+(22, 'Nota Venta F-1-20251118213900-238', 'nota_venta', 1, '{\"ve_id\":16,\"fa_id\":15,\"ve_numero_documento\":\"SU1-1763516340\",\"fa_numero\":\"F-1-20251118213900-238\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"\"}', '2025-11-18 21:39:00'),
+(23, 'Nota Venta F-1-20251118213932-712', 'nota_venta', 1, '{\"ve_id\":17,\"fa_id\":16,\"ve_numero_documento\":\"SU1-1763516372\",\"fa_numero\":\"F-1-20251118213932-712\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":1,\"precio\":1,\"subtotal\":1}],\"subtotal\":1,\"total\":1,\"metodo_pago\":\"\"}', '2025-11-18 21:39:32');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `inventarios`
+-- Estructura de tabla para la tabla `inventarios`
 --
 
 CREATE TABLE `inventarios` (
@@ -322,17 +381,17 @@ CREATE TABLE `inventarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `inventarios`
+-- Volcado de datos para la tabla `inventarios`
 --
 
 INSERT INTO `inventarios` (`inv_id`, `med_id`, `su_id`, `inv_total_cajas`, `inv_total_unidades`, `inv_total_valorado`, `inv_minimo`, `inv_maximo`, `inv_codigo_barras`, `inv_stock_alerta`, `inv_actualizado_en`, `inv_creado_en`) VALUES
-(1, 5, 1, 6, 36, 42.00, 0, NULL, NULL, 0, '2025-11-17 14:35:47', '2025-11-17 14:35:47'),
-(2, 4, 1, 234, 54756, 54756.00, 0, NULL, NULL, 0, '2025-11-17 14:57:06', '2025-11-17 14:57:06');
+(1, 5, 1, 5, 5, '42.00', 0, NULL, NULL, 0, '2025-11-18 21:25:24', '2025-11-17 14:35:47'),
+(2, 4, 1, 613, 613, '58756.00', 0, NULL, NULL, 0, '2025-11-18 21:39:32', '2025-11-17 14:57:06');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `laboratorios`
+-- Estructura de tabla para la tabla `laboratorios`
 --
 
 CREATE TABLE `laboratorios` (
@@ -345,7 +404,7 @@ CREATE TABLE `laboratorios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `laboratorios`
+-- Volcado de datos para la tabla `laboratorios`
 --
 
 INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_creado_en`, `la_actualizado_en`, `la_estado`) VALUES
@@ -361,7 +420,7 @@ INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_cread
 -- --------------------------------------------------------
 
 --
--- Table structure for table `lote_medicamento`
+-- Estructura de tabla para la tabla `lote_medicamento`
 --
 
 CREATE TABLE `lote_medicamento` (
@@ -388,17 +447,18 @@ CREATE TABLE `lote_medicamento` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `lote_medicamento`
+-- Volcado de datos para la tabla `lote_medicamento`
 --
 
 INSERT INTO `lote_medicamento` (`lm_id`, `med_id`, `su_id`, `pr_id`, `pr_id_compra`, `lm_numero_lote`, `lm_cant_caja`, `lm_cant_blister`, `lm_cant_unidad`, `lm_cant_actual_cajas`, `lm_cant_actual_unidades`, `lm_precio_compra`, `lm_precio_venta`, `lm_fecha_ingreso`, `lm_fecha_vencimiento`, `lm_estado`, `lm_creado_en`, `lm_actualizado_en`, `lm_origen_id`) VALUES
-(1, 5, 1, 1, 1, 'MED-0001', 6, 1, 1, 6, 6, 7.00, 4.00, '2025-11-13 13:55:49', '2025-11-28', 'activo', '2025-11-13 13:55:49', '2025-11-17 14:35:47', NULL),
-(2, 4, 1, 3, 2, 'MED-0002', 234, 1, 1, 234, 234, 234.00, 523.00, '2025-11-16 13:30:17', '2025-12-03', 'activo', '2025-11-16 13:30:17', '2025-11-17 14:57:06', NULL);
+(1, 5, 1, 1, 1, 'MED-0001', 6, 1, 1, 5, 5, '7.00', '4.00', '2025-11-13 13:55:49', '2025-11-28', 'activo', '2025-11-13 13:55:49', '2025-11-18 21:25:24', NULL),
+(2, 4, 1, 3, 2, 'MED-0002', 234, 1, 1, 213, 213, '234.00', '523.00', '2025-11-16 13:30:17', '2025-12-03', 'activo', '2025-11-16 13:30:17', '2025-11-18 21:39:32', NULL),
+(3, 4, 1, 1, 3, 'MED-0003', 10, 4, 10, 10, 400, '10.00', '1.00', '2025-11-18 10:26:29', '2025-12-07', 'activo', '2025-11-18 10:26:29', '2025-11-18 10:27:56', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `medicamento`
+-- Estructura de tabla para la tabla `medicamento`
 --
 
 CREATE TABLE `medicamento` (
@@ -423,25 +483,25 @@ CREATE TABLE `medicamento` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `medicamento`
+-- Volcado de datos para la tabla `medicamento`
 --
 
 INSERT INTO `medicamento` (`med_id`, `med_nombre_quimico`, `med_principio_activo`, `med_accion_farmacologica`, `med_presentacion`, `med_descripcion`, `med_precio_unitario`, `med_precio_caja`, `med_codigo_barras`, `med_version_comercial`, `med_creado_en`, `med_actualizado_en`, `uf_id`, `ff_id`, `vd_id`, `la_id`, `su_id`, `us_id`) VALUES
-(1, 'Paracetamol', 'Paracetamol', 'Analgésico y antipirético', 'Tabletas 500mg x 10', 'Analgésico para dolor leve a moderado', 2.50, 25.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 1, 1, 1, 1, 1, 1),
-(2, 'Ibuprofeno', 'Ibuprofeno', 'Antiinflamatorio no esteroideo', 'Tabletas 400mg x 20', 'Antiinflamatorio y analgésico', 3.00, 60.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 3, 1, 1, 2, 1, 1),
-(3, 'Amoxicilina', 'Amoxicilina', 'Antibiótico de amplio espectro', 'Cápsulas 500mg x 12', 'Antibiótico para infecciones bacterianas', 15.00, 180.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 2, 2, 1, 3, 1, 1),
-(4, 'Loratadina', 'Loratadina', 'Antihistamínico', 'Tabletas 10mg x 10', 'Para alergias y rinitis', 4.50, 45.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 4, 1, 1, 4, 1, 1),
-(5, 'Omeprazol', 'Omeprazol', 'Inhibidor de bomba de protones', 'Cápsulas 20mg x 14', 'Para úlceras y reflujo gastroesofágico', 12.00, 168.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 8, 2, 1, 5, 1, 1),
-(6, 'Metformina', 'Metformina', 'Hipoglucemiante oral', 'Tabletas 850mg x 30', 'Para diabetes tipo 2', 8.50, 255.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 6, 1, 1),
-(7, 'Atorvastatina', 'Atorvastatina', 'Hipolipemiante', 'Tabletas 20mg x 30', 'Para reducir colesterol', 18.00, 540.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 7, 1, 1),
-(8, 'Salbutamol', 'Salbutamol', 'Broncodilatador', 'Spray 100mcg x 200 dosis', 'Para asma y broncoespasmo', 35.00, 35.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 10, 9, 10, 8, 1, 1),
-(9, 'Losartán', 'Losartán', 'Antihipertensivo', 'Tabletas 50mg x 30', 'Para hipertensión arterial', 22.00, 660.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 1, 1, 1),
-(10, 'Diazepam', 'Diazepam', 'Ansiolítico y relajante muscular', 'Tabletas 5mg x 20', 'Para ansiedad y espasmos musculares', 6.50, 130.00, NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 9, 1, 1, 2, 1, 1);
+(1, 'Paracetamol', 'Paracetamol', 'Analgésico y antipirético', 'Tabletas 500mg x 10', 'Analgésico para dolor leve a moderado', '2.50', '25.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 1, 1, 1, 1, 1, 1),
+(2, 'Ibuprofeno', 'Ibuprofeno', 'Antiinflamatorio no esteroideo', 'Tabletas 400mg x 20', 'Antiinflamatorio y analgésico', '3.00', '60.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 3, 1, 1, 2, 1, 1),
+(3, 'Amoxicilina', 'Amoxicilina', 'Antibiótico de amplio espectro', 'Cápsulas 500mg x 12', 'Antibiótico para infecciones bacterianas', '15.00', '180.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 2, 2, 1, 3, 1, 1),
+(4, 'Loratadina', 'Loratadina', 'Antihistamínico', 'Tabletas 10mg x 10', 'Para alergias y rinitis', '4.50', '45.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 4, 1, 1, 4, 1, 1),
+(5, 'Omeprazol', 'Omeprazol', 'Inhibidor de bomba de protones', 'Cápsulas 20mg x 14', 'Para úlceras y reflujo gastroesofágico', '12.00', '168.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 8, 2, 1, 5, 1, 1),
+(6, 'Metformina', 'Metformina', 'Hipoglucemiante oral', 'Tabletas 850mg x 30', 'Para diabetes tipo 2', '8.50', '255.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 6, 1, 1),
+(7, 'Atorvastatina', 'Atorvastatina', 'Hipolipemiante', 'Tabletas 20mg x 30', 'Para reducir colesterol', '18.00', '540.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 7, 1, 1),
+(8, 'Salbutamol', 'Salbutamol', 'Broncodilatador', 'Spray 100mcg x 200 dosis', 'Para asma y broncoespasmo', '35.00', '35.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 10, 9, 10, 8, 1, 1),
+(9, 'Losartán', 'Losartán', 'Antihipertensivo', 'Tabletas 50mg x 30', 'Para hipertensión arterial', '22.00', '660.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 1, 1, 1),
+(10, 'Diazepam', 'Diazepam', 'Ansiolítico y relajante muscular', 'Tabletas 5mg x 20', 'Para ansiedad y espasmos musculares', '6.50', '130.00', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 9, 1, 1, 2, 1, 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `merma`
+-- Estructura de tabla para la tabla `merma`
 --
 
 CREATE TABLE `merma` (
@@ -458,7 +518,7 @@ CREATE TABLE `merma` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `movimiento_caja`
+-- Estructura de tabla para la tabla `movimiento_caja`
 --
 
 CREATE TABLE `movimiento_caja` (
@@ -473,10 +533,20 @@ CREATE TABLE `movimiento_caja` (
   `mc_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `movimiento_caja`
+--
+
+INSERT INTO `movimiento_caja` (`mc_id`, `caja_id`, `us_id`, `mc_tipo`, `mc_monto`, `mc_concepto`, `mc_referencia_tipo`, `mc_referencia_id`, `mc_fecha`) VALUES
+(14, 4, 1, 'venta', '4.00', 'Venta SU1-1763515524', 'venta', 14, '2025-11-18 21:25:24'),
+(15, 4, 1, 'venta', '10.00', 'Venta SU1-1763516118', 'venta', 15, '2025-11-18 21:35:18'),
+(16, 4, 1, 'venta', '10.00', 'Venta SU1-1763516340', 'venta', 16, '2025-11-18 21:39:00'),
+(17, 4, 1, 'venta', '1.00', 'Venta SU1-1763516372', 'venta', 17, '2025-11-18 21:39:32');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `movimiento_inventario`
+-- Estructura de tabla para la tabla `movimiento_inventario`
 --
 
 CREATE TABLE `movimiento_inventario` (
@@ -496,17 +566,23 @@ CREATE TABLE `movimiento_inventario` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `movimiento_inventario`
+-- Volcado de datos para la tabla `movimiento_inventario`
 --
 
 INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
 (1, 1, 5, 1, 1, 'entrada', 36, 'unidad', 'activacion', 1, 'Ingreso por Activacion de lote MED-0001', '2025-11-17 14:35:47', 1),
-(2, 2, 4, 1, 1, 'entrada', 54756, 'unidad', 'activacion', 2, 'Ingreso por Activacion de lote MED-0002', '2025-11-17 14:57:06', 1);
+(2, 2, 4, 1, 1, 'entrada', 54756, 'unidad', 'activacion', 2, 'Ingreso por Activacion de lote MED-0002', '2025-11-17 14:57:06', 1),
+(3, 3, 4, 1, 1, 'entrada', 16000, 'unidad', 'activacion', 3, 'Ingreso por Activacion de lote MED-0003', '2025-11-18 10:27:56', 1),
+(4, NULL, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 1, 'Venta #SU1-1763476327', '2025-11-18 10:32:07', 1),
+(17, 1, 5, 1, 1, 'salida', 1, 'unidad', 'venta', 14, 'Venta SU1-1763515524 (lm_id 1)', '2025-11-18 21:25:24', 1),
+(18, 2, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 15, 'Venta SU1-1763516118 (lm_id 2)', '2025-11-18 21:35:18', 1),
+(19, 2, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 16, 'Venta SU1-1763516340 (lm_id 2)', '2025-11-18 21:39:00', 1),
+(20, 2, 4, 1, 1, 'salida', 1, 'unidad', 'venta', 17, 'Venta SU1-1763516372 (lm_id 2)', '2025-11-18 21:39:32', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `proveedores`
+-- Estructura de tabla para la tabla `proveedores`
 --
 
 CREATE TABLE `proveedores` (
@@ -523,7 +599,7 @@ CREATE TABLE `proveedores` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `proveedores`
+-- Volcado de datos para la tabla `proveedores`
 --
 
 INSERT INTO `proveedores` (`pr_id`, `pr_nombres`, `pr_apellido_paterno`, `pr_apellido_materno`, `pr_telefono`, `pr_nit`, `pr_direccion`, `pr_creado_en`, `pr_actualizado_en`, `pr_estado`) VALUES
@@ -537,7 +613,7 @@ INSERT INTO `proveedores` (`pr_id`, `pr_nombres`, `pr_apellido_paterno`, `pr_ape
 -- --------------------------------------------------------
 
 --
--- Table structure for table `proveedores_laboratorio`
+-- Estructura de tabla para la tabla `proveedores_laboratorio`
 --
 
 CREATE TABLE `proveedores_laboratorio` (
@@ -550,7 +626,7 @@ CREATE TABLE `proveedores_laboratorio` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roles`
+-- Estructura de tabla para la tabla `roles`
 --
 
 CREATE TABLE `roles` (
@@ -563,7 +639,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `roles`
+-- Volcado de datos para la tabla `roles`
 --
 
 INSERT INTO `roles` (`ro_id`, `ro_nombre`, `ro_descripcion`, `ro_creado_en`, `ro_actualizado_en`, `ro_estado`) VALUES
@@ -574,7 +650,7 @@ INSERT INTO `roles` (`ro_id`, `ro_nombre`, `ro_descripcion`, `ro_creado_en`, `ro
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sucursales`
+-- Estructura de tabla para la tabla `sucursales`
 --
 
 CREATE TABLE `sucursales` (
@@ -588,7 +664,7 @@ CREATE TABLE `sucursales` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `sucursales`
+-- Volcado de datos para la tabla `sucursales`
 --
 
 INSERT INTO `sucursales` (`su_id`, `su_nombre`, `su_direccion`, `su_telefono`, `su_creado_en`, `su_actualizado_en`, `su_estado`) VALUES
@@ -597,7 +673,7 @@ INSERT INTO `sucursales` (`su_id`, `su_nombre`, `su_direccion`, `su_telefono`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `uso_farmacologico`
+-- Estructura de tabla para la tabla `uso_farmacologico`
 --
 
 CREATE TABLE `uso_farmacologico` (
@@ -610,7 +686,7 @@ CREATE TABLE `uso_farmacologico` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `uso_farmacologico`
+-- Volcado de datos para la tabla `uso_farmacologico`
 --
 
 INSERT INTO `uso_farmacologico` (`uf_id`, `uf_nombre`, `uf_imagen`, `uf_creado_en`, `uf_actualizado_en`, `uf_estado`) VALUES
@@ -628,7 +704,7 @@ INSERT INTO `uso_farmacologico` (`uf_id`, `uf_nombre`, `uf_imagen`, `uf_creado_e
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usuarios`
+-- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
@@ -652,7 +728,7 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `usuarios`
+-- Volcado de datos para la tabla `usuarios`
 --
 
 INSERT INTO `usuarios` (`us_id`, `us_nombres`, `us_apellido_paterno`, `us_apellido_materno`, `us_numero_carnet`, `us_telefono`, `us_correo`, `us_direccion`, `us_username`, `us_password_hash`, `us_token_recuperacion`, `us_token_expiracion`, `us_creado_en`, `us_actualizado_en`, `us_estado`, `su_id`, `ro_id`) VALUES
@@ -661,7 +737,7 @@ INSERT INTO `usuarios` (`us_id`, `us_nombres`, `us_apellido_paterno`, `us_apelli
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ventas`
+-- Estructura de tabla para la tabla `ventas`
 --
 
 CREATE TABLE `ventas` (
@@ -682,10 +758,21 @@ CREATE TABLE `ventas` (
   `ve_numero_control` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `ventas`
+--
+
+INSERT INTO `ventas` (`ve_id`, `ve_numero_documento`, `ve_fecha_emision`, `cl_id`, `us_id`, `su_id`, `caja_id`, `ve_subtotal`, `ve_impuesto`, `ve_total`, `ve_actualizado_en`, `ve_estado`, `ve_tipo_documento`, `ve_estado_documento`, `ve_numero_control`) VALUES
+(1, 'SU1-1763476327', '2025-11-18 10:32:07', 8, 1, 1, NULL, '10.00', '0.00', '10.00', '2025-11-18 10:32:07', 1, 'nota de venta', 'emitida', NULL),
+(14, 'SU1-1763515524', '2025-11-18 21:25:24', 3, 1, 1, 4, '4.00', '0.00', '4.00', '2025-11-18 21:25:24', 1, 'nota de venta', 'emitida', NULL),
+(15, 'SU1-1763516118', '2025-11-18 21:35:18', 7, 1, 1, 4, '10.00', '0.00', '10.00', '2025-11-18 21:35:18', 1, 'nota de venta', 'emitida', NULL),
+(16, 'SU1-1763516340', '2025-11-18 21:39:00', NULL, 1, 1, 4, '10.00', '0.00', '10.00', '2025-11-18 21:39:00', 1, '', 'emitida', NULL),
+(17, 'SU1-1763516372', '2025-11-18 21:39:32', NULL, 1, 1, 4, '1.00', '0.00', '1.00', '2025-11-18 21:39:32', 1, '', 'emitida', NULL);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `via_de_administracion`
+-- Estructura de tabla para la tabla `via_de_administracion`
 --
 
 CREATE TABLE `via_de_administracion` (
@@ -698,7 +785,7 @@ CREATE TABLE `via_de_administracion` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `via_de_administracion`
+-- Volcado de datos para la tabla `via_de_administracion`
 --
 
 INSERT INTO `via_de_administracion` (`vd_id`, `vd_nombre`, `vd_imagen`, `vd_creado_en`, `vd_actualizado_en`, `vd_estado`) VALUES
@@ -714,11 +801,11 @@ INSERT INTO `via_de_administracion` (`vd_id`, `vd_nombre`, `vd_imagen`, `vd_crea
 (10, 'Nasal', 'nasal.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1);
 
 --
--- Indexes for dumped tables
+-- Índices para tablas volcadas
 --
 
 --
--- Indexes for table `caja`
+-- Indices de la tabla `caja`
 --
 ALTER TABLE `caja`
   ADD PRIMARY KEY (`caja_id`),
@@ -726,14 +813,14 @@ ALTER TABLE `caja`
   ADD KEY `fk_caja_usuario` (`us_id`);
 
 --
--- Indexes for table `clientes`
+-- Indices de la tabla `clientes`
 --
 ALTER TABLE `clientes`
   ADD PRIMARY KEY (`cl_id`),
   ADD KEY `ix_clientes_carnet` (`cl_carnet`);
 
 --
--- Indexes for table `compras`
+-- Indices de la tabla `compras`
 --
 ALTER TABLE `compras`
   ADD PRIMARY KEY (`co_id`),
@@ -743,7 +830,13 @@ ALTER TABLE `compras`
   ADD KEY `fk_compras_usuarios` (`us_id`);
 
 --
--- Indexes for table `detalle_compra`
+-- Indices de la tabla `configuracion_empresa`
+--
+ALTER TABLE `configuracion_empresa`
+  ADD PRIMARY KEY (`ce_id`);
+
+--
+-- Indices de la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
   ADD PRIMARY KEY (`dc_id`),
@@ -752,7 +845,7 @@ ALTER TABLE `detalle_compra`
   ADD KEY `ix_dc_lm` (`lm_id`);
 
 --
--- Indexes for table `detalle_venta`
+-- Indices de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
   ADD PRIMARY KEY (`dv_id`),
@@ -761,7 +854,7 @@ ALTER TABLE `detalle_venta`
   ADD KEY `ix_dv_lm` (`lm_id`);
 
 --
--- Indexes for table `devoluciones`
+-- Indices de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   ADD PRIMARY KEY (`dev_id`),
@@ -771,7 +864,7 @@ ALTER TABLE `devoluciones`
   ADD KEY `fk_dev_us` (`us_id`);
 
 --
--- Indexes for table `factura`
+-- Indices de la tabla `factura`
 --
 ALTER TABLE `factura`
   ADD PRIMARY KEY (`fa_id`),
@@ -781,21 +874,21 @@ ALTER TABLE `factura`
   ADD KEY `fk_factura_sucursal` (`su_id`);
 
 --
--- Indexes for table `facturacion_electronica`
+-- Indices de la tabla `facturacion_electronica`
 --
 ALTER TABLE `facturacion_electronica`
   ADD PRIMARY KEY (`fe_id`),
   ADD KEY `fk_fe_fa` (`fa_id`);
 
 --
--- Indexes for table `forma_farmaceutica`
+-- Indices de la tabla `forma_farmaceutica`
 --
 ALTER TABLE `forma_farmaceutica`
   ADD PRIMARY KEY (`ff_id`),
   ADD UNIQUE KEY `ux_forma_nombre` (`ff_nombre`);
 
 --
--- Indexes for table `historial_lote`
+-- Indices de la tabla `historial_lote`
 --
 ALTER TABLE `historial_lote`
   ADD PRIMARY KEY (`hl_id`),
@@ -803,14 +896,14 @@ ALTER TABLE `historial_lote`
   ADD KEY `fk_historial_lote_us` (`us_id`);
 
 --
--- Indexes for table `informes`
+-- Indices de la tabla `informes`
 --
 ALTER TABLE `informes`
   ADD PRIMARY KEY (`inf_id`),
   ADD KEY `fk_inf_usuario` (`inf_usuario`);
 
 --
--- Indexes for table `inventarios`
+-- Indices de la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
   ADD PRIMARY KEY (`inv_id`),
@@ -818,14 +911,14 @@ ALTER TABLE `inventarios`
   ADD KEY `ix_inv_med` (`med_id`);
 
 --
--- Indexes for table `laboratorios`
+-- Indices de la tabla `laboratorios`
 --
 ALTER TABLE `laboratorios`
   ADD PRIMARY KEY (`la_id`),
   ADD UNIQUE KEY `ux_laboratorios_nombre` (`la_nombre_comercial`);
 
 --
--- Indexes for table `lote_medicamento`
+-- Indices de la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
   ADD PRIMARY KEY (`lm_id`),
@@ -836,7 +929,7 @@ ALTER TABLE `lote_medicamento`
   ADD KEY `fk_lm_origen` (`lm_origen_id`);
 
 --
--- Indexes for table `medicamento`
+-- Indices de la tabla `medicamento`
 --
 ALTER TABLE `medicamento`
   ADD PRIMARY KEY (`med_id`),
@@ -848,7 +941,7 @@ ALTER TABLE `medicamento`
   ADD KEY `fk_med_us` (`us_id`);
 
 --
--- Indexes for table `merma`
+-- Indices de la tabla `merma`
 --
 ALTER TABLE `merma`
   ADD PRIMARY KEY (`me_id`),
@@ -858,7 +951,7 @@ ALTER TABLE `merma`
   ADD KEY `fk_me_us` (`us_id`);
 
 --
--- Indexes for table `movimiento_caja`
+-- Indices de la tabla `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
   ADD PRIMARY KEY (`mc_id`),
@@ -866,7 +959,7 @@ ALTER TABLE `movimiento_caja`
   ADD KEY `fk_mc_us` (`us_id`);
 
 --
--- Indexes for table `movimiento_inventario`
+-- Indices de la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
   ADD PRIMARY KEY (`mi_id`),
@@ -876,14 +969,14 @@ ALTER TABLE `movimiento_inventario`
   ADD KEY `ix_mi_us` (`us_id`);
 
 --
--- Indexes for table `proveedores`
+-- Indices de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
   ADD PRIMARY KEY (`pr_id`),
   ADD KEY `ix_proveedores_nit` (`pr_nit`);
 
 --
--- Indexes for table `proveedores_laboratorio`
+-- Indices de la tabla `proveedores_laboratorio`
 --
 ALTER TABLE `proveedores_laboratorio`
   ADD PRIMARY KEY (`pl_id`),
@@ -892,28 +985,28 @@ ALTER TABLE `proveedores_laboratorio`
   ADD KEY `fk_pl_la` (`la_id`);
 
 --
--- Indexes for table `roles`
+-- Indices de la tabla `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`ro_id`),
   ADD UNIQUE KEY `ux_roles_nombre` (`ro_nombre`);
 
 --
--- Indexes for table `sucursales`
+-- Indices de la tabla `sucursales`
 --
 ALTER TABLE `sucursales`
   ADD PRIMARY KEY (`su_id`),
   ADD UNIQUE KEY `ux_sucursales_nombre` (`su_nombre`);
 
 --
--- Indexes for table `uso_farmacologico`
+-- Indices de la tabla `uso_farmacologico`
 --
 ALTER TABLE `uso_farmacologico`
   ADD PRIMARY KEY (`uf_id`),
   ADD UNIQUE KEY `ux_uso_nombre` (`uf_nombre`);
 
 --
--- Indexes for table `usuarios`
+-- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`us_id`),
@@ -923,7 +1016,7 @@ ALTER TABLE `usuarios`
   ADD KEY `fk_usuarios_roles` (`ro_id`);
 
 --
--- Indexes for table `ventas`
+-- Indices de la tabla `ventas`
 --
 ALTER TABLE `ventas`
   ADD PRIMARY KEY (`ve_id`),
@@ -933,185 +1026,191 @@ ALTER TABLE `ventas`
   ADD KEY `fk_ventas_caja` (`caja_id`);
 
 --
--- Indexes for table `via_de_administracion`
+-- Indices de la tabla `via_de_administracion`
 --
 ALTER TABLE `via_de_administracion`
   ADD PRIMARY KEY (`vd_id`),
   ADD UNIQUE KEY `ux_via_nombre` (`vd_nombre`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT for table `caja`
+-- AUTO_INCREMENT de la tabla `caja`
 --
 ALTER TABLE `caja`
-  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `clientes`
+-- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `compras`
+-- AUTO_INCREMENT de la tabla `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `detalle_compra`
+-- AUTO_INCREMENT de la tabla `configuracion_empresa`
+--
+ALTER TABLE `configuracion_empresa`
+  MODIFY `ce_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `detalle_venta`
+-- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `devoluciones`
+-- AUTO_INCREMENT de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `factura`
+-- AUTO_INCREMENT de la tabla `factura`
 --
 ALTER TABLE `factura`
-  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT for table `facturacion_electronica`
+-- AUTO_INCREMENT de la tabla `facturacion_electronica`
 --
 ALTER TABLE `facturacion_electronica`
   MODIFY `fe_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `forma_farmaceutica`
+-- AUTO_INCREMENT de la tabla `forma_farmaceutica`
 --
 ALTER TABLE `forma_farmaceutica`
   MODIFY `ff_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `historial_lote`
+-- AUTO_INCREMENT de la tabla `historial_lote`
 --
 ALTER TABLE `historial_lote`
-  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `informes`
+-- AUTO_INCREMENT de la tabla `informes`
 --
 ALTER TABLE `informes`
-  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
--- AUTO_INCREMENT for table `inventarios`
+-- AUTO_INCREMENT de la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `laboratorios`
+-- AUTO_INCREMENT de la tabla `laboratorios`
 --
 ALTER TABLE `laboratorios`
   MODIFY `la_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `lote_medicamento`
+-- AUTO_INCREMENT de la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
-  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `medicamento`
+-- AUTO_INCREMENT de la tabla `medicamento`
 --
 ALTER TABLE `medicamento`
   MODIFY `med_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `merma`
+-- AUTO_INCREMENT de la tabla `merma`
 --
 ALTER TABLE `merma`
   MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `movimiento_caja`
+-- AUTO_INCREMENT de la tabla `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
-  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `movimiento_inventario`
+-- AUTO_INCREMENT de la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT for table `proveedores`
+-- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
   MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `proveedores_laboratorio`
+-- AUTO_INCREMENT de la tabla `proveedores_laboratorio`
 --
 ALTER TABLE `proveedores_laboratorio`
   MODIFY `pl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `roles`
+-- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
   MODIFY `ro_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `sucursales`
+-- AUTO_INCREMENT de la tabla `sucursales`
 --
 ALTER TABLE `sucursales`
   MODIFY `su_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `uso_farmacologico`
+-- AUTO_INCREMENT de la tabla `uso_farmacologico`
 --
 ALTER TABLE `uso_farmacologico`
   MODIFY `uf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `usuarios`
+-- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   MODIFY `us_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `ventas`
+-- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `via_de_administracion`
+-- AUTO_INCREMENT de la tabla `via_de_administracion`
 --
 ALTER TABLE `via_de_administracion`
   MODIFY `vd_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- Constraints for dumped tables
+-- Restricciones para tablas volcadas
 --
 
 --
--- Constraints for table `caja`
+-- Filtros para la tabla `caja`
 --
 ALTER TABLE `caja`
   ADD CONSTRAINT `fk_caja_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_caja_usuario` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `compras`
+-- Filtros para la tabla `compras`
 --
 ALTER TABLE `compras`
   ADD CONSTRAINT `fk_compras_laboratorio` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1120,7 +1219,7 @@ ALTER TABLE `compras`
   ADD CONSTRAINT `fk_compras_usuario` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `detalle_compra`
+-- Filtros para la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
   ADD CONSTRAINT `fk_dc_compras` FOREIGN KEY (`co_id`) REFERENCES `compras` (`co_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1128,7 +1227,7 @@ ALTER TABLE `detalle_compra`
   ADD CONSTRAINT `fk_dc_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `detalle_venta`
+-- Filtros para la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
   ADD CONSTRAINT `fk_dv_lm` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1136,7 +1235,7 @@ ALTER TABLE `detalle_venta`
   ADD CONSTRAINT `fk_dv_venta` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `devoluciones`
+-- Filtros para la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
   ADD CONSTRAINT `fk_dev_fa` FOREIGN KEY (`fa_id`) REFERENCES `factura` (`fa_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1145,7 +1244,7 @@ ALTER TABLE `devoluciones`
   ADD CONSTRAINT `fk_dev_ve` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `factura`
+-- Filtros para la tabla `factura`
 --
 ALTER TABLE `factura`
   ADD CONSTRAINT `fk_factura_cliente` FOREIGN KEY (`cl_id`) REFERENCES `clientes` (`cl_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1154,33 +1253,33 @@ ALTER TABLE `factura`
   ADD CONSTRAINT `fk_factura_venta` FOREIGN KEY (`ve_id`) REFERENCES `ventas` (`ve_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `facturacion_electronica`
+-- Filtros para la tabla `facturacion_electronica`
 --
 ALTER TABLE `facturacion_electronica`
   ADD CONSTRAINT `fk_fe_fa` FOREIGN KEY (`fa_id`) REFERENCES `factura` (`fa_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `historial_lote`
+-- Filtros para la tabla `historial_lote`
 --
 ALTER TABLE `historial_lote`
   ADD CONSTRAINT `fk_historial_lote_lm` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_historial_lote_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `informes`
+-- Filtros para la tabla `informes`
 --
 ALTER TABLE `informes`
   ADD CONSTRAINT `fk_inf_usuario` FOREIGN KEY (`inf_usuario`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `inventarios`
+-- Filtros para la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
   ADD CONSTRAINT `fk_inv_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_inv_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `lote_medicamento`
+-- Filtros para la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
   ADD CONSTRAINT `fk_lm_medicamento` FOREIGN KEY (`med_id`) REFERENCES `medicamento` (`med_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1189,7 +1288,7 @@ ALTER TABLE `lote_medicamento`
   ADD CONSTRAINT `fk_lm_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `medicamento`
+-- Filtros para la tabla `medicamento`
 --
 ALTER TABLE `medicamento`
   ADD CONSTRAINT `fk_medicamento_forma` FOREIGN KEY (`ff_id`) REFERENCES `forma_farmaceutica` (`ff_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1200,7 +1299,7 @@ ALTER TABLE `medicamento`
   ADD CONSTRAINT `fk_medicamento_via` FOREIGN KEY (`vd_id`) REFERENCES `via_de_administracion` (`vd_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `merma`
+-- Filtros para la tabla `merma`
 --
 ALTER TABLE `merma`
   ADD CONSTRAINT `fk_me_lm` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1209,14 +1308,14 @@ ALTER TABLE `merma`
   ADD CONSTRAINT `fk_me_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `movimiento_caja`
+-- Filtros para la tabla `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
   ADD CONSTRAINT `fk_mc_caja` FOREIGN KEY (`caja_id`) REFERENCES `caja` (`caja_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mc_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `movimiento_inventario`
+-- Filtros para la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
   ADD CONSTRAINT `fk_mi_lm` FOREIGN KEY (`lm_id`) REFERENCES `lote_medicamento` (`lm_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1225,21 +1324,21 @@ ALTER TABLE `movimiento_inventario`
   ADD CONSTRAINT `fk_mi_us` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `proveedores_laboratorio`
+-- Filtros para la tabla `proveedores_laboratorio`
 --
 ALTER TABLE `proveedores_laboratorio`
   ADD CONSTRAINT `fk_pl_la` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_pl_pr` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `usuarios`
+-- Filtros para la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD CONSTRAINT `fk_usuarios_roles` FOREIGN KEY (`ro_id`) REFERENCES `roles` (`ro_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_usuarios_sucursales` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `ventas`
+-- Filtros para la tabla `ventas`
 --
 ALTER TABLE `ventas`
   ADD CONSTRAINT `fk_ventas_caja` FOREIGN KEY (`caja_id`) REFERENCES `caja` (`caja_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1251,3 +1350,36 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+
+/* Breve descripción de cada tabla (para usar como prompt o documentación)
+Tabla	Descripción breve
+
+
+sucursales	Registra las sucursales físicas donde se manejan inventarios y ventas.
+proveedores	Contiene los proveedores de medicamentos, sin vinculación directa a laboratorios.
+laboratorios	Clasifica los laboratorios productores de medicamentos.
+forma_farmaceutica	Define la forma farmacéutica de cada medicamento (jarabe, cápsula, inyectable, etc.).
+uso_farmacologico	Clasifica medicamentos según su uso (analgésico, antibiótico, etc.).
+via_de_administracion	Indica la vía de aplicación del medicamento (oral, tópica, etc.).
+roles	Define los roles del sistema (administrador, gerente, usuario).
+usuarios	Registra los usuarios del sistema y sus credenciales.
+clientes	Guarda los datos de clientes frecuentes para emitir notas y facturas.
+medicamento	Almacena la información base de los medicamentos (composición, código de barras, laboratorio, presentación, precios).
+lote_medicamento	Registra los lotes físicos de medicamentos, cantidades por caja/blíster/unidad, fechas y sucursal donde se encuentran. Fuente principal de stock.
+inventarios	Tabla resumen del stock total por medicamento y sucursal; consolida datos de los lotes.
+compras	Encabezado de cada compra o reabastecimiento de medicamentos a la farmacia.
+detalle_compra	Detalla los medicamentos comprados en cada orden de compra.
+ventas	Encabezado de las ventas realizadas en las sucursales.
+detalle_venta	Detalle de cada producto vendido (por unidad o por caja), con referencia opcional a lote.
+factura	Registro de facturas generadas en ventas, con posibilidad de integrarse a SIAT.
+facturacion_electronica	Tabla preparada para la integración con el sistema SIAT de Bolivia (CUF, QR, estado, etc.).
+movimiento_inventario	Registro histórico de movimientos de stock (entradas, salidas, transferencias, ajustes).
+historial_lote	Historial de acciones sobre lotes (creación, activación, caducidad, baja, etc.).
+merma	Registra pérdidas de inventario por deterioro, vencimiento u otros motivos.
+caja	Define las cajas de punto de venta asociadas a cada sucursal.
+movimiento_caja	Registra entradas y salidas de efectivo de cada caja.
+informes	Guarda configuraciones o reportes generados por los usuarios.
+devoluciones	Registra las devoluciones de productos por los clientes, sin reingreso automático a stock. */
