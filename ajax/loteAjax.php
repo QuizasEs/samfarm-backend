@@ -16,7 +16,7 @@ if (isset($_POST['loteAjax'])) {
     session_start(['name' => 'SMP']);
 
     // Verificar que el usuario tenga sesión activa y permisos
-    if (!isset($_SESSION['id_smp']) || $_SESSION['rol_smp'] != 1) {
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         // Sesión inválida o sin permisos
         session_unset();
         session_destroy();
@@ -25,6 +25,16 @@ if (isset($_POST['loteAjax'])) {
             "Alerta" => "simple",
             "Titulo" => "Sesión expirada",
             "texto" => "Por favor vuelva a iniciar sesión",
+            "Tipo" => "error"
+        ]);
+        exit();
+    }
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo json_encode([
+            "Alerta" => "simple",
+            "Titulo" => "Ocurrio un error",
+            "texto" => "No cuenta con lo privilegios necesarios para ejecutar esta accion",
             "Tipo" => "error"
         ]);
         exit();

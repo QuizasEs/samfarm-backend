@@ -27,6 +27,19 @@
                 "loteLista",
                 "caja",
                 "cajaCerrar",
+                "inventarioLista",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
             ];
 
             if(in_array($vistas,$listaBlanca)){

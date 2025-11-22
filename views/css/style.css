@@ -1728,6 +1728,89 @@ dark .ventas-cliente a {
 
 
 /***************************************predeternimado********************************************************/
+
+/* estados */
+.estado-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 12px;
+    text-align: center;
+    min-width: 110px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+}
+
+.estado-badge.espera {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    color: white;
+}
+
+.estado-badge.activo {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    color: white;
+}
+
+.estado-badge.terminado {
+    background: linear-gradient(135deg, #9E9E9E 0%, #616161 100%);
+    color: white;
+}
+
+.estado-badge.caducado {
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+    color: white;
+    animation: pulse-red 2s infinite;
+}
+
+.estado-badge.devuelto {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: white;
+}
+
+.estado-badge.bloqueado {
+    background: linear-gradient(135deg, #795548 0%, #5D4037 100%);
+    color: white;
+}
+
+.estado-badge.desconocido {
+    background: linear-gradient(135deg, #607D8B 0%, #455A64 100%);
+    color: white;
+}
+
+@keyframes pulse-red {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(244, 67, 54, 0);
+    }
+}
+
+/* Loader */
+.ajax-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.loader-inner {
+    padding: 20px 40px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* botones */
+
 .btn-primary {
     padding: 10px;
     width: 300px;
@@ -3162,15 +3245,16 @@ td img {
 
 /**************************************abrir caja*********************************************/
 
-.open-caja-container{
-width: 100%;
-height: 90vh;
-display: flex;
-justify-content: center;
-align-items: center;
+.open-caja-container {
+    width: 100%;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
 }
-.open-content{
+
+.open-content {
     align-self: center;
     margin: 0 auto;
     width: 500px;
@@ -3179,7 +3263,8 @@ align-items: center;
     height: fit-content;
 
 }
-.open-bloque{
+
+.open-bloque {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -3187,15 +3272,18 @@ align-items: center;
     gap: 10px;
 
 }
-.open-bloque label{
+
+.open-bloque label {
     font-size: 1.4rem;
     color: var(--text-primary);
     text-transform: uppercase;
     font-weight: 600;
 }
-.dark .open-bloque label{
+
+.dark .open-bloque label {
     color: var(--dark-text-primary);
 }
+
 .open-bloque input {
     height: 40px;
     width: 100%;
@@ -3212,32 +3300,36 @@ align-items: center;
     background-color: var(--bg-primary);
 }
 
-.dark .open-bloque input{
+.dark .open-bloque input {
     border: 2px solid var(--accent-primary);
     box-shadow: 2px 2px 10px var(--dark-shadow-dark);
     color: var(--dark-text-secondary);
     background-color: var(--dark-bg-secondary);
 }
+
 .open-bloque input:focus {
     border: 2px solid var(--dark-accent-primary);
     box-shadow: 3px 2px 10px var(--dark-accent-primary);
     background-color: white;
 }
 
-.dark .open-bloque input:focus{
+.dark .open-bloque input:focus {
     box-shadow: 3px 2px 10px var(--accent-primary);
     background-color: var(--dark-hover);
     border: 2px solid var(--accent-primary);
 }
-.open-buttons{
-    display:flex;
+
+.open-buttons {
+    display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
     width: 100%;
 }
-.qty-input{
+
+.qty-input {
     min-width: 40px;
 }
+
 /**************************************lista*********************************************/
 /**************************************lista*********************************************/

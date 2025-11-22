@@ -1,144 +1,336 @@
-/* ajax_tablas.js — versión estable sin pushState
-   Reutilizable para tablas con paginación y filtros.
-   Requiere:
-   - Contenedor .tabla-dinamica[data-ajax-table="true"]
-   - data-ajax-url → ruta al archivo AJAX (por ejemplo "ajax/loteAjax.php")
-   - data-ajax-param → parámetro para acción (por ejemplo "loteAjax")
-   - data-ajax-registros → opcional (default 10)
-   - Dentro del contenedor: formulario .filtro-dinamico con input[name="busqueda"] y selects opcionales select1, select2, select3
-*/
-
 (function () {
-    // Detecta automáticamente el path base del proyecto (sin SERVER_URL)
+    // Detecta automáticamente el path base del proyecto
     function getBaseURL() {
         const path = window.location.pathname;
         const match = path.match(/^\/([^\/]+)\//);
-        return match ? '/' + match[1] + '/' : '/';
+        return match ? "/" + match[1] + "/" : "/";
     }
 
     const tablas = document.querySelectorAll('.tabla-dinamica[data-ajax-table="true"]');
-    if (!tablas || tablas.length === 0) return;
+    if (!tablas || tablas.length === 0) {
+        console.warn('⚠️ No se encontraron tablas dinámicas');
+        return;
+    }
 
+    console.log('✅ Inicializando', tablas.length, 'tabla(s) dinámica(s)');
     tablas.forEach(initTabla);
 
     function initTabla(container) {
-        const ajaxUrl = container.dataset.ajaxUrl || 'ajax/loteAjax.php';
-        const paramName = container.dataset.ajaxParam || 'loteAjax';
+        const ajaxUrl = container.dataset.ajaxUrl || "ajax/loteAjax.php";
+        const paramName = container.dataset.ajaxParam || "loteAjax";
         const registrosDefault = parseInt(container.dataset.ajaxRegistros || 10);
 
+        console.log('🔧 Configurando tabla:', { ajaxUrl, paramName, registrosDefault });
+
         // Área donde se renderiza la tabla
-        let destino = container.querySelector('.tabla-contenedor');
+        let destino = container.querySelector(".tabla-contenedor");
         if (!destino) {
-            destino = document.createElement('div');
-            destino.className = 'tabla-contenedor';
+            destino = document.createElement("div");
+            destino.className = "tabla-contenedor";
             container.appendChild(destino);
         }
 
         // Loader visual
-        const loader = document.createElement('div');
-        loader.className = 'ajax-loader';
-        loader.style.display = 'none';
+        const loader = document.createElement("div");
+        loader.className = "ajax-loader";
+        loader.style.display = "none";
         loader.innerHTML = '<div class="loader-inner">Cargando...</div>';
         container.appendChild(loader);
 
-        const form = container.querySelector('.filtro-dinamico');
+        const form = container.querySelector(".filtro-dinamico");
 
         // Eventos de formulario (filtros)
         if (form) {
+            console.log('✅ Formulario encontrado, configurando eventos');
+
+            // 📅 Eventos para filtros de fecha
+            // 📅 Eventos para filtros de fecha CON VALIDACIÓN
+            const fechaInputs = form.querySelectorAll('input[name="fecha_desde"], input[name="fecha_hasta"]');
+            if (fechaInputs.length > 0) {
+                console.log('📅 Inputs de fecha encontrados:', fechaInputs.length);
+
+                const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+                const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+
+                // Función de validación
+                function validarFechas() {
+                    if (!fechaDesde || !fechaHasta) return true;
+
+                    const desde = fechaDesde.value;
+                    const hasta = fechaHasta.value;
+
+                    // Si ambas están vacías, no validar
+                    if (!desde && !hasta) {
+                        fechaDesde.setCustomValidity('');
+                        fechaHasta.setCustomValidity('');
+                        fechaDesde.style.borderColor = '';
+                        fechaHasta.style.borderColor = '';
+                        return true;
+                    }
+
+                    // Si solo una está llena, es válido
+                    if (!desde || !hasta) {
+                        fechaDesde.setCustomValidity('');
+                        fechaHasta.setCustomValidity('');
+                        fechaDesde.style.borderColor = '';
+                        fechaHasta.style.borderColor = '';
+                        return true;
+                    }
+
+                    // Validar que desde <= hasta
+                    const tsDesde = new Date(desde).getTime();
+                    const tsHasta = new Date(hasta).getTime();
+
+                    if (tsDesde > tsHasta) {
+                        // ❌ Rango inválido
+                        console.warn('⚠️ Fecha desde es mayor que fecha hasta');
+                        fechaDesde.style.borderColor = '#ff9800';
+                        fechaHasta.style.borderColor = '#ff9800';
+                        fechaDesde.setCustomValidity('La fecha inicial debe ser menor o igual a la final');
+
+                        // Mostrar tooltip
+                        mostrarTooltip(fechaDesde, 'La fecha "Desde" debe ser anterior o igual a "Hasta"');
+                        return false;
+                    } else {
+                        // ✅ Rango válido
+                        console.log('✅ Rango de fechas válido:', desde, 'a', hasta);
+                        fechaDesde.setCustomValidity('');
+                        fechaHasta.setCustomValidity('');
+                        fechaDesde.style.borderColor = '#4CAF50';
+                        fechaHasta.style.borderColor = '#4CAF50';
+
+                        // Quitar estilos después de 2 segundos
+                        setTimeout(() => {
+                            fechaDesde.style.borderColor = '';
+                            fechaHasta.style.borderColor = '';
+                        }, 2000);
+
+                        return true;
+                    }
+                }
+
+                // Función para mostrar tooltip
+                function mostrarTooltip(elemento, mensaje) {
+                    // Remover tooltip existente
+                    const tooltipExistente = document.querySelector('.tooltip-fecha-error');
+                    if (tooltipExistente) tooltipExistente.remove();
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip-fecha-error';
+                    tooltip.textContent = mensaje;
+                    tooltip.style.cssText = `
+                        position: absolute;
+                        background: #ff9800;
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        white-space: nowrap;
+                        z-index: 10000;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        animation: fadeInTooltip 0.3s ease;
+                    `;
+
+                    document.body.appendChild(tooltip);
+
+                    const rect = elemento.getBoundingClientRect();
+                    tooltip.style.top = (rect.top - tooltip.offsetHeight - 8) + 'px';
+                    tooltip.style.left = rect.left + 'px';
+
+                    // Auto-remover después de 3 segundos
+                    setTimeout(() => tooltip.remove(), 3000);
+                }
+
+                // Eventos de cambio
+                fechaInputs.forEach(input => {
+                    input.addEventListener('change', () => {
+                        console.log('📅 Cambio en fecha:', input.name, input.value);
+
+                        if (validarFechas()) {
+                            // Solo buscar si las fechas son válidas
+                            cargarPagina(1);
+                        }
+                    });
+
+                    // Validar también al escribir (input event)
+                    input.addEventListener('input', () => {
+                        validarFechas();
+                    });
+                });
+
+                // Agregar estilos de animación
+                if (!document.querySelector('#tooltip-animation-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'tooltip-animation-styles';
+                    style.textContent = `
+                        @keyframes fadeInTooltip {
+                            from {
+                                opacity: 0;
+                                transform: translateY(-5px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
             // Búsqueda por Enter
-            const busqInput = form.querySelector('input[name="busqueda"], #filtroBusqueda');
+            const busqInput = form.querySelector('input[name="busqueda"]');
             if (busqInput) {
-                busqInput.addEventListener('keydown', e => {
-                    if (e.key === 'Enter') {
+                console.log('🔍 Input de búsqueda encontrado');
+                busqInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
                         e.preventDefault();
+                        console.log('🔍 Enter presionado, buscando...');
                         cargarPagina(1);
                     }
                 });
+            } else {
+                console.warn('⚠️ No se encontró input[name="busqueda"]');
             }
 
             // Cambio de selects
-            const selects = form.querySelectorAll('select');
-            selects.forEach(sel => {
-                sel.addEventListener('change', () => cargarPagina(1));
-            });
+            const selects = form.querySelectorAll("select");
+            if (selects.length > 0) {
+                console.log('🎛️ Selects encontrados:', selects.length);
+                selects.forEach((sel, idx) => {
+                    sel.addEventListener("change", () => {
+                        console.log('🎛️ Cambio en select', idx + 1, ':', sel.value);
+                        cargarPagina(1);
+                    });
+                });
+            }
 
             // Click en botón buscar
-            const btnBuscar = form.querySelector('button[type="button"], .btn-search');
+            const btnBuscar = form.querySelector('.btn-search');
             if (btnBuscar) {
-                btnBuscar.addEventListener('click', () => cargarPagina(1));
+                console.log('🔘 Botón buscar encontrado');
+                btnBuscar.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    console.log('🔘 Click en buscar');
+                    cargarPagina(1);
+                });
+            } else {
+                console.warn('⚠️ No se encontró .btn-search');
             }
+        } else {
+            console.warn('⚠️ No se encontró .filtro-dinamico');
         }
 
         // Delegar clicks de paginación
-        destino.addEventListener('click', e => {
-            const a = e.target.closest('a.page-link');
+        destino.addEventListener("click", (e) => {
+            const a = e.target.closest("a.page-link");
             if (!a) return;
-            const page = a.dataset.page || parsePageFromHref(a.getAttribute('href'));
+            const page = a.dataset.page || parsePageFromHref(a.getAttribute("href"));
             if (!page) return;
             e.preventDefault();
+            console.log('📄 Navegando a página:', page);
             cargarPagina(page);
         });
 
         // Cargar tabla inicial
+        console.log('🚀 Cargando página inicial');
         cargarPagina(1);
 
         async function cargarPagina(pagina) {
-            loader.style.display = 'block';
-            destino.style.opacity = '0.6';
+            console.log('📡 Cargando página:', pagina);
+            loader.style.display = "block";
+            destino.style.opacity = "0.6";
 
             const base = getBaseURL();
-            const fullUrl = window.location.origin + base + ajaxUrl.replace(/^\//, '');
+            const fullUrl = window.location.origin + base + ajaxUrl.replace(/^\//, "");
             const formData = new URLSearchParams();
 
-            formData.append(paramName, 'listar');
-            formData.append('pagina', pagina);
-            formData.append('registros', registrosDefault);
+            formData.append(paramName, "listar");
+            formData.append("pagina", pagina);
+            formData.append("registros", registrosDefault);
 
             if (form) {
-                const busq = form.querySelector('input[name="busqueda"], #filtroBusqueda');
-                if (busq) formData.append('busqueda', busq.value.trim());
+                // 🔍 Búsqueda por término
+                const busq = form.querySelector('input[name="busqueda"]');
+                if (busq) {
+                    const valor = busq.value ? busq.value.trim() : '';
+                    if (valor) {
+                        console.log('🔍 Búsqueda:', valor);
+                        formData.append("busqueda", valor);
+                    }
+                }
 
-                for (let i = 1; i <= 3; i++) {
-                    const sel = form.querySelector('select[name="select' + i + '"], #select' + i);
-                    if (sel) {
-                        formData.append('select' + i, sel.value);
-                        if (sel.dataset.type === 'fecha') {
-                            formData.append('select' + i + '_type', 'fecha');
-                        }
+                // 📅 Filtros de fecha
+                const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+                const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+
+                if (fechaDesde && fechaDesde.value) {
+                    console.log('📅 Fecha desde:', fechaDesde.value);
+                    formData.append("fecha_desde", fechaDesde.value);
+                }
+                if (fechaHasta && fechaHasta.value) {
+                    console.log('📅 Fecha hasta:', fechaHasta.value);
+                    formData.append("fecha_hasta", fechaHasta.value);
+                }
+
+                // 🎛️ Selects genéricos (hasta 5)
+                for (let i = 1; i <= 5; i++) {
+                    const sel = form.querySelector(`select[name="select${i}"]`);
+                    if (sel && sel.value) {
+                        console.log(`🎛️ Select${i}:`, sel.value);
+                        formData.append(`select${i}`, sel.value);
                     }
                 }
             }
 
+            console.log('📤 Enviando datos:', Object.fromEntries(formData));
+
             try {
                 const res = await fetch(fullUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData,
                 });
 
-                const contentType = res.headers.get('Content-Type') || '';
-                let html = '';
-                if (contentType.includes('application/json')) {
-                    const json = await res.json();
-                    html = json.html || '';
-                } else {
-                    html = await res.text();
+                console.log('📥 Respuesta recibida:', res.status, res.statusText);
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
 
-                destino.innerHTML = html;
+                const contentType = res.headers.get("Content-Type") || "";
+                let html = "";
 
-                // Actualizar data-page en links del paginador
-                const links = destino.querySelectorAll('.custom-pagination a.page-link');
-                links.forEach(a => {
-                    const p = parsePageFromHref(a.getAttribute('href'));
-                    if (p) a.dataset.page = p;
-                });
+                if (contentType.includes("application/json")) {
+                    const json = await res.json();
+                    console.log('📋 JSON recibido:', json);
+                    html = json.html || "";
+                } else {
+                    html = await res.text();
+                    console.log('📄 HTML recibido (primeros 200 chars):', html.substring(0, 200));
+                }
+
+                if (!html || html.trim().length === 0) {
+                    console.error('❌ Respuesta vacía del servidor');
+                    destino.innerHTML = '<div class="error">No se recibieron datos del servidor</div>';
+                } else {
+                    destino.innerHTML = html;
+                    console.log('✅ Tabla actualizada correctamente');
+
+                    // Actualizar data-page en links
+                    const links = destino.querySelectorAll(".custom-pagination a.page-link");
+                    links.forEach((a) => {
+                        const p = parsePageFromHref(a.getAttribute("href"));
+                        if (p) a.dataset.page = p;
+                    });
+                }
             } catch (err) {
-                console.error('Error AJAX:', err);
-                destino.innerHTML = '<div class="error">Error al cargar datos.</div>';
+                console.error("❌ Error AJAX:", err);
+                destino.innerHTML = `<div class="error">Error al cargar datos: ${err.message}</div>`;
             } finally {
-                loader.style.display = 'none';
-                destino.style.opacity = '';
+                loader.style.display = "none";
+                destino.style.opacity = "";
             }
         }
     }

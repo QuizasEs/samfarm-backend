@@ -2,6 +2,8 @@
 
 require_once "mainModel.php";
 
+
+
 class ventaModel extends mainModel
 {
 
@@ -9,11 +11,11 @@ class ventaModel extends mainModel
     {
         $db = mainModel::conectar();
         $stmt = $db->prepare("
-            SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta
-            FROM lote_medicamento
-            WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0
-            ORDER BY lm_fecha_ingreso ASC, lm_fecha_vencimiento ASC
-        ");
+                SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta
+                FROM lote_medicamento
+                WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0
+                ORDER BY lm_fecha_ingreso ASC, lm_fecha_vencimiento ASC
+            ");
         $stmt->bindParam(":med_id", $med_id, PDO::PARAM_INT);
         $stmt->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
         $stmt->execute();
@@ -58,27 +60,31 @@ class ventaModel extends mainModel
         $conexion = mainModel::conectar();
 
         $sql = "
-            SELECT DISTINCT
-                m.med_id,
-                m.med_nombre_quimico AS nombre,
-                COALESCE(m.med_version_comercial, '') AS version_comercial,
-                COALESCE(ff.ff_nombre, '') AS presentacion,
-                COALESCE(la.la_nombre_comercial, '') AS linea,
-                MIN(lm.lm_precio_venta) AS precio_venta,
-                SUM(lm.lm_cant_actual_unidades) AS stock
-            FROM medicamento m
-            INNER JOIN lote_medicamento lm ON lm.med_id = m.med_id
-            LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
-            WHERE lm.su_id = :sucursal_id
-            AND lm.lm_estado = 'activo'
-            AND lm.lm_cant_actual_unidades > 0
-            AND (
-                m.med_nombre_quimico LIKE :termino
-                OR m.med_codigo_barras LIKE :termino
-                OR m.med_version_comercial LIKE :termino
-            )
-        ";
+        SELECT 
+            m.med_id,
+            lm.lm_id,
+            lm.lm_numero_lote,
+            m.med_nombre_quimico AS nombre,
+            COALESCE(m.med_version_comercial, '') AS version_comercial,
+            COALESCE(ff.ff_nombre, '') AS presentacion,
+            COALESCE(la.la_nombre_comercial, '') AS linea,
+            lm.lm_precio_venta AS precio_venta,
+            lm.lm_cant_actual_unidades AS stock,
+            DATE_FORMAT(lm.lm_fecha_vencimiento, '%Y-%m-%d') AS fecha_vencimiento
+        FROM lote_medicamento lm
+        INNER JOIN medicamento m ON m.med_id = lm.med_id
+        LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+        LEFT JOIN laboratorios la ON la.la_id = m.la_id
+        WHERE lm.su_id = :sucursal_id
+          AND lm.lm_estado = 'activo'
+          AND lm.lm_cant_actual_unidades > 0
+          AND (
+              m.med_nombre_quimico LIKE :termino
+              OR m.med_codigo_barras LIKE :termino
+              OR m.med_version_comercial LIKE :termino
+              OR lm.lm_numero_lote LIKE :termino
+          )
+    ";
 
         $params = [
             ":termino" => $termino,
@@ -88,33 +94,39 @@ class ventaModel extends mainModel
         // Aplicar filtros opcionales
         if (!empty($filtros['linea'])) {
             $sql .= " AND m.la_id = :la_id";
-            $params[":la_id"] = $filtros['linea'];
+            $params[":la_id"] = (int)$filtros['linea'];
         }
         if (!empty($filtros['presentacion'])) {
             $sql .= " AND m.ff_id = :ff_id";
-            $params[":ff_id"] = $filtros['presentacion'];
+            $params[":ff_id"] = (int)$filtros['presentacion'];
         }
         if (!empty($filtros['funcion'])) {
             $sql .= " AND m.uf_id = :uf_id";
-            $params[":uf_id"] = $filtros['funcion'];
+            $params[":uf_id"] = (int)$filtros['funcion'];
         }
         if (!empty($filtros['via'])) {
             $sql .= " AND m.vd_id = :vd_id";
-            $params[":vd_id"] = $filtros['via'];
+            $params[":vd_id"] = (int)$filtros['via'];
         }
 
-        $sql .= " GROUP BY m.med_id, m.med_nombre_quimico, m.med_version_comercial, ff.ff_nombre, la.la_nombre_comercial
-              HAVING SUM(lm.lm_cant_actual_unidades) > 0
-              ORDER BY m.med_nombre_quimico ASC 
+        // Ordenar: nombre, laboratorio, precio (más barato primero), vencimiento
+        $sql .= " ORDER BY 
+                m.med_nombre_quimico ASC,
+                la.la_nombre_comercial ASC,
+                lm.lm_precio_venta ASC,
+                lm.lm_fecha_vencimiento ASC
               LIMIT 50";
 
         $stmt = $conexion->prepare($sql);
-        foreach ($params as $k => $v) {
-            $stmt->bindValue($k, $v);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     /* buscar los productos mas vendidos de la sucursal */
     protected static function top_ventas_model($sucursal_id, $limit = 5)
@@ -128,7 +140,8 @@ class ventaModel extends mainModel
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
                 COALESCE(lm_ag.min_precio, 0) AS precio_venta,
-                COALESCE(SUM(dv.dv_cantidad), 0) AS vendidos
+                COALESCE(SUM(dv.dv_cantidad), 0) AS vendidos,
+                COALESCE(inv.inv_total_unidades, 0) AS stock
             FROM medicamento m
             INNER JOIN detalle_venta dv ON dv.med_id = m.med_id
             INNER JOIN ventas v ON v.ve_id = dv.ve_id AND v.su_id = :sucursal_id
@@ -138,6 +151,7 @@ class ventaModel extends mainModel
                 WHERE lm_estado = 'activo' AND su_id = :sucursal_id2
                 GROUP BY med_id
             ) lm_ag ON lm_ag.med_id = m.med_id
+            LEFT JOIN inventarios inv ON inv.med_id = m.med_id AND inv.su_id = :sucursal_id3
             WHERE lm_ag.min_precio IS NOT NULL AND lm_ag.min_precio > 0
             GROUP BY m.med_id
             ORDER BY vendidos DESC
@@ -147,6 +161,7 @@ class ventaModel extends mainModel
         $sql->bindValue(":limit", (int)$limit, PDO::PARAM_INT);
         $sql->bindValue(":sucursal_id", (int)$sucursal_id, PDO::PARAM_INT);
         $sql->bindValue(":sucursal_id2", (int)$sucursal_id, PDO::PARAM_INT);
+        $sql->bindValue(":sucursal_id3", (int)$sucursal_id, PDO::PARAM_INT);
 
         $sql->execute();
         return $sql->fetchAll(PDO::FETCH_ASSOC);
@@ -202,9 +217,9 @@ class ventaModel extends mainModel
         $db = mainModel::conectar();
         $stmt = $db->prepare("
             INSERT INTO ventas
-                (ve_numero_documento, ve_fecha_emision, cl_id, us_id, su_id, ve_subtotal, ve_impuesto, ve_total, ve_tipo_documento, ve_estado, caja_id)
+                (ve_numero_documento, ve_fecha_emision, cl_id, us_id, su_id, ve_subtotal, ve_impuesto, ve_total, ve_tipo_documento, ve_estado,ve_metodo_pago, caja_id)
             VALUES
-                (:ve_numero_documento, NOW(), :cl_id, :us_id, :su_id, :ve_subtotal, :ve_impuesto, :ve_total, :ve_tipo_documento, 1, :caja_id)
+                (:ve_numero_documento, NOW(), :cl_id, :us_id, :su_id, :ve_subtotal, :ve_impuesto, :ve_total, :ve_tipo_documento, 1,:ve_metodo_pago, :caja_id)
         ");
         $stmt->bindParam(":ve_numero_documento", $datos['ve_numero_documento']);
         $stmt->bindParam(":cl_id", $datos['cl_id']);
@@ -214,6 +229,7 @@ class ventaModel extends mainModel
         $stmt->bindParam(":ve_impuesto", $datos['ve_impuesto']);
         $stmt->bindParam(":ve_total", $datos['ve_total']);
         $stmt->bindParam(":ve_tipo_documento", $datos['ve_tipo_documento']);
+        $stmt->bindParam(":ve_metodo_pago", $datos['ve_metodo_pago']);
         $stmt->bindParam(":caja_id", $datos['caja_id']);
         $stmt->execute();
         return (int) $db->lastInsertId();
@@ -400,6 +416,53 @@ class ventaModel extends mainModel
         $upd->execute();
 
         return $upd->rowCount() > 0;
+    }
+
+    public static function verificar_estado_lote_terminado_model($lm_id)
+    {
+        if ($lm_id <= 0) return false;
+
+        $db = mainModel::conectar();
+
+        try {
+            // Consultar estado actual del lote
+            $check_stmt = $db->prepare("
+                    SELECT lm_cant_actual_unidades, lm_estado 
+                    FROM lote_medicamento 
+                    WHERE lm_id = :lm_id
+                ");
+            $check_stmt->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
+            $check_stmt->execute();
+
+            $lote = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$lote) return false;
+
+            $unidades = (int)$lote['lm_cant_actual_unidades'];
+            $estado_actual = $lote['lm_estado'];
+
+            // Si llegó a 0 unidades y está activo, cambiar a terminado
+            if ($unidades === 0 && $estado_actual === 'activo') {
+                $update_stmt = $db->prepare("
+                        UPDATE lote_medicamento 
+                        SET lm_estado = 'terminado',
+                            lm_actualizado_en = NOW()
+                        WHERE lm_id = :lm_id
+                    ");
+                $update_stmt->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
+                $update_stmt->execute();
+
+                // Log para debugging
+                error_log("✅ Lote #{$lm_id} actualizado a estado 'terminado' (stock agotado)");
+
+                return $update_stmt->rowCount() > 0;
+            }
+
+            return false;
+        } catch (PDOException $e) {
+            error_log("❌ Error verificando estado lote: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**************************************************************************
@@ -654,57 +717,50 @@ class ventaModel extends mainModel
     /**************************************************************************
      * generar_pdf_factura_model (usa libs/pdf_factura.php)
      **************************************************************************/
-    protected static function generar_pdf_factura_model($fa_id)
+    protected static function generar_pdf_factura_model($fa_id, $tipo = 'nota_venta')
     {
-        // ============================
-        // 1) VALIDAR ID
-        // ============================
         $fa_id = (int)$fa_id;
-        if ($fa_id <= 0) {
-            return false;
-        }
+        if ($fa_id <= 0) return false;
 
-        // ============================
-        // 2) CARGAR FPDF CON RUTA SEGURA
-        // ============================
-        $root = dirname(__DIR__); // Ruta base del proyecto
-        require_once $root . "/libs/fpdf/fpdf.php";
+        try {
+            // ✅ CARGAR FPDF CON RUTA CORRECTA
+            $root = dirname(__DIR__); // Ruta base del proyecto
+            require_once $root . "/libs/fpdf/fpdf.php";
 
-        // ============================
-        // 3) CONSULTAR FACTURA + VENTA (CORREGIDO)
-        // ============================
-        $sql = "
+            // Conectar a BD
+            $db = mainModel::conectar();
+
+            // ✅ CONSULTAR DATOS DE FACTURA Y VENTA
+            $sql = "
             SELECT f.*, 
                 v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_fecha_emision,
-                c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet, 
+                c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet,
                 u.us_nombres, u.us_apellido_paterno,
-                s.su_nombre, s.su_direccion, s.su_telefono
+                s.su_nombre
             FROM factura f
             INNER JOIN ventas v ON v.ve_id = f.ve_id
             LEFT JOIN clientes c ON c.cl_id = f.cl_id
             INNER JOIN usuarios u ON u.us_id = f.us_id
             INNER JOIN sucursales s ON s.su_id = f.su_id
             WHERE f.fa_id = :fa_id
-            LIMIT 1
         ";
-        $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->bindParam(":fa_id", $fa_id);
-        $stmt->execute();
 
-        if ($stmt->rowCount() <= 0) {
-            return false;
-        }
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":fa_id", $fa_id, PDO::PARAM_INT);
+            $stmt->execute();
 
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        $ve_id = (int)$data['ve_id'];
+            if ($stmt->rowCount() <= 0) {
+                error_log("❌ No se encontró factura con ID: {$fa_id}");
+                return false;
+            }
 
-        // ============================
-        // 4) CONSULTAR DETALLE DE VENTA (CORREGIDO)
-        // ============================
-        $sql2 = "
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            $ve_id = (int)$data['ve_id'];
+
+            // ✅ CONSULTAR DETALLE DE VENTA
+            $sql2 = "
             SELECT dv.*, 
                 m.med_nombre_quimico AS med_nombre,
-                m.med_codigo_barras AS med_codigo,
                 COALESCE(m.med_version_comercial, '') AS version_comercial,
                 COALESCE(ff.ff_nombre, '') AS presentacion
             FROM detalle_venta dv
@@ -712,236 +768,177 @@ class ventaModel extends mainModel
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
             WHERE dv.ve_id = :ve_id
         ";
-        $stmt2 = mainModel::conectar()->prepare($sql2);
-        $stmt2->bindParam(":ve_id", $ve_id);
-        $stmt2->execute();
-        $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            $stmt2 = $db->prepare($sql2);
+            $stmt2->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
+            $stmt2->execute();
+            $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-        // ============================
-        // 5) CONSULTAR CONFIGURACIÓN DE EMPRESA (CORREGIDO)
-        // ============================
-        $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
-        $cfg_stmt = mainModel::conectar()->prepare($cfg_sql);
-        $cfg_stmt->execute();
-        $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
+            // ✅ CONSULTAR CONFIGURACIÓN DE EMPRESA
+            $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
+            $cfg_stmt = $db->prepare($cfg_sql);
+            $cfg_stmt->execute();
+            $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Validar si existe configuración, si no usar valores por defecto
-        if (!$empresa) {
-            $empresa = [
-                'ce_nombre' => 'SAMFARM',
-                'ce_nit' => 'S/N',
-                'ce_direccion' => 'Dirección no configurada',
-                'ce_telefono' => 'S/N',
-                'ce_correo' => '',
-                'ce_logo' => null
-            ];
-        }
-
-        // ============================
-        // 6) GENERAR ARCHIVO PDF
-        // ============================
-        $pdf = new FPDF("P", "mm", "A4");
-        $pdf->AddPage();
-
-        // ------------ ENCABEZADO CON LOGO Y DATOS EMPRESA ------------
-        $logo_x = 10;
-        $logo_y = 8;
-        $logo_ancho = 35;
-
-        // Logo (si existe)
-        if (!empty($empresa['ce_logo']) && file_exists($root . "/storage/" . $empresa['ce_logo'])) {
-            $pdf->Image($root . "/storage/" . $empresa['ce_logo'], $logo_x, $logo_y, $logo_ancho);
-            $margen_info_empresa = $logo_x + $logo_ancho + 5;
-        } else {
-            $margen_info_empresa = 10;
-        }
-
-        // Información de la empresa (lado derecho)
-        $pdf->SetFont("Arial", "B", 14);
-        $pdf->SetXY($margen_info_empresa + 60, $logo_y);
-        $pdf->Cell(0, 8, utf8_decode($empresa['ce_nombre']), 0, 1, "R");
-
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->SetX($margen_info_empresa + 60);
-        $pdf->Cell(0, 6, "NIT: " . ($empresa['ce_nit'] ?? 'S/N'), 0, 1, "R");
-
-        if (!empty($empresa['ce_direccion'])) {
-            $pdf->SetX($margen_info_empresa + 60);
-            $pdf->Cell(0, 6, utf8_decode($empresa['ce_direccion']), 0, 1, "R");
-        }
-
-        if (!empty($empresa['ce_telefono'])) {
-            $pdf->SetX($margen_info_empresa + 60);
-            $pdf->Cell(0, 6, utf8_decode("Tel: " . $empresa['ce_telefono']), 0, 1, "R");
-        }
-
-        if (!empty($empresa['ce_correo'])) {
-            $pdf->SetX($margen_info_empresa + 60);
-            $pdf->Cell(0, 6, utf8_decode("Email: " . $empresa['ce_correo']), 0, 1, "R");
-        }
-
-        $pdf->Ln(5);
-
-        // ------------ LÍNEA SEPARADORA ------------
-        $pdf->SetDrawColor(200, 200, 200);
-        $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
-        $pdf->Ln(3);
-
-        // ============================
-        // 7) TÍTULO
-        // ============================
-        $pdf->SetFont("Arial", "B", 16);
-        $pdf->SetTextColor(50, 50, 50);
-        $pdf->Cell(0, 10, "NOTA DE VENTA", 0, 1, "C");
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->Ln(2);
-
-        // ============================
-        // 8) INFO CLIENTE Y VENTA (CORREGIDO)
-        // ============================
-        $pdf->SetFont("Arial", "", 10);
-
-        // Construir nombre completo del cliente
-        $nombre_completo = trim(
-            ($data['cl_nombres'] ?? '') . ' ' .
-                ($data['cl_apellido_paterno'] ?? '') . ' ' .
-                ($data['cl_apellido_materno'] ?? '')
-        );
-        if (empty($nombre_completo)) {
-            $nombre_completo = "Cliente General";
-        }
-
-        // Construir nombre vendedor
-        $vendedor = trim(
-            ($data['us_nombres'] ?? '') . ' ' .
-                ($data['us_apellido_paterno'] ?? '')
-        );
-
-        // Información en dos columnas
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(50, 6, "Cliente:", 0, 0);
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(90, 6, utf8_decode($nombre_completo), 0, 0);
-
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(30, 6, "Nro Venta:", 0, 0, "R");
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(0, 6, $data['ve_numero_documento'], 0, 1);
-
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(50, 6, "CI/NIT:", 0, 0);
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(90, 6, ($data['cl_carnet'] ?? "S/N"), 0, 0);
-
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(30, 6, "Fecha:", 0, 0, "R");
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(0, 6, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
-
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(50, 6, "Vendedor:", 0, 0);
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(90, 6, utf8_decode($vendedor), 0, 0);
-
-        $pdf->SetFont("Arial", "B", 10);
-        $pdf->Cell(30, 6, "Sucursal:", 0, 0, "R");
-        $pdf->SetFont("Arial", "", 10);
-        $pdf->Cell(0, 6, utf8_decode($data['su_nombre']), 0, 1);
-
-        $pdf->Ln(5);
-
-        // ============================
-        // 9) DETALLE DE PRODUCTOS (MEJORADO)
-        // ============================
-        $pdf->SetFillColor(240, 240, 240);
-        $pdf->SetFont("Arial", "B", 9);
-        $pdf->Cell(10, 8, "N°", 1, 0, 'C', true);
-        $pdf->Cell(80, 8, utf8_decode("Descripción"), 1, 0, 'C', true);
-        $pdf->Cell(20, 8, "Cant.", 1, 0, 'C', true);
-        $pdf->Cell(30, 8, "P. Unit.", 1, 0, 'C', true);
-        $pdf->Cell(25, 8, "Desc.", 1, 0, 'C', true);
-        $pdf->Cell(25, 8, "Total", 1, 0, 'C', true);
-        $pdf->Ln();
-
-        $pdf->SetFont("Arial", "", 9);
-        $contador = 1;
-        $subtotal_general = 0;
-        $descuento_general = 0;
-
-        foreach ($detalles as $d) {
-            // Construir nombre completo del producto
-            $nombre_producto = $d['med_nombre'];
-            if (!empty($d['version_comercial'])) {
-                $nombre_producto .= " - " . $d['version_comercial'];
-            }
-            if (!empty($d['presentacion'])) {
-                $nombre_producto .= " (" . $d['presentacion'] . ")";
+            if (!$empresa) {
+                $empresa = [
+                    'ce_nombre' => 'SAMFARM',
+                    'ce_nit' => 'S/N',
+                    'ce_direccion' => '',
+                    'ce_telefono' => '',
+                    'ce_correo' => '',
+                    'ce_logo' => null
+                ];
             }
 
-            $pdf->Cell(10, 7, $contador, 1, 0, 'C');
-            $pdf->Cell(80, 7, utf8_decode($nombre_producto), 1);
-            $pdf->Cell(20, 7, $d['dv_cantidad'], 1, 0, 'C');
-            $pdf->Cell(30, 7, number_format($d['dv_precio_unitario'], 2) . " Bs", 1, 0, 'R');
-            $pdf->Cell(25, 7, number_format($d['dv_descuento'], 2) . " Bs", 1, 0, 'R');
-            $pdf->Cell(25, 7, number_format($d['dv_subtotal'], 2) . " Bs", 1, 0, 'R');
-            $pdf->Ln();
+            // ✅ CREAR PDF (tamaño media carta para nota de venta)
+            $pdf = new FPDF('P', 'mm', array(140, 216));
+            $pdf->AddPage();
+            $pdf->SetMargins(10, 10, 10);
+            $pdf->SetAutoPageBreak(true, 10);
 
-            $subtotal_general += ($d['dv_cantidad'] * $d['dv_precio_unitario']);
-            $descuento_general += $d['dv_descuento'];
-            $contador++;
+            // ✅ ENCABEZADO CON LOGO
+            $logo_x = 10;
+            $logo_y = 8;
+
+            if (!empty($empresa['ce_logo']) && file_exists($root . '/storage/' . $empresa['ce_logo'])) {
+                $pdf->Image($root . '/storage/' . $empresa['ce_logo'], $logo_x, $logo_y, 25);
+            }
+
+            // ✅ INFORMACIÓN EMPRESA (sin función utf8_decode)
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->SetXY(80, $logo_y);
+            $pdf->Cell(0, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $empresa['ce_nombre']), 0, 1, 'R');
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetX(80);
+            $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'R');
+
+            if (!empty($empresa['ce_direccion'])) {
+                $pdf->SetX(80);
+                $pdf->Cell(0, 4, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $empresa['ce_direccion']), 0, 1, 'R');
+            }
+
+            if (!empty($empresa['ce_telefono'])) {
+                $pdf->SetX(80);
+                $pdf->Cell(0, 4, 'Tel: ' . $empresa['ce_telefono'], 0, 1, 'R');
+            }
+
+            $pdf->Ln(3);
+            $pdf->Line(10, $pdf->GetY(), 130, $pdf->GetY());
+            $pdf->Ln(2);
+
+            // ✅ TÍTULO
+            $pdf->SetFont('Arial', 'B', 13);
+            $pdf->Cell(0, 6, 'NOTA DE VENTA', 0, 1, 'C');
+            $pdf->Ln(2);
+
+            // ✅ INFORMACIÓN CLIENTE Y VENTA
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(30, 5, 'Cliente:', 0, 0);
+            $pdf->SetFont('Arial', '', 8);
+
+            $nombre_cliente = trim(
+                ($data['cl_nombres'] ?? '') . ' ' .
+                    ($data['cl_apellido_paterno'] ?? '') . ' ' .
+                    ($data['cl_apellido_materno'] ?? '')
+            );
+            if (empty($nombre_cliente)) $nombre_cliente = 'Cliente General';
+
+            $pdf->Cell(60, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $nombre_cliente), 0, 0);
+
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(15, 5, 'N Venta:', 0, 0, 'R');
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->Cell(0, 5, $data['ve_numero_documento'], 0, 1);
+
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(30, 5, 'CI/NIT:', 0, 0);
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->Cell(60, 5, $data['cl_carnet'] ?? 'S/N', 0, 0);
+
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(15, 5, 'Fecha:', 0, 0, 'R');
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->Cell(0, 5, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
+
+            $pdf->Ln(3);
+
+            // ✅ TABLA DE PRODUCTOS
+            $pdf->SetFillColor(240, 240, 240);
+            $pdf->SetFont('Arial', 'B', 7);
+            $pdf->Cell(8, 5, 'N', 1, 0, 'C', true);
+            $pdf->Cell(55, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Descripción'), 1, 0, 'C', true);
+            $pdf->Cell(12, 5, 'Cant.', 1, 0, 'C', true);
+            $pdf->Cell(20, 5, 'P. Unit.', 1, 0, 'C', true);
+            $pdf->Cell(12, 5, 'Desc.', 1, 0, 'C', true);
+            $pdf->Cell(0, 5, 'Total', 1, 1, 'C', true);
+
+            $pdf->SetFont('Arial', '', 7);
+            $contador = 1;
+            $subtotal_general = 0;
+            $descuento_general = 0;
+
+            foreach ($detalles as $d) {
+                $nombre_producto = $d['med_nombre'];
+                if (!empty($d['version_comercial'])) {
+                    $nombre_producto .= ' - ' . $d['version_comercial'];
+                }
+
+                // Truncar nombre si es muy largo
+                $nombre_producto = substr($nombre_producto, 0, 45);
+
+                $pdf->Cell(8, 5, $contador, 1, 0, 'C');
+                $pdf->Cell(55, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $nombre_producto), 1);
+                $pdf->Cell(12, 5, $d['dv_cantidad'], 1, 0, 'C');
+                $pdf->Cell(20, 5, number_format($d['dv_precio_unitario'], 2), 1, 0, 'R');
+                $pdf->Cell(12, 5, number_format($d['dv_descuento'], 2), 1, 0, 'R');
+                $pdf->Cell(0, 5, number_format($d['dv_subtotal'], 2), 1, 1, 'R');
+
+                $subtotal_general += ($d['dv_cantidad'] * $d['dv_precio_unitario']);
+                $descuento_general += $d['dv_descuento'];
+                $contador++;
+            }
+
+            // ✅ TOTALES
+            $pdf->Ln(2);
+            $pdf->SetFont('Arial', 'B', 8);
+
+            // Subtotal
+            $pdf->Cell(95, 5, '', 0, 0);
+            $pdf->Cell(15, 5, 'Subtotal:', 0, 0, 'R');
+            $pdf->Cell(0, 5, number_format($subtotal_general, 2) . ' Bs', 0, 1, 'R');
+
+            // Descuento
+            if ($descuento_general > 0) {
+                $pdf->Cell(95, 5, '', 0, 0);
+                $pdf->Cell(15, 5, 'Descuento:', 0, 0, 'R');
+                $pdf->Cell(0, 5, '- ' . number_format($descuento_general, 2) . ' Bs', 0, 1, 'R');
+            }
+
+            // Total
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetFillColor(240, 240, 240);
+            $pdf->Cell(95, 6, '', 0, 0);
+            $pdf->Cell(15, 6, 'TOTAL:', 1, 0, 'R', true);
+            $pdf->Cell(0, 6, number_format($data['ve_total'], 2) . ' Bs', 1, 1, 'R', true);
+
+            // ✅ PIE DE PÁGINA
+            $pdf->Ln(6);
+            $pdf->SetFont('Arial', 'I', 7);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Gracias por su compra'), 0, 1, 'C');
+            $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Este documento es una nota de venta, no es un documento fiscal'), 0, 1, 'C');
+
+            // ✅ RETORNAR CONTENIDO EN BASE64
+            $contenido_pdf = $pdf->Output('S'); // 'S' = String
+            $pdf_base64 = base64_encode($contenido_pdf);
+
+            error_log("✅ PDF generado exitosamente para factura #{$fa_id}");
+            return $pdf_base64;
+        } catch (Exception $e) {
+            error_log("❌ Error generando PDF: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return false;
         }
-
-        // ============================
-        // 10) TOTALES (MEJORADO)
-        // ============================
-        $pdf->Ln(3);
-        $pdf->SetFont("Arial", "B", 10);
-
-        // Subtotal
-        $pdf->Cell(140, 6, "", 0, 0);
-        $pdf->Cell(25, 6, "Subtotal:", 0, 0, 'R');
-        $pdf->Cell(25, 6, number_format($subtotal_general, 2) . " Bs", 0, 1, 'R');
-
-        // Descuento
-        if ($descuento_general > 0) {
-            $pdf->Cell(140, 6, "", 0, 0);
-            $pdf->Cell(25, 6, "Descuento:", 0, 0, 'R');
-            $pdf->Cell(25, 6, "- " . number_format($descuento_general, 2) . " Bs", 0, 1, 'R');
-        }
-
-        // Total
-        $pdf->SetFont("Arial", "B", 12);
-        $pdf->SetFillColor(240, 240, 240);
-        $pdf->Cell(140, 8, "", 0, 0);
-        $pdf->Cell(25, 8, "TOTAL:", 1, 0, 'R', true);
-        $pdf->Cell(25, 8, number_format($data['ve_total'], 2) . " Bs", 1, 1, 'R', true);
-
-        // ============================
-        // 11) PIE DE PÁGINA
-        // ============================
-        $pdf->Ln(10);
-        $pdf->SetFont("Arial", "I", 8);
-        $pdf->SetTextColor(100, 100, 100);
-        $pdf->Cell(0, 5, utf8_decode("Gracias por su compra"), 0, 1, 'C');
-        $pdf->Cell(0, 5, utf8_decode("Este documento es una nota de venta, no es un documento fiscal"), 0, 1, 'C');
-
-        // ============================
-        // 12) GUARDAR ARCHIVO PDF
-        // ============================
-        $filename = "nota_venta_" . $data['fa_numero'] . ".pdf";
-        $full_path = $root . "/facturas/" . $filename;
-
-        if (!file_exists($root . "/facturas")) {
-            mkdir($root . "/facturas", 0777, true);
-        }
-
-        $pdf->Output("F", $full_path);
-
-        // ============================
-        // 13) RETORNAR URL PÚBLICA PARA ABRIR EN NUEVA PESTAÑA
-        // ============================
-        $url = SERVER_URL . "facturas/" . $filename;
-
-        return $url;
     }
 }

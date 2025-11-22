@@ -20,8 +20,22 @@ class loteController extends loteModel
         $id = mainModel::limpiar_cadena($id);
         return loteModel::datos_lote_model($id);
     }
+
     public function paginado_lote_controller($pagina, $registros, $url, $busqueda = "", $f1 = "", $f2 = "", $f3 = "")
     {
+        /* Validar permisos de acceso */
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+        $id_usuario = $_SESSION['id_smp'] ?? 0;
+
+        // Vendedores (rol 3) NO pueden acceder
+        if ($rol_usuario == 3) {
+            return '<div class="error" style="padding:30px;text-align:center;">
+                        <h3>⛔ Acceso Denegado</h3>
+                        <p>No tiene permisos para ver esta sección</p>
+                    </div>';
+        }
+
         /* limpiamos cadenas para evitar inyección */
         $pagina = mainModel::limpiar_cadena($pagina);
         $registros = mainModel::limpiar_cadena($registros);
@@ -33,69 +47,81 @@ class loteController extends loteModel
         $f3 = mainModel::limpiar_cadena($f3);
 
         $tabla = '';
-
         $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
         $inicio = ($pagina > 0) ? (($pagina * $registros) - $registros) : 0;
 
         // Construir WHERE dinámico
         $whereParts = [];
 
-        // Búsqueda por término
-        if (isset($busqueda) && $busqueda != '') {
-            $b = $busqueda;
+        // 🐛 DEBUG TEMPORAL (puedes comentarlo después)
+        error_log("=== FILTROS DEBUG ===");
+        error_log("Rol: $rol_usuario | Sucursal: $sucursal_usuario");
+        error_log("F1='$f1' | F2='$f2' | F3='$f3' | Búsqueda='$busqueda'");
+
+        // 🏢 FILTRO POR SUCURSAL según rol
+        if ($rol_usuario == 1) {
+            // ADMIN: puede ver todas o filtrar por sucursal específica
+            if ($f3 !== '') {
+                $whereParts[] = "lm.su_id = '" . $f3 . "'";
+                error_log("✅ Admin filtrando por sucursal: $f3");
+            } else {
+                error_log("👁️ Admin viendo TODAS las sucursales");
+            }
+        } elseif ($rol_usuario == 2) {
+            // GERENTE: SIEMPRE filtra por su sucursal
+            $whereParts[] = "lm.su_id = '" . $sucursal_usuario . "'";
+            error_log("🔒 Gerente viendo solo sucursal: $sucursal_usuario");
+        }
+
+        // 🔍 Búsqueda limitada a nombre químico y principio activo
+        if (!empty($busqueda)) {
             $whereParts[] = "(
-                lm.lm_numero_lote LIKE '%$b%' OR
-                m.med_nombre_quimico LIKE '%$b%' OR
-                m.med_principio_activo LIKE '%$b%' OR
-                p.pr_nombres LIKE '%$b%'
+                m.med_nombre_quimico LIKE '%$busqueda%' OR
+                m.med_principio_activo LIKE '%$busqueda%'
             )";
         }
 
-        // filtro select1 (ej: estado)
+        // 🎛️ Select 1: Estado del lote
         if ($f1 !== '') {
-            // si es lista de valores separados por comas se puede adaptar; aquí simple igualdad o IN
-            // suponemos que select1 corresponde a lm.lm_estado
-            $whereParts[] = "lm.lm_estado = '$f1'";
-        }
-
-        // filtro select2 (ej: si data-type="fecha", se envió el número de mes)
-        if ($f2 !== '') {
-            // Si el select2 viene marcado como fecha (ej: mes), intenta filtrar por MONTH(lm_fecha_ingreso)
-            // Permitimos que el valor pueda ser "YYYY" o "MM" o "YYYY-MM"
-            if (is_numeric($f2)) {
-                // mes (1..12)
-                $mes = (int)$f2;
-                if ($mes >= 1 && $mes <= 12) {
-                    $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = $mes";
-                } else {
-                    // si viene un año
-                    $whereParts[] = "YEAR(lm.lm_fecha_ingreso) = " . intval($f2);
-                }
-            } else {
-                // fallback: intentar YEAR-MONTH
-                if (preg_match('/^\d{4}-\d{2}$/', $f2)) {
-                    $parts = explode('-', $f2);
-                    $y = intval($parts[0]);
-                    $m = intval($parts[1]);
-                    $whereParts[] = "(YEAR(lm.lm_fecha_ingreso) = $y AND MONTH(lm.lm_fecha_ingreso) = $m)";
-                }
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            if (in_array($f1, $estados_validos)) {
+                $whereParts[] = "lm.lm_estado = '$f1'";
             }
         }
 
-        // filtro select3 (ej: sucursal su_id)
-        if ($f3 !== '') {
-            // supondremos que corresponde a su_id
-            $whereParts[] = "lm.su_id = " . intval($f3);
+        // 🎛️ Select 2: Mes
+        if ($f2 !== '' && is_numeric($f2)) {
+            $mes = (int)$f2;
+            if ($mes >= 1 && $mes <= 12) {
+                $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = $mes";
+            }
         }
 
-        // Si no hay búsqueda ni filtros, aplicar filtro por defecto (en_espera y activo)
-        if (count($whereParts) === 0) {
-            $whereSQL = "WHERE lm.lm_estado IN ('en_espera','activo')";
-        } else {
-            $whereSQL = "WHERE " . implode(' AND ', $whereParts);
+        // 📅 Filtros de fecha con validación mejorada
+        $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
+        $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
+
+        $fecha_desde_valida = !empty($fecha_desde) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_desde);
+        $fecha_hasta_valida = !empty($fecha_hasta) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_hasta);
+
+        if ($fecha_desde_valida && $fecha_hasta_valida) {
+            $timestamp_desde = strtotime($fecha_desde);
+            $timestamp_hasta = strtotime($fecha_hasta);
+
+            if ($timestamp_desde <= $timestamp_hasta) {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '$fecha_desde' AND '$fecha_hasta'";
+            } else {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '$fecha_hasta' AND '$fecha_desde'";
+            }
+        } elseif ($fecha_desde_valida) {
+            $whereParts[] = "DATE(lm.lm_fecha_ingreso) >= '$fecha_desde'";
+        } elseif ($fecha_hasta_valida) {
+            $whereParts[] = "DATE(lm.lm_fecha_ingreso) <= '$fecha_hasta'";
         }
 
-        // Consulta principal con SQL_CALC_FOUND_ROWS
+        // ✅ Construir cláusula WHERE
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+
         $consulta = "
             SELECT 
                 SQL_CALC_FOUND_ROWS 
@@ -123,76 +149,85 @@ class loteController extends loteModel
             LIMIT $inicio, $registros
         ";
 
-        $conexion = mainModel::conectar();
-        $datosStmt = $conexion->query($consulta);
-        $datos = $datosStmt->fetchAll();
+        error_log("=== SQL GENERADO ===");
+        error_log($consulta);
 
-        $totalStmt = $conexion->query('SELECT FOUND_ROWS()');
-        $total = (int) $totalStmt->fetchColumn();
+        try {
+            $conexion = mainModel::conectar();
+            $datosStmt = $conexion->query($consulta);
+            $datos = $datosStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $totalStmt = $conexion->query('SELECT FOUND_ROWS()');
+            $total = (int) $totalStmt->fetchColumn();
+
+            error_log("Resultados: " . count($datos) . " de $total total");
+        } catch (PDOException $e) {
+            error_log("❌ ERROR SQL: " . $e->getMessage());
+            return '<div class="error" style="padding:20px;color:red;border:2px solid red;margin:10px;">
+                    <strong>Error en la consulta SQL:</strong><br>' .
+                htmlspecialchars($e->getMessage()) .
+                '</div>';
+        }
 
         $Npaginas = ceil($total / $registros);
 
-        // inicio de tabla (igual que tu versión)
+        // 🏢 Determinar si mostrar columna SUCURSAL (solo para admin)
+        $mostrar_columna_sucursal = ($rol_usuario == 1);
+        $colspan_total = $mostrar_columna_sucursal ? 14 : 13;
+
         $tabla .= '
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>N° LOTE</th>
-                                <th>MEDICAMENTO</th>
-                                <th>PROVEEDOR</th>
-                                <th>SUCURSAL</th>
-                                <th>CANT. INICIAL</th>
-                                <th>CANT. ACTUAL</th>
-                                <th>PRECIO COMPRA</th>
-                                <th>PRECIO VENTA</th>
-                                <th>FECHA INGRESO</th>
-                                <th>FECHA VENCIMIENTO</th>
-                                <th>ESTADO</th>
-                                <th>ACCIONES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            ';
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>N° LOTE</th>
+                            <th>MEDICAMENTO</th>
+                            <th>PROVEEDOR</th>' .
+            ($mostrar_columna_sucursal ? '<th>🏢 SUCURSAL</th>' : '') .
+            '<th>CANT. INICIAL</th>
+                            <th>CANT. ACTUAL</th>
+                            <th>PRECIO COMPRA</th>
+                            <th>PRECIO VENTA</th>
+                            <th>FECHA INGRESO</th>
+                            <th>FECHA VENCIMIENTO</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $contador = $inicio + 1;
             $reg_inicio = $inicio + 1;
+
             foreach ($datos as $rows) {
                 $fecha_actual = date('Y-m-d');
                 $fecha_vencimiento = $rows['lm_fecha_vencimiento'];
-                $estado_class = '';
-                $estado_texto = '';
 
+                // Generar badge de estado
                 switch ($rows['lm_estado']) {
                     case 'en_espera':
-                        $estado_class = 'estado-espera';
-                        $estado_texto = 'En Espera';
+                        $estado_html = '<span class="estado-badge espera"><ion-icon name="time-outline"></ion-icon> En Espera</span>';
                         break;
                     case 'activo':
-                        $estado_class = 'estado-activo';
-                        $estado_texto = 'Activo';
+                        $estado_html = '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>';
                         break;
                     case 'terminado':
-                        $estado_class = 'estado-terminado';
-                        $estado_texto = 'Terminado';
+                        $estado_html = '<span class="estado-badge terminado"><ion-icon name="archive-outline"></ion-icon> Terminado</span>';
                         break;
                     case 'caducado':
-                        $estado_class = 'estado-caducado';
-                        $estado_texto = 'Caducado';
+                        $estado_html = '<span class="estado-badge caducado"><ion-icon name="warning-outline"></ion-icon> Caducado</span>';
                         break;
                     case 'devuelto':
-                        $estado_class = 'estado-devuelto';
-                        $estado_texto = 'Devuelto';
+                        $estado_html = '<span class="estado-badge devuelto"><ion-icon name="return-down-back-outline"></ion-icon> Devuelto</span>';
                         break;
                     case 'bloqueado':
-                        $estado_class = 'estado-bloqueado';
-                        $estado_texto = 'Bloqueado';
+                        $estado_html = '<span class="estado-badge bloqueado"><ion-icon name="lock-closed-outline"></ion-icon> Bloqueado</span>';
                         break;
                     default:
-                        $estado_class = 'estado-desconocido';
-                        $estado_texto = ucfirst($rows['lm_estado']);
+                        $estado_html = '<span class="estado-badge desconocido">' . ucfirst($rows['lm_estado']) . '</span>';
                 }
 
                 $dias_restantes = '';
@@ -200,71 +235,63 @@ class loteController extends loteModel
                     $diff = strtotime($fecha_vencimiento) - strtotime($fecha_actual);
                     $dias = floor($diff / (60 * 60 * 24));
                     if ($dias <= 30 && $dias > 0) {
-                        $dias_restantes = '<br><small style="color: orange;">Vence en ' . $dias . ' días</small>';
+                        $dias_restantes = '<br><small style="color: orange;"><ion-icon name="alarm-outline"></ion-icon> Vence en ' . $dias . ' días</small>';
                     } elseif ($dias <= 0) {
-                        $dias_restantes = '<br><small style="color: red;">¡VENCIDO!</small>';
+                        $dias_restantes = '<br><small style="color: red;font-weight:bold;"><ion-icon name="trash-bin-outline"></ion-icon> ¡VENCIDO!</small>';
                     }
                 }
 
                 $tabla .= '
-                        <tr>
-                            <td>' . $contador . '</td>
-                            <td>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</td>
-                            <td>' . $rows['med_nombre_quimico'] . '<br><small>' . $rows['med_principio_activo'] . '</small></td>
-                            <td>' . ($rows['pr_nombres'] ?? 'N/A') . '</td>
-                            <td>' . $rows['su_nombre'] . '</td>
-                            <td>' . $rows['lm_cantidad_inicial'] . '</td>
-                            <td><strong>' . $rows['lm_cantidad_actual'] . '</strong></td>
-                            <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
-                            <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
-                            <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
-                            <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
-                            <td>
-                                ' .
+                    <tr>
+                        <td>' . $contador . '</td>
+                        <td><strong>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</strong></td>
+                        <td>' . htmlspecialchars($rows['med_nombre_quimico']) . '<br><small>' . htmlspecialchars($rows['med_principio_activo']) . '</small></td>
+                        <td>' . htmlspecialchars($rows['pr_nombres'] ?? 'N/A') . '</td>' .
+                    ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 10px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($rows['su_nombre']) . '</span></td>' : '') .
+                    '<td>' . $rows['lm_cantidad_inicial'] . '</td>
+                        <td><strong style="color:#1976D2;font-size:16px;">' . $rows['lm_cantidad_actual'] . '</strong></td>
+                        <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
+                        <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
+                        <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
+                        <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
+                        <td>' .
                     ($rows['lm_estado'] == "en_espera"
                         ? '<a href="#" 
-                                        class="btn-editar btn-activar-lote" 
-                                        data-id="' . $rows['lm_id'] . '" 
-                                        data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
-                                        title="Activar lote">
-                                        Activar
-                                    </a>'
-                        : '<span class="badge-' . $rows['lm_estado'] . '">' . $estado_texto . '</span>')
-                    . '
-                            </td>
-
-
-                            <td class="buttons">
-                                <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
-                            </td>
-                        </tr>
-                    ';
+                                class="btn-editar btn-activar-lote" 
+                                data-id="' . $rows['lm_id'] . '" 
+                                data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
+                                title="Activar lote">
+                                Activar
+                            </a>'
+                        : $estado_html)
+                    . '</td>
+                        <td class="buttons">
+                            <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
+                        </td>
+                    </tr>
+                ';
                 $contador++;
             }
             $reg_final = $contador - 1;
         } else {
-            if ($total >= 1) {
-                $tabla .= ' <tr><td colspan="13"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr> ';
-            } else {
-                $tabla .= ' <tr><td colspan="13">No hay registros</td></tr> ';
-            }
+            $tabla .= '<tr><td colspan="' . $colspan_total . '" style="text-align:center;padding:20px;color:#999;">
+                        📭 No hay registros que coincidan con los filtros aplicados
+                    </td></tr>';
         }
 
         $tabla .= '
                     </tbody>
-                    </table>
-                </div>
-            ';
+                </table>
+            </div>
+        ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p>Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
-            // mainModel::paginador_tablas_main debe usarse (ya adaptado)
+            $tabla .= '<p style="padding:10px;">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 
         return $tabla;
     }
-
 
 
     public function actualizar_lote_controller()
@@ -433,7 +460,8 @@ class loteController extends loteModel
         $datos_lote = [
             'lm_estado' => 'activo',
             'lm_id' => $id,
-            'parametro' => 'en_espera'
+            'parametro' => 'en_espera',
+            'us_id' => $_SESSION['id_smp']
         ];
         /* insertamos y actualizamos */
         $lote_up = loteModel::activar_lote_model($datos_lote);

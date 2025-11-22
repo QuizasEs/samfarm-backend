@@ -230,8 +230,17 @@ class ventaController extends ventaModel
         $total = isset($_POST['total_venta']) ? (float) $_POST['total_venta'] : 0.0;
         $dinero_recibido = isset($_POST['dinero_recibido_venta']) ? (float) $_POST['dinero_recibido_venta'] : 0.0;
         $cliente_id = isset($_POST['cliente_id']) && is_numeric($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
-        $metodo_pago = mainModel::limpiar_cadena($_POST['metodo_pago_venta'] ?? '');
-        $documento = mainModel::limpiar_cadena($_POST['documento_venta'] ?? 'nota de venta');
+        $metodo_pago = mainModel::limpiar_cadena($_POST['metodo_pago_venta']);
+        $documento = mainModel::limpiar_cadena($_POST['documento_venta']);
+
+
+        /* verificamos que metodo de pago y documento no esten vacios */
+        if ($metodo_pago == "" || !in_array($metodo_pago, ["targeta", "QR", "efectivo"])) {
+            $metodo_pago = "efectivo";
+        }
+        if ($documento == "" || !in_array($metodo_pago, ["factura", "nota de venta"])) {
+            $documento = "nota de venta";
+        }
 
         // Validaciones
         if (!is_array($venta_items) || count($venta_items) === 0) {
@@ -261,14 +270,13 @@ class ventaController extends ventaModel
                 "ve_impuesto" => 0.00,
                 "ve_total" => $total,
                 "ve_tipo_documento" => $documento,
+                "ve_metodo_pago" => $metodo_pago,
                 "caja_id" => $caja_id
             ];
             $ve_id = self::guardar_venta_model($datos_venta);
             if ($ve_id <= 0) throw new Exception("No se pudo registrar la venta");
 
-            // Procesar items: cada item puede referirse a unidades, blister o caja.
-            // Estructura esperada por item:
-            // { med_id, cantidad, tipo: 'unidad'|'blister'|'caja', precio, descuento }
+
             foreach ($venta_items as $item) {
                 $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
                 $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 0;
@@ -280,8 +288,6 @@ class ventaController extends ventaModel
                     throw new Exception("Ítem inválido");
                 }
 
-                // Convertir cantidad a unidades según tipo usando lotes (si possible).
-                // Para convertir a unidades exactas, usamos el primer lote disponible (solo para factor caja/blister).
                 $unidades_requeridas = $cantidad;
                 if ($tipo === 'caja' || $tipo === 'blister') {
                     // Obtener factor (unidades por tipo) preferentemente desde un lote activo.
@@ -328,6 +334,22 @@ class ventaController extends ventaModel
                     // Actualizar lote (unidades y cajas según factor)
                     $ok = self::descontar_unidades_lote_model($lm_id, $take);
                     if (!$ok) throw new Exception("No se pudo actualizar lote {$lm_id}");
+
+                    /* verifica que el estado de stock de los lotes */
+                    self::verificar_estado_lote_terminado_model($lm_id);
+                    // Registrar en historial_lote
+                    $historial_stmt = $db->prepare("
+                        INSERT INTO historial_lote (lm_id, us_id, hl_accion, hl_descripcion)
+                        VALUES (:lm_id, :us_id, 'terminacion', :descripcion)
+                    ");
+
+                    // Obtener usuario desde sesión (si está disponible)
+                    $us_id = isset($_SESSION['id_smp']) ? (int)$_SESSION['id_smp'] : null;
+
+                    $historial_stmt->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
+                    $historial_stmt->bindParam(":us_id", $us_id, PDO::PARAM_INT);
+                    $historial_stmt->bindValue(":descripcion", "Lote agotado por ventas, cambiado a estado 'terminado' automáticamente");
+                    $historial_stmt->execute();
 
                     // Registrar movimiento_inventario
                     $mov_inv = [
@@ -424,21 +446,24 @@ class ventaController extends ventaModel
             }
 
             // Generar PDF y commit
-            $pdf_url = self::generar_pdf_factura_model($fa_id);
-            if (!$pdf_url) {
-                // No abortamos la transacción por PDF, pero avisamos. (Si prefieres abortar, lanza excepción)
+            // Generar PDF en memoria (sin guardar)
+            $pdf_base64 = self::generar_pdf_factura_model($fa_id, 'nota_venta');
+
+            if (!$pdf_base64) {
+                error_log("⚠️ No se pudo generar PDF para factura #{$fa_id}, pero la venta se registró");
             }
 
             $db->commit();
 
-            // Responder con URL del PDF (frontend debe abrir con window.open)
+            // ✅ Responder con PDF en base64 para abrir en frontend
             echo json_encode([
-                'Alerta' => 'recargar',
+                'Alerta' => 'venta_exitosa',
                 'Titulo' => 'Venta registrada',
                 'texto' => 'La venta se registró correctamente',
                 'Tipo' => 'success',
-                'pdf_url' => $pdf_url
-            ]);
+                'pdf_data' => $pdf_base64,
+                'pdf_nombre' => "nota_venta_{$ve_numero_documento}.pdf"
+            ], JSON_UNESCAPED_UNICODE);
             exit();
         } catch (Exception $e) {
             $db->rollBack();

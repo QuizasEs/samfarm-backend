@@ -996,12 +996,13 @@
 
 <!-- script que manea ja busqueda de medicamentos lista de compras y envio por post -->
 <script>
+    // Script corregido para el control de stock en ventas
+    // Script completo de ventas con búsqueda por lote y tiempo real
     (function() {
-        // 🔒 VERIFICAR que el formulario de ventas existe en esta vista
         const formVenta = document.getElementById('form-venta-caja');
         if (!formVenta) {
             console.log('⚠️ Formulario de venta no encontrado, script no se ejecuta');
-            return; // Salir inmediatamente si no es la vista correcta
+            return;
         }
 
         console.log('✅ Script de ventas inicializado');
@@ -1011,12 +1012,10 @@
         let debounce = null;
 
         function $(s) {
-            // Buscar solo dentro del formulario de venta
             return formVenta.querySelector(s);
         }
 
         function $all(s) {
-            // Buscar solo dentro del formulario de venta
             return Array.from(formVenta.querySelectorAll(s));
         }
 
@@ -1106,16 +1105,28 @@
                 cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
                     tr.dataset.med = it.med_id;
+                    tr.dataset.lote = it.lote_id || '';
+
+                    // Mostrar nombre con información del lote si existe
+                    let nombreDisplay = escapeHtml(it.nombre);
+                    if (it.lote) {
+                        nombreDisplay += '<br><small style="color: #666;">' +
+                            '<ion-icon name="barcode-outline"></ion-icon> ' +
+                            escapeHtml(it.lote) +
+                            (it.linea ? ' | ' + escapeHtml(it.linea) : '') +
+                            '</small>';
+                    }
+
                     tr.innerHTML =
                         '<td>' + (i + 1) + '</td>' +
-                        '<td>' + escapeHtml(it.nombre) + '</td>' +
+                        '<td>' + nombreDisplay + '</td>' +
                         '<td>' + escapeHtml(it.presentacion || '') + '</td>' +
                         '<td><div class="table-cantidad">' +
-                        '<button type="button" class="qty-dec" data-med="' + it.med_id + '">' +
+                        '<button type="button" class="qty-dec" data-index="' + i + '">' +
                         '<ion-icon name="remove-outline"></ion-icon>' +
                         '</button>' +
-                        '<input type="number" class="qty-input" data-med="' + it.med_id + '" value="' + it.cantidad + '" min="1">' +
-                        '<button type="button" class="qty-inc" data-med="' + it.med_id + '">' +
+                        '<input type="number" class="qty-input" data-index="' + i + '" value="' + it.cantidad + '" min="1">' +
+                        '<button type="button" class="qty-inc" data-index="' + i + '">' +
                         '<ion-icon name="add-outline"></ion-icon>' +
                         '</button>' +
                         '</div></td>' +
@@ -1128,6 +1139,7 @@
 
             itemsHidden.value = JSON.stringify(cart.map(i => ({
                 med_id: i.med_id,
+                lote_id: i.lote_id || null,
                 cantidad: i.cantidad,
                 precio: Number(i.precio),
                 subtotal: Number((i.precio * i.cantidad).toFixed(2))
@@ -1140,26 +1152,30 @@
         function attachQtyEvents() {
             $all('.qty-inc').forEach(b => {
                 b.onclick = function() {
-                    changeQty(this.dataset.med, 1);
+                    const idx = parseInt(this.dataset.index);
+                    changeQtyByIndex(idx, 1);
                 };
             });
             $all('.qty-dec').forEach(b => {
                 b.onclick = function() {
-                    changeQty(this.dataset.med, -1);
+                    const idx = parseInt(this.dataset.index);
+                    changeQtyByIndex(idx, -1);
                 };
             });
             $all('.qty-input').forEach(i => {
                 i.onchange = function() {
-                    setQty(this.dataset.med, parseInt(this.value) || 0);
+                    const idx = parseInt(this.dataset.index);
+                    setQtyByIndex(idx, parseInt(this.value) || 0);
                 };
             });
         }
 
-        function changeQty(id, delta) {
-            const idx = cart.findIndex(c => String(c.med_id) === String(id));
-            if (idx === -1) return;
+        function changeQtyByIndex(idx, delta) {
+            if (idx < 0 || idx >= cart.length) return;
+
             const item = cart[idx];
             const nuevo = item.cantidad + delta;
+
             if (nuevo <= 0) {
                 Swal.fire({
                     title: '¿Eliminar medicamento?',
@@ -1178,18 +1194,29 @@
                 });
                 return;
             }
+
             if (item.stock != null && nuevo > item.stock) {
-                Swal.fire('Sin stock', 'No hay stock suficiente', 'warning');
+                Swal.fire({
+                    title: 'Sin stock suficiente',
+                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Intentando agregar: <strong>${nuevo}</strong> unidades</p>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
+
             item.cantidad = nuevo;
             renderCart();
         }
 
-        function setQty(id, val) {
-            const idx = cart.findIndex(c => String(c.med_id) === String(id));
-            if (idx === -1) return;
+        function setQtyByIndex(idx, val) {
+            if (idx < 0 || idx >= cart.length) return;
+
             const item = cart[idx];
+
             if (val <= 0) {
                 Swal.fire({
                     title: 'Cantidad 0',
@@ -1209,11 +1236,22 @@
                 });
                 return;
             }
+
             if (item.stock != null && val > item.stock) {
-                Swal.fire('Sin stock', 'No hay suficiente stock', 'warning');
+                Swal.fire({
+                    title: 'Sin stock suficiente',
+                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Cantidad ingresada: <strong>${val}</strong> unidades</p>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                item.cantidad = item.stock > 0 ? item.stock : 1;
                 renderCart();
                 return;
             }
+
             item.cantidad = val;
             renderCart();
         }
@@ -1233,17 +1271,46 @@
         }
 
         function addItem(m) {
-            const idx = cart.findIndex(c => String(c.med_id) === String(m.med_id));
+            // Buscar si existe el mismo medicamento Y lote
+            const idx = cart.findIndex(c =>
+                String(c.med_id) === String(m.med_id) &&
+                (m.lote_id ? String(c.lote_id) === String(m.lote_id) : !c.lote_id)
+            );
+
             if (idx !== -1) {
                 const ex = cart[idx];
-                if (m.stock != null && ex.cantidad + 1 > m.stock) {
-                    Swal.fire('Sin stock', 'No hay stock suficiente', 'warning');
+                const nuevaCantidad = ex.cantidad + 1;
+
+                if (m.stock != null && nuevaCantidad > m.stock) {
+                    Swal.fire({
+                        title: 'Sin stock suficiente',
+                        html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
+                           ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
+                           <p>Stock disponible: <strong>${m.stock}</strong> unidades</p>
+                           <p>Ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido'
+                    });
                     return;
                 }
-                ex.cantidad += 1;
+                ex.cantidad = nuevaCantidad;
             } else {
+                if (m.stock != null && m.stock <= 0) {
+                    Swal.fire({
+                        title: 'Sin stock',
+                        html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
+                           ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
+                           <p>Este ${m.lote ? 'lote' : 'medicamento'} no tiene stock disponible</p>`,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido'
+                    });
+                    return;
+                }
+
                 cart.push({
                     med_id: m.med_id,
+                    lote_id: m.lote_id || null,
+                    lote: m.lote || null,
                     nombre: m.nombre,
                     presentacion: m.presentacion || '',
                     linea: m.linea || '',
@@ -1257,9 +1324,13 @@
 
         function doSearch(term) {
             if (!term || term.trim().length < 1) {
-                if (resultsContainer) resultsContainer.innerHTML = '';
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '';
+                    resultsContainer.style.display = 'none';
+                }
                 return;
             }
+
             const body = new URLSearchParams();
             body.append('ventaAjax', 'buscar');
             body.append('termino', term);
@@ -1267,6 +1338,7 @@
             if (filtro_presentacion && filtro_presentacion.value) body.append('presentacion', filtro_presentacion.value);
             if (filtro_funcion && filtro_funcion.value) body.append('funcion', filtro_funcion.value);
             if (filtro_via && filtro_via.value) body.append('via', filtro_via.value);
+
             fetch(URL_MED, {
                 method: 'POST',
                 headers: {
@@ -1274,9 +1346,14 @@
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
+                console.log('Resultados recibidos:', json);
                 renderResults(json || []);
             }).catch(err => {
-                console.error(err);
+                console.error('Error en búsqueda:', err);
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
+                    resultsContainer.style.display = 'block';
+                }
             });
         }
 
@@ -1291,19 +1368,59 @@
 
             resultsContainer.innerHTML = items.map(it => {
                 const nombre = escapeHtml(it.nombre || '');
+                const lote = escapeHtml(it.lm_numero_lote || '');
                 const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
-                const via = escapeHtml(it.linea || 'Sin vía');
+                const linea = escapeHtml(it.linea || 'Sin laboratorio');
                 const precio = formatMoney(it.precio_venta || 0);
+                const stock = Number(it.stock || 0);
 
-                return `<div class="search-results-item" 
+                // Calcular días hasta vencimiento
+                let diasVenc = '';
+                if (it.fecha_vencimiento) {
+                    const hoy = new Date();
+                    const vence = new Date(it.fecha_vencimiento);
+                    const diff = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
+
+                    if (diff < 0) {
+                        diasVenc = '<span style="color: red; font-weight: bold;">⚠ VENCIDO</span>';
+                    } else if (diff <= 30) {
+                        diasVenc = `<span style="color: orange; font-weight: bold;">⚠ ${diff}d</span>`;
+                    } else if (diff <= 90) {
+                        diasVenc = `<span style="color: #ff9800;">${diff}d</span>`;
+                    }
+                }
+
+                const stockText = stock > 0 ?
+                    `<span style="color: #4caf50;">Stock: ${stock}</span>` :
+                    '<span style="color: red;">Sin stock</span>';
+
+                const sinStock = stock <= 0 ? 'sin-stock' : '';
+
+                return `<div class="search-results-item ${sinStock}" 
                 data-id="${it.med_id}" 
+                data-lote-id="${it.lm_id || ''}"
+                data-lote="${lote}"
                 data-nombre="${nombre}" 
                 data-presentacion="${presentacion}" 
-                data-linea="${via}"
+                data-linea="${linea}"
                 data-precio="${it.precio_venta || 0}"
-                data-stock="${it.stock || 0}">
-                <div class="search-result-name">${nombre}</div>
-                <div class="search-result-details">${via} · ${presentacion} · Bs. ${precio}</div>
+                data-stock="${stock}">
+                
+                <div class="search-result-name">
+                    <strong>${nombre}</strong>
+                    <span style="font-size: 0.85em; color: #666; margin-left: 8px;">(${linea})</span>
+                </div>
+                
+                <div class="search-result-details" style="font-size: 0.9em; color: #555;">
+                    <span><ion-icon name="barcode-outline"></ion-icon> ${lote}</span>
+                    <span style="margin: 0 6px;">•</span>
+                    <span>${presentacion}</span>
+                    <span style="margin: 0 6px;">•</span>
+                    <span><ion-icon name="pricetag-outline"></ion-icon> Bs. ${precio}</span>
+                    <span style="margin: 0 6px;">•</span>
+                    ${stockText}
+                    ${diasVenc ? '<span style="margin: 0 6px;">•</span>' + diasVenc : ''}
+                </div>
             </div>`;
             }).join('');
 
@@ -1311,14 +1428,19 @@
 
             resultsContainer.querySelectorAll('.search-results-item:not(.no-results)').forEach(el => {
                 el.addEventListener('click', () => {
+                    const stock = Number(el.dataset.stock || 0);
+
                     addItem({
                         med_id: el.dataset.id,
+                        lote_id: el.dataset.loteId || null,
+                        lote: el.dataset.lote || null,
                         nombre: el.dataset.nombre,
                         presentacion: el.dataset.presentacion,
                         linea: el.dataset.linea,
                         precio: parseFloat(el.dataset.precio || 0),
-                        stock: Number(el.dataset.stock || 0)
+                        stock: stock
                     });
+
                     resultsContainer.innerHTML = '';
                     resultsContainer.style.display = 'none';
                     if (medSearch) medSearch.value = '';
@@ -1339,6 +1461,7 @@
                     return;
                 }
 
+                // Búsqueda en tiempo real después de 250ms
                 debounce = setTimeout(() => doSearch(term), 250);
             });
 
@@ -1359,6 +1482,7 @@
             const body = new URLSearchParams();
             body.append('ventaAjax', 'mas_vendidos');
             body.append('limit', '5');
+
             fetch(URL_MED, {
                 method: 'POST',
                 headers: {
@@ -1367,46 +1491,65 @@
                 body: body.toString()
             }).then(r => r.json()).then(json => {
                 if (!tablaMasVendidos) return;
-                tablaMasVendidos.innerHTML = (json || []).map((it, i) =>
-                    '<tr data-id="' + it.med_id + '"><td>' + (i + 1) + '</td><td>' + escapeHtml(it.nombre) + '</td><td>Bs. ' + formatMoney(it.precio_venta) + '</td><td><a href="#" class="btn caja btn-add" data-id="' + it.med_id + '" data-nombre="' + escapeHtml(it.nombre) + '" data-precio="' + it.precio_venta + '">agregar</a></td></tr>'
-                ).join('');
-                tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => b.addEventListener('click', e => {
-                    e.preventDefault();
-                    const el = e.currentTarget;
-                    addItem({
-                        med_id: el.dataset.id,
-                        nombre: el.dataset.nombre,
-                        presentacion: '',
-                        linea: '',
-                        precio: parseFloat(el.dataset.precio || 0),
-                        stock: null
+
+                tablaMasVendidos.innerHTML = (json || []).map((it, i) => {
+                    const stock = Number(it.stock || 0);
+                    const stockClass = stock <= 0 ? 'sin-stock' : '';
+                    const stockText = stock > 0 ? `(Stock: ${stock})` : '<span style="color: red;">(Sin stock)</span>';
+
+                    return `<tr data-id="${it.med_id}" class="${stockClass}">
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(it.nombre)}</td>
+                    <td>Bs. ${formatMoney(it.precio_venta)} ${stockText}</td>
+                    <td>
+                        <a href="#" 
+                           class="btn caja btn-add" 
+                           data-id="${it.med_id}" 
+                           data-nombre="${escapeHtml(it.nombre)}" 
+                           data-precio="${it.precio_venta}"
+                           data-stock="${stock}">
+                            agregar
+                        </a>
+                    </td>
+                </tr>`;
+                }).join('');
+
+                tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => {
+                    b.addEventListener('click', e => {
+                        e.preventDefault();
+                        const el = e.currentTarget;
+                        const stock = Number(el.dataset.stock || 0);
+
+                        addItem({
+                            med_id: el.dataset.id,
+                            lote_id: null,
+                            lote: null,
+                            nombre: el.dataset.nombre,
+                            presentacion: '',
+                            linea: '',
+                            precio: parseFloat(el.dataset.precio || 0),
+                            stock: stock
+                        });
                     });
-                }));
+                });
             }).catch(err => console.error(err));
         }
 
         if (inputDinero) inputDinero.addEventListener('input', updateTotals);
 
-        // Validación solo para este formulario específico
         formVenta.addEventListener('submit', function(e) {
             if (cart.length === 0) {
                 e.preventDefault();
                 Swal.fire('Carrito vacío', 'Agrega al menos un medicamento para realizar la venta.', 'warning');
                 return;
             }
-            itemsHidden.value = JSON.stringify(cart.map(i => ({
-                med_id: i.med_id,
-                cantidad: i.cantidad,
-                precio: Number(i.precio),
-                subtotal: Number((i.precio * i.cantidad).toFixed(2))
-            })));
+
             updateTotals();
         });
 
         loadMostSold();
         renderCart();
 
-        // Cerrar dropdown al hacer click fuera
         document.addEventListener('click', function(e) {
             if (resultsContainer &&
                 !resultsContainer.contains(e.target) &&
@@ -1424,7 +1567,7 @@
     })();
 </script>
 
-<!-- script cliente -->
+<!-- script busqueda de cliente para caja -->
 <script>
     // Script mejorado para búsqueda de clientes
     (function() {
@@ -1687,4 +1830,47 @@
 
         console.log("✅ Script de búsqueda de clientes inicializado");
     })();
+</script>
+<script>  /* base 64 */
+    window.abrirPDFDesdeBase64 = function(base64Data, nombreArchivo) {
+        try {
+            // Decodificar base64
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], {
+                type: 'application/pdf'
+            });
+
+            // Crear URL temporal
+            const url = URL.createObjectURL(blob);
+
+            // Abrir en nueva ventana
+            const ventanaPDF = window.open(url, '_blank');
+
+            // Limpiar URL cuando se cierre la ventana
+            if (ventanaPDF) {
+                ventanaPDF.onbeforeunload = function() {
+                    URL.revokeObjectURL(url);
+                };
+            }
+
+            console.log('✅ PDF abierto exitosamente');
+            return true;
+
+        } catch (error) {
+            console.error('❌ Error abriendo PDF:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo abrir el PDF. Intenta nuevamente.'
+            });
+            return false;
+        }
+    };
 </script>

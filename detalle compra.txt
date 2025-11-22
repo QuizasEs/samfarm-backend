@@ -1,7 +1,0 @@
-al momento de activar un lote me manda este mensaje en la alerta
-No se pudo procesar la solicitud: Unexpected token '<', "
-"... is not valid JSON
-me muestra eesto en network de la consola
-<br />
-<b>Warning</b>:  Undefined array key "us_id" in <b>C:\xampp\htdocs\samfarm-backend\models\loteModel.php</b> on line <b>158</b><br />
-{"Alerta":"recargar","Titulo":"Lote activado","texto":"El lote se activ\u00f3 correctamente y se gener\u00f3 el informe de activaci\u00f3n.","Tipo":"success"}
