@@ -10,27 +10,32 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-url="ajax/inventarioAjax.php"
         data-ajax-param="inventarioAjax"
         data-ajax-registros="10">
+        <div class="title">
+            <h3>
+                <ion-icon name="bandage-outline"></ion-icon> Inventario
+            </h3>
+        </div>
 
         <form class="filtro-dinamico">
-            <div class="search">
+            <div class="filtro-dinamico-search">
 
                 <!-- Select 1: Laboratorio -->
                 <select class="select-filtro" name="select1">
                     <option value="">Todos los laboratorios</option>
                     <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                        <option value="<?php echo $lab['la_id'] ?>">🏭 <?php echo $lab['la_nombre_comercial'] ?></option>
+                        <option value="<?php echo $lab['la_id'] ?>"><?php echo $lab['la_nombre_comercial'] ?></option>
                     <?php } ?>
                 </select>
 
                 <!-- Select 2: Estado de Stock (CORREGIDO) -->
                 <select class="select-filtro" name="select2">
                     <option value="">Todos los estados</option>
-                    <option value="agotado">❌ Agotado</option>
-                    <option value="critico">🔴 Crítico</option>
-                    <option value="bajo">⚠️ Bajo</option>
-                    <option value="normal">✅ Normal</option>
-                    <option value="exceso">📦 Exceso</option>
-                    <option value="sin_definir">❓ Sin Definir</option>
+                    <option value="agotado">Agotado</option>
+                    <option value="critico">Crítico</option>
+                    <option value="bajo">Bajo</option>
+                    <option value="normal">Normal</option>
+                    <option value="exceso">Exceso</option>
+                    <option value="sin_definir">Sin Definir</option>
                 </select>
 
                 <!-- Select 3: Sucursal (solo admin) -->
@@ -46,23 +51,26 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <!-- Select 4: Forma Farmacéutica -->
                 <select class="select-filtro" name="select4">
                     <option value="">Todas las formas</option>
-                    <?php foreach ($datos_select['formas_farmaceuticas'] as $forma) { ?>
-                        <option value="<?php echo $forma['ff_id'] ?>">💊 <?php echo $forma['ff_nombre'] ?></option>
+                    <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
+                        <option value="<?php echo $forma['ff_id'] ?>"><?php echo $forma['ff_nombre'] ?></option>
                     <?php } ?>
                 </select>
 
-                <!-- Búsqueda -->
-                <input type="text" name="busqueda" placeholder="Buscar por nombre, principio activo o código...">
+                <div class="search">
+                    <!-- Búsqueda -->
+                    <input type="text" name="busqueda" placeholder="Buscar por nombre, principio activo o código...">
 
-                <button type="button" class="btn-search">
-                    <ion-icon name="search-outline"></ion-icon>
-                </button>
+                    <button type="button" class="">
+                        <ion-icon name="search"></ion-icon>
+                    </button>
 
-                <!-- Botón Exportar Excel -->
-                <button type="button" class="btn success" id="btnExportarExcel" style="margin-left: 10px;">
-                    <ion-icon name="download-outline"></ion-icon> Excel
-                </button>
+                </div>
+
             </div>
+            <!-- Botón Exportar Excel -->
+            <button type="button" class="btn success" id="btnExportarExcel" style="margin-left: 10px;">
+                <ion-icon name="download-outline"></ion-icon> Excel
+            </button>
         </form>
 
         <div class="tabla-contenedor"></div>

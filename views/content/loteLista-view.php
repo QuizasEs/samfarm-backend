@@ -1,32 +1,33 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     /* en caso que el rol del usuario este en admin o genrente */
-    echo $_SESSION['rol_smp'];
     require_once "./controllers/MedicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
 
 ?>
 
-
-
     <div class="container tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/loteAjax.php"
         data-ajax-param="loteAjax"
         data-ajax-registros="10">
-
+        <div class="title">
+            <h3>
+                <ion-icon name="bandage-outline"></ion-icon> Lotes de medicamentos
+            </h3>
+        </div>
         <form class="filtro-dinamico">
-            <div class="search">
+            <div class="filtro-dinamico-search">
 
                 <select class="select-filtro" name="select1">
                     <option value="">Todos los estados</option>
-                    <option value="en_espera">⏳ En Espera</option>
-                    <option value="activo">✅ Activo</option>
-                    <option value="terminado">📦 Terminado</option>
-                    <option value="caducado">⚠️ Caducado</option>
-                    <option value="devuelto">🔄 Devuelto</option>
-                    <option value="bloqueado">🔒 Bloqueado</option>
+                    <option value="en_espera">En Espera</option>
+                    <option value="activo">Activo</option>
+                    <option value="terminado">Terminado</option>
+                    <option value="caducado">Caducado</option>
+                    <option value="devuelto">Devuelto</option>
+                    <option value="bloqueado">Bloqueado</option>
                 </select>
                 <select class="select-filtro" name="select2" id="">
                     <option value="">Mes</option>
@@ -57,12 +58,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
                 <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
 
-                <!-- Búsqueda -->
-                <input type="text" name="busqueda" placeholder="Buscar por nombre o principio activo...">
+                <div class="search">
+                    <!-- Búsqueda -->
+                    <input type="text" name="busqueda" placeholder="Buscar por nombre o principio activo...">
 
-                <button type="button" class="btn-search">
-                    <ion-icon name="search"></ion-icon>
-                </button>
+                    <button type="button" class="btn-search">
+                        <ion-icon name="search"></ion-icon>
+                    </button>
+                </div>
             </div>
         </form>
 

@@ -1,3 +1,10 @@
+function obtenerAjaxConfig(container) {
+    return {
+        url: container.dataset.ajaxUrl || "ajax/loteAjax.php",
+        param: container.dataset.ajaxParam || "loteAjax",
+        registros: parseInt(container.dataset.ajaxRegistros || 10)
+    };
+}
 (function () {
     // Detecta automáticamente el path base del proyecto
     function getBaseURL() {
@@ -16,9 +23,11 @@
     tablas.forEach(initTabla);
 
     function initTabla(container) {
-        const ajaxUrl = container.dataset.ajaxUrl || "ajax/loteAjax.php";
-        const paramName = container.dataset.ajaxParam || "loteAjax";
-        const registrosDefault = parseInt(container.dataset.ajaxRegistros || 10);
+        const ajaxCfg = obtenerAjaxConfig(container);
+        const ajaxUrl = ajaxCfg.url;
+        const paramName = ajaxCfg.param;
+        const registrosDefault = ajaxCfg.registros;
+
 
         console.log('🔧 Configurando tabla:', { ajaxUrl, paramName, registrosDefault });
 

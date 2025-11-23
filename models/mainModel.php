@@ -71,7 +71,7 @@ class mainModel
     /* ----------------------------------------funcion para limpiar cadenas---------------------------------------------- */
     public function limpiar_cadena($cadena)
     {
-    
+
 
         // Eliminar espacios al inicio y final
         $cadena = trim($cadena);
@@ -215,10 +215,10 @@ class mainModel
     {
         if ($tipo == "Unico") {
             $sql = mainModel::conectar()->prepare("
-            SELECT u.us_nombres, r.ro_nombre, r.ro_id   
-            FROM roles AS r
-            JOIN usuarios AS u ON u.ro_id = r.ro_id 
-            WHERE u.us_id = $id;");
+                SELECT u.us_nombres, r.ro_nombre, r.ro_id   
+                FROM roles AS r
+                JOIN usuarios AS u ON u.ro_id = r.ro_id 
+                WHERE u.us_id = $id;");
         } else if ($tipo == "Multiple") {
             $sql = mainModel::conectar()->prepare("SELECT ro_nombre, ro_id FROM roles WHERE ro_estado = 1");
         }

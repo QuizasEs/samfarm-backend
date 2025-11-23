@@ -286,7 +286,7 @@ class loteController extends loteModel
         ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p style="padding:10px;">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 

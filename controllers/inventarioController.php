@@ -101,7 +101,7 @@ class inventarioController extends inventarioModel
                                 <th>N°</th>
                                 <th>MEDICAMENTO</th>
                                 <th>LABORATORIO</th>' .
-            ($mostrar_columna_sucursal ? '<th>🏢 SUCURSAL</th>' : '') .
+            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '<th>CAJAS</th>
                                 <th>UNIDADES</th>
                                 <th>VALORADO</th>
@@ -161,24 +161,24 @@ class inventarioController extends inventarioModel
                     $row['lotes_activos'] . '</span>
                             </td>
                             <td style="text-align:center;">' . $dias_vencer . '</td>
-                            <td class="buttons">
+                            <td class="accion-buttons">
                                 <a href="javascript:void(0)" 
                                 class="btn default" 
                                 title="Ver detalle"
                                 onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="eye-outline"></ion-icon>
+                                    <ion-icon name="eye-outline"></ion-icon> Detalles
+                                </a>
+                                <a href="javascript:void(0)" 
+                                class="btn danger" 
+                                title="Transferir"
+                                onclick="InventarioModals.abrirTransferencia(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
+                                    <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir
                                 </a>
                                 <a href="javascript:void(0)" 
                                 class="btn primary" 
-                                title="Transferir"
-                                onclick="InventarioModals.abrirTransferencia(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="swap-horizontal-outline"></ion-icon>
-                                </a>
-                                <a href="javascript:void(0)" 
-                                class="btn warning" 
                                 title="Ver historial"
                                 onclick="InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="time-outline"></ion-icon>
+                                    <ion-icon name="time-outline"></ion-icon> Historial
                                 </a>
                             </td>
                         </tr>
@@ -195,7 +195,7 @@ class inventarioController extends inventarioModel
         $tabla .= '</tbody></table></div>';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p style="padding:10px;">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 

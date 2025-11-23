@@ -14,8 +14,7 @@ class medicamentoController extends medicamentoModel
     /* -----------------------------------controlador para recabar datos de los selects------------------------------------------ */
     public function datos_extras_controller()
     {
-        /* $id = mainModel::decryption($id);
-        $id = mainModel::limpiar_cadena($id); */
+
 
         return mainModel::datos_extras_model();
     }
@@ -172,176 +171,192 @@ class medicamentoController extends medicamentoModel
 
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
 
-    public function paginado_medicamento_controller($pagina, $registros, $privilegio, $url, $busqueda)
+    public function paginado_medicamento_controller($pagina, $registros, $privilegio, $url, $busqueda = "", $f1 = "", $f2 = "", $f3 = "", $f4 = "")
     {
-        /* limpiamos cadenas para evitar inyección SQL */
+        /* Limpiar parámetros */
         $pagina = mainModel::limpiar_cadena($pagina);
         $registros = mainModel::limpiar_cadena($registros);
-        $privilegio = mainModel::limpiar_cadena($privilegio);
+        $privilegio = mainModel::limpiar_cadena($privilegio); // ✅ Aunque no se usa, debe estar
         $url = mainModel::limpiar_cadena($url);
-        $url = SERVER_URL . $url . "/";
+        $url = SERVER_URL . $url . '/';
         $busqueda = mainModel::limpiar_cadena($busqueda);
+        $f1 = mainModel::limpiar_cadena($f1); // Laboratorio
+        $f2 = mainModel::limpiar_cadena($f2); // Vía
+        $f3 = mainModel::limpiar_cadena($f3); // Forma
+        $f4 = mainModel::limpiar_cadena($f4); // Uso
 
-        $tabla = "";
-
-        /* validamos que el valor ingresado por url sea un número */
-        $pagina = (isset($pagina) && $pagina > 0) ? (int)$pagina : 1;
+        $tabla = '';
+        $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
         $inicio = ($pagina > 0) ? (($pagina * $registros) - $registros) : 0;
 
-        if (isset($busqueda) && $busqueda != "") {
-            $consulta = "
-            SELECT 
-                SQL_CALC_FOUND_ROWS 
-                m.*, 
-                la.la_nombre_comercial AS laboratorio_nombre,
-                ff.ff_nombre AS forma_farmaceutica,
-                vd.vd_nombre AS via_administracion,
-                uf.uf_nombre AS uso_farmacologico,
-                s.su_nombre AS sucursal_nombre
-            FROM medicamento AS m
-            LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
-            LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
-            LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
-            LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
-            LEFT JOIN sucursales AS s ON m.su_id = s.su_id
-            WHERE (
-                m.med_nombre_quimico LIKE '%$busqueda%' OR
-                m.med_principio_activo LIKE '%$busqueda%' OR
-                m.med_presentacion LIKE '%$busqueda%' OR
-                m.med_accion_farmacologica LIKE '%$busqueda%' OR
-                la.la_nombre_comercial LIKE '%$busqueda%' OR
-                ff.ff_nombre LIKE '%$busqueda%' OR
-                vd.vd_nombre LIKE '%$busqueda%' OR
-                uf.uf_nombre LIKE '%$busqueda%' OR
-                s.su_nombre LIKE '%$busqueda%'
-            )
-            AND (la.la_estado = 1 OR la.la_estado IS NULL)
-            AND (ff.ff_estado = 1 OR ff.ff_estado IS NULL)
-            AND (vd.vd_estado = 1 OR vd.vd_estado IS NULL)
-            AND (uf.uf_estado = 1 OR uf.uf_estado IS NULL)
-            AND (s.su_estado = 1 OR s.su_estado IS NULL)
-            ORDER BY m.med_nombre_quimico ASC 
-            LIMIT $inicio, $registros
-        ";
-        } else {
-            $consulta = "
-            SELECT 
-                SQL_CALC_FOUND_ROWS 
-                m.*, 
-                la.la_nombre_comercial AS laboratorio_nombre,
-                ff.ff_nombre AS forma_farmaceutica,
-                vd.vd_nombre AS via_administracion,
-                uf.uf_nombre AS uso_farmacologico,
-                s.su_nombre AS sucursal_nombre
-            FROM medicamento AS m
-            LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
-            LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
-            LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
-            LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
-            LEFT JOIN sucursales AS s ON m.su_id = s.su_id
-            WHERE (la.la_estado = 1 OR la.la_estado IS NULL)
-                AND (ff.ff_estado = 1 OR ff.ff_estado IS NULL)
-                AND (vd.vd_estado = 1 OR vd.vd_estado IS NULL)
-                AND (uf.uf_estado = 1 OR uf.uf_estado IS NULL)
-                AND (s.su_estado = 1 OR s.su_estado IS NULL)
-            ORDER BY m.med_nombre_quimico ASC 
-            LIMIT $inicio, $registros
-        ";
+        /* ===== CONSTRUIR WHERE DINÁMICO ===== */
+        $whereParts = [];
+
+        // Validar estados activos
+        $whereParts[] = "(la.la_estado = 1 OR la.la_estado IS NULL)";
+        $whereParts[] = "(ff.ff_estado = 1 OR ff.ff_estado IS NULL)";
+        $whereParts[] = "(vd.vd_estado = 1 OR vd.vd_estado IS NULL)";
+        $whereParts[] = "(uf.uf_estado = 1 OR uf.uf_estado IS NULL)";
+        $whereParts[] = "(s.su_estado = 1 OR s.su_estado IS NULL)";
+
+        // Búsqueda por texto
+        if (!empty($busqueda)) {
+            $whereParts[] = "(
+                    m.med_nombre_quimico LIKE '%$busqueda%' OR
+                    m.med_principio_activo LIKE '%$busqueda%' OR
+                    m.med_presentacion LIKE '%$busqueda%' OR
+                    m.med_accion_farmacologica LIKE '%$busqueda%' OR
+                    la.la_nombre_comercial LIKE '%$busqueda%'
+                )";
         }
 
-        /* realizamos la petición a la base de datos */
-        $conexion = mainModel::conectar();
-        $datos = $conexion->query($consulta);
-        $datos = $datos->fetchAll();
+        // Filtros por selects
+        if ($f1 !== '' && is_numeric($f1)) {
+            $whereParts[] = "m.la_id = " . (int)$f1;
+        }
 
-        /* obtenemos la cantidad total de registros */
-        $total = $conexion->query("SELECT FOUND_ROWS()");
-        $total = (int)$total->fetchColumn();
+        if ($f2 !== '' && is_numeric($f2)) {
+            $whereParts[] = "m.vd_id = " . (int)$f2;
+        }
 
-        /* número de páginas por registros */
+        if ($f3 !== '' && is_numeric($f3)) {
+            $whereParts[] = "m.ff_id = " . (int)$f3;
+        }
+
+        if ($f4 !== '' && is_numeric($f4)) {
+            $whereParts[] = "m.uf_id = " . (int)$f4;
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+
+        /* ===== CONSULTA SQL ===== */
+        $consulta = "
+                SELECT 
+                    SQL_CALC_FOUND_ROWS 
+                    m.med_id,
+                    m.med_nombre_quimico,
+                    m.med_principio_activo,
+                    m.med_accion_farmacologica,
+                    m.med_presentacion,
+                    m.med_precio_unitario,
+                    m.med_precio_caja,
+                    m.med_creado_en,
+                    m.med_actualizado_en,
+                    la.la_nombre_comercial AS laboratorio_nombre,
+                    ff.ff_nombre AS forma_farmaceutica,
+                    vd.vd_nombre AS via_administracion,
+                    uf.uf_nombre AS uso_farmacologico,
+                    s.su_nombre AS sucursal_nombre
+                FROM medicamento AS m
+                LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
+                LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
+                LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
+                LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
+                LEFT JOIN sucursales AS s ON m.su_id = s.su_id
+                $whereSQL
+                ORDER BY m.med_nombre_quimico ASC 
+                LIMIT $inicio, $registros
+            ";
+
+        /* ===== EJECUTAR CONSULTA ===== */
+        try {
+            $conexion = mainModel::conectar();
+
+            // 🛠️ DEBUG: Mostrar la consulta generada
+            error_log("=== SQL GENERADO ===");
+            error_log($consulta);
+
+            $datos = $conexion->query($consulta);
+            $datos = $datos->fetchAll();
+
+            $total = $conexion->query("SELECT FOUND_ROWS()");
+            $total = (int)$total->fetchColumn();
+
+            error_log("Total registros encontrados: $total");
+        } catch (PDOException $e) {
+            error_log("❌ ERROR SQL: " . $e->getMessage());
+            return '<div class="error" style="padding:20px;color:red;">
+                            <strong>Error en la consulta:</strong><br>' .
+                htmlspecialchars($e->getMessage()) .
+                '</div>';
+        }
+
         $Npaginas = ceil($total / $registros);
 
-        /* inicio de tabla */
+        /* ===== CONSTRUIR TABLA ===== */
         $tabla .= '
-    <div class="table-container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>N°</th>
-                    <th>NOMBRE QUÍMICO</th>
-                    <th>PRINCIPIO ACTIVO</th>
-                    <th>ACCIÓN FARMACOLÓGICA</th>
-                    <th>PRESENTACIÓN</th>
-                    <th>USO FARMACOLÓGICO</th>
-                    <th>FORMA FARMACÉUTICA</th>
-                    <th>VÍA ADMINISTRACIÓN</th>
-                    <th>LABORATORIO</th>
-                    <th>SUCURSAL</th>
-                    <th>PRECIO UNITARIO</th>
-                    <th>PRECIO CAJA</th>
-                    <th>CREADO EN</th>
-                    <th>ACTUALIZADO EN</th>
-                    <th>ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody>
-';
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>NOMBRE QUÍMICO</th>
+                                <th>PRINCIPIO ACTIVO</th>
+                                <th>LABORATORIO</th>
+                                <th>FORMA</th>
+                                <th>VÍA</th>
+                                <th>USO</th>
+                                <th>PRESENTACIÓN</th>
+                                <th>PRECIO UNITARIO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $contador = $inicio + 1;
             $reg_inicio = $inicio + 1;
+
             foreach ($datos as $rows) {
                 $tabla .= '
-            <tr>
-                <td>' . $contador . '</td>
-                <td>' . htmlspecialchars($rows["med_nombre_quimico"]) . '</td>
-                <td>' . htmlspecialchars($rows["med_principio_activo"]) . '</td>
-                <td>' . htmlspecialchars($rows["med_accion_farmacologica"]) . '</td>
-                <td>' . htmlspecialchars($rows["med_presentacion"]) . '</td>
-                <td>' . htmlspecialchars($rows["uso_farmacologico"]) . '</td>
-                <td>' . htmlspecialchars($rows["forma_farmaceutica"]) . '</td>
-                <td>' . htmlspecialchars($rows["via_administracion"]) . '</td>
-                <td>' . htmlspecialchars($rows["laboratorio_nombre"]) . '</td>
-                <td>' . htmlspecialchars($rows["sucursal_nombre"]) . '</td>
-                <td>Bs. ' . number_format($rows["med_precio_unitario"], 2) . '</td>
-                <td>Bs. ' . number_format($rows["med_precio_caja"], 2) . '</td>
-                <td>' . date('d/m/Y H:i', strtotime($rows["med_creado_en"])) . '</td>
-                <td>' . date('d/m/Y H:i', strtotime($rows["med_actualizado_en"])) . '</td>
-                <td>
-                    <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn-editar">Editar</a>
-                    <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
-                        <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
-                        <button type="submit" class="btn-disable">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        ';
+                        <tr>
+                            <td>' . $contador . '</td>
+                            <td><strong>' . htmlspecialchars($rows['med_nombre_quimico']) . '</strong></td>
+                            <td>' . htmlspecialchars($rows['med_principio_activo']) . '</td>
+                            <td>' . htmlspecialchars($rows['laboratorio_nombre'] ?? 'Sin laboratorio') . '</td>
+                            <td>' . htmlspecialchars($rows['forma_farmaceutica'] ?? 'Sin forma') . '</td>
+                            <td>' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . '</td>
+                            <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
+                            <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
+                            <td>Bs. ' . number_format($rows['med_precio_unitario'], 2) . '</td>
+                            <td class="accion-buttons">
+                                <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
+                                    <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
+                                    <button type="submit" class="btn-disable">Eliminar</button>
+                                </form>
+                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn default">
+                                    <ion-icon name="create-outline"></ion-icon> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    ';
                 $contador++;
             }
             $reg_final = $contador - 1;
         } else {
             if ($total >= 1) {
-                $tabla .= '<tr><td colspan="15"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
+                $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
             } else {
-                $tabla .= '<tr><td colspan="15">No hay registros</td></tr>';
+                $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
+                                🔭 No hay registros que coincidan con los filtros aplicados
+                            </td></tr>';
             }
         }
 
-        /* final de tabla */
         $tabla .= '
-            </tbody>
-        </table>
-    </div>
-';
+                        </tbody>
+                    </table>
+                </div>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p>Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
-            $tabla .= mainModel::paginador_tablas($pagina, $Npaginas, $url, 5);
+            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 
         return $tabla;
     }
-
 
 
     /* -----------------------------------controlador para recuperar datos de un medicamento en especifico------------------------------------------ */
@@ -510,19 +525,19 @@ class medicamentoController extends medicamentoModel
 
         if (isset($busqueda) && $busqueda != "") {
             $consulta = "
-            SELECT SQL_CALC_FOUND_ROWS *
-            FROM via_de_administracion
-            WHERE vd_nombre LIKE '%$busqueda%'
-            ORDER BY vd_nombre ASC
-            LIMIT $inicio, $registros
-        ";
+                    SELECT SQL_CALC_FOUND_ROWS *
+                    FROM via_de_administracion
+                    WHERE vd_nombre LIKE '%$busqueda%'
+                    ORDER BY vd_nombre ASC
+                    LIMIT $inicio, $registros
+                ";
         } else {
             $consulta = "
-            SELECT SQL_CALC_FOUND_ROWS *
-            FROM via_de_administracion
-            ORDER BY vd_nombre ASC
-            LIMIT $inicio, $registros
-        ";
+                    SELECT SQL_CALC_FOUND_ROWS *
+                    FROM via_de_administracion
+                    ORDER BY vd_nombre ASC
+                    LIMIT $inicio, $registros
+                ";
         }
 
         $conexion = mainModel::conectar();
@@ -534,21 +549,21 @@ class medicamentoController extends medicamentoModel
         $Npaginas = ceil($total / $registros);
 
         $tabla .= '
-    <div class="table-container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>N°</th>
-                    <th>NOMBRE</th>
-                    <th>IMAGEN</th>
-                    <th>CREADO EN</th>
-                    <th>ACTUALIZADO EN</th>
-                    <th>ESTADO</th>
-                    <th>ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody>
-    ';
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>NOMBRE</th>
+                            <th>IMAGEN</th>
+                            <th>CREADO EN</th>
+                            <th>ACTUALIZADO EN</th>
+                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $contador = $inicio + 1;
@@ -564,22 +579,22 @@ class medicamentoController extends medicamentoModel
                     : '<span class="sin-imagen">—</span>';
 
                 $tabla .= '
-                <tr>
-                    <td>' . $contador . '</td>
-                    <td>' . htmlspecialchars($rows["vd_nombre"]) . '</td>
-                    <td>' . $img_tag . '</td>
-                    <td>' . date('d/m/Y H:i', strtotime($rows["vd_creado_en"])) . '</td>
-                    <td>' . date('d/m/Y H:i', strtotime($rows["vd_actualizado_en"])) . '</td>
-                    <td>' . $estado . '</td>
-                    <td>
-                        <a href="' . SERVER_URL . 'viaActualizar/' . mainModel::encryption($rows['vd_id']) . '/" class="btn-editar">Editar</a>
-                        <form action="' . SERVER_URL . 'ajax/viaAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
-                            <input type="hidden" name="via_del" value="' . mainModel::encryption($rows['vd_id']) . '">
-                            <button type="submit" class="btn-disable">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            ';
+                        <tr>
+                            <td>' . $contador . '</td>
+                            <td>' . htmlspecialchars($rows["vd_nombre"]) . '</td>
+                            <td>' . $img_tag . '</td>
+                            <td>' . date('d/m/Y H:i', strtotime($rows["vd_creado_en"])) . '</td>
+                            <td>' . date('d/m/Y H:i', strtotime($rows["vd_actualizado_en"])) . '</td>
+                            <td>' . $estado . '</td>
+                            <td>
+                                <a href="' . SERVER_URL . 'viaActualizar/' . mainModel::encryption($rows['vd_id']) . '/" class="btn-editar">Editar</a>
+                                <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
+                                    <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
+                                    <button type="submit" class="btn-disable">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    ';
                 $contador++;
             }
 
@@ -593,10 +608,10 @@ class medicamentoController extends medicamentoModel
         }
 
         $tabla .= '
-            </tbody>
-        </table>
-    </div>
-    ';
+                    </tbody>
+                </table>
+            </div>
+            ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
             $tabla .= '<p>Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
