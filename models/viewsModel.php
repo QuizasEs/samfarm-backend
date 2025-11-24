@@ -28,7 +28,7 @@
                 "caja",
                 "cajaCerrar",
                 "inventarioLista",
-                "",
+                "ventasHistorialLista",
                 "",
                 "",
                 "",
