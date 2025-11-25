@@ -24,6 +24,27 @@ if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "ex
     exit();
 }
 
+if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_excel") {
+    
+    session_start(['name' => 'SMP']);
+    
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+    
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+    
+    require_once "../controllers/compraHistorialController.php";
+    $ins_compra = new compraHistorialController();
+    $ins_compra->exportar_compras_excel_controller();
+    exit();
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (isset($_POST['comprasHistorialAjax'])) {
