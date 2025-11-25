@@ -263,6 +263,7 @@ class mainModel
                 SELECT * FROM sucursales WHERE su_estado = 1
             ");
         $sql_pr = self::conectar()->prepare("SELECT * FROM proveedores WHERE pr_estado = 1");
+        $sql_caja = self::conectar()->prepare("SELECT * FROM `usuarios` WHERE ro_id != 1");
 
         /* ejecutamos todas las consultas */
         $sql_uf->execute();
@@ -271,6 +272,7 @@ class mainModel
         $sql_la->execute();
         $sql_su->execute();
         $sql_pr->execute();
+        $sql_caja->execute();
         /* retornamos el resultado de consultas */
         return [
             'uso_farmacologico' => $sql_uf->fetchAll(),
@@ -278,7 +280,8 @@ class mainModel
             'via_administracion' => $sql_vd->fetchAll(),
             'laboratorios' => $sql_la->fetchAll(),
             'sucursales' => $sql_su->fetchAll(),
-            'proveedores' => $sql_pr->fetchAll()
+            'proveedores' => $sql_pr->fetchAll(),
+            'caja' => $sql_caja->fetchAll()
         ];
     }
     /* ----------------------------------------- funcion para guardar imagenes--------------------------------------------- */
@@ -358,7 +361,140 @@ class mainModel
     }
 
 
-    /* -------------------------------------------------------------------------------------- */
+    /* --------------------------------------generar reportes pdpf------------------------------------------------ */
+
+
+    public static function generar_pdf_reporte($datos)
+    {
+        require_once "./libs/fpdf/fpdf.php";
+
+        $empresa = self::obtener_config_empresa_model();
+
+        $contenido_html = $datos["contenido"] ?? "";
+        $nombre_archivo = $datos["nombre_archivo"] ?? ("Reporte_" . date("Y-m-d") . ".pdf");
+
+        // Iniciar documento tamaño carta
+        $pdf = new FPDF('P', 'mm', 'Letter');
+        $pdf->AddPage();
+        $pdf->SetMargins(10, 10, 10);
+
+        /* ----------------------------
+            ENCABEZADO DEL DOCUMENTO
+            ---------------------------- */
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->Cell(0, 7, utf8_decode($empresa['ce_nombre']), 0, 1, 'C');
+
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->Cell(0, 5, utf8_decode("NIT: " . $empresa['ce_nit']), 0, 1, 'C');
+        $pdf->Cell(0, 5, utf8_decode($empresa['ce_direccion']), 0, 1, 'C');
+        $pdf->Cell(0, 5, utf8_decode("Tel: " . $empresa['ce_telefono']), 0, 1, 'C');
+        $pdf->Ln(5);
+
+        $pdf->Line(10, $pdf->GetY(), 205, $pdf->GetY());
+        $pdf->Ln(5);
+
+        /* ----------------------------
+            PARSEADOR DE HTML → PDF
+            (Tablas, textos, títulos, etc.)
+            ---------------------------- */
+
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetDrawColor(0, 0, 0);
+
+        // Dividir por líneas
+        $lineas = explode("\n", $contenido_html);
+
+        foreach ($lineas as $linea) {
+
+            $linea = trim($linea);
+            if ($linea == "") continue;
+
+            /* ---------- TITULOS ---------- */
+            if (preg_match('/<h3>(.*?)<\/h3>/', $linea, $m)) {
+                $pdf->SetFont('Arial', 'B', 14);
+                $pdf->Cell(0, 8, utf8_decode(strip_tags($m[1])), 0, 1, 'L');
+                $pdf->Ln(2);
+                continue;
+            }
+
+            /* ---------- INFO BOX ---------- */
+            if (preg_match('/<div(.*?)>(.*?)<\/div>/s', $linea, $m)) {
+                $texto = strip_tags($m[2]);
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->MultiCell(0, 5, utf8_decode($texto));
+                $pdf->Ln(2);
+                continue;
+            }
+
+            /* ---------- TABLAS ---------- */
+            if (strpos($linea, "<table") !== false) {
+                $en_tabla = true;
+                continue;
+            }
+
+            if (strpos($linea, "</table>") !== false) {
+                $en_tabla = false;
+                $pdf->Ln(5);
+                continue;
+            }
+
+            if (!empty($en_tabla)) {
+
+                // Header
+                if (preg_match('/<th>(.*?)<\/th>/', $linea)) {
+                    preg_match_all('/<th>(.*?)<\/th>/', $linea, $ths);
+
+                    $pdf->SetFont('Arial', 'B', 9);
+                    foreach ($ths[1] as $enc) {
+                        $pdf->Cell(25, 7, utf8_decode(strip_tags($enc)), 1, 0, 'C');
+                    }
+                    $pdf->Ln();
+                    continue;
+                }
+
+                // Filas
+                if (preg_match('/<td(.*?)>(.*?)<\/td>/', $linea)) {
+                    preg_match_all('/<td(.*?)>(.*?)<\/td>/', $linea, $tds);
+
+                    $pdf->SetFont('Arial', '', 9);
+                    foreach ($tds[2] as $val) {
+                        $pdf->Cell(25, 6, utf8_decode(strip_tags($val)), 1, 0, 'C');
+                    }
+                    $pdf->Ln();
+                    continue;
+                }
+            }
+
+            /* ---------- TEXTO GENERAL ---------- */
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->MultiCell(0, 5, utf8_decode(strip_tags($linea)));
+        }
+
+        /* ----------------------------
+            SALIDA
+            ---------------------------- */
+        $pdf->Output("I", $nombre_archivo);
+    }
+
+
+    protected static function obtener_config_empresa_model()
+    {
+        $sql = self::conectar()->prepare("SELECT * FROM configuracion_empresa WHERE ce_id = 1 LIMIT 1");
+        $sql->execute();
+        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+
+        if (!$resultado) {
+            return [
+                'ce_nombre' => 'SAMFARM PHARMA',
+                'ce_nit' => '123456789',
+                'ce_direccion' => 'Dirección no configurada',
+                'ce_telefono' => 'Sin teléfono',
+                'ce_correo' => 'Sin correo'
+            ];
+        }
+
+        return $resultado;
+    }
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

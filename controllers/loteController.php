@@ -31,7 +31,7 @@ class loteController extends loteModel
         // Vendedores (rol 3) NO pueden acceder
         if ($rol_usuario == 3) {
             return '<div class="error" style="padding:30px;text-align:center;">
-                        <h3>⛔ Acceso Denegado</h3>
+                        <h3> Acceso Denegado</h3>
                         <p>No tiene permisos para ver esta sección</p>
                     </div>';
         }
@@ -53,24 +53,24 @@ class loteController extends loteModel
         // Construir WHERE dinámico
         $whereParts = [];
 
-        // 🐛 DEBUG TEMPORAL (puedes comentarlo después)
+        //  DEBUG TEMPORAL (puedes comentarlo después)
         error_log("=== FILTROS DEBUG ===");
         error_log("Rol: $rol_usuario | Sucursal: $sucursal_usuario");
         error_log("F1='$f1' | F2='$f2' | F3='$f3' | Búsqueda='$busqueda'");
 
-        // 🏢 FILTRO POR SUCURSAL según rol
+        //  FILTRO POR SUCURSAL según rol
         if ($rol_usuario == 1) {
             // ADMIN: puede ver todas o filtrar por sucursal específica
             if ($f3 !== '') {
                 $whereParts[] = "lm.su_id = '" . $f3 . "'";
-                error_log("✅ Admin filtrando por sucursal: $f3");
+                error_log(" Admin filtrando por sucursal: $f3");
             } else {
-                error_log("👁️ Admin viendo TODAS las sucursales");
+                error_log(" Admin viendo TODAS las sucursales");
             }
         } elseif ($rol_usuario == 2) {
             // GERENTE: SIEMPRE filtra por su sucursal
             $whereParts[] = "lm.su_id = '" . $sucursal_usuario . "'";
-            error_log("🔒 Gerente viendo solo sucursal: $sucursal_usuario");
+            error_log(" Gerente viendo solo sucursal: $sucursal_usuario");
         }
 
         // 🔍 Búsqueda limitada a nombre químico y principio activo
@@ -81,7 +81,7 @@ class loteController extends loteModel
             )";
         }
 
-        // 🎛️ Select 1: Estado del lote
+        //  Select 1: Estado del lote
         if ($f1 !== '') {
             $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
             if (in_array($f1, $estados_validos)) {
@@ -89,7 +89,7 @@ class loteController extends loteModel
             }
         }
 
-        // 🎛️ Select 2: Mes
+        //  Select 2: Mes
         if ($f2 !== '' && is_numeric($f2)) {
             $mes = (int)$f2;
             if ($mes >= 1 && $mes <= 12) {
@@ -97,7 +97,7 @@ class loteController extends loteModel
             }
         }
 
-        // 📅 Filtros de fecha con validación mejorada
+        //  Filtros de fecha con validación mejorada
         $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
 
@@ -119,7 +119,7 @@ class loteController extends loteModel
             $whereParts[] = "DATE(lm.lm_fecha_ingreso) <= '$fecha_hasta'";
         }
 
-        // ✅ Construir cláusula WHERE
+        //  Construir cláusula WHERE
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
         $consulta = "
@@ -162,7 +162,7 @@ class loteController extends loteModel
 
             error_log("Resultados: " . count($datos) . " de $total total");
         } catch (PDOException $e) {
-            error_log("❌ ERROR SQL: " . $e->getMessage());
+            error_log(" ERROR SQL: " . $e->getMessage());
             return '<div class="error" style="padding:20px;color:red;border:2px solid red;margin:10px;">
                     <strong>Error en la consulta SQL:</strong><br>' .
                 htmlspecialchars($e->getMessage()) .
@@ -171,7 +171,7 @@ class loteController extends loteModel
 
         $Npaginas = ceil($total / $registros);
 
-        // 🏢 Determinar si mostrar columna SUCURSAL (solo para admin)
+        // Determinar si mostrar columna SUCURSAL (solo para admin)
         $mostrar_columna_sucursal = ($rol_usuario == 1);
         $colspan_total = $mostrar_columna_sucursal ? 14 : 13;
 
@@ -266,7 +266,7 @@ class loteController extends loteModel
                         : $estado_html)
                     . '</td>
                         <td class="buttons">
-                            <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default">EDITAR</a>
+                            <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>
                         </td>
                     </tr>
                 ';
@@ -275,7 +275,7 @@ class loteController extends loteModel
             $reg_final = $contador - 1;
         } else {
             $tabla .= '<tr><td colspan="' . $colspan_total . '" style="text-align:center;padding:20px;color:#999;">
-                        📭 No hay registros que coincidan con los filtros aplicados
+                        <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
                     </td></tr>';
         }
 

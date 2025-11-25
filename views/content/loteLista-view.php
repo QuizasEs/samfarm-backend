@@ -20,43 +20,63 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
 
-                <select class="select-filtro" name="select1">
-                    <option value="">Todos los estados</option>
-                    <option value="en_espera">En Espera</option>
-                    <option value="activo">Activo</option>
-                    <option value="terminado">Terminado</option>
-                    <option value="caducado">Caducado</option>
-                    <option value="devuelto">Devuelto</option>
-                    <option value="bloqueado">Bloqueado</option>
-                </select>
-                <select class="select-filtro" name="select2" id="">
-                    <option value="">Mes</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiempre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-                <!-- select de sucursales solo para administrador -->
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                    <select class="select-filtro" name="select3" id="">
-                        <option value="">Sucursales</option>
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                        <?php } ?>
+                <div class="form-fechas">
+
+                    <small>Estados</small>
+                    <select class="select-filtro" name="select1">
+                        <option value="">Todos los estados</option>
+                        <option value="en_espera">En Espera</option>
+                        <option value="activo">Activo</option>
+                        <option value="terminado">Terminado</option>
+                        <option value="caducado">Caducado</option>
+                        <option value="devuelto">Devuelto</option>
+                        <option value="bloqueado">Bloqueado</option>
                     </select>
-                <?php } ?>
-                <!-- Rango de fechas (NUEVO) -->
+                </div>
+                <div class="form-fechas">
+                    <small>Meses</small>
+                    <select class="select-filtro" name="select2" id="">
+                        <option value="">Mes</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiempre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <!-- select de sucursales solo para administrador -->
+                <div class="form-fechas">
+
+                    <small>Sucursales</small>
+                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                        <select class="select-filtro" name="select3" id="">
+                            <option value="">Sucursales</option>
+                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                            <?php } ?>
+                        </select>
+                    <?php } ?>
+                </div>
                 <!-- Fechas -->
-                <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
+                <div class="form-fechas">
+                    <small>
+                        Desde
+                    </small>
+                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
+                </div>
+                <div class="form-fechas">
+                    <small>
+                        Hasta
+                    </small>
+                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
+                </div>
 
                 <div class="search">
                     <!-- Búsqueda -->

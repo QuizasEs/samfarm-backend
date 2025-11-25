@@ -602,11 +602,7 @@ class ventaModel extends mainModel
     }
 
 
-    /**************************************************************************
-     * DESCONTAR DEL INVENTARIO CONSOLIDADO (MÉTODO DIRECTO)
-     * - Más eficiente que recalcular todo
-     * - Actualiza directamente restando las unidades vendidas
-     **************************************************************************/
+
     public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades)
     {
         if ($cantidad_unidades <= 0) return false;
@@ -714,23 +710,20 @@ class ventaModel extends mainModel
             return false;
         }
     }
-    /**************************************************************************
-     * generar_pdf_factura_model (usa libs/pdf_factura.php)
-     **************************************************************************/
-    protected static function generar_pdf_factura_model($fa_id, $tipo = 'nota_venta')
+
+    public function generar_pdf_factura_model($fa_id, $tipo = 'nota_venta')
     {
         $fa_id = (int)$fa_id;
         if ($fa_id <= 0) return false;
 
         try {
-            // ✅ CARGAR FPDF CON RUTA CORRECTA
-            $root = dirname(__DIR__); // Ruta base del proyecto
+            $root = dirname(__DIR__);
+
             require_once $root . "/libs/fpdf/fpdf.php";
 
             // Conectar a BD
             $db = mainModel::conectar();
 
-            // ✅ CONSULTAR DATOS DE FACTURA Y VENTA
             $sql = "
             SELECT f.*, 
                 v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_fecha_emision,
@@ -757,7 +750,6 @@ class ventaModel extends mainModel
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
             $ve_id = (int)$data['ve_id'];
 
-            // ✅ CONSULTAR DETALLE DE VENTA
             $sql2 = "
             SELECT dv.*, 
                 m.med_nombre_quimico AS med_nombre,
@@ -773,7 +765,6 @@ class ventaModel extends mainModel
             $stmt2->execute();
             $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-            // ✅ CONSULTAR CONFIGURACIÓN DE EMPRESA
             $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
             $cfg_stmt = $db->prepare($cfg_sql);
             $cfg_stmt->execute();
@@ -790,13 +781,11 @@ class ventaModel extends mainModel
                 ];
             }
 
-            // ✅ CREAR PDF (tamaño media carta para nota de venta)
             $pdf = new FPDF('P', 'mm', array(140, 216));
             $pdf->AddPage();
             $pdf->SetMargins(10, 10, 10);
             $pdf->SetAutoPageBreak(true, 10);
 
-            // ✅ ENCABEZADO CON LOGO
             $logo_x = 10;
             $logo_y = 8;
 
@@ -804,7 +793,6 @@ class ventaModel extends mainModel
                 $pdf->Image($root . '/storage/' . $empresa['ce_logo'], $logo_x, $logo_y, 25);
             }
 
-            // ✅ INFORMACIÓN EMPRESA (sin función utf8_decode)
             $pdf->SetFont('Arial', 'B', 11);
             $pdf->SetXY(80, $logo_y);
             $pdf->Cell(0, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $empresa['ce_nombre']), 0, 1, 'R');
@@ -827,12 +815,10 @@ class ventaModel extends mainModel
             $pdf->Line(10, $pdf->GetY(), 130, $pdf->GetY());
             $pdf->Ln(2);
 
-            // ✅ TÍTULO
             $pdf->SetFont('Arial', 'B', 13);
             $pdf->Cell(0, 6, 'NOTA DE VENTA', 0, 1, 'C');
             $pdf->Ln(2);
 
-            // ✅ INFORMACIÓN CLIENTE Y VENTA
             $pdf->SetFont('Arial', 'B', 8);
             $pdf->Cell(30, 5, 'Cliente:', 0, 0);
             $pdf->SetFont('Arial', '', 8);
@@ -863,7 +849,6 @@ class ventaModel extends mainModel
 
             $pdf->Ln(3);
 
-            // ✅ TABLA DE PRODUCTOS
             $pdf->SetFillColor(240, 240, 240);
             $pdf->SetFont('Arial', 'B', 7);
             $pdf->Cell(8, 5, 'N', 1, 0, 'C', true);
@@ -884,7 +869,6 @@ class ventaModel extends mainModel
                     $nombre_producto .= ' - ' . $d['version_comercial'];
                 }
 
-                // Truncar nombre si es muy largo
                 $nombre_producto = substr($nombre_producto, 0, 45);
 
                 $pdf->Cell(8, 5, $contador, 1, 0, 'C');
@@ -899,7 +883,6 @@ class ventaModel extends mainModel
                 $contador++;
             }
 
-            // ✅ TOTALES
             $pdf->Ln(2);
             $pdf->SetFont('Arial', 'B', 8);
 
@@ -922,18 +905,18 @@ class ventaModel extends mainModel
             $pdf->Cell(15, 6, 'TOTAL:', 1, 0, 'R', true);
             $pdf->Cell(0, 6, number_format($data['ve_total'], 2) . ' Bs', 1, 1, 'R', true);
 
-            // ✅ PIE DE PÁGINA
+            // PIE DE PÁGINA
             $pdf->Ln(6);
             $pdf->SetFont('Arial', 'I', 7);
             $pdf->SetTextColor(100, 100, 100);
             $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Gracias por su compra'), 0, 1, 'C');
             $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Este documento es una nota de venta, no es un documento fiscal'), 0, 1, 'C');
 
-            // ✅ RETORNAR CONTENIDO EN BASE64
+            // RETORNAR CONTENIDO EN BASE64
             $contenido_pdf = $pdf->Output('S'); // 'S' = String
             $pdf_base64 = base64_encode($contenido_pdf);
 
-            error_log("✅ PDF generado exitosamente para factura #{$fa_id}");
+            error_log(" PDF generado exitosamente para factura #{$fa_id}");
             return $pdf_base64;
         } catch (Exception $e) {
             error_log("❌ Error generando PDF: " . $e->getMessage());

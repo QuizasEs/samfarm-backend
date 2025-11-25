@@ -10,14 +10,12 @@ class ventasHistorialController extends ventasHistorialModel
 
     public function paginado_ventas_historial_controller($pagina, $registros, $url, $busqueda = "", $f1 = "", $f2 = "", $f3 = "", $f4 = "", $f5 = "")
     {
-        // ===== VALIDAR PERMISOS =====
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
         $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 
-        // Vendedores NO pueden acceder
         if ($rol_usuario == 3) {
             return '<div class="error" style="padding:30px;text-align:center;">
-                        <h3>⛔ Acceso Denegado</h3>
+                        <h3> Acceso Denegado</h3>
                         <p>No tiene permisos para ver el historial de ventas</p>
                     </div>';
         }
@@ -28,11 +26,11 @@ class ventasHistorialController extends ventasHistorialModel
         $url = mainModel::limpiar_cadena($url);
         $url = SERVER_URL . $url . '/';
         $busqueda = mainModel::limpiar_cadena($busqueda);
-        $f1 = mainModel::limpiar_cadena($f1); // Sucursal
-        $f2 = mainModel::limpiar_cadena($f2); // Cliente
-        $f3 = mainModel::limpiar_cadena($f3); // Vendedor
-        $f4 = mainModel::limpiar_cadena($f4); // Tipo documento
-        $f5 = mainModel::limpiar_cadena($f5); // Estado (no implementado aún)
+        $f1 = mainModel::limpiar_cadena($f1); 
+        $f2 = mainModel::limpiar_cadena($f2); 
+        $f3 = mainModel::limpiar_cadena($f3); 
+        $f4 = mainModel::limpiar_cadena($f4); 
+        $f5 = mainModel::limpiar_cadena($f5); 
 
         $tabla = '';
         $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
@@ -41,7 +39,7 @@ class ventasHistorialController extends ventasHistorialModel
         // ===== CONSTRUIR FILTROS =====
         $filtros = [];
 
-        // 🔒 Filtro por sucursal según rol
+        
         if ($rol_usuario == 1) {
             // Admin: puede ver todas o filtrar
             if ($f1 !== '') {
@@ -52,7 +50,7 @@ class ventasHistorialController extends ventasHistorialModel
             $filtros['su_id'] = $sucursal_usuario;
         }
 
-        // 📅 Filtros de fecha
+        //  Filtros de fecha
         $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
 
@@ -64,22 +62,22 @@ class ventasHistorialController extends ventasHistorialModel
             $filtros['fecha_hasta'] = $fecha_hasta;
         }
 
-        // 👤 Filtro por cliente
+        //  Filtro por cliente
         if ($f2 !== '' && is_numeric($f2)) {
             $filtros['cliente'] = (int)$f2;
         }
 
-        // 👨‍💼 Filtro por vendedor
+        //  Filtro por vendedor
         if ($f3 !== '' && is_numeric($f3)) {
             $filtros['vendedor'] = (int)$f3;
         }
 
-        // 📄 Filtro por tipo de documento
+        //  Filtro por tipo de documento
         if ($f4 !== '') {
             $filtros['tipo_documento'] = $f4;
         }
 
-        // 🔍 Búsqueda
+        // Búsqueda
         if (!empty($busqueda)) {
             $filtros['busqueda'] = $busqueda;
         }
@@ -93,7 +91,7 @@ class ventasHistorialController extends ventasHistorialModel
 
             $total = self::contar_ventas_historial_model($filtros);
         } catch (PDOException $e) {
-            error_log("❌ ERROR SQL: " . $e->getMessage());
+            error_log(" ERROR SQL: " . $e->getMessage());
             return '<div class="error" style="padding:20px;color:red;">
                         <strong>Error en la consulta:</strong><br>' .
                 htmlspecialchars($e->getMessage()) .
@@ -170,15 +168,8 @@ class ventasHistorialController extends ventasHistorialModel
                                title="Reimprimir nota de venta"
                                onclick="VentasHistorialModals.reimprimirNota(' . $row['ve_id'] . ')">
                                 <ion-icon name="print-outline"></ion-icon> Reimprimir
-                            </a>' .
-                    ($tiene_factura ?
-                        '<a href="javascript:void(0)" 
-                            class="btn success" 
-                            title="Ver factura"
-                            onclick="VentasHistorialModals.verFactura(' . $row['fa_id'] . ')">
-                             <ion-icon name="document-text-outline"></ion-icon> Factura
-                         </a>' : '') .
-                    '</td>
+                            </a>
+                    </td>
                     </tr>
                 ';
                 $contador++;
@@ -200,9 +191,7 @@ class ventasHistorialController extends ventasHistorialModel
         return $tabla;
     }
 
-    /**
-     * Controlador para obtener detalle de venta
-     */
+
     public function detalle_venta_controller()
     {
         $ve_id = isset($_POST['ve_id']) ? (int)$_POST['ve_id'] : 0;
@@ -305,11 +294,10 @@ class ventasHistorialController extends ventasHistorialModel
             exit();
         }
     }
-    /**
-     * Controlador para generar PDF de nota de venta
-     */
+
     public function generar_pdf_nota_controller()
     {
+        
         $ve_id = isset($_POST['ve_id']) ? (int)$_POST['ve_id'] : 0;
 
         if ($ve_id <= 0) {
@@ -322,21 +310,46 @@ class ventasHistorialController extends ventasHistorialModel
             echo json_encode($alerta);
             exit();
         }
+        $consulta = self::ejecutar_consulta_simple("
+                SELECT fa_id 
+                FROM factura 
+                WHERE ve_id = $ve_id
+                LIMIT 1
+            ");
+        if ($consulta->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'La venta no tiene factura registrada',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        // Extraer fa_id
+        $data = $consulta->fetch(PDO::FETCH_ASSOC);
+        $fa_id = (int)$data['fa_id'];
+
+
 
         try {
-            $pdf_base64 = self::generar_pdf_nota_venta_model($ve_id);
+            require_once dirname(__DIR__).'./models/ventaModel.php';
+            $ins_venta = new ventaModel();
+            $pdf_base64 = $ins_venta->generar_pdf_factura_model($fa_id, 'nota_venta');
 
             if (!$pdf_base64) {
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Error',
-                    'texto' => 'No se pudo generar el PDF',
+                    'texto' => 'Nonononono se pudo generar el PDF',
                     'Tipo' => 'error'
                 ];
                 echo json_encode($alerta);
                 exit();
             }
 
+            // Respuesta exitosa
             $response = [
                 'success' => true,
                 'pdf_base64' => $pdf_base64
@@ -345,11 +358,11 @@ class ventasHistorialController extends ventasHistorialModel
             echo json_encode($response);
             exit();
         } catch (Exception $e) {
-            error_log("Error en generar_pdf_nota_controller: " . $e->getMessage());
+            error_log("❌ Error en generar_pdf_nota_controller: " . $e->getMessage());
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'Error al generar PDF',
+                'texto' => 'Error al generar PDF: ' . $e->getMessage(),
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
@@ -357,9 +370,7 @@ class ventasHistorialController extends ventasHistorialModel
         }
     }
 
-    /**
-     * Controlador para exportar a Excel
-     */
+
     public function exportar_excel_controller()
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -492,7 +503,7 @@ class ventasHistorialController extends ventasHistorialModel
                 
                 th {
                     background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                    color: white;
+                    color: black;
                     font-weight: 500;
                     text-align: center;
                     padding: 14px 10px;
@@ -585,34 +596,34 @@ class ventasHistorialController extends ventasHistorialModel
         <body>';
 
             echo '<div class="container">';
-            echo '<div class="header">📊 HISTORIAL DE VENTAS - SAMFARM PHARMA</div>';
+            echo '<div class="header"> HISTORIAL DE VENTAS - SAMFARM PHARMA</div>';
 
             echo '<div class="info">';
             echo '<div class="info-item">';
-            echo '<strong>📅 Fecha de Generación</strong>';
+            echo '<strong> Fecha de Generación</strong>';
             echo date('d/m/Y H:i:s');
             echo '</div>';
 
             echo '<div class="info-item">';
-            echo '<strong>👤 Usuario</strong>';
+            echo '<strong>👤 Usuario :</strong>';
             echo htmlspecialchars($_SESSION['nombre_smp'] ?? 'Sistema');
             echo '</div>';
 
             if (!empty($filtros['su_id'])) {
                 echo '<div class="info-item">';
-                echo '<strong>🏪 Sucursal</strong>';
+                echo '<strong> Sucursal</strong>';
                 echo 'Sucursal ID ' . $filtros['su_id'];
                 echo '</div>';
             } else {
                 echo '<div class="info-item">';
-                echo '<strong>🏪 Sucursal</strong>';
+                echo '<strong> Sucursal: </strong>';
                 echo 'Todas las Sucursales';
                 echo '</div>';
             }
 
             if (!empty($filtros['fecha_desde']) || !empty($filtros['fecha_hasta'])) {
                 echo '<div class="info-item">';
-                echo '<strong>📆 Rango de Fechas</strong>';
+                echo '<strong> Rango de Fechas</strong>';
                 if (!empty($filtros['fecha_desde'])) {
                     echo date('d/m/Y', strtotime($filtros['fecha_desde']));
                 }
@@ -623,7 +634,7 @@ class ventasHistorialController extends ventasHistorialModel
             }
 
             echo '<div class="info-item">';
-            echo '<strong>📋 Total de Registros</strong>';
+            echo '<strong>Total de Registros: </strong>';
             echo count($datos);
             echo '</div>';
             echo '</div>';
@@ -657,7 +668,7 @@ class ventasHistorialController extends ventasHistorialModel
             }
 
             echo '<tr class="total-row">';
-            echo '<td colspan="8" style="text-align: right; padding-right: 20px;">📊 TOTAL GENERAL:</td>';
+            echo '<td colspan="8" style="text-align: right; padding-right: 20px;"> TOTAL GENERAL:</td>';
             echo '<td class="moneda">Bs ' . number_format($total_general, 2, ',', '.') . '</td>';
             echo '<td colspan="2"></td>';
             echo '</tr>';

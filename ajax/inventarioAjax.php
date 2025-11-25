@@ -5,7 +5,6 @@ $peticionAjax = true;
 // Importamos la configuración general
 require_once "../config/APP.php";
 
-// ✅ MANEJAR EXPORTACIÓN EXCEL PRIMERO (viene por GET)
 if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel") {
     
     session_start(['name' => 'SMP']);
@@ -29,7 +28,6 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel
     exit();
 }
 
-// ✅ VALIDACIÓN DE SEGURIDAD PARA PETICIONES POST
 if (isset($_POST['inventarioAjax'])) {
 
     // Iniciamos sesión para validar permisos

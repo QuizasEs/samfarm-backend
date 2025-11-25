@@ -287,4 +287,75 @@ class ventasHistorialModel extends mainModel
 
         return mainModel::conectar()->query($sql);
     }
+
+    /**
+     * Exportar historial a Excel
+     */
+    protected static function exportar_historial_excel_model($filtros = [])
+    {
+        $sql = "
+            SELECT 
+                v.ve_numero_documento AS 'N° Documento',
+                DATE_FORMAT(v.ve_fecha_emision, '%d/%m/%Y %H:%i') AS 'Fecha',
+                COALESCE(CONCAT_WS(' ', c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno), 'Sin cliente') AS 'Cliente',
+                CONCAT_WS(' ', u.us_nombres, u.us_apellido_paterno) AS 'Vendedor',
+                s.su_nombre AS 'Sucursal',
+                (SELECT COUNT(*) FROM detalle_venta dv WHERE dv.ve_id = v.ve_id) AS 'Items',
+                v.ve_subtotal AS 'Subtotal (Bs)',
+                v.ve_impuesto AS 'Impuestos (Bs)',
+                v.ve_total AS 'Total (Bs)',
+                COALESCE(v.ve_tipo_documento, 'venta') AS 'Tipo Documento',
+                f.fa_numero AS 'N° Factura'
+            FROM ventas v
+            INNER JOIN usuarios u ON u.us_id = v.us_id
+            INNER JOIN sucursales s ON s.su_id = v.su_id
+            LEFT JOIN clientes c ON c.cl_id = v.cl_id
+            LEFT JOIN factura f ON f.ve_id = v.ve_id
+            WHERE v.ve_estado = 1
+        ";
+
+        $params = [];
+
+        if (!empty($filtros['su_id'])) {
+            $sql .= " AND v.su_id = :su_id";
+            $params[':su_id'] = (int)$filtros['su_id'];
+        }
+
+        if (!empty($filtros['fecha_desde'])) {
+            $sql .= " AND DATE(v.ve_fecha_emision) >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+
+        if (!empty($filtros['fecha_hasta'])) {
+            $sql .= " AND DATE(v.ve_fecha_emision) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+
+        if (!empty($filtros['cliente'])) {
+            $sql .= " AND v.cl_id = :cliente";
+            $params[':cliente'] = (int)$filtros['cliente'];
+        }
+
+        if (!empty($filtros['vendedor'])) {
+            $sql .= " AND v.us_id = :vendedor";
+            $params[':vendedor'] = (int)$filtros['vendedor'];
+        }
+
+        if (!empty($filtros['tipo_documento'])) {
+            $sql .= " AND v.ve_tipo_documento = :tipo_documento";
+            $params[':tipo_documento'] = $filtros['tipo_documento'];
+        }
+
+        $sql .= " ORDER BY v.ve_fecha_emision DESC";
+
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        return $stmt;
+    }
 }

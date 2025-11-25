@@ -1,6 +1,11 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     /* Admin o Gerente */
+
+    require_once "./controllers/MedicamentoController.php";
+    $ins_med = new medicamentoController();
+    $datos_select = $ins_med->datos_extras_controller();
+
 ?>
 
     <div class="container tabla-dinamica"
@@ -19,32 +24,50 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <div class="filtro-dinamico-search">
 
                 <!-- Filtro por Rango de Fechas -->
-                <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
+                <div class="form-fechas">
+                    <small>Desde</small>
+                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
+                </div>
+                <div class="form-fechas">
+                    <small>Hasta</small>
+                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
+                </div>
 
                 <!-- Select Sucursal (solo para admin) -->
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                    <select class="select-filtro" name="select1">
+                <div class="form-fechas">
+                    <small>Sucursales</small>
+                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                        <select class="select-filtro" name="select1">
+                            <option value="">Todas las sucursales</option>
+                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                            <?php } ?>
+                        </select>
+                    <?php } ?>
+                </div>
+
+
+                <!-- Select cajero -->
+                <div class="form-fechas">
+                    <small>Cajero</small>
+                    <select class="select-filtro" name="select3">
+                        <option value="">Todos los cajeros</option>
+                        <?php foreach ($datos_select['caja'] as $caja) { ?>
+                            <option value="<?php echo $caja['us_id'] ?>"><?php echo $caja['us_nombres'] ?></option>
+                        <?php } ?>
 
                     </select>
-                <?php } ?>
-
-                <!-- Select Cliente -->
-                <select class="select-filtro" name="select2">
-
-                </select>
-
-                <!-- Select Vendedor -->
-                <select class="select-filtro" name="select3">
-
-                </select>
+                </div>
 
                 <!-- Select Tipo Documento -->
-                <select class="select-filtro" name="select4">
-                    <option value="">Todos los tipos</option>
-                    <option value="nota de venta">Nota de Venta</option>
-                    <option value="factura">Factura</option>
-                </select>
+                <div class="form-fechas">
+                    <small>Tipo de documento</small>
+                    <select class="select-filtro" name="select4">
+                        <option value="">Todos los tipos</option>
+                        <option value="nota de venta">Nota de Venta</option>
+                        <option value="factura">Factura</option>
+                    </select>
+                </div>
 
                 <!-- Búsqueda -->
                 <div class="search">
@@ -54,11 +77,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </button>
                 </div>
             </div>
-            <div class="filtro-acciones" style="display:flex; gap:10px; margin-top:10px;">
-                <button type="button" id="btnExportarExcel" class="btn success">
-                    <ion-icon name="download-outline"></ion-icon> Exportar a Excel
-                </button>
-            </div>
+            <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                <div class="filtro-acciones" style="display:flex; gap:10px; margin-top:10px;">
+                    <button type="button" id="btnExportarExcel" class="btn success">
+                        <ion-icon name="download-outline"></ion-icon> Exportar a Excel
+                    </button>
+                </div>
+            <?php } ?>
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -321,8 +346,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
-                    Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+                    console.error(' Error:', error);
+                    Swal.fire('Error', 'aquiNo se pudo generar el PDF', 'error');
                 }
             }
         };

@@ -1,15 +1,11 @@
 
 <?php
-// Indicamos que esta petición viene vía AJAX
 $peticionAjax = true;
 
-// Importamos la configuración general
 require_once "../config/APP.php";
 
-// Forzamos salida JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// ✅ VALIDACIÓN DE SEGURIDAD (igual que userAjax.php)
 if (isset($_POST['loteAjax'])) {
 
     // Iniciamos sesión para validar permisos
@@ -40,7 +36,6 @@ if (isset($_POST['loteAjax'])) {
         exit();
     }
 
-    // ✅ Sesión válida, procesar petición
     $valor = $_POST['loteAjax'];
 
     require_once "../controllers/loteController.php";
@@ -76,7 +71,6 @@ if (isset($_POST['loteAjax'])) {
         echo json_encode($debug);
         exit(); */
 
-        // 🚀 Producción (descomentar después)
         echo $ins_lote->activar_lote_controller();
     }
     if ($valor == "update") {
@@ -90,7 +84,6 @@ if (isset($_POST['loteAjax'])) {
         echo json_encode($debug);
         exit(); */
 
-        // 🚀 Producción (descomentar después)
         echo $ins_lote->actualizar_lote_controller();
     }
 } else {

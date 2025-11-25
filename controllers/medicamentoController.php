@@ -176,14 +176,14 @@ class medicamentoController extends medicamentoModel
         /* Limpiar parámetros */
         $pagina = mainModel::limpiar_cadena($pagina);
         $registros = mainModel::limpiar_cadena($registros);
-        $privilegio = mainModel::limpiar_cadena($privilegio); // ✅ Aunque no se usa, debe estar
+        $privilegio = mainModel::limpiar_cadena($privilegio); 
         $url = mainModel::limpiar_cadena($url);
         $url = SERVER_URL . $url . '/';
         $busqueda = mainModel::limpiar_cadena($busqueda);
-        $f1 = mainModel::limpiar_cadena($f1); // Laboratorio
-        $f2 = mainModel::limpiar_cadena($f2); // Vía
-        $f3 = mainModel::limpiar_cadena($f3); // Forma
-        $f4 = mainModel::limpiar_cadena($f4); // Uso
+        $f1 = mainModel::limpiar_cadena($f1); 
+        $f2 = mainModel::limpiar_cadena($f2); 
+        $f3 = mainModel::limpiar_cadena($f3); 
+        $f4 = mainModel::limpiar_cadena($f4); 
 
         $tabla = '';
         $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
@@ -323,7 +323,7 @@ class medicamentoController extends medicamentoModel
                             <td class="accion-buttons">
                                 <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
                                     <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
-                                    <button type="submit" class="btn-disable">Eliminar</button>
+                                    <button type="submit" class="btn warning"><ion-icon name="trash-outline"></ion-icon> Eliminar</button>
                                 </form>
                                 <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn default">
                                     <ion-icon name="create-outline"></ion-icon> Editar
@@ -339,7 +339,7 @@ class medicamentoController extends medicamentoModel
                 $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
             } else {
                 $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
-                                🔭 No hay registros que coincidan con los filtros aplicados
+                                <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
                             </td></tr>';
             }
         }

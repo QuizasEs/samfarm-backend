@@ -1831,7 +1831,8 @@
         console.log("✅ Script de búsqueda de clientes inicializado");
     })();
 </script>
-<script>  /* base 64 */
+<script>
+    /* base 64 */
     window.abrirPDFDesdeBase64 = function(base64Data, nombreArchivo) {
         try {
             // Decodificar base64
@@ -1860,11 +1861,11 @@
                 };
             }
 
-            console.log('✅ PDF abierto exitosamente');
+            console.log('PDF abierto exitosamente');
             return true;
 
         } catch (error) {
-            console.error('❌ Error abriendo PDF:', error);
+            console.error('Error abriendo PDF:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -1876,127 +1877,122 @@
 </script>
 
 
-    <!-- ========================================
-     🔹 FUNCIONES GENÉRICAS PARA MODALES DE INVENTARIO t generacion de excel inventario
-     ======================================== -->
-    <script>
-        /**
-         * ============================================================
-         * INVENTARIO MODALS - Sistema Corregido
-         * ============================================================
-         */
-        const InventarioModals = (function() {
-            'use strict';
 
-            const API_URL = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php';
+<!-- funciones para inventario -->
 
-            // ==================== UTILIDADES ====================
-            const utils = {
-                async ajax(params) {
-                    try {
-                        console.log('📡 Enviando petición:', params);
+<script>
+    const InventarioModals = (function() {
+        'use strict';
 
-                        const response = await fetch(API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: new URLSearchParams(params)
-                        });
+        const API_URL = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php';
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
+        // ==================== UTILIDADES ====================
+        const utils = {
+            async ajax(params) {
+                try {
+                    console.log('📡 Enviando petición:', params);
 
-                        const data = await response.json();
-                        console.log('✅ Respuesta recibida:', data);
-                        return data;
-
-                    } catch (error) {
-                        console.error('❌ Error AJAX:', error);
-                        throw error;
-                    }
-                },
-
-                abrir(modalId) {
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.style.display = 'flex';
-                        console.log(`✅ Modal abierto: ${modalId}`);
-                    } else {
-                        console.error(`❌ Modal no encontrado: ${modalId}`);
-                    }
-                },
-
-                cerrar(modalId) {
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.style.display = 'none';
-                        console.log(`✅ Modal cerrado: ${modalId}`);
-                    }
-                },
-
-                formatearFecha(fecha) {
-                    if (!fecha) return 'N/A';
-                    const d = new Date(fecha);
-                    const dia = String(d.getDate()).padStart(2, '0');
-                    const mes = String(d.getMonth() + 1).padStart(2, '0');
-                    const anio = d.getFullYear();
-                    return `${dia}/${mes}/${anio}`;
-                },
-
-                formatearNumero(num) {
-                    return parseInt(num || 0).toLocaleString('es-BO');
-                },
-
-                formatearMoneda(num) {
-                    return 'Bs ' + parseFloat(num || 0).toFixed(2);
-                }
-            };
-
-            // ==================== MODAL DETALLE ====================
-            const detalle = {
-                async abrir(invId, medId, suId, medicamento) {
-                    console.log('📋 Abriendo detalle:', {
-                        invId,
-                        medId,
-                        suId,
-                        medicamento
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams(params)
                     });
 
-                    document.getElementById('modalDetalleMedicamento').textContent = medicamento;
-                    document.getElementById('modalDetalleInvId').value = invId;
-                    document.getElementById('modalDetalleMedId').value = medId;
-                    document.getElementById('modalDetalleSuId').value = suId;
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
 
-                    utils.abrir('modalDetalleInventario');
+                    const data = await response.json();
+                    console.log('✅ Respuesta recibida:', data);
+                    return data;
 
-                    // Mostrar loading
-                    document.getElementById('tablaLotesDetalle').innerHTML =
-                        '<tr><td colspan="5" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+                } catch (error) {
+                    console.error('❌ Error AJAX:', error);
+                    throw error;
+                }
+            },
 
-                    try {
-                        const data = await utils.ajax({
-                            inventarioAjax: 'detalle',
-                            inv_id: invId,
-                            med_id: medId,
-                            su_id: suId
-                        });
+            abrir(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                    console.log(`✅ Modal abierto: ${modalId}`);
+                } else {
+                    console.error(`❌ Modal no encontrado: ${modalId}`);
+                }
+            },
 
-                        if (data.error) {
-                            throw new Error(data.error);
-                        }
+            cerrar(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    console.log(`✅ Modal cerrado: ${modalId}`);
+                }
+            },
 
-                        document.getElementById('detalleLaboral').textContent = data.laboratorio || 'N/A';
-                        document.getElementById('detalleSucursal').textContent = data.sucursal || 'N/A';
-                        document.getElementById('detalleCajas').textContent = utils.formatearNumero(data.cajas);
-                        document.getElementById('detalleUnidades').textContent = utils.formatearNumero(data.unidades);
-                        document.getElementById('detalleValorado').textContent = utils.formatearMoneda(data.valorado);
-                        document.getElementById('detalleEstado').innerHTML = data.estado_html || 'N/A';
+            formatearFecha(fecha) {
+                if (!fecha) return 'N/A';
+                const d = new Date(fecha);
+                const dia = String(d.getDate()).padStart(2, '0');
+                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                const anio = d.getFullYear();
+                return `${dia}/${mes}/${anio}`;
+            },
 
-                        const tbody = document.getElementById('tablaLotesDetalle');
-                        if (data.lotes && data.lotes.length > 0) {
-                            tbody.innerHTML = data.lotes.map(lote => `
+            formatearNumero(num) {
+                return parseInt(num || 0).toLocaleString('es-BO');
+            },
+
+            formatearMoneda(num) {
+                return 'Bs ' + parseFloat(num || 0).toFixed(2);
+            }
+        };
+
+        // ==================== MODAL DETALLE ====================
+        const detalle = {
+            async abrir(invId, medId, suId, medicamento) {
+                console.log('📋 Abriendo detalle:', {
+                    invId,
+                    medId,
+                    suId,
+                    medicamento
+                });
+
+                document.getElementById('modalDetalleMedicamento').textContent = medicamento;
+                document.getElementById('modalDetalleInvId').value = invId;
+                document.getElementById('modalDetalleMedId').value = medId;
+                document.getElementById('modalDetalleSuId').value = suId;
+
+                utils.abrir('modalDetalleInventario');
+
+                // Mostrar loading
+                document.getElementById('tablaLotesDetalle').innerHTML =
+                    '<tr><td colspan="5" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+
+                try {
+                    const data = await utils.ajax({
+                        inventarioAjax: 'detalle',
+                        inv_id: invId,
+                        med_id: medId,
+                        su_id: suId
+                    });
+
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    document.getElementById('detalleLaboral').textContent = data.laboratorio || 'N/A';
+                    document.getElementById('detalleSucursal').textContent = data.sucursal || 'N/A';
+                    document.getElementById('detalleCajas').textContent = utils.formatearNumero(data.cajas);
+                    document.getElementById('detalleUnidades').textContent = utils.formatearNumero(data.unidades);
+                    document.getElementById('detalleValorado').textContent = utils.formatearMoneda(data.valorado);
+                    document.getElementById('detalleEstado').innerHTML = data.estado_html || 'N/A';
+
+                    const tbody = document.getElementById('tablaLotesDetalle');
+                    if (data.lotes && data.lotes.length > 0) {
+                        tbody.innerHTML = data.lotes.map(lote => `
                         <tr>
                             <td>${lote.numero_lote}</td>
                             <td>${utils.formatearNumero(lote.unidades)}</td>
@@ -2005,105 +2001,105 @@
                             <td>${lote.estado}</td>
                         </tr>
                     `).join('');
-                        } else {
-                            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin lotes</td></tr>';
-                        }
-
-                    } catch (error) {
-                        console.error('❌ Error:', error);
-                        Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin lotes</td></tr>';
                     }
-                }
-            };
 
-            // ==================== MODAL TRANSFERIR ====================
-            const transferir = {
-                async abrir(invId, medId, suId, medicamento) {
-                    console.log('🔄 Abriendo transferencia:', {
-                        invId,
-                        medId,
-                        suId,
-                        medicamento
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
+                }
+            }
+        };
+
+        // ==================== MODAL TRANSFERIR ====================
+        const transferir = {
+            async abrir(invId, medId, suId, medicamento) {
+                console.log('🔄 Abriendo transferencia:', {
+                    invId,
+                    medId,
+                    suId,
+                    medicamento
+                });
+
+                document.getElementById('modalTransferirMedicamento').textContent = medicamento;
+                document.getElementById('modalTransferirInvId').value = invId;
+                document.getElementById('modalTransferirMedId').value = medId;
+                document.getElementById('modalTransferirSuOrigenId').value = suId;
+
+                document.getElementById('transferirSucursalDestino').value = '';
+                document.getElementById('transferirCantidad').value = '';
+                document.getElementById('transferirMotivo').value = '';
+                document.getElementById('transferirStockDisponible').textContent = '';
+
+                utils.abrir('modalTransferirInventario');
+
+                try {
+                    const data = await utils.ajax({
+                        inventarioAjax: 'lotes_transferibles',
+                        med_id: medId,
+                        su_id: suId
                     });
 
-                    document.getElementById('modalTransferirMedicamento').textContent = medicamento;
-                    document.getElementById('modalTransferirInvId').value = invId;
-                    document.getElementById('modalTransferirMedId').value = medId;
-                    document.getElementById('modalTransferirSuOrigenId').value = suId;
+                    const selectLote = document.getElementById('transferirLote');
+                    selectLote.innerHTML = '<option value="">Seleccione lote...</option>';
 
-                    document.getElementById('transferirSucursalDestino').value = '';
-                    document.getElementById('transferirCantidad').value = '';
-                    document.getElementById('transferirMotivo').value = '';
-                    document.getElementById('transferirStockDisponible').textContent = '';
-
-                    utils.abrir('modalTransferirInventario');
-
-                    try {
-                        const data = await utils.ajax({
-                            inventarioAjax: 'lotes_transferibles',
-                            med_id: medId,
-                            su_id: suId
+                    if (data.lotes && data.lotes.length > 0) {
+                        data.lotes.forEach(lote => {
+                            selectLote.innerHTML += `<option value="${lote.lm_id}" data-stock="${lote.stock}">${lote.numero_lote} (${utils.formatearNumero(lote.stock)} unid.)</option>`;
                         });
-
-                        const selectLote = document.getElementById('transferirLote');
-                        selectLote.innerHTML = '<option value="">Seleccione lote...</option>';
-
-                        if (data.lotes && data.lotes.length > 0) {
-                            data.lotes.forEach(lote => {
-                                selectLote.innerHTML += `<option value="${lote.lm_id}" data-stock="${lote.stock}">${lote.numero_lote} (${utils.formatearNumero(lote.stock)} unid.)</option>`;
-                            });
-                        } else {
-                            selectLote.innerHTML = '<option value="">Sin lotes disponibles</option>';
-                        }
-
-                    } catch (error) {
-                        console.error('❌ Error:', error);
-                        Swal.fire('Error', 'No se pudieron cargar los lotes', 'error');
+                    } else {
+                        selectLote.innerHTML = '<option value="">Sin lotes disponibles</option>';
                     }
-                },
 
-                procesar() {
-                    Swal.fire({
-                        title: 'Funcionalidad en desarrollo',
-                        text: 'La transferencia se implementará en la siguiente fase',
-                        icon: 'info'
-                    });
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'No se pudieron cargar los lotes', 'error');
                 }
-            };
+            },
 
-            // ==================== MODAL HISTORIAL ====================
-            const historial = {
-                async abrir(medId, suId, medicamento) {
-                    console.log('📜 Abriendo historial:', {
-                        medId,
-                        suId,
-                        medicamento
+            procesar() {
+                Swal.fire({
+                    title: 'Funcionalidad en desarrollo',
+                    text: 'La transferencia se implementará en la siguiente fase',
+                    icon: 'info'
+                });
+            }
+        };
+
+        // ==================== MODAL HISTORIAL ====================
+        const historial = {
+            async abrir(medId, suId, medicamento) {
+                console.log('📜 Abriendo historial:', {
+                    medId,
+                    suId,
+                    medicamento
+                });
+
+                document.getElementById('modalHistorialMedicamento').textContent = medicamento;
+                document.getElementById('modalHistorialMedId').value = medId;
+                document.getElementById('modalHistorialSuId').value = suId;
+
+                utils.abrir('modalHistorialInventario');
+
+                document.getElementById('tablaHistorialMovimientos').innerHTML =
+                    '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+
+                try {
+                    const data = await utils.ajax({
+                        inventarioAjax: 'historial',
+                        med_id: medId,
+                        su_id: suId
                     });
 
-                    document.getElementById('modalHistorialMedicamento').textContent = medicamento;
-                    document.getElementById('modalHistorialMedId').value = medId;
-                    document.getElementById('modalHistorialSuId').value = suId;
+                    const tbody = document.getElementById('tablaHistorialMovimientos');
 
-                    utils.abrir('modalHistorialInventario');
+                    if (data.movimientos && data.movimientos.length > 0) {
+                        tbody.innerHTML = data.movimientos.map(mov => {
+                            const colorTipo = mov.tipo === 'entrada' ? '#e8f5e9' : '#ffebee';
+                            const iconTipo = mov.tipo === 'entrada' ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline';
 
-                    document.getElementById('tablaHistorialMovimientos').innerHTML =
-                        '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
-
-                    try {
-                        const data = await utils.ajax({
-                            inventarioAjax: 'historial',
-                            med_id: medId,
-                            su_id: suId
-                        });
-
-                        const tbody = document.getElementById('tablaHistorialMovimientos');
-
-                        if (data.movimientos && data.movimientos.length > 0) {
-                            tbody.innerHTML = data.movimientos.map(mov => {
-                                const colorTipo = mov.tipo === 'entrada' ? '#e8f5e9' : '#ffebee';
-                                const iconTipo = mov.tipo === 'entrada' ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline';
-
-                                return `
+                            return `
                             <tr>
                                 <td>${mov.fecha}</td>
                                 <td>
@@ -2118,84 +2114,379 @@
                                 <td>${mov.motivo || '-'}</td>
                             </tr>
                         `;
-                            }).join('');
-                        } else {
-                            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin movimientos</td></tr>';
-                        }
-
-                    } catch (error) {
-                        console.error('❌ Error:', error);
-                        Swal.fire('Error', 'No se pudo cargar el historial', 'error');
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin movimientos</td></tr>';
                     }
+
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'No se pudo cargar el historial', 'error');
                 }
-            };
+            }
+        };
 
-            // ==================== LISTENER PARA ACTUALIZAR STOCK ==================== 
-            document.addEventListener('DOMContentLoaded', function() {
-                const selectLote = document.getElementById('transferirLote');
-                if (selectLote) {
-                    selectLote.addEventListener('change', function() {
-                        const option = this.options[this.selectedIndex];
-                        const stock = option.getAttribute('data-stock');
-                        const infoElement = document.getElementById('transferirStockDisponible');
-
-                        if (stock && stock > 0) {
-                            infoElement.textContent = `Stock disponible: ${utils.formatearNumero(stock)} unidades`;
-                            infoElement.style.color = '#4caf50';
-                        } else {
-                            infoElement.textContent = '';
-                        }
-                    });
-                }
-            });
-
-            // ==================== API PÚBLICA ====================
-            return {
-                cerrar: utils.cerrar,
-                verDetalle: detalle.abrir,
-                abrirTransferencia: transferir.abrir,
-                procesarTransferencia: transferir.procesar,
-                verHistorial: historial.abrir
-            };
-        })();
-
-        // ==================== EXPORTAR EXCEL (CSV) ====================
+        // ==================== LISTENER PARA ACTUALIZAR STOCK ==================== 
         document.addEventListener('DOMContentLoaded', function() {
-            const btnExcel = document.getElementById('btnExportarExcel');
+            const selectLote = document.getElementById('transferirLote');
+            if (selectLote) {
+                selectLote.addEventListener('change', function() {
+                    const option = this.options[this.selectedIndex];
+                    const stock = option.getAttribute('data-stock');
+                    const infoElement = document.getElementById('transferirStockDisponible');
 
-            if (btnExcel) {
-                btnExcel.addEventListener('click', function() {
-                    const sucursalSelect = document.querySelector('select[name="select3"]');
-                    const sucursalId = sucursalSelect ? sucursalSelect.value : '';
-
-                    const url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel' +
-                        (sucursalId ? '&su_id=' + sucursalId : '');
-
-                    console.log('📥 Descargando archivo:', url);
-
-                    // Abrir en nueva ventana para forzar descarga
-                    window.open(url, '_blank');
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Descargando',
-                        text: 'El archivo se está descargando...',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                    if (stock && stock > 0) {
+                        infoElement.textContent = `Stock disponible: ${utils.formatearNumero(stock)} unidades`;
+                        infoElement.style.color = '#4caf50';
+                    } else {
+                        infoElement.textContent = '';
+                    }
                 });
             }
         });
 
-        // ==================== CERRAR AL HACER CLIC FUERA ====================
-        document.addEventListener('click', function(e) {
-            const modales = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario'];
+        // ==================== API PÚBLICA ====================
+        return {
+            cerrar: utils.cerrar,
+            verDetalle: detalle.abrir,
+            abrirTransferencia: transferir.abrir,
+            procesarTransferencia: transferir.procesar,
+            verHistorial: historial.abrir
+        };
+    })();
 
-            modales.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal && modal.style.display === 'flex' && e.target === modal) {
-                    InventarioModals.cerrar(modalId);
-                }
+    /* exportar excel */
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnExcel = document.getElementById('btnExportarExcel');
+
+        if (btnExcel) {
+            btnExcel.addEventListener('click', function() {
+                const sucursalSelect = document.querySelector('select[name="select3"]');
+                const sucursalId = sucursalSelect ? sucursalSelect.value : '';
+
+                const url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel' +
+                    (sucursalId ? '&su_id=' + sucursalId : '');
+
+                console.log('📥 Descargando archivo:', url);
+
+                // Abrir en nueva ventana para forzar descarga
+                window.open(url, '_blank');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Descargando',
+                    text: 'El archivo se está descargando...',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             });
+        }
+    });
+
+    /* cerrar al interactuar con el fondo */
+    document.addEventListener('click', function(e) {
+        const modales = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario'];
+
+        modales.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal && modal.style.display === 'flex' && e.target === modal) {
+                InventarioModals.cerrar(modalId);
+            }
         });
-    </script>
+    });
+</script>
+
+<!-- vista tavla historial caja -->
+<script>
+    const CajaHistorial = (function() {
+        'use strict';
+
+        const API_URL = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php';
+
+        function init() {
+            cargarResumen();
+            cargarGrafico();
+            configurarEventos();
+        }
+
+        function configurarEventos() {
+            const btnExcel = document.getElementById('btnExportarExcelCajaHistorial');
+            const btnPDF = document.getElementById('btnExportarPDFCajaHistorial');
+
+            if (btnExcel) {
+                btnExcel.addEventListener('click', exportarExcel);
+            }
+
+            if (btnPDF) {
+                btnPDF.addEventListener('click', exportarPDF);
+            }
+
+            const filtros = document.querySelectorAll('.filtro-dinamico select, .filtro-dinamico input[type="date"]');
+            filtros.forEach(filtro => {
+                filtro.addEventListener('change', function() {
+                    cargarResumen();
+                    cargarGrafico();
+                });
+            });
+        }
+
+        async function cargarResumen() {
+            const formData = obtenerFiltros();
+            formData.append('cajaHistorialAjax', 'resumen');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    return;
+                }
+
+                const resumenHTML = `
+                <div class="container">
+                    <div class="title">
+                    <h4>
+                        <ion-icon name="analytics-outline" ></ion-icon>
+                        Resumen del Periodo Filtrado
+                    </h4></div>
+                    <div class="resumen-content">
+                        <div class="resumen-bloque">
+                            <div >Total Ingresos</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #4caf50;">
+                                <ion-icon name="arrow-down-circle-outline" ></ion-icon>
+                                Bs. ${formatearNumero(data.total_ingresos)}
+                            </div>
+                        </div>
+                        <div class="resumen-bloque">
+                            <div >Total Egresos</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #f44336;">
+                                <ion-icon name="arrow-up-circle-outline" ></ion-icon>
+                                Bs. ${formatearNumero(data.total_egresos)}
+                            </div>
+                        </div>
+                        <div class="resumen-bloque">
+                            <div >Balance</div>
+                            <div style="font-size: 24px; font-weight: bold; color: ${data.balance >= 0 ? '#4caf50' : '#f44336'};">
+                                <ion-icon name="${data.balance >= 0 ? 'trending-up-outline' : 'trending-down-outline'}" ></ion-icon>
+                                Bs. ${formatearNumero(data.balance)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+                const resumenContainer = document.getElementById('resumen-periodo');
+                if (resumenContainer) {
+                    resumenContainer.innerHTML = resumenHTML;
+                }
+
+            } catch (error) {
+                console.error('Error cargando resumen:', error);
+            }
+        }
+
+        async function cargarGrafico() {
+            const formData = obtenerFiltros();
+            formData.append('cajaHistorialAjax', 'grafico');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const datos = await response.json();
+
+                if (datos.error) {
+                    console.error('Error:', datos.error);
+                    return;
+                }
+
+                const fechas = [...new Set(datos.map(d => d.fecha))];
+                const ingresos = fechas.map(fecha => {
+                    const registro = datos.find(d => d.fecha === fecha && (d.mc_tipo === 'ingreso' || d.mc_tipo === 'venta'));
+                    return registro ? parseFloat(registro.total) : 0;
+                });
+                const egresos = fechas.map(fecha => {
+                    const registro = datos.find(d => d.fecha === fecha && (d.mc_tipo === 'egreso' || d.mc_tipo === 'compra'));
+                    return registro ? parseFloat(registro.total) : 0;
+                });
+
+                const fechasFormateadas = fechas.map(f => {
+                    const [y, m, d] = f.split('-');
+                    return `${d}/${m}`;
+                });
+
+                const myChart = echarts.init(document.getElementById('grafico-movimientos'));
+
+                const option = {
+                    title: {
+                        text: 'Movimientos de Caja por Fecha',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        data: ['Ingresos', 'Egresos'],
+                        bottom: 0
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '10%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: fechasFormateadas
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                            name: 'Ingresos',
+                            type: 'bar',
+                            data: ingresos,
+                            itemStyle: {
+                                color: '#4caf50'
+                            }
+                        },
+                        {
+                            name: 'Egresos',
+                            type: 'bar',
+                            data: egresos,
+                            itemStyle: {
+                                color: '#f44336'
+                            }
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+
+            } catch (error) {
+                console.error('Error cargando gráfico:', error);
+            }
+        }
+
+        function obtenerFiltros() {
+            const formData = new FormData();
+            const form = document.querySelector('.filtro-dinamico');
+
+            if (form) {
+                const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+                const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+                const select1 = form.querySelector('select[name="select1"]');
+                const select2 = form.querySelector('select[name="select2"]');
+                const select3 = form.querySelector('select[name="select3"]');
+                const select4 = form.querySelector('select[name="select4"]');
+
+                if (fechaDesde && fechaDesde.value) formData.append('fecha_desde', fechaDesde.value);
+                if (fechaHasta && fechaHasta.value) formData.append('fecha_hasta', fechaHasta.value);
+                if (select1 && select1.value) formData.append('select1', select1.value);
+                if (select2 && select2.value) formData.append('select2', select2.value);
+                if (select3 && select3.value) formData.append('select3', select3.value);
+                if (select4 && select4.value) formData.append('select4', select4.value);
+            }
+
+            return formData;
+        }
+
+        function formatearNumero(num) {
+            return parseFloat(num || 0).toFixed(2);
+        }
+
+        function verReferencia(tipo, id) {
+            if (!tipo || !id) {
+                Swal.fire('Sin referencia', 'Este movimiento no tiene referencia asociada', 'info');
+                return;
+            }
+
+            const urls = {
+                'venta': '<?php echo SERVER_URL; ?>ventaDetalle/' + id + '/',
+                'compra': '<?php echo SERVER_URL; ?>compraDetalle/' + id + '/'
+            };
+
+            if (urls[tipo]) {
+                window.location.href = urls[tipo];
+            } else {
+                Swal.fire('Referencia no disponible', 'No se puede abrir esta referencia', 'warning');
+            }
+        }
+
+        function exportarMovimiento(mc_id) {
+            if (!mc_id || mc_id <= 0) {
+                Swal.fire('Error', 'ID de movimiento inválido', 'error');
+                return;
+            }
+
+            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' + mc_id;
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando Comprobante',
+                text: 'El comprobante PDF se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function exportarExcel() {
+            const filtros = obtenerFiltros();
+            const params = new URLSearchParams(filtros);
+            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_excel&' + params.toString();
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Descargando',
+                text: 'El archivo Excel se está descargando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function exportarPDF() {
+            const filtros = obtenerFiltros();
+            const params = new URLSearchParams(filtros);
+            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_pdf&' + params.toString();
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando PDF',
+                text: 'El archivo PDF se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        return {
+            verReferencia,
+            exportarMovimiento,
+            exportarExcel,
+            exportarPDF
+        };
+    })();
+</script>

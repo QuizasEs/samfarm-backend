@@ -2687,13 +2687,13 @@ td img {
 }
 .filtro-dinamico-search .search input{
     width: 80%;
-    padding: 10px;
+    padding: 18px;
     border-radius: 4px;
     outline-style: none;
     border: 2px solid var(--accent-primary);
     background: var(--bg-secondary);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-align: center;
     transition: all 0.3s ease-in-out;
 }
@@ -2713,6 +2713,18 @@ td img {
     width: 200px;
     min-width: 100px;
 
+}
+.form-fechas{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+.form-fechas small{
+    padding: 2px 5px ;
+    color: var(--text-secondary);
+}
+.dark .form-fechas small{
+    color: var(--dark-text-secondary);
 }
 input[type="date"]{
     border: 2px solid var(--accent-primary);
@@ -2906,6 +2918,35 @@ input[type="date"]:focus{
 .dark .select-filtro:focus {
     border-left-color: var(--accent-primary);
     background: var(--dark-bg-primary);
+}
+
+/* resumen */
+.resumen-content{
+    display: flex; 
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    border: 2px solid black;
+    background: var(--accent-primary);
+    box-shadow: 5px 5px 5px var(--shadow-light);
+    border-radius: 10px;
+}
+.resumen-bloque{
+    display: flex; 
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin: 10px;
+    padding: 20px;
+    width: 300px;
+    min-width: 100px;
+    height: 100px;
+    color: var(--dark-text-secondary);
+    border-radius: 1rem;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 /**************************************modal*********************************************/
