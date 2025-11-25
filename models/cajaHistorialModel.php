@@ -254,21 +254,21 @@ class cajaHistorialModel extends mainModel
     protected static function exportar_historial_caja_excel_model($filtros = [])
     {
         $sql = "
-                SELECT 
-                    s.su_nombre AS 'Sucursal',
-                    c.caja_nombre AS 'Caja',
-                    mc.mc_fecha AS 'Fecha',
-                    UPPER(mc.mc_tipo) AS 'Tipo',
-                    mc.mc_concepto AS 'Concepto',
-                    CONCAT(UPPER(mc.mc_referencia_tipo), ' #', mc.mc_referencia_id) AS 'Referencia',
-                    CONCAT(u.us_nombres, ' ', COALESCE(u.us_apellido_paterno, '')) AS 'Usuario',
-                    mc.mc_monto AS 'Monto'
-                FROM movimiento_caja mc
-                INNER JOIN caja c ON c.caja_id = mc.caja_id
-                INNER JOIN sucursales s ON s.su_id = c.su_id
-                LEFT JOIN usuarios u ON u.us_id = mc.us_id
-                WHERE 1=1
-            ";
+            SELECT 
+                s.su_nombre AS 'Sucursal',
+                c.caja_nombre AS 'Caja',
+                mc.mc_fecha AS 'Fecha',
+                UPPER(mc.mc_tipo) AS 'Tipo',
+                mc.mc_concepto AS 'Concepto',
+                CONCAT(UPPER(COALESCE(mc.mc_referencia_tipo, 'N/A')), ' #', COALESCE(mc.mc_referencia_id, '0')) AS 'Referencia',
+                CONCAT(COALESCE(u.us_nombres, 'Sistema'), ' ', COALESCE(u.us_apellido_paterno, '')) AS 'Usuario',
+                mc.mc_monto AS 'Monto'
+            FROM movimiento_caja mc
+            INNER JOIN caja c ON c.caja_id = mc.caja_id
+            INNER JOIN sucursales s ON s.su_id = c.su_id
+            LEFT JOIN usuarios u ON u.us_id = mc.us_id
+            WHERE 1=1
+        ";
 
         $params = [];
 
@@ -313,7 +313,7 @@ class cajaHistorialModel extends mainModel
         $stmt->execute();
         return $stmt;
     }
-    
+
     protected static function obtener_movimiento_individual_model($mc_id)
     {
         $sql = "
@@ -321,28 +321,24 @@ class cajaHistorialModel extends mainModel
                 mc.mc_id,
                 mc.mc_fecha,
                 mc.mc_tipo,
-                mc.mc_concepto,
                 mc.mc_monto,
+                mc.mc_concepto,
                 mc.mc_referencia_tipo,
                 mc.mc_referencia_id,
-                
                 c.caja_nombre,
                 s.su_nombre,
-                
-                CONCAT(u.us_nombre, ' ', u.us_apellido) AS usuario_completo
-                
-            FROM movimiento_caja AS mc
-            INNER JOIN caja AS c ON mc.caja_id = c.caja_id
-            INNER JOIN sucursal AS s ON c.su_id = s.su_id
-            INNER JOIN usuario AS u ON mc.us_id = u.us_id
-            WHERE mc.mc_id = :id
+                CONCAT(u.us_nombres, ' ', COALESCE(u.us_apellido_paterno, '')) AS usuario_completo
+            FROM movimiento_caja mc
+            INNER JOIN caja c ON c.caja_id = mc.caja_id
+            INNER JOIN sucursales s ON s.su_id = c.su_id
+            LEFT JOIN usuarios u ON u.us_id = mc.us_id
+            WHERE mc.mc_id = :mc_id
             LIMIT 1
         ";
 
-        $stmt = self::conectar()->prepare($sql);
-        $stmt->bindParam(":id", $mc_id, PDO::PARAM_INT);
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->bindParam(':mc_id', $mc_id, PDO::PARAM_INT);
         $stmt->execute();
-
         return $stmt;
     }
 }

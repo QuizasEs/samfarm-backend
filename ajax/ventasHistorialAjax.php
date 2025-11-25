@@ -7,6 +7,9 @@ if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exp
     session_start(['name' => 'SMP']);
 
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        
+        
+        
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }

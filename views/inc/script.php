@@ -2183,17 +2183,19 @@
         }
     });
 
-    /* cerrar al interactuar con el fondo */
-    document.addEventListener('click', function(e) {
-        const modales = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario'];
 
-        modales.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (modal && modal.style.display === 'flex' && e.target === modal) {
-                InventarioModals.cerrar(modalId);
-            }
+    (function() {
+        const modalIds = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario'];
+
+        document.addEventListener('click', function(e) {
+            modalIds.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && modal.style && modal.style.display === 'flex' && e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         });
-    });
+    })();
 </script>
 
 <!-- vista tavla historial caja -->
@@ -2204,6 +2206,8 @@
         const API_URL = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php';
 
         function init() {
+            console.log('CajaHistorial inicializado');
+            console.log('API_URL:', API_URL);
             cargarResumen();
             cargarGrafico();
             configurarEventos();
@@ -2212,6 +2216,9 @@
         function configurarEventos() {
             const btnExcel = document.getElementById('btnExportarExcelCajaHistorial');
             const btnPDF = document.getElementById('btnExportarPDFCajaHistorial');
+
+            console.log('Botón Excel encontrado:', !!btnExcel);
+            console.log('Botón PDF encontrado:', !!btnPDF);
 
             if (btnExcel) {
                 btnExcel.addEventListener('click', exportarExcel);
@@ -2224,6 +2231,7 @@
             const filtros = document.querySelectorAll('.filtro-dinamico select, .filtro-dinamico input[type="date"]');
             filtros.forEach(filtro => {
                 filtro.addEventListener('change', function() {
+                    console.log('Filtro cambiado:', this.name, this.value);
                     cargarResumen();
                     cargarGrafico();
                 });
@@ -2234,6 +2242,8 @@
             const formData = obtenerFiltros();
             formData.append('cajaHistorialAjax', 'resumen');
 
+            console.log('Cargando resumen con filtros:', Object.fromEntries(formData));
+
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -2243,10 +2253,12 @@
                     body: new URLSearchParams(formData)
                 });
 
+                console.log('Respuesta resumen status:', response.status);
                 const data = await response.json();
+                console.log('Datos resumen:', data);
 
                 if (data.error) {
-                    console.error('Error:', data.error);
+                    console.error('Error en resumen:', data.error);
                     return;
                 }
 
@@ -2297,6 +2309,8 @@
             const formData = obtenerFiltros();
             formData.append('cajaHistorialAjax', 'grafico');
 
+            console.log('Cargando gráfico con filtros:', Object.fromEntries(formData));
+
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -2306,10 +2320,12 @@
                     body: new URLSearchParams(formData)
                 });
 
+                console.log('Respuesta gráfico status:', response.status);
                 const datos = await response.json();
+                console.log('Datos gráfico:', datos);
 
                 if (datos.error) {
-                    console.error('Error:', datos.error);
+                    console.error('Error en gráfico:', datos.error);
                     return;
                 }
 
@@ -2431,18 +2447,19 @@
 
         function exportarMovimiento(mc_id) {
             if (!mc_id || mc_id <= 0) {
-                Swal.fire('Error', 'ID de movimiento inválido', 'error');
+                Swal.fire('Error', 'ID de movimiento invalido', 'error');
                 return;
             }
 
-            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' + mc_id;
+            const url = API_URL + '?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' + mc_id;
+            console.log('Exportando movimiento:', url);
 
             window.open(url, '_blank');
 
             Swal.fire({
                 icon: 'success',
                 title: 'Generando Comprobante',
-                text: 'El comprobante PDF se está generando...',
+                text: 'El comprobante PDF se esta generando...',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -2451,14 +2468,16 @@
         function exportarExcel() {
             const filtros = obtenerFiltros();
             const params = new URLSearchParams(filtros);
-            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_excel&' + params.toString();
+            const url = API_URL + '?cajaHistorialAjax=exportar_excel&' + params.toString();
+
+            console.log('Exportando Excel:', url);
 
             window.open(url, '_blank');
 
             Swal.fire({
                 icon: 'success',
                 title: 'Descargando',
-                text: 'El archivo Excel se está descargando...',
+                text: 'El archivo Excel se esta descargando...',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -2467,14 +2486,16 @@
         function exportarPDF() {
             const filtros = obtenerFiltros();
             const params = new URLSearchParams(filtros);
-            const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_pdf&' + params.toString();
+            const url = API_URL + '?cajaHistorialAjax=exportar_pdf_historial&' + params.toString();
+
+            console.log('Exportando PDF:', url);
 
             window.open(url, '_blank');
 
             Swal.fire({
                 icon: 'success',
                 title: 'Generando PDF',
-                text: 'El archivo PDF se está generando...',
+                text: 'El archivo PDF se esta generando...',
                 timer: 2000,
                 showConfirmButton: false
             });

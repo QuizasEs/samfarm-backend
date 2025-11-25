@@ -1,9 +1,7 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     require_once "./controllers/medicamentoController.php";
-    require_once "./models/mainModel.php";
     $ins_med = new medicamentoController();
-    $ins_main = new mainModel();
     $datos_select = $ins_med->datos_extras_controller();
 
     $rol_usuario = $_SESSION['rol_smp'];
@@ -37,7 +35,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="form-fechas">
                 <small>Tipo de Movimiento</small>
-                <select class="select-filtro" name="select2">
+                <select class="select-filtro" name="select1">
                     <option value="">Todos</option>
                     <option value="ingreso">Ingreso</option>
                     <option value="egreso">Egreso</option>
@@ -49,7 +47,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="form-fechas">
                 <small>Usuario</small>
-                <select class="select-filtro" name="select3">
+                <select class="select-filtro" name="select2">
                     <option value="">Todos los usuarios</option>
                     <?php
                     foreach ($datos_select['caja'] as $usuario) {
@@ -63,7 +61,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <?php if ($rol_usuario == 1) { ?>
             <div class="form-fechas">
                 <small>Sucursal</small>
-                <select class="select-filtro" name="select4">
+                <select class="select-filtro" name="select3">
                     <option value="">Todas las sucursales</option>
                     <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
                         <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>

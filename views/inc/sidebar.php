@@ -92,7 +92,7 @@ if ($_SESSION['rol_smp'] == 1) {
 
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>ventasHistorialLista/">Historial de ventas</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>cajaHistorialLista/">Hsitorial de caja</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">pensando</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>comprasHistorialLista/">Historial de compras</a></li>
                     <li class="sub-link"><a href="#">Ventas</a></li>
                     <li class="sub-link"><a href="#">Stock</a></li>
                     <li class="sub-link"><a href="#">Finanzas</a></li>

@@ -363,119 +363,218 @@ class mainModel
 
     /* --------------------------------------generar reportes pdpf------------------------------------------------ */
 
-
-    public static function generar_pdf_reporte($datos)
+    protected static function generar_pdf_reporte_fpdf($datos_pdf)
     {
-        require_once "./libs/fpdf/fpdf.php";
+        require_once dirname(__DIR__) . './libs/fpdf/fpdf.php';
 
-        $empresa = self::obtener_config_empresa_model();
-
-        $contenido_html = $datos["contenido"] ?? "";
-        $nombre_archivo = $datos["nombre_archivo"] ?? ("Reporte_" . date("Y-m-d") . ".pdf");
-
-        // Iniciar documento tamaño carta
         $pdf = new FPDF('P', 'mm', 'Letter');
-        $pdf->AddPage();
         $pdf->SetMargins(10, 10, 10);
+        $pdf->AddPage();
 
-        /* ----------------------------
-            ENCABEZADO DEL DOCUMENTO
-            ---------------------------- */
-        $pdf->SetFont('Arial', 'B', 14);
-        $pdf->Cell(0, 7, utf8_decode($empresa['ce_nombre']), 0, 1, 'C');
+        $config_empresa = self::obtener_config_empresa_model();
 
-        $pdf->SetFont('Arial', '', 10);
-        $pdf->Cell(0, 5, utf8_decode("NIT: " . $empresa['ce_nit']), 0, 1, 'C');
-        $pdf->Cell(0, 5, utf8_decode($empresa['ce_direccion']), 0, 1, 'C');
-        $pdf->Cell(0, 5, utf8_decode("Tel: " . $empresa['ce_telefono']), 0, 1, 'C');
-        $pdf->Ln(5);
+        // Encabezado más compacto
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->SetTextColor(44, 62, 80);
+        $pdf->Cell(0, 6, utf8_decode($config_empresa['ce_nombre']), 0, 1, 'C');
 
-        $pdf->Line(10, $pdf->GetY(), 205, $pdf->GetY());
-        $pdf->Ln(5);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 3, utf8_decode('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
+        $pdf->Cell(0, 3, utf8_decode($config_empresa['ce_direccion']), 0, 1, 'C');
 
-        /* ----------------------------
-            PARSEADOR DE HTML → PDF
-            (Tablas, textos, títulos, etc.)
-            ---------------------------- */
+        $pdf->SetDrawColor(52, 152, 219);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(10, $pdf->GetY() + 1, 200, $pdf->GetY() + 1);
+        $pdf->Ln(2);
 
-        $pdf->SetFont('Arial', '', 10);
-        $pdf->SetDrawColor(0, 0, 0);
+        // Título
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetTextColor(44, 62, 80);
+        $pdf->Cell(0, 5, utf8_decode($datos_pdf['titulo']), 0, 1, 'C');
+        $pdf->Ln(1);
 
-        // Dividir por líneas
-        $lineas = explode("\n", $contenido_html);
+        // Información superior compacta
+        if (isset($datos_pdf['info_superior'])) {
+            $pdf->SetFillColor(245, 245, 245);
+            $pdf->Rect(10, $pdf->GetY(), 190, 12, 'F');
 
-        foreach ($lineas as $linea) {
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->SetTextColor(52, 73, 94);
 
-            $linea = trim($linea);
-            if ($linea == "") continue;
+            $y_start = $pdf->GetY() + 2;
+            $x_pos = 15;
+            $count = 0;
 
-            /* ---------- TITULOS ---------- */
-            if (preg_match('/<h3>(.*?)<\/h3>/', $linea, $m)) {
-                $pdf->SetFont('Arial', 'B', 14);
-                $pdf->Cell(0, 8, utf8_decode(strip_tags($m[1])), 0, 1, 'L');
-                $pdf->Ln(2);
-                continue;
-            }
+            foreach ($datos_pdf['info_superior'] as $key => $value) {
+                $pdf->SetXY($x_pos, $y_start);
+                $pdf->SetFont('Arial', 'B', 7);
+                $pdf->Cell(25, 3, utf8_decode($key . ':'), 0, 0, 'L');
+                $pdf->SetFont('Arial', '', 7);
+                $pdf->Cell(40, 3, utf8_decode($value), 0, 0, 'L');
 
-            /* ---------- INFO BOX ---------- */
-            if (preg_match('/<div(.*?)>(.*?)<\/div>/s', $linea, $m)) {
-                $texto = strip_tags($m[2]);
-                $pdf->SetFont('Arial', '', 10);
-                $pdf->MultiCell(0, 5, utf8_decode($texto));
-                $pdf->Ln(2);
-                continue;
-            }
-
-            /* ---------- TABLAS ---------- */
-            if (strpos($linea, "<table") !== false) {
-                $en_tabla = true;
-                continue;
-            }
-
-            if (strpos($linea, "</table>") !== false) {
-                $en_tabla = false;
-                $pdf->Ln(5);
-                continue;
-            }
-
-            if (!empty($en_tabla)) {
-
-                // Header
-                if (preg_match('/<th>(.*?)<\/th>/', $linea)) {
-                    preg_match_all('/<th>(.*?)<\/th>/', $linea, $ths);
-
-                    $pdf->SetFont('Arial', 'B', 9);
-                    foreach ($ths[1] as $enc) {
-                        $pdf->Cell(25, 7, utf8_decode(strip_tags($enc)), 1, 0, 'C');
-                    }
-                    $pdf->Ln();
-                    continue;
-                }
-
-                // Filas
-                if (preg_match('/<td(.*?)>(.*?)<\/td>/', $linea)) {
-                    preg_match_all('/<td(.*?)>(.*?)<\/td>/', $linea, $tds);
-
-                    $pdf->SetFont('Arial', '', 9);
-                    foreach ($tds[2] as $val) {
-                        $pdf->Cell(25, 6, utf8_decode(strip_tags($val)), 1, 0, 'C');
-                    }
-                    $pdf->Ln();
-                    continue;
+                $count++;
+                $x_pos += 80;
+                if ($count % 2 == 0) {
+                    $y_start += 4;
+                    $x_pos = 15;
                 }
             }
-
-            /* ---------- TEXTO GENERAL ---------- */
-            $pdf->SetFont('Arial', '', 10);
-            $pdf->MultiCell(0, 5, utf8_decode(strip_tags($linea)));
+            $pdf->Ln(8);
         }
 
-        /* ----------------------------
-            SALIDA
-            ---------------------------- */
-        $pdf->Output("I", $nombre_archivo);
-    }
+        // DEFINIR ALTURA MÁXIMA ANTES DEL PIE DE PÁGINA
+        $altura_maxima = 250; // 279mm (Letter) - 10mm margen sup - 15mm pie de página - 4mm margen
 
+        // Tabla optimizada
+        if (isset($datos_pdf['tabla'])) {
+            $tabla = $datos_pdf['tabla'];
+
+            // Eliminar columnas duplicadas
+            $headers_filtrados = [];
+            $seen_headers = [];
+
+            foreach ($tabla['headers'] as $header) {
+                $header_text = $header['text'];
+                if (!in_array($header_text, $seen_headers)) {
+                    $headers_filtrados[] = $header;
+                    $seen_headers[] = $header_text;
+                }
+            }
+            $tabla['headers'] = $headers_filtrados;
+
+            // Ajustar anchos de columnas
+            $ancho_total_tabla = array_sum(array_column($tabla['headers'], 'width'));
+            $ancho_disponible = 190;
+
+            if ($ancho_total_tabla > $ancho_disponible) {
+                $factor_ajuste = $ancho_disponible / $ancho_total_tabla;
+                foreach ($tabla['headers'] as &$header) {
+                    $header['width'] = round($header['width'] * $factor_ajuste);
+                }
+            }
+
+            // Encabezados compactos
+            $pdf->SetFont('Arial', 'B', 6);
+            $pdf->SetFillColor(52, 73, 94);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetDrawColor(52, 73, 94);
+
+            foreach ($tabla['headers'] as $header) {
+                $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            // Filas compactas
+            $pdf->SetFont('Arial', '', 6);
+            $pdf->SetTextColor(44, 62, 80);
+            $pdf->SetFillColor(248, 249, 250);
+
+            $fill = false;
+            foreach ($tabla['rows'] as $row) {
+                // VERIFICAR ESPACIO CONSIDERANDO EL PIE DE PÁGINA
+                if ($pdf->GetY() > $altura_maxima) {
+                    $pdf->AddPage();
+                    // Redibujar encabezados
+                    $pdf->SetFont('Arial', 'B', 6);
+                    $pdf->SetFillColor(52, 73, 94);
+                    $pdf->SetTextColor(255, 255, 255);
+                    foreach ($tabla['headers'] as $header) {
+                        $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
+                    }
+                    $pdf->Ln();
+                    $pdf->SetFont('Arial', '', 6);
+                    $pdf->SetTextColor(44, 62, 80);
+                }
+
+                if (isset($row['es_total']) && $row['es_total']) {
+                    $pdf->SetFont('Arial', 'B', 7);
+                    $pdf->SetFillColor(41, 128, 185);
+                    $pdf->SetTextColor(255, 255, 255);
+                    $fill_total = true;
+                } else {
+                    $pdf->SetFont('Arial', '', 6);
+                    $pdf->SetTextColor(44, 62, 80);
+                    $fill_total = false;
+                }
+
+                // Filtrar celdas duplicadas también
+                $cells_filtrados = [];
+                $cell_count = 0;
+                foreach ($row['cells'] as $i => $cell) {
+                    if ($cell_count < count($tabla['headers'])) {
+                        $cells_filtrados[] = $cell;
+                        $cell_count++;
+                    }
+                }
+
+                foreach ($cells_filtrados as $i => $cell) {
+                    $text = utf8_decode($cell['text']);
+                    $width = $tabla['headers'][$i]['width'];
+                    $align = isset($cell['align']) ? $cell['align'] : 'C';
+
+                    if (isset($cell['color'])) {
+                        $pdf->SetTextColor($cell['color'][0], $cell['color'][1], $cell['color'][2]);
+                    }
+
+                    $pdf->Cell($width, 4, $text, 1, 0, $align, $fill_total ? true : $fill);
+
+                    if (isset($cell['color'])) {
+                        $pdf->SetTextColor(44, 62, 80);
+                    }
+                }
+                $pdf->Ln();
+                $fill = !$fill;
+            }
+        }
+
+        // Resumen compacto - VERIFICAR ESPACIO PARA EL RESUMEN TAMBIÉN
+        if (isset($datos_pdf['resumen'])) {
+            // Altura aproximada del resumen
+            $altura_resumen = 20;
+
+            // Verificar si hay espacio para el resumen + pie de página
+            if ($pdf->GetY() + $altura_resumen > $altura_maxima) {
+                $pdf->AddPage();
+            }
+
+            $pdf->Ln(3);
+            $pdf->SetFillColor(236, 240, 241);
+            $pdf->Rect(10, $pdf->GetY(), 190, 15, 'F');
+
+            $y_start = $pdf->GetY() + 2;
+            $pdf->SetXY(15, $y_start);
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(0, 4, utf8_decode('RESUMEN DEL PERIODO'), 0, 1, 'L');
+
+            foreach ($datos_pdf['resumen'] as $key => $value) {
+                $pdf->SetX(15);
+                $pdf->SetFont('Arial', 'B', 7);
+                $pdf->Cell(50, 3, utf8_decode($key . ':'), 0, 0, 'L');
+                $pdf->SetFont('Arial', '', 7);
+
+                if (isset($value['color'])) {
+                    $pdf->SetTextColor($value['color'][0], $value['color'][1], $value['color'][2]);
+                }
+
+                $pdf->Cell(0, 3, utf8_decode($value['text']), 0, 1, 'L');
+
+                if (isset($value['color'])) {
+                    $pdf->SetTextColor(44, 62, 80);
+                }
+            }
+        }
+
+        // Pie de página - SOLO SI ESTAMOS EN LA PRIMERA PÁGINA O HAY SUFICIENTE ESPACIO
+        $pdf->SetY(-40); // Posición fija desde el fondo
+        $pdf->SetFont('Arial', 'I', 6);
+        $pdf->SetTextColor(150, 150, 150);
+        $pdf->Cell(0, 2, utf8_decode('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
+        $pdf->Cell(0, 2, utf8_decode('Página ') . $pdf->PageNo(), 0, 0, 'C');
+
+        $pdf->Output('I', $datos_pdf['nombre_archivo']);
+        exit();
+    }
 
     protected static function obtener_config_empresa_model()
     {
