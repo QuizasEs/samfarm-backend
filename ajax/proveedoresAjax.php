@@ -94,6 +94,7 @@ if (isset($_POST['proveedoresAjax'])) {
         echo $ins_proveedor->actualizar_proveedor_controller();
         exit();
     }
+    
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

@@ -11,28 +11,38 @@ if ($_SESSION['rol_smp'] == 1) {
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="rocket-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL?>dashboard/">Dashboard</a></span>
+                        <span><a href="<?php echo SERVER_URL ?>dashboard/">Dashboard</a></span>
                     </div>
                 </div>
             </li>
 
-            <!-- CAJA -->
+
+            <!-- caja -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="cart-outline"></ion-icon>
-                        <span>Caja</span>
+                        <span><a href="<?php echo SERVER_URL ?>caja/">Caja</a></span>
                     </div>
-                    <ion-icon name="chevron-down-outline"></ion-icon>
                 </div>
-                <ul class="sub-links">
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>caja/">Venta</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Cotizar</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Devolucion</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Historial Venta</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Historial caja</a></li>
-
-                </ul>
+            </li>
+            <!-- devoluciones -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <ion-icon name="repeat-outline"></ion-icon>
+                        <span><a href="<?php echo SERVER_URL ?>devolucionLista/">Devolucion</a></span>
+                    </div>
+                </div>
+            </li>
+            <!-- CLIENTES -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <ion-icon name="people-outline"></ion-icon>
+                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
+                    </div>
+                </div>
             </li>
 
             <!-- productos -->
@@ -47,19 +57,10 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>medicamentoLista/">Medicamento</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Categoria</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorLista/">Proveedor</a></li>
                 </ul>
             </li>
 
-            <!-- CLIENTES -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="people-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
-                    </div>
-                </div>
-            </li>
+
 
             <!-- INVENTARIO -->
             <li class="link">
@@ -73,8 +74,8 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>loteLista/">Lote</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>inventarioLista/">Inventario</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorRegistro/">Registrar proveedor</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>compraOrden">Registrar compra</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorLista/">Proveedor</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Pedidos</a></li>
                 </ul>
             </li>
@@ -142,7 +143,7 @@ if ($_SESSION['rol_smp'] == 1) {
 
 
             <!-- CONFIGURACIÓN -->
-<!--             <li class="link">
+            <!--             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="settings"></ion-icon>

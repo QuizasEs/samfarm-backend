@@ -507,8 +507,8 @@ class clienteController extends clienteModel
             }
 
             $detalle['antiguedad_dias'] = $this->calcularAntiguedad($detalle['cl_creado_en']);
-            $detalle['promedio_compra'] = $detalle['total_compras'] > 0 
-                ? round($detalle['monto_total'] / $detalle['total_compras'], 2) 
+            $detalle['promedio_compra'] = $detalle['total_compras'] > 0
+                ? round($detalle['monto_total'] / $detalle['total_compras'], 2)
                 : 0;
 
             return json_encode($detalle, JSON_UNESCAPED_UNICODE);
@@ -589,4 +589,208 @@ class clienteController extends clienteModel
             return $diferencia->d . ' día' . ($diferencia->d > 1 ? 's' : '');
         }
     }
+
+    public function exportar_pdf_cliente_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario == 3) {
+            echo "Acceso denegado";
+            return;
+        }
+
+        try {
+            $stmt = self::exportar_clientes_pdf_model();
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($datos)) {
+                echo "No hay datos para exportar";
+                return;
+            }
+
+            $datos_pdf = [
+                'titulo' => 'REPORTE GENERAL DE CLIENTES',
+                'nombre_archivo' => 'Clientes_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => [
+                    'Fecha Generación' => date('d/m/Y H:i:s'),
+                    'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                    'Total Clientes' => count($datos),
+                    'Clientes Activos' => count(array_filter($datos, function ($d) {
+                        return $d['Estado'] == 'ACTIVO';
+                    }))
+                ],
+                'tabla' => [
+                    'headers' => [
+                        ['text' => 'N°', 'width' => 10],
+                        ['text' => 'CLIENTE', 'width' => 45],
+                        ['text' => 'CI', 'width' => 20],
+                        ['text' => 'TELÉFONO', 'width' => 20],
+                        ['text' => 'COMPRAS', 'width' => 18],
+                        ['text' => 'MONTO TOTAL', 'width' => 25],
+                        ['text' => 'ÚLTIMA COMPRA', 'width' => 25],
+                        ['text' => 'ESTADO', 'width' => 17]
+                    ],
+                    'rows' => []
+                ],
+                'resumen' => [
+                    'Total de Clientes' => ['text' => count($datos)],
+                    'Clientes Activos' => ['text' => count(array_filter($datos, function ($d) {
+                        return $d['Estado'] == 'ACTIVO';
+                    })), 'color' => [46, 125, 50]],
+                    'Clientes Inactivos' => ['text' => count(array_filter($datos, function ($d) {
+                        return $d['Estado'] == 'INACTIVO';
+                    })), 'color' => [198, 40, 40]],
+                    'Total Compras Registradas' => ['text' => array_sum(array_column($datos, 'Total Compras'))],
+                    'Monto Total Acumulado' => ['text' => 'Bs. ' . number_format(array_sum(array_map(function ($d) {
+                        return floatval(str_replace(['Bs. ', ','], '', $d['Monto Total']));
+                    }, $datos)), 2), 'color' => [13, 71, 161]]
+                ]
+            ];
+
+            $contador = 1;
+            foreach ($datos as $row) {
+                $nombre_completo = trim($row['Nombres'] . ' ' . $row['Apellido Paterno'] . ' ' . ($row['Apellido Materno'] ?: ''));
+
+                $color_estado = $row['Estado'] == 'ACTIVO' ? [46, 125, 50] : [198, 40, 40];
+
+                $datos_pdf['tabla']['rows'][] = [
+                    'cells' => [
+                        ['text' => $contador, 'align' => 'C'],
+                        ['text' => $nombre_completo, 'align' => 'L'],
+                        ['text' => $row['CI'] ?: 'Sin CI', 'align' => 'C'],
+                        ['text' => $row['Teléfono'] ?: '-', 'align' => 'C'],
+                        ['text' => $row['Total Compras'], 'align' => 'C'],
+                        ['text' => $row['Monto Total'], 'align' => 'R'],
+                        ['text' => $row['Última Compra'], 'align' => 'C'],
+                        ['text' => $row['Estado'], 'align' => 'C', 'color' => $color_estado]
+                    ]
+                ];
+                $contador++;
+            }
+
+            self::generar_pdf_reporte_fpdf($datos_pdf);
+        } catch (Exception $e) {
+            error_log("Error exportando PDF: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function exportar_pdf_detalle_controller()
+    {
+        $cl_id = isset($_GET['cl_id']) ? (int)$_GET['cl_id'] : 0;
+
+        if ($cl_id <= 0) {
+            echo "ID de cliente inválido";
+            return;
+        }
+
+        try {
+            $detalleStmt = self::detalle_completo_cliente_model($cl_id);
+            $detalle = $detalleStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$detalle) {
+                echo "Cliente no encontrado";
+                return;
+            }
+
+            $nombre_completo = trim($detalle['cl_nombres'] . ' ' . $detalle['cl_apellido_paterno'] . ' ' . ($detalle['cl_apellido_materno'] ?: ''));
+
+            $comprasStmt = self::ultimas_compras_cliente_model($cl_id, 20);
+            $compras = $comprasStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $medicamentosStmt = self::medicamentos_mas_comprados_model($cl_id, 10);
+            $medicamentos = $medicamentosStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $promedio = $detalle['total_compras'] > 0
+                ? round($detalle['monto_total'] / $detalle['total_compras'], 2)
+                : 0;
+
+            $datos_pdf = [
+                'titulo' => 'DETALLE DEL CLIENTE',
+                'nombre_archivo' => 'Cliente_' . $cl_id . '_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => [
+                    'Cliente' => $nombre_completo,
+                    'CI/Carnet' => $detalle['cl_carnet'] ?: 'Sin CI',
+                    'Teléfono' => $detalle['cl_telefono'] ?: '-',
+                    'Correo' => $detalle['cl_correo'] ?: '-',
+                    'Dirección' => $detalle['cl_direccion'] ?: '-',
+                    'Fecha Registro' => date('d/m/Y', strtotime($detalle['cl_creado_en'])),
+                    'Estado' => $detalle['cl_estado'] == 1 ? 'ACTIVO' : 'INACTIVO'
+                ],
+                'tabla' => [
+                    'headers' => [
+                        ['text' => 'N°', 'width' => 10],
+                        ['text' => 'N° DOCUMENTO', 'width' => 40],
+                        ['text' => 'FECHA', 'width' => 25],
+                        ['text' => 'ITEMS', 'width' => 15],
+                        ['text' => 'TOTAL', 'width' => 25],
+                        ['text' => 'TIPO', 'width' => 40]
+                    ],
+                    'rows' => []
+                ],
+                'resumen' => [
+                    'Total de Compras Realizadas' => ['text' => $detalle['total_compras']],
+                    'Monto Total Gastado' => ['text' => 'Bs. ' . number_format($detalle['monto_total'], 2), 'color' => [13, 71, 161]],
+                    'Facturas Emitidas' => ['text' => $detalle['facturas_emitidas']],
+                    'Promedio por Compra' => ['text' => 'Bs. ' . number_format($promedio, 2), 'color' => [123, 31, 162]],
+                    'Última Compra' => ['text' => $detalle['ultima_compra'] ? date('d/m/Y', strtotime($detalle['ultima_compra'])) : 'Nunca']
+                ]
+            ];
+
+            if (!empty($compras)) {
+                $contador = 1;
+                foreach ($compras as $compra) {
+                    $datos_pdf['tabla']['rows'][] = [
+                        'cells' => [
+                            ['text' => $contador, 'align' => 'C'],
+                            ['text' => $compra['ve_numero_documento'], 'align' => 'L'],
+                            ['text' => date('d/m/Y H:i', strtotime($compra['ve_fecha_emision'])), 'align' => 'C'],
+                            ['text' => $compra['total_items'], 'align' => 'C'],
+                            ['text' => 'Bs. ' . number_format($compra['ve_total'], 2), 'align' => 'R'],
+                            ['text' => $compra['ve_tipo_documento'] ?: 'nota de venta', 'align' => 'C']
+                        ]
+                    ];
+                    $contador++;
+                }
+
+                $datos_pdf['tabla']['rows'][] = [
+                    'es_total' => true,
+                    'cells' => [
+                        ['text' => '', 'align' => 'C'],
+                        ['text' => '', 'align' => 'L'],
+                        ['text' => '', 'align' => 'C'],
+                        ['text' => 'TOTAL:', 'align' => 'R'],
+                        ['text' => 'Bs. ' . number_format(array_sum(array_column($compras, 've_total')), 2), 'align' => 'R'],
+                        ['text' => '', 'align' => 'C']
+                    ]
+                ];
+            }
+
+            self::generar_pdf_reporte_fpdf($datos_pdf);
+        } catch (Exception $e) {
+            error_log("Error exportando PDF detalle: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function historial_completo_controller()
+    {
+        $cl_id = isset($_POST['cl_id']) ? (int)$_POST['cl_id'] : 0;
+
+        if ($cl_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = clienteModel::historial_completo_model($cl_id);
+            $compras = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return json_encode(['compras' => $compras], JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en historial_completo_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar historial']);
+        }
+    }
+
+
 }

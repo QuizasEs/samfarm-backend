@@ -4,21 +4,62 @@ require_once "../config/APP.php";
 
 if (isset($_GET['clientesAjax']) && $_GET['clientesAjax'] == "exportar_excel") {
     session_start(['name' => 'SMP']);
-    
+
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }
-    
+
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo "No tiene permisos para exportar clientes.";
         exit();
     }
-    
+
     require_once "../controllers/clienteController.php";
     $ins_cliente = new clienteController();
     $ins_cliente->exportar_clientes_excel_controller();
+    exit();
+}
+
+/* generadores de documentos */
+if (isset($_GET['clientesAjax']) && $_GET['clientesAjax'] == "exportar_pdf_cliente") {
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar PDF.";
+        exit();
+    }
+
+    require_once "../controllers/clienteController.php";
+    $ins_cliente = new clienteController();
+    $ins_cliente->exportar_pdf_cliente_controller();
+    exit();
+}
+
+if (isset($_GET['clientesAjax']) && $_GET['clientesAjax'] == "exportar_pdf_detalle") {
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar PDF.";
+        exit();
+    }
+
+    require_once "../controllers/clienteController.php";
+    $ins_cliente = new clienteController();
+    $ins_cliente->exportar_pdf_detalle_controller();
     exit();
 }
 
@@ -37,7 +78,7 @@ if (isset($_POST['clientesAjax'])) {
         ]);
         exit();
     }
-    
+
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo json_encode([
@@ -112,6 +153,11 @@ if (isset($_POST['clientesAjax'])) {
         echo $ins_cliente->grafico_compras_mensuales_controller();
         exit();
     }
+    if ($valor === "historial_completo") {
+        echo $ins_cliente->historial_completo_controller();
+        exit();
+    }
+
 
     echo json_encode([
         "Alerta" => "simple",
@@ -120,7 +166,6 @@ if (isset($_POST['clientesAjax'])) {
         "Tipo" => "error"
     ]);
     exit();
-
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

@@ -373,4 +373,71 @@ class clienteModel extends mainModel
 
         return $stmt;
     }
+
+
+    protected static function exportar_clientes_pdf_model()
+    {
+        $sql = "
+            SELECT 
+                c.cl_id,
+                c.cl_nombres AS 'Nombres',
+                c.cl_apellido_paterno AS 'Apellido Paterno',
+                c.cl_apellido_materno AS 'Apellido Materno',
+                c.cl_carnet AS 'CI',
+                c.cl_telefono AS 'Teléfono',
+                c.cl_correo AS 'Correo',
+                DATE_FORMAT(c.cl_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
+                COUNT(v.ve_id) AS 'Total Compras',
+                CONCAT('Bs. ', FORMAT(IFNULL(SUM(v.ve_total), 0), 2)) AS 'Monto Total',
+                IFNULL(DATE_FORMAT(MAX(v.ve_fecha_emision), '%d/%m/%Y'), 'Nunca') AS 'Última Compra',
+                CASE WHEN c.cl_estado = 1 THEN 'ACTIVO' ELSE 'INACTIVO' END AS 'Estado'
+            FROM clientes c
+            LEFT JOIN ventas v ON c.cl_id = v.cl_id
+            GROUP BY c.cl_id
+            ORDER BY c.cl_creado_en DESC
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    protected static function obtener_config_empresa_model()
+    {
+        $sql = "SELECT * FROM configuracion_empresa LIMIT 1";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->execute();
+        $config = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $config ?: [
+            'ce_nombre' => 'SAMFARM PHARMA',
+            'ce_nit' => '123456789',
+            'ce_telefono' => '591-2-1234567',
+            'ce_direccion' => 'Av. Principal #123, La Paz, Bolivia'
+        ];
+    }
+
+    protected static function historial_completo_model($cl_id)
+    {
+        $sql = "
+            SELECT 
+                v.ve_numero_documento,
+                v.ve_fecha_emision,
+                v.ve_total,
+                v.ve_tipo_documento,
+                v.ve_id,
+                COUNT(dv.dv_id) as total_items
+            FROM ventas v
+            LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
+            WHERE v.cl_id = :cl_id
+            GROUP BY v.ve_id
+            ORDER BY v.ve_fecha_emision DESC
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
 }

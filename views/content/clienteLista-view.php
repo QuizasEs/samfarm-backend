@@ -72,6 +72,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <button type="button" class="btn primary" id="btnExportarExcelClientes">
                 <ion-icon name="download-outline"></ion-icon> Exportar Excel
             </button>
+            <button type="button" class="btn danger" id="btnExportarPDFClientes">
+                <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+            </button>
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -347,7 +350,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <th>Total</th>
                                     <th>Items</th>
                                     <th>Tipo</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaUltimasCompras">
@@ -391,8 +393,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.editarDesdeDetalle()">
                         <ion-icon name="create-outline"></ion-icon> Editar Cliente
                     </a>
-                    <a href="javascript:void(0)" class="btn success" id="btnVerHistorialCompleto">
-                        <ion-icon name="time-outline"></ion-icon> Ver Historial Completo
+                    <a href="javascript:void(0)" class="btn danger" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
+                        <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                    </a>
+                    <a href="javascript:void(0)" class="btn success" onclick="ClientesModals.verHistorialCompleto()">
+                        <ion-icon name="time-outline"></ion-icon> Ver Historial
                     </a>
                     <a href="javascript:void(0)" class="btn warning" id="btnToggleEstadoDetalle">
                         <ion-icon name="power-outline"></ion-icon> Cambiar Estado
@@ -414,7 +419,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             function abrirModalNuevo() {
                 const modal = document.getElementById('modalNuevoCliente');
-                if (modal) modal.style.display = 'flex';
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
             }
 
             function cerrarModalNuevo() {
@@ -440,6 +447,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     });
 
                     const data = await response.json();
+
                     if (data.error) {
                         Swal.fire('Error', data.error, 'error');
                         return;
@@ -458,13 +466,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     if (modal) modal.style.display = 'flex';
 
                 } catch (error) {
+                    console.error('Error:', error);
                     Swal.fire('Error', 'No se pudo cargar los datos del cliente', 'error');
                 }
             }
 
             function cerrarModalEditar() {
                 const modal = document.getElementById('modalEditarCliente');
-                if (modal) modal.style.display = 'none';
+                if (modal) {
+                    modal.style.display = 'none';
+                }
             }
 
             async function toggleEstado(cl_id, estado) {
@@ -475,7 +486,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     text: '¿Desea ' + texto + ' este cliente?',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Sí',
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, ' + texto,
                     cancelButtonText: 'Cancelar'
                 });
 
@@ -514,12 +527,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                 } catch (error) {
+                    console.error(error);
                     Swal.fire('Error', 'No se pudo procesar la solicitud', 'error');
                 }
             }
 
             async function verDetalle(cl_id) {
                 document.getElementById('detalleClienteId').value = cl_id;
+
                 const modal = document.getElementById('modalDetalleCliente');
                 if (modal) modal.style.display = 'flex';
 
@@ -536,6 +551,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     });
 
                     const data = await response.json();
+
                     if (data.error) {
                         Swal.fire('Error', data.error, 'error');
                         return;
@@ -554,7 +570,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const estadoHtml = data.cl_estado == 1 ?
                         '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
                         '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
-
                     document.getElementById('detalleEstado').innerHTML = estadoHtml;
 
                     document.getElementById('detalleTotalCompras').textContent = data.total_compras || 0;
@@ -564,15 +579,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleUltimaCompra').textContent = data.ultima_compra ? formatearFecha(data.ultima_compra) : 'Nunca';
 
                     const btnToggle = document.getElementById('btnToggleEstadoDetalle');
-                    if (btnToggle) btnToggle.onclick = function() {
-                        toggleEstado(cl_id, data.cl_estado);
-                    };
+                    if (btnToggle) {
+                        btnToggle.onclick = function() {
+                            toggleEstado(cl_id, data.cl_estado);
+                        };
+                    }
 
                     cargarUltimasCompras(cl_id);
                     cargarMedicamentosMasComprados(cl_id);
                     cargarGraficoComprasMensuales(cl_id);
 
                 } catch (error) {
+                    console.error('Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el detalle del cliente', 'error');
                 }
             }
@@ -601,18 +619,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             <td>Bs. ${formatearNumero(compra.ve_total)}</td>
                             <td>${compra.total_items}</td>
                             <td>${compra.ve_tipo_documento || 'nota de venta'}</td>
-                            <td>
-                                <a href="<?php echo SERVER_URL; ?>ventaDetalle/${compra.ve_id}/" class="btn default">
-                                    <ion-icon name="eye-outline"></ion-icon> Ver
-                                </a>
-                            </td>
+                            
                         </tr>
                     `).join('');
                     } else {
                         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="cart-outline"></ion-icon> Sin compras registradas</td></tr>';
                     }
 
-                } catch (error) {}
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
 
             async function cargarMedicamentosMasComprados(cl_id) {
@@ -635,8 +651,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         tbody.innerHTML = data.medicamentos.map((med, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td>${med.med_nombre_quimico}</td>
-                            <td>${med.veces_comprado}</td>
+                            <td><strong>${med.med_nombre_quimico}</strong></td>
+                            <td style="text-align:center;"><strong style="color:#1976D2;">${med.veces_comprado}</strong></td>
                             <td>${formatearFecha(med.ultima_compra)}</td>
                         </tr>
                     `).join('');
@@ -644,7 +660,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos comprados</td></tr>';
                     }
 
-                } catch (error) {}
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
 
             async function cargarGraficoComprasMensuales(cl_id) {
@@ -663,7 +681,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const data = await response.json();
 
                     if (data.datos && data.datos.length > 0) {
-
                         const meses = data.datos.map(d => {
                             const [year, month] = d.mes.split('-');
                             const fecha = new Date(year, month - 1);
@@ -672,13 +689,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 year: 'numeric'
                             });
                         });
-
                         const compras = data.datos.map(d => parseInt(d.total_compras));
                         const montos = data.datos.map(d => parseFloat(d.monto_total));
 
                         const myChart = echarts.init(document.getElementById('graficoComprasMensuales'));
 
-                        myChart.setOption({
+                        const option = {
                             title: {
                                 text: 'Compras de los Últimos 12 Meses',
                                 left: 'center'
@@ -708,7 +724,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             },
                             yAxis: [{
                                     type: 'value',
-                                    name: 'Compras'
+                                    name: 'Compras',
+                                    position: 'left'
                                 },
                                 {
                                     type: 'value',
@@ -734,14 +751,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     }
                                 }
                             ]
-                        });
+                        };
 
+                        myChart.setOption(option);
                     } else {
-                        document.getElementById('graficoComprasMensuales').innerHTML =
-                            '<div style="text-align:center;padding:50px;color:#999;">Sin datos para mostrar</div>';
+                        document.getElementById('graficoComprasMensuales').innerHTML = '<div style="text-align:center;padding:50px;color:#999;">Sin datos para mostrar</div>';
                     }
 
-                } catch (error) {}
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
 
             function cerrarModalDetalle() {
@@ -753,6 +772,22 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const cl_id = document.getElementById('detalleClienteId').value;
                 cerrarModalDetalle();
                 abrirModalEditar(cl_id);
+            }
+
+            function exportarPDFDetalle(cl_id) {
+                const url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_pdf_detalle&cl_id=' + cl_id;
+
+                console.log('Exportando PDF detalle:', url);
+
+                window.open(url, '_blank');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Generando PDF',
+                    text: 'El comprobante PDF se está generando...',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
 
             function formatearFecha(fecha) {
@@ -767,6 +802,133 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             function formatearNumero(num) {
                 return parseFloat(num || 0).toFixed(2);
             }
+
+
+            function verHistorialCompleto() {
+                const cl_id = document.getElementById('detalleClienteId').value;
+                const nombreCliente = document.getElementById('detalleClienteNombre').textContent;
+
+                cerrarModalDetalle();
+
+                Swal.fire({
+                    title: 'Historial Completo',
+                    html: `
+                    <p style="margin-bottom:15px;">Seleccione cómo desea ver el historial de <strong>${nombreCliente}</strong>:</p>
+                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                        <button onclick="ClientesModals.verHistorialEnPantalla(${cl_id})" class="swal2-confirm swal2-styled" style="background:#2196f3;">
+                            <ion-icon name="eye-outline"></ion-icon> Ver en Pantalla
+                        </button>
+                        <button onclick="ClientesModals.descargarHistorialPDF(${cl_id})" class="swal2-confirm swal2-styled" style="background:#f44336;">
+                            <ion-icon name="document-text-outline"></ion-icon> Descargar PDF
+                        </button>                    
+                    </div>
+                `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    width: '600px'
+                });
+            }
+
+            async function verHistorialEnPantalla(cl_id) {
+                Swal.fire({
+                    title: 'Cargando historial...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            clientesAjax: 'historial_completo',
+                            cl_id: cl_id
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                        return;
+                    }
+
+                    const compras = data.compras || [];
+
+                    if (compras.length === 0) {
+                        Swal.fire('Sin datos', 'Este cliente no tiene compras registradas', 'info');
+                        return;
+                    }
+
+                    const tablaHTML = `
+                    <div style="max-height:500px;overflow-y:auto;">
+                        <table class="table" style="width:100%;font-size:12px;">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Documento</th>
+                                    <th>Fecha</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${compras.map((c, i) => `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td>${c.ve_numero_documento}</td>
+                                        <td>${formatearFecha(c.ve_fecha_emision)}</td>
+                                        <td>${c.total_items}</td>
+                                        <td>Bs. ${formatearNumero(c.ve_total)}</td>
+                                        <td>${c.ve_tipo_documento || 'nota de venta'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#f5f5f5;font-weight:bold;">
+                                    <td colspan="3">TOTALES:</td>
+                                    <td>${compras.reduce((sum, c) => sum + parseInt(c.total_items), 0)}</td>
+                                    <td>Bs. ${formatearNumero(compras.reduce((sum, c) => sum + parseFloat(c.ve_total), 0))}</td>
+                                    <td>${compras.length} compras</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+
+                    Swal.fire({
+                        title: 'Historial Completo de Compras',
+                        html: tablaHTML,
+                        width: '900px',
+                        showCloseButton: true,
+                        showConfirmButton: false
+                    });
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'No se pudo cargar el historial', 'error');
+                }
+            }
+
+            function descargarHistorialPDF(cl_id) {
+                Swal.close();
+
+                const url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_pdf_detalle&cl_id=' + cl_id;
+
+                window.open(url, '_blank');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Generando PDF',
+                    text: 'El historial completo se está generando en PDF...',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+
 
             document.addEventListener('click', function(e) {
                 const modals = ['modalNuevoCliente', 'modalEditarCliente', 'modalDetalleCliente'];
@@ -786,11 +948,58 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 toggleEstado,
                 verDetalle,
                 cerrarModalDetalle,
-                editarDesdeDetalle
+                editarDesdeDetalle,
+                exportarPDFDetalle,
+                verHistorialCompleto,
+                verHistorialEnPantalla,
+                descargarHistorialPDF
             };
-
         })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnExcelClientes = document.getElementById('btnExportarExcelClientes');
+
+            if (btnExcelClientes) {
+                btnExcelClientes.addEventListener('click', function() {
+                    const url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_excel';
+
+                    console.log('Descargando Excel:', url);
+
+                    window.open(url, '_blank');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Descargando',
+                        text: 'El archivo Excel se está descargando...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                });
+            }
+
+            const btnPDFClientes = document.getElementById('btnExportarPDFClientes');
+
+            if (btnPDFClientes) {
+                btnPDFClientes.addEventListener('click', function() {
+                    const url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_pdf_cliente';
+
+                    console.log('Generando PDF:', url);
+
+                    window.open(url, '_blank');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Generando PDF',
+                        text: 'El archivo PDF se está generando...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                });
+            }
+        });
     </script>
+
+
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">

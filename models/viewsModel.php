@@ -32,7 +32,7 @@
                 "cajaHistorialLista",
                 "comprasHistorialLista",
                 "clienteLista",
-                "",
+                "devolucionLista",
                 "",
                 "",
                 "",
