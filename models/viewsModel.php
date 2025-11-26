@@ -31,7 +31,7 @@
                 "ventasHistorialLista",
                 "cajaHistorialLista",
                 "comprasHistorialLista",
-                "",
+                "clienteLista",
                 "",
                 "",
                 "",

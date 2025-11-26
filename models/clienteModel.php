@@ -4,36 +4,373 @@ require_once "mainModel.php";
 
 class clienteModel extends mainModel
 {
-    /* registrar clientes */
-    protected static function registrar_cliente_model($datos)
-    {
-        $sql = mainModel::conectar()->prepare("
-            INSERT INTO `clientes`
-            ( `cl_nombres`, 
-            `cl_apellido_paterno`, 
-            `cl_apellido_materno`, 
-            `cl_telefono`, 
-            `cl_correo`, 
-            `cl_direccion`, 
-            `cl_carnet`) 
-            VALUES
-            (:cl_nombres, 
-            :cl_apellido_paterno, 
-            :cl_apellido_materno, 
-            :cl_telefono, 
-            :cl_correo, 
-            :cl_direccion, 
-            :cl_carnet)
-        ");
-        $sql->bindParam(":cl_nombres",$datos['cl_nombres']);
-        $sql->bindParam(":cl_apellido_paterno",$datos['cl_apellido_paterno']);
-        $sql->bindParam(":cl_apellido_materno",$datos['cl_apellido_materno']);
-        $sql->bindParam(":cl_telefono",$datos['cl_telefono']);
-        $sql->bindParam(":cl_correo",$datos['cl_correo']);
-        $sql->bindParam(":cl_direccion",$datos['cl_direccion']);
-        $sql->bindParam(":cl_carnet",$datos['cl_carnet']);
 
-        $sql->execute();
-        return $sql;
+    protected static function datos_clientes_model($inicio, $registros, $filtros = [])
+    {
+        $whereParts = [];
+        $havingParts = [];
+        $params = [];
+
+        if (!empty($filtros['busqueda'])) {
+            $whereParts[] = "(
+                    c.cl_nombres LIKE :busqueda OR 
+                    c.cl_apellido_paterno LIKE :busqueda OR 
+                    c.cl_apellido_materno LIKE :busqueda OR 
+                    c.cl_carnet LIKE :busqueda OR 
+                    c.cl_telefono LIKE :busqueda
+                )";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
+        }
+
+        if (isset($filtros['estado'])) {
+            if ($filtros['estado'] == 'activo') {
+                $whereParts[] = "c.cl_estado = 1";
+            } elseif ($filtros['estado'] == 'inactivo') {
+                $whereParts[] = "c.cl_estado = 0";
+            }
+        }
+
+        if (isset($filtros['con_compras'])) {
+            if ($filtros['con_compras'] == 'con_compras') {
+                $havingParts[] = "COUNT(v.ve_id) > 0";
+            } elseif ($filtros['con_compras'] == 'sin_compras') {
+                $havingParts[] = "COUNT(v.ve_id) = 0";
+            }
+        }
+
+        if (isset($filtros['ultima_compra'])) {
+            $dias = $filtros['ultima_compra'];
+            if ($dias == 'nunca') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) IS NULL";
+            } elseif ($dias == 'mas_90') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) < DATE_SUB(NOW(), INTERVAL 90 DAY)";
+            } else {
+                $havingParts[] = "MAX(v.ve_fecha_emision) >= DATE_SUB(NOW(), INTERVAL " . (int)$dias . " DAY)";
+            }
+        }
+
+        if (isset($filtros['fecha_desde'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+
+        if (isset($filtros['fecha_hasta'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+        $havingSQL = count($havingParts) > 0 ? "HAVING " . implode(' AND ', $havingParts) : "";
+
+        $sql = "
+                SELECT 
+                    c.cl_id,
+                    c.cl_nombres,
+                    c.cl_apellido_paterno,
+                    c.cl_apellido_materno,
+                    c.cl_carnet,
+                    c.cl_telefono,
+                    c.cl_correo,
+                    c.cl_creado_en,
+                    c.cl_estado,
+                    COUNT(v.ve_id) as total_compras,
+                    MAX(v.ve_fecha_emision) as ultima_compra
+                FROM clientes c
+                LEFT JOIN ventas v ON c.cl_id = v.cl_id
+                $whereSQL
+                GROUP BY c.cl_id
+                $havingSQL
+                ORDER BY ultima_compra DESC
+                LIMIT $inicio, $registros
+            ";
+
+        $stmt = self::conectar()->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        return $stmt;
+    }
+
+    protected static function contar_clientes_model($filtros = [])
+    {
+        $whereParts = [];
+        $havingParts = [];
+        $params = [];
+
+        if (!empty($filtros['busqueda'])) {
+            $whereParts[] = "(
+                    c.cl_nombres LIKE :busqueda OR 
+                    c.cl_apellido_paterno LIKE :busqueda OR 
+                    c.cl_apellido_materno LIKE :busqueda OR 
+                    c.cl_carnet LIKE :busqueda OR 
+                    c.cl_telefono LIKE :busqueda
+                )";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
+        }
+
+        if (isset($filtros['estado'])) {
+            if ($filtros['estado'] == 'activo') {
+                $whereParts[] = "c.cl_estado = 1";
+            } elseif ($filtros['estado'] == 'inactivo') {
+                $whereParts[] = "c.cl_estado = 0";
+            }
+        }
+
+        if (isset($filtros['con_compras'])) {
+            if ($filtros['con_compras'] == 'con_compras') {
+                $havingParts[] = "COUNT(v.ve_id) > 0";
+            } elseif ($filtros['con_compras'] == 'sin_compras') {
+                $havingParts[] = "COUNT(v.ve_id) = 0";
+            }
+        }
+
+        if (isset($filtros['ultima_compra'])) {
+            $dias = $filtros['ultima_compra'];
+            if ($dias == 'nunca') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) IS NULL";
+            } elseif ($dias == 'mas_90') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) < DATE_SUB(NOW(), INTERVAL 90 DAY)";
+            } else {
+                $havingParts[] = "MAX(v.ve_fecha_emision) >= DATE_SUB(NOW(), INTERVAL " . (int)$dias . " DAY)";
+            }
+        }
+
+        if (isset($filtros['fecha_desde'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+
+        if (isset($filtros['fecha_hasta'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+        $havingSQL = count($havingParts) > 0 ? "HAVING " . implode(' AND ', $havingParts) : "";
+
+        $sql = "
+                SELECT COUNT(*) as total FROM (
+                    SELECT c.cl_id
+                    FROM clientes c
+                    LEFT JOIN ventas v ON c.cl_id = v.cl_id
+                    $whereSQL
+                    GROUP BY c.cl_id
+                    $havingSQL
+                ) as subquery
+            ";
+
+        $stmt = self::conectar()->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+    protected static function exportar_clientes_excel_model()
+    {
+        $sql = "
+                SELECT 
+                    c.cl_nombres AS 'Nombres',
+                    c.cl_apellido_paterno AS 'Apellido Paterno',
+                    c.cl_apellido_materno AS 'Apellido Materno',
+                    c.cl_carnet AS 'CI',
+                    c.cl_telefono AS 'Teléfono',
+                    c.cl_correo AS 'Correo',
+                    c.cl_direccion AS 'Dirección',
+                    DATE_FORMAT(c.cl_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
+                    COUNT(v.ve_id) AS 'Total Compras',
+                    IFNULL(DATE_FORMAT(MAX(v.ve_fecha_emision), '%d/%m/%Y'), 'Nunca') AS 'Última Compra',
+                    CASE WHEN c.cl_estado = 1 THEN 'ACTIVO' ELSE 'INACTIVO' END AS 'Estado'
+                FROM clientes c
+                LEFT JOIN ventas v ON c.cl_id = v.cl_id
+                GROUP BY c.cl_id
+                ORDER BY c.cl_creado_en DESC
+            ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    /* modelo de registro y edicion */
+    protected static function agregar_cliente_model($datos)
+    {
+        $sql = "INSERT INTO clientes (
+            cl_nombres, 
+            cl_apellido_paterno, 
+            cl_apellido_materno, 
+            cl_telefono, 
+            cl_correo, 
+            cl_direccion, 
+            cl_carnet
+        ) VALUES (
+            :nombres, 
+            :paterno, 
+            :materno, 
+            :telefono, 
+            :correo, 
+            :direccion, 
+            :carnet
+        )";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':nombres', $datos['cl_nombres']);
+        $stmt->bindParam(':paterno', $datos['cl_apellido_paterno']);
+        $stmt->bindParam(':materno', $datos['cl_apellido_materno']);
+        $stmt->bindParam(':telefono', $datos['cl_telefono']);
+        $stmt->bindParam(':correo', $datos['cl_correo']);
+        $stmt->bindParam(':direccion', $datos['cl_direccion']);
+        $stmt->bindParam(':carnet', $datos['cl_carnet']);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function editar_cliente_model($datos)
+    {
+        $sql = "UPDATE clientes SET 
+            cl_nombres = :nombres,
+            cl_apellido_paterno = :paterno,
+            cl_apellido_materno = :materno,
+            cl_telefono = :telefono,
+            cl_correo = :correo,
+            cl_direccion = :direccion,
+            cl_carnet = :carnet
+        WHERE cl_id = :cl_id";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $datos['cl_id']);
+        $stmt->bindParam(':nombres', $datos['cl_nombres']);
+        $stmt->bindParam(':paterno', $datos['cl_apellido_paterno']);
+        $stmt->bindParam(':materno', $datos['cl_apellido_materno']);
+        $stmt->bindParam(':telefono', $datos['cl_telefono']);
+        $stmt->bindParam(':correo', $datos['cl_correo']);
+        $stmt->bindParam(':direccion', $datos['cl_direccion']);
+        $stmt->bindParam(':carnet', $datos['cl_carnet']);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function toggle_estado_cliente_model($cl_id, $estado)
+    {
+        $sql = "UPDATE clientes SET cl_estado = :estado WHERE cl_id = :cl_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->bindParam(':estado', $estado);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function datos_cliente_model($cl_id)
+    {
+        $sql = "SELECT * FROM clientes WHERE cl_id = :cl_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+
+    protected static function detalle_completo_cliente_model($cl_id)
+    {
+        $sql = "
+            SELECT 
+                c.*,
+                COUNT(v.ve_id) as total_compras,
+                IFNULL(SUM(v.ve_total), 0) as monto_total,
+                COUNT(DISTINCT f.fa_id) as facturas_emitidas,
+                MAX(v.ve_fecha_emision) as ultima_compra
+            FROM clientes c
+            LEFT JOIN ventas v ON c.cl_id = v.cl_id
+            LEFT JOIN factura f ON v.ve_id = f.ve_id
+            WHERE c.cl_id = :cl_id
+            GROUP BY c.cl_id
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function ultimas_compras_cliente_model($cl_id, $limite = 5)
+    {
+        $sql = "
+            SELECT 
+                v.ve_numero_documento,
+                v.ve_fecha_emision,
+                v.ve_total,
+                v.ve_tipo_documento,
+                v.ve_id,
+                COUNT(dv.dv_id) as total_items
+            FROM ventas v
+            LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
+            WHERE v.cl_id = :cl_id
+            GROUP BY v.ve_id
+            ORDER BY v.ve_fecha_emision DESC
+            LIMIT :limite
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function medicamentos_mas_comprados_model($cl_id, $limite = 5)
+    {
+        $sql = "
+            SELECT 
+                m.med_nombre_quimico,
+                COUNT(dv.dv_id) as veces_comprado,
+                MAX(v.ve_fecha_emision) as ultima_compra
+            FROM detalle_venta dv
+            INNER JOIN ventas v ON dv.ve_id = v.ve_id
+            INNER JOIN medicamento m ON dv.med_id = m.med_id
+            WHERE v.cl_id = :cl_id
+            GROUP BY dv.med_id
+            ORDER BY veces_comprado DESC
+            LIMIT :limite
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function grafico_compras_mensuales_model($cl_id)
+    {
+        $sql = "
+            SELECT 
+                DATE_FORMAT(v.ve_fecha_emision, '%Y-%m') as mes,
+                COUNT(v.ve_id) as total_compras,
+                SUM(v.ve_total) as monto_total
+            FROM ventas v
+            WHERE v.cl_id = :cl_id
+            AND v.ve_fecha_emision >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+            GROUP BY mes
+            ORDER BY mes ASC
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':cl_id', $cl_id);
+        $stmt->execute();
+
+        return $stmt;
     }
 }

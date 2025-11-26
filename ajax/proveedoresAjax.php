@@ -3,11 +3,34 @@ $peticionAjax = true;
 
 require_once "../config/APP.php";
 
-header('Content-Type: application/json; charset=utf-8');
+if (isset($_GET['exportar']) && $_GET['exportar'] === 'excel') {
+
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        session_unset();
+        session_destroy();
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "Acceso denegado. No cuenta con los privilegios necesarios.";
+        exit();
+    }
+
+    require_once "../controllers/proveedorController.php";
+    $ins_proveedor = new proveedorController();
+    $ins_proveedor->exportar_proveedores_excel_controller();
+    exit();
+}
 
 if (isset($_POST['proveedoresAjax'])) {
 
     session_start(['name' => 'SMP']);
+
+    header('Content-Type: application/json; charset=utf-8');
 
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         session_unset();
@@ -53,6 +76,24 @@ if (isset($_POST['proveedoresAjax'])) {
         exit();
     }
 
+    if ($valor === "detalle") {
+        echo $ins_proveedor->detalle_proveedor_controller();
+        exit();
+    }
+    if ($valor === "registrar") {
+        echo $ins_proveedor->registrar_proveedor_controller();
+        exit();
+    }
+
+    if ($valor === "obtener") {
+        echo $ins_proveedor->obtener_proveedor_controller();
+        exit();
+    }
+
+    if ($valor === "actualizar") {
+        echo $ins_proveedor->actualizar_proveedor_controller();
+        exit();
+    }
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

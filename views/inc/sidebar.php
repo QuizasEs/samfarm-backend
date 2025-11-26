@@ -56,7 +56,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="people-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>">Clientes</a></span>
+                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
                     </div>
                 </div>
             </li>
