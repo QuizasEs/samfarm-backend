@@ -93,6 +93,15 @@ if (isset($_POST['usuariosAjax'])) {
         echo $ins_usuario->datos_usuario_controller();
         exit();
     }
+    if ($valor === "detalle_completo") {
+        echo $ins_usuario->detalle_completo_usuario_controller();
+        exit();
+    }
+    if ($valor === "ultimas_ventas") {
+    echo $ins_usuario->ultimas_ventas_usuario_controller();
+    exit();
+}
+
 
 
     echo json_encode([

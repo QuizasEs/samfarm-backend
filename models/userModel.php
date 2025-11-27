@@ -159,6 +159,157 @@ class userModel extends mainModel
         $stmt->execute();
         return $stmt;
     }
+    protected static function editar_usuario_model($datos)
+    {
+        $sql = "UPDATE usuarios SET 
+                    us_nombres = :nombres,
+                    us_apellido_paterno = :paterno,
+                    us_apellido_materno = :materno,
+                    us_numero_carnet = :carnet,
+                    us_telefono = :telefono,
+                    us_correo = :correo,
+                    us_direccion = :direccion,
+                    us_username = :username,
+                    us_password_hash = :password,
+                    su_id = :sucursal,
+                    ro_id = :rol
+                WHERE us_id = :us_id";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $datos['us_id']);
+        $stmt->bindParam(':nombres', $datos['Nombres']);
+        $stmt->bindParam(':paterno', $datos['ApellidoPaterno']);
+        $stmt->bindParam(':materno', $datos['ApellidoMaterno']);
+        $stmt->bindParam(':carnet', $datos['Carnet']);
+        $stmt->bindParam(':telefono', $datos['Telefono']);
+        $stmt->bindParam(':correo', $datos['Correo']);
+        $stmt->bindParam(':direccion', $datos['Direccion']);
+        $stmt->bindParam(':username', $datos['UsuarioName']);
+        $stmt->bindParam(':password', $datos['Password']);
+        $stmt->bindParam(':sucursal', $datos['Sucursal']);
+        $stmt->bindParam(':rol', $datos['Rol']);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function toggle_estado_usuario_model($us_id, $estado)
+    {
+        $sql = "UPDATE usuarios SET us_estado = :estado WHERE us_id = :us_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id);
+        $stmt->bindParam(':estado', $estado);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function datos_usuario_model($us_id)
+    {
+        $sql = "SELECT * FROM usuarios WHERE us_id = :us_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function detalle_completo_usuario_model($us_id)
+    {
+        $sql = "
+                    SELECT 
+                        u.*,
+                        r.ro_nombre as rol_nombre,
+                        s.su_nombre as sucursal_nombre,
+                        COUNT(v.ve_id) as total_ventas,
+                        IFNULL(SUM(v.ve_total), 0) as monto_total
+                    FROM usuarios u
+                    LEFT JOIN roles r ON u.ro_id = r.ro_id
+                    LEFT JOIN sucursales s ON u.su_id = s.su_id
+                    LEFT JOIN ventas v ON u.us_id = v.us_id
+                    WHERE u.us_id = :us_id
+                    GROUP BY u.us_id
+                ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    protected static function ultimas_ventas_usuario_model($us_id, $limite = 10)
+    {
+        $sql = "
+                    SELECT 
+                        v.ve_numero_documento,
+                        v.ve_fecha_emision,
+                        v.ve_total,
+                        v.ve_tipo_documento,
+                        v.ve_id,
+                        COUNT(dv.dv_id) as total_items,
+                        CONCAT_WS(' ', c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno) as cliente_nombre
+                    FROM ventas v
+                    LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
+                    LEFT JOIN clientes c ON v.cl_id = c.cl_id
+                    WHERE v.us_id = :us_id
+                    GROUP BY v.ve_id
+                    ORDER BY v.ve_fecha_emision DESC
+                    LIMIT :limite
+                ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id);
+        $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt;
+    }
+    protected static function agregar_usuario_modelo($datos)
+    {
+        $sql = mainModel::conectar()->prepare("
+            INSERT INTO usuarios(
+                us_nombres, 
+                us_apellido_paterno, 
+                us_apellido_materno, 
+                us_numero_carnet, 
+                us_telefono, 
+                us_correo, 
+                us_direccion, 
+                us_username, 
+                us_password_hash, 
+                su_id, 
+                ro_id
+            ) VALUES(
+                :nombres, 
+                :apellido_paterno, 
+                :apellido_materno, 
+                :carnet, 
+                :telefono, 
+                :correo, 
+                :direccion, 
+                :username, 
+                :password, 
+                :sucursal, 
+                :rol
+            )
+        ");
+
+        $sql->bindParam(":nombres", $datos['Nombres']);
+        $sql->bindParam(":apellido_paterno", $datos['ApellidoPaterno']);
+        $sql->bindParam(":apellido_materno", $datos['ApellidoMaterno']);
+        $sql->bindParam(":carnet", $datos['Carnet']);
+        $sql->bindParam(":telefono", $datos['Telefono']);
+        $sql->bindParam(":correo", $datos['Correo']);
+        $sql->bindParam(":direccion", $datos['Direccion']);
+        $sql->bindParam(":username", $datos['UsuarioName']);
+        $sql->bindParam(":password", $datos['Password']);
+        $sql->bindParam(":sucursal", $datos['Sucursal']);
+        $sql->bindParam(":rol", $datos['Rol']);
+
+        $sql->execute();
+        return $sql;
+    }
 
     /* ------------------------------ usuario usuario----------------------------------- */
     /* ------------------------------ usuario usuario----------------------------------- */

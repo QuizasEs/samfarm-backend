@@ -253,6 +253,420 @@ class userController extends userModel
             echo "Error al generar archivo: " . $e->getMessage();
         }
     }
+    public function agregar_usuario_controller()
+    {
+        $nombres = mainModel::limpiar_cadena($_POST['Nombres_reg'] ?? '');
+        $apellido_paterno = mainModel::limpiar_cadena($_POST['ApellidoPaterno_reg'] ?? '');
+        $apellido_materno = mainModel::limpiar_cadena($_POST['ApellidoMaterno_reg'] ?? '');
+        $carnet = mainModel::limpiar_cadena($_POST['Carnet_reg'] ?? '');
+        $telefono = mainModel::limpiar_cadena($_POST['Telefono_reg'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_reg'] ?? '');
+        $direccion = mainModel::limpiar_cadena($_POST['Direccion_reg'] ?? '');
+        $usuarioName = mainModel::limpiar_cadena($_POST['UsuarioName_reg'] ?? '');
+        $password = mainModel::limpiar_cadena($_POST['Password_reg'] ?? '');
+        $password_confirm = mainModel::limpiar_cadena($_POST['PasswordConfirm_reg'] ?? '');
+        $sucursal = mainModel::limpiar_cadena($_POST['Sucursal_reg'] ?? '');
+        $rol = mainModel::limpiar_cadena($_POST['Rol_reg'] ?? '');
+
+        if (empty($nombres) || empty($apellido_paterno) || empty($apellido_materno) || empty($carnet) || empty($usuarioName) || empty($password) || empty($password_confirm) || empty($sucursal) || empty($rol)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Campos obligatorios",
+                "texto" => "Debe completar todos los campos obligatorios",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if ($password != $password_confirm) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Contraseñas no coinciden",
+                "texto" => "Las contraseñas ingresadas no coinciden",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if ($rol != 2 && $rol != 3) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Rol inválido",
+                "texto" => "Solo puede crear usuarios con rol Gerente o Vendedor",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_carnet = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_numero_carnet = '$carnet'");
+        if ($check_carnet->rowCount() > 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Carnet duplicado",
+                "texto" => "Ya existe otro usuario con este número de carnet",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_username = '$usuarioName'");
+        if ($check_usuario->rowCount() > 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Usuario duplicado",
+                "texto" => "Ya existe otro usuario con este nombre de usuario",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (!empty($correo)) {
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo inválido",
+                    "texto" => "El formato del correo electrónico no es válido",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            $check_correo = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_correo = '$correo'");
+            if ($check_correo->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo duplicado",
+                    "texto" => "Ya existe otro usuario con este correo electrónico",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        $password_hash = mainModel::encryption($password);
+
+        $datos_usuario = [
+            'Nombres' => $nombres,
+            'ApellidoPaterno' => $apellido_paterno,
+            'ApellidoMaterno' => $apellido_materno,
+            'Carnet' => $carnet,
+            'Telefono' => $telefono,
+            'Correo' => $correo,
+            'Direccion' => $direccion,
+            'UsuarioName' => $usuarioName,
+            'Password' => $password_hash,
+            'Sucursal' => $sucursal,
+            'Rol' => $rol
+        ];
+
+        $agregar = userModel::agregar_usuario_modelo($datos_usuario);
+
+        if ($agregar->rowCount() == 1) {
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Usuario registrado",
+                "texto" => "El usuario fue registrado correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo registrar el usuario",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
+
+    public function editar_usuario_controller()
+    {
+        $us_id = mainModel::limpiar_cadena($_POST['us_id_editar'] ?? '');
+        $nombres = mainModel::limpiar_cadena($_POST['Nombres_edit'] ?? '');
+        $apellido_paterno = mainModel::limpiar_cadena($_POST['ApellidoPaterno_edit'] ?? '');
+        $apellido_materno = mainModel::limpiar_cadena($_POST['ApellidoMaterno_edit'] ?? '');
+        $carnet = mainModel::limpiar_cadena($_POST['Carnet_edit'] ?? '');
+        $telefono = mainModel::limpiar_cadena($_POST['Telefono_edit'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_edit'] ?? '');
+        $direccion = mainModel::limpiar_cadena($_POST['Direccion_edit'] ?? '');
+        $usuarioName = mainModel::limpiar_cadena($_POST['UsuarioName_edit'] ?? '');
+        $password = mainModel::limpiar_cadena($_POST['Password_edit'] ?? '');
+        $password_confirm = mainModel::limpiar_cadena($_POST['PasswordConfirm_edit'] ?? '');
+        $sucursal = mainModel::limpiar_cadena($_POST['Sucursal_edit'] ?? '');
+        $rol = mainModel::limpiar_cadena($_POST['Rol_edit'] ?? '');
+
+        if (empty($us_id) || empty($nombres) || empty($apellido_paterno) || empty($apellido_materno) || empty($carnet) || empty($usuarioName) || empty($sucursal) || empty($rol)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Campos obligatorios",
+                "texto" => "Debe completar todos los campos obligatorios",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT * FROM usuarios WHERE us_id = '$us_id'");
+        if ($check_usuario->rowCount() <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Usuario no existe",
+                "texto" => "El usuario no fue encontrado en el sistema",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $usuario_actual = $check_usuario->fetch();
+
+        if ($carnet != $usuario_actual['us_numero_carnet']) {
+            $check_carnet = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_numero_carnet = '$carnet'");
+            if ($check_carnet->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Carnet duplicado",
+                    "texto" => "Ya existe otro usuario con este número de carnet",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if ($usuarioName != $usuario_actual['us_username']) {
+            $check_username = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_username = '$usuarioName'");
+            if ($check_username->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Usuario duplicado",
+                    "texto" => "Ya existe otro usuario con este nombre de usuario",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if (!empty($correo) && $correo != $usuario_actual['us_correo']) {
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo inválido",
+                    "texto" => "El formato del correo electrónico no es válido",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            $check_correo = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_correo = '$correo'");
+            if ($check_correo->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo duplicado",
+                    "texto" => "Ya existe otro usuario con este correo electrónico",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        $password_hash = $usuario_actual['us_password_hash'];
+
+        if (!empty($password) && !empty($password_confirm)) {
+            if ($password != $password_confirm) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Contraseñas no coinciden",
+                    "texto" => "Las nuevas contraseñas no coinciden",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+            $password_hash = mainModel::encryption($password);
+        }
+
+        $datos_usuario = [
+            'us_id' => $us_id,
+            'Nombres' => $nombres,
+            'ApellidoPaterno' => $apellido_paterno,
+            'ApellidoMaterno' => $apellido_materno,
+            'Carnet' => $carnet,
+            'Telefono' => $telefono,
+            'Correo' => $correo,
+            'Direccion' => $direccion,
+            'UsuarioName' => $usuarioName,
+            'Password' => $password_hash,
+            'Sucursal' => $sucursal,
+            'Rol' => $rol
+        ];
+
+        $actualizar = userModel::editar_usuario_model($datos_usuario);
+
+        if ($actualizar->rowCount() >= 0) {
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Usuario actualizado",
+                "texto" => "Los datos del usuario fueron actualizados correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo actualizar el usuario",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
+
+    public function toggle_estado_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+        $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 0;
+
+        if ($us_id <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "ID de usuario inválido",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if ($us_id == 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acción no permitida",
+                "texto" => "No se puede cambiar el estado del usuario principal",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_id = '$us_id'");
+        if ($check_usuario->rowCount() <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Usuario no existe",
+                "texto" => "El usuario no fue encontrado en el sistema",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $nuevo_estado = $estado == 1 ? 0 : 1;
+        $texto_estado = $nuevo_estado == 1 ? 'activado' : 'desactivado';
+
+        $actualizar = userModel::toggle_estado_usuario_model($us_id, $nuevo_estado);
+
+        if ($actualizar->rowCount() == 1) {
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Estado actualizado",
+                "texto" => "El usuario fue " . $texto_estado . " correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo cambiar el estado del usuario",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
+
+    public function datos_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+
+        if ($us_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = userModel::datos_usuario_model($us_id);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$usuario) {
+                return json_encode(['error' => 'Usuario no encontrado']);
+            }
+
+            return json_encode($usuario, JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en datos_usuario_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar datos']);
+        }
+    }
+
+    public function detalle_completo_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+
+        if ($us_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = userModel::detalle_completo_usuario_model($us_id);
+            $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$detalle) {
+                return json_encode(['error' => 'Usuario no encontrado']);
+            }
+
+            return json_encode($detalle, JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en detalle_completo_usuario_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar detalle']);
+        }
+    }
+
+    public function ultimas_ventas_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+
+        if ($us_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = userModel::ultimas_ventas_usuario_model($us_id, 10);
+            $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return json_encode(['ventas' => $ventas], JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en ultimas_ventas_usuario_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar ventas']);
+        }
+    }
+
+    
+
+
 
     /* -----------------------------------controlador para paginar usuarios------------------------------------------ */
     /* -----------------------------------controlador para paginar usuarios------------------------------------------ */

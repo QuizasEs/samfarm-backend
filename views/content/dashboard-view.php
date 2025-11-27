@@ -69,8 +69,8 @@
                             <div class="direct-link-text">
                                 <h3><!-- mostramos la cantidad de usuarios -->
                                     <?php 
-                                        $total=$ins_usuario->data_user_controller("Conteo", 0); 
-                                        echo $total->rowCount();
+                                        /* $total=$ins_usuario->data_user_controller("Conteo", 0); 
+                                        echo $total->rowCount(); */
                                     ?>
                                 </h3>
                                 <p>Usuarios</p>
