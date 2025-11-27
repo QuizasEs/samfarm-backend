@@ -566,7 +566,7 @@ class proveedorController extends proveedorModel
         $nit = mainModel::limpiar_cadena($_POST['Nit_pr'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_pr'] ?? '');
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_pr'] ?? '');
-
+        /* verificar que los campos ablgatorios no esten vacios */
         if (empty($nombres) || empty($nit)) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -577,7 +577,64 @@ class proveedorController extends proveedorModel
             echo json_encode($alerta);
             exit();
         }
-
+        /* verificar la integridad de los datos  */
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NOMBRE no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($paterno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (!empty($materno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NIT no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($telefono)) {
+            if (mainModel::verificar_datos("[0-9]{6,30}", $telefono)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El TELEFONO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        /*  el nit no deve repetirse */
         $verificar_nit = self::verificar_nit_duplicado_model($nit);
         if ($verificar_nit->rowCount() > 0) {
             $alerta = [
@@ -673,6 +730,64 @@ class proveedorController extends proveedorModel
             ];
             echo json_encode($alerta);
             exit();
+        }
+
+        /* verificar la integridad de los datos  */
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NOMBRE no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($paterno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (!empty($materno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NIT no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($telefono)) {
+            if (mainModel::verificar_datos("[0-9]{6,30}", $telefono)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El TELEFONO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
         }
 
         $verificar = self::obtener_proveedor_por_id_model($pr_id);

@@ -8,13 +8,14 @@ class devolucionModel extends mainModel
     {
         $db = mainModel::conectar();
 
-        $campo_busqueda = match ($criterio) {
+        $map = [
             'fa_id' => 'f.fa_id',
             've_id' => 'v.ve_id',
             'numero_documento' => 'v.ve_numero_documento',
             'numero_factura' => 'f.fa_numero',
-            default => null
-        };
+        ];
+
+        $campo_busqueda = isset($map[$criterio]) ? $map[$criterio] : null;
 
         if (!$campo_busqueda) {
             return false;

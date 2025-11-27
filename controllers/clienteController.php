@@ -276,7 +276,8 @@ class clienteController extends clienteModel
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_cl'] ?? '');
         $carnet = mainModel::limpiar_cadena($_POST['Carnet_cl'] ?? '');
 
-        if (empty($nombres) || empty($paterno)) {
+        /* verificamos que os campos obligaptorios no vengan vacios */
+        if (empty($nombres) || empty($paterno) || empty($carnet)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Campos obligatorios',
@@ -286,6 +287,62 @@ class clienteController extends clienteModel
             echo json_encode($alerta);
             exit();
         }
+
+        /* validar integridad de datos */
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NOMBRE no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($materno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (!empty($telefono)) {
+            if (mainModel::verificar_datos("[0-9]{6,20}", $telefono)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El TELEFONO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (mainModel::verificar_datos("[0-9]{6,20}", $carnet)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El CARNET no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
 
         if (!empty($carnet)) {
             $check_carnet = mainModel::ejecutar_consulta_simple("SELECT cl_id FROM clientes WHERE cl_carnet = '$carnet'");
@@ -336,15 +393,16 @@ class clienteController extends clienteModel
     public function editar_cliente_controller()
     {
         $cl_id = mainModel::limpiar_cadena($_POST['cl_id_editar'] ?? '');
-        $nombres = mainModel::limpiar_cadena($_POST['Nombres_cl_edit'] ?? '');
-        $paterno = mainModel::limpiar_cadena($_POST['Paterno_cl_edit'] ?? '');
-        $materno = mainModel::limpiar_cadena($_POST['Materno_cl_edit'] ?? '');
-        $telefono = mainModel::limpiar_cadena($_POST['Telefono_cl_edit'] ?? '');
-        $correo = mainModel::limpiar_cadena($_POST['Correo_cl_edit'] ?? '');
-        $direccion = mainModel::limpiar_cadena($_POST['Direccion_cl_edit'] ?? '');
-        $carnet = mainModel::limpiar_cadena($_POST['Carnet_cl_edit'] ?? '');
+        $nombres = mainModel::limpiar_cadena($_POST['Nombres_cl'] ?? '');
+        $paterno = mainModel::limpiar_cadena($_POST['Paterno_cl'] ?? '');
+        $materno = mainModel::limpiar_cadena($_POST['Materno_cl'] ?? '');
+        $telefono = mainModel::limpiar_cadena($_POST['Telefono_cl'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_cl'] ?? '');
+        $direccion = mainModel::limpiar_cadena($_POST['Direccion_cl'] ?? '');
+        $carnet = mainModel::limpiar_cadena($_POST['Carnet_cl'] ?? '');
 
-        if (empty($cl_id) || empty($nombres) || empty($paterno)) {
+        /* verificamos que los campos obligatorios no esten vacios */
+        if (empty($cl_id) || empty($nombres) || empty($paterno) || empty($carnet)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Campos obligatorios',
@@ -353,6 +411,64 @@ class clienteController extends clienteModel
             ];
             echo json_encode($alerta);
             exit();
+        }
+
+        /* verificamos la integridad de los datos */
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El NOMBRE no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "ocurrio un error inesperado",
+                "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        };
+        if (!empty($materno)) {
+            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (!empty($carnet)) {
+            if (mainModel::verificar_datos("[0-9]{6,20}", $carnet)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El CARNET no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
+        }
+        if (!empty($telefono)) {
+            if (mainModel::verificar_datos("[0-9]{6,20}", $telefono)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "ocurrio un error inesperado",
+                    "texto" => "El TELEFONO no coincide con el formato solicitado!",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            };
         }
 
         $check_cliente = mainModel::ejecutar_consulta_simple("SELECT cl_id FROM clientes WHERE cl_id = '$cl_id'");
@@ -476,7 +592,7 @@ class clienteController extends clienteModel
         }
 
         try {
-            $stmt = clienteModel::datos_cliente_model($cl_id);
+            $stmt = self::datos_cliente_model($cl_id);
             $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$cliente) {
@@ -695,11 +811,8 @@ class clienteController extends clienteModel
 
             $nombre_completo = trim($detalle['cl_nombres'] . ' ' . $detalle['cl_apellido_paterno'] . ' ' . ($detalle['cl_apellido_materno'] ?: ''));
 
-            $comprasStmt = self::ultimas_compras_cliente_model($cl_id, 20);
+            $comprasStmt = self::historial_completo_model($cl_id);
             $compras = $comprasStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $medicamentosStmt = self::medicamentos_mas_comprados_model($cl_id, 10);
-            $medicamentos = $medicamentosStmt->fetchAll(PDO::FETCH_ASSOC);
 
             $promedio = $detalle['total_compras'] > 0
                 ? round($detalle['monto_total'] / $detalle['total_compras'], 2)
@@ -719,12 +832,14 @@ class clienteController extends clienteModel
                 ],
                 'tabla' => [
                     'headers' => [
-                        ['text' => 'N°', 'width' => 10],
-                        ['text' => 'N° DOCUMENTO', 'width' => 40],
-                        ['text' => 'FECHA', 'width' => 25],
-                        ['text' => 'ITEMS', 'width' => 15],
-                        ['text' => 'TOTAL', 'width' => 25],
-                        ['text' => 'TIPO', 'width' => 40]
+                        ['text' => 'N°', 'width' => 8],
+                        ['text' => 'DOCUMENTO', 'width' => 30],
+                        ['text' => 'FECHA', 'width' => 20],
+                        ['text' => 'MEDICAMENTOS', 'width' => 50],
+                        ['text' => 'UND', 'width' => 12],
+                        ['text' => 'TOTAL', 'width' => 20],
+                        ['text' => 'VENDEDOR', 'width' => 25],
+                        ['text' => 'SUCURSAL', 'width' => 25]
                     ],
                     'rows' => []
                 ],
@@ -740,18 +855,28 @@ class clienteController extends clienteModel
             if (!empty($compras)) {
                 $contador = 1;
                 foreach ($compras as $compra) {
+                    $vendedor = trim(($compra['vendedor_nombre'] ?: '') . ' ' . ($compra['vendedor_apellido'] ?: '')) ?: 'N/A';
+                    $medicamentos = $compra['medicamentos_detalle'] ?: '-';
+                    if (strlen($medicamentos) > 60) {
+                        $medicamentos = substr($medicamentos, 0, 57) . '...';
+                    }
+
                     $datos_pdf['tabla']['rows'][] = [
                         'cells' => [
                             ['text' => $contador, 'align' => 'C'],
                             ['text' => $compra['ve_numero_documento'], 'align' => 'L'],
-                            ['text' => date('d/m/Y H:i', strtotime($compra['ve_fecha_emision'])), 'align' => 'C'],
-                            ['text' => $compra['total_items'], 'align' => 'C'],
+                            ['text' => date('d/m/Y', strtotime($compra['ve_fecha_emision'])), 'align' => 'C'],
+                            ['text' => $medicamentos, 'align' => 'L'],
+                            ['text' => $compra['total_unidades'] ?: '0', 'align' => 'C'],
                             ['text' => 'Bs. ' . number_format($compra['ve_total'], 2), 'align' => 'R'],
-                            ['text' => $compra['ve_tipo_documento'] ?: 'nota de venta', 'align' => 'C']
+                            ['text' => $vendedor, 'align' => 'L'],
+                            ['text' => $compra['sucursal_nombre'] ?: '-', 'align' => 'L']
                         ]
                     ];
                     $contador++;
                 }
+
+                $total_unidades = array_sum(array_column($compras, 'total_unidades'));
 
                 $datos_pdf['tabla']['rows'][] = [
                     'es_total' => true,
@@ -759,9 +884,11 @@ class clienteController extends clienteModel
                         ['text' => '', 'align' => 'C'],
                         ['text' => '', 'align' => 'L'],
                         ['text' => '', 'align' => 'C'],
-                        ['text' => 'TOTAL:', 'align' => 'R'],
+                        ['text' => 'TOTALES:', 'align' => 'R'],
+                        ['text' => $total_unidades, 'align' => 'C'],
                         ['text' => 'Bs. ' . number_format(array_sum(array_column($compras, 've_total')), 2), 'align' => 'R'],
-                        ['text' => '', 'align' => 'C']
+                        ['text' => '', 'align' => 'L'],
+                        ['text' => count($compras) . ' compras', 'align' => 'L']
                     ]
                 ];
             }
@@ -791,6 +918,4 @@ class clienteController extends clienteModel
             return json_encode(['error' => 'Error al cargar historial']);
         }
     }
-
-
 }

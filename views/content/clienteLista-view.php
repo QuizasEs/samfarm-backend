@@ -93,21 +93,25 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="modal-group">
                     <div class="row">
-                        <label class="required">Nombres</label>
-                        <input type="text" name="Nombres_cl_edit" id="Nombres_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombres</label>
+                                <input type="text" name="Nombres_cl" id="Nombres_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Paterno</label>
-                                <input type="text" name="Paterno_cl_edit" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                                <input type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Apellido Materno</label>
-                                <input type="text" name="Materno_cl_edit" id="Materno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
+                                <input type="text" name="Materno_cl" id="Materno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
                             </div>
                         </div>
                     </div>
@@ -115,14 +119,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="number" name="Telefono_cl_edit" id="Telefono_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
+                                <label class="required">Carnet</label>
+                                <input type="number" name="Carnet_cl" id="Carnet_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_cl_edit" id="Correo_cl_edit">
+                                <label>Teléfono</label>
+                                <input type="number" name="Telefono_cl" id="Telefono_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
                     </div>
@@ -131,20 +135,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Dirección</label>
-                                <input type="text" name="Direccion_cl_edit" id="Direccion_cl_edit">
+                                <input type="text" name="Direccion_cl" id="Direccion_cl_edit">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Carnet</label>
-                                <input type="text" name="Carnet_cl_edit" id="Carnet_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_cl" id="Correo_cl_edit">
                             </div>
                         </div>
                     </div>
 
                     <div class="btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalEditar()">Cancelar</a>
-                        <button type="submit" class="btn success">Guardar Cambios</button>
+                        <button type="submit" class="btn success">Actualizar</button>
                     </div>
                 </div>
             </form>
@@ -163,8 +167,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="modal-group">
                     <div class="row">
-                        <label class="required">Nombres</label>
-                        <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombres</label>
+                                <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -185,16 +193,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
+                                <label class="required">Carnet</label>
+                                <input type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_cl">
+                                <label>Teléfono</label>
+                                <input type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
+
                     </div>
 
                     <div class="row">
@@ -206,15 +215,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Carnet</label>
-                                <input type="text" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_cl">
                             </div>
                         </div>
                     </div>
 
                     <div class="btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalNuevo()">Cancelar</a>
-                        <button type="submit" class="btn success">Registrar Cliente</button>
+                        <button type="submit" class="btn success">Registrar</button>
                     </div>
                 </div>
             </form>
@@ -347,9 +356,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <tr>
                                     <th>N° Documento</th>
                                     <th>Fecha</th>
+                                    <th>Medicamentos</th>
+                                    <th>Unidades</th>
+                                    <th>Subtotal</th>
                                     <th>Total</th>
-                                    <th>Items</th>
-                                    <th>Tipo</th>
+                                    <th>Vendedor</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaUltimasCompras">
@@ -374,7 +385,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <tr>
                                     <th>N°</th>
                                     <th>Medicamento</th>
-                                    <th>Veces Comprado</th>
+                                    <th>Nombre Comercial</th>
+                                    <th>Laboratorio</th>
+                                    <th>Forma</th>
+                                    <th>Veces</th>
+                                    <th>Unidades</th>
                                     <th>Última Compra</th>
                                 </tr>
                             </thead>
@@ -612,18 +627,29 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const tbody = document.getElementById('tablaUltimasCompras');
 
                     if (data.compras && data.compras.length > 0) {
-                        tbody.innerHTML = data.compras.map(compra => `
+                        tbody.innerHTML = data.compras.map(compra => {
+                            const vendedor = compra.vendedor_nombre || 'N/A';
+                            const medicamentos = compra.medicamentos_detalle ?
+                                (compra.medicamentos_detalle.length > 80 ?
+                                    compra.medicamentos_detalle.substring(0, 80) + '...' :
+                                    compra.medicamentos_detalle) :
+                                '-';
+
+                            return `
                         <tr>
-                            <td>${compra.ve_numero_documento}</td>
+                            <td><strong>${compra.ve_numero_documento}</strong></td>
                             <td>${formatearFecha(compra.ve_fecha_emision)}</td>
-                            <td>Bs. ${formatearNumero(compra.ve_total)}</td>
-                            <td>${compra.total_items}</td>
-                            <td>${compra.ve_tipo_documento || 'nota de venta'}</td>
+                            <td style="font-size:11px;" title="${compra.medicamentos_detalle || ''}">${medicamentos}</td>
+                            <td style="text-align:center;"><strong>${compra.total_unidades || 0}</strong></td>
+                            <td style="text-align:right;">Bs. ${formatearNumero(compra.ve_subtotal || compra.ve_total)}</td>
+                            <td style="text-align:right;"><strong style="color:#1976D2;">Bs. ${formatearNumero(compra.ve_total)}</strong></td>
+                            <td style="font-size:11px;">${vendedor}</td>
                             
                         </tr>
-                    `).join('');
+                    `
+                        }).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="cart-outline"></ion-icon> Sin compras registradas</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;"><ion-icon name="cart-outline"></ion-icon> Sin compras registradas</td></tr>';
                     }
 
                 } catch (error) {
@@ -652,12 +678,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <tr>
                             <td>${index + 1}</td>
                             <td><strong>${med.med_nombre_quimico}</strong></td>
+                            <td style="font-size:11px;color:#666;">${med.med_version_comercial || '-'}</td>
+                            <td style="font-size:11px;">${med.laboratorio || '-'}</td>
+                            <td style="font-size:11px;">${med.forma_farmaceutica || '-'}</td>
                             <td style="text-align:center;"><strong style="color:#1976D2;">${med.veces_comprado}</strong></td>
+                            <td style="text-align:center;"><strong>${med.total_unidades}</strong></td>
                             <td>${formatearFecha(med.ultima_compra)}</td>
                         </tr>
                     `).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos comprados</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos comprados</td></tr>';
                     }
 
                 } catch (error) {
@@ -864,35 +894,46 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     const tablaHTML = `
                     <div style="max-height:500px;overflow-y:auto;">
-                        <table class="table" style="width:100%;font-size:12px;">
+                        <table class="table" style="width:100%;font-size:11px;">
                             <thead>
                                 <tr>
                                     <th>N°</th>
                                     <th>Documento</th>
                                     <th>Fecha</th>
-                                    <th>Items</th>
+                                    <th>Medicamentos</th>
+                                    <th>Unidades</th>
                                     <th>Total</th>
-                                    <th>Tipo</th>
+                                    <th>Vendedor</th>
+                                    <th>Sucursal</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${compras.map((c, i) => `
+                                ${compras.map((c, i) => {
+                                    const vendedor = (c.vendedor_nombre || '') + ' ' + (c.vendedor_apellido || '');
+                                    const medicamentos = c.medicamentos_detalle 
+                                        ? (c.medicamentos_detalle.length > 60 
+                                            ? c.medicamentos_detalle.substring(0, 60) + '...' 
+                                            : c.medicamentos_detalle)
+                                        : '-';
+                                    return `
                                     <tr>
                                         <td>${i + 1}</td>
                                         <td>${c.ve_numero_documento}</td>
                                         <td>${formatearFecha(c.ve_fecha_emision)}</td>
-                                        <td>${c.total_items}</td>
-                                        <td>Bs. ${formatearNumero(c.ve_total)}</td>
-                                        <td>${c.ve_tipo_documento || 'nota de venta'}</td>
+                                        <td style="font-size:10px;" title="${c.medicamentos_detalle || ''}">${medicamentos}</td>
+                                        <td style="text-align:center;">${c.total_unidades || 0}</td>
+                                        <td style="text-align:right;">Bs. ${formatearNumero(c.ve_total)}</td>
+                                        <td style="font-size:10px;">${vendedor.trim() || 'N/A'}</td>
+                                        <td style="font-size:10px;">${c.sucursal_nombre || '-'}</td>
                                     </tr>
-                                `).join('')}
+                                `}).join('')}
                             </tbody>
                             <tfoot>
                                 <tr style="background:#f5f5f5;font-weight:bold;">
-                                    <td colspan="3">TOTALES:</td>
-                                    <td>${compras.reduce((sum, c) => sum + parseInt(c.total_items), 0)}</td>
-                                    <td>Bs. ${formatearNumero(compras.reduce((sum, c) => sum + parseFloat(c.ve_total), 0))}</td>
-                                    <td>${compras.length} compras</td>
+                                    <td colspan="4">TOTALES:</td>
+                                    <td style="text-align:center;">${compras.reduce((sum, c) => sum + parseInt(c.total_unidades || 0), 0)}</td>
+                                    <td style="text-align:right;">Bs. ${formatearNumero(compras.reduce((sum, c) => sum + parseFloat(c.ve_total), 0))}</td>
+                                    <td colspan="2">${compras.length} compras</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -902,7 +943,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     Swal.fire({
                         title: 'Historial Completo de Compras',
                         html: tablaHTML,
-                        width: '900px',
+                        width: '1100px',
                         showCloseButton: true,
                         showConfirmButton: false
                     });

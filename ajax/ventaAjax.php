@@ -1,5 +1,5 @@
 <?php
-file_put_contents('debug_post.txt', print_r($_POST, true));
+
 // Indicamos que esta petición viene vía AJAX
 $peticionAjax = true;
 

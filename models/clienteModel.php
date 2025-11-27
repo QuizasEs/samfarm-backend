@@ -306,20 +306,35 @@ class clienteModel extends mainModel
     protected static function ultimas_compras_cliente_model($cl_id, $limite = 5)
     {
         $sql = "
-            SELECT 
-                v.ve_numero_documento,
-                v.ve_fecha_emision,
-                v.ve_total,
-                v.ve_tipo_documento,
-                v.ve_id,
-                COUNT(dv.dv_id) as total_items
-            FROM ventas v
-            LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
-            WHERE v.cl_id = :cl_id
-            GROUP BY v.ve_id
-            ORDER BY v.ve_fecha_emision DESC
-            LIMIT :limite
-        ";
+                    SELECT 
+                        v.ve_numero_documento,
+                        v.ve_fecha_emision,
+                        v.ve_total,
+                        v.ve_tipo_documento,
+                        v.ve_id,
+                        v.ve_subtotal,
+                        v.ve_impuesto,
+                        COUNT(dv.dv_id) as total_items,
+                        SUM(dv.dv_cantidad) as total_unidades,
+                        GROUP_CONCAT(
+                            CONCAT(m.med_nombre_quimico, ' (', dv.dv_cantidad, ')')
+                            ORDER BY dv.dv_id 
+                            SEPARATOR ' | '
+                        ) as medicamentos_detalle,
+                        u.us_nombres as vendedor_nombre,
+                        s.su_nombre as sucursal_nombre,
+                        c.caja_nombre as caja_nombre
+                    FROM ventas v
+                    LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
+                    LEFT JOIN medicamento m ON dv.med_id = m.med_id
+                    LEFT JOIN usuarios u ON v.us_id = u.us_id
+                    LEFT JOIN sucursales s ON v.su_id = s.su_id
+                    LEFT JOIN caja c ON v.caja_id = c.caja_id
+                    WHERE v.cl_id = :cl_id
+                    GROUP BY v.ve_id
+                    ORDER BY v.ve_fecha_emision DESC
+                    LIMIT :limite
+                ";
 
         $stmt = self::conectar()->prepare($sql);
         $stmt->bindParam(':cl_id', $cl_id);
@@ -332,18 +347,25 @@ class clienteModel extends mainModel
     protected static function medicamentos_mas_comprados_model($cl_id, $limite = 5)
     {
         $sql = "
-            SELECT 
-                m.med_nombre_quimico,
-                COUNT(dv.dv_id) as veces_comprado,
-                MAX(v.ve_fecha_emision) as ultima_compra
-            FROM detalle_venta dv
-            INNER JOIN ventas v ON dv.ve_id = v.ve_id
-            INNER JOIN medicamento m ON dv.med_id = m.med_id
-            WHERE v.cl_id = :cl_id
-            GROUP BY dv.med_id
-            ORDER BY veces_comprado DESC
-            LIMIT :limite
-        ";
+                    SELECT 
+                        m.med_nombre_quimico,
+                        m.med_version_comercial,
+                        l.la_nombre_comercial as laboratorio,
+                        ff.ff_nombre as forma_farmaceutica,
+                        COUNT(dv.dv_id) as veces_comprado,
+                        SUM(dv.dv_cantidad) as total_unidades,
+                        MAX(v.ve_fecha_emision) as ultima_compra,
+                        ROUND(AVG(dv.dv_precio_unitario), 2) as precio_promedio
+                    FROM detalle_venta dv
+                    INNER JOIN ventas v ON dv.ve_id = v.ve_id
+                    INNER JOIN medicamento m ON dv.med_id = m.med_id
+                    LEFT JOIN laboratorios l ON m.la_id = l.la_id
+                    LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
+                    WHERE v.cl_id = :cl_id
+                    GROUP BY dv.med_id
+                    ORDER BY veces_comprado DESC, total_unidades DESC
+                    LIMIT :limite
+                ";
 
         $stmt = self::conectar()->prepare($sql);
         $stmt->bindParam(':cl_id', $cl_id);
@@ -420,19 +442,35 @@ class clienteModel extends mainModel
     protected static function historial_completo_model($cl_id)
     {
         $sql = "
-            SELECT 
-                v.ve_numero_documento,
-                v.ve_fecha_emision,
-                v.ve_total,
-                v.ve_tipo_documento,
-                v.ve_id,
-                COUNT(dv.dv_id) as total_items
-            FROM ventas v
-            LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
-            WHERE v.cl_id = :cl_id
-            GROUP BY v.ve_id
-            ORDER BY v.ve_fecha_emision DESC
-        ";
+                SELECT 
+                    v.ve_numero_documento,
+                    v.ve_fecha_emision,
+                    v.ve_total,
+                    v.ve_subtotal,
+                    v.ve_impuesto,
+                    v.ve_tipo_documento,
+                    v.ve_id,
+                    COUNT(dv.dv_id) as total_items,
+                    SUM(dv.dv_cantidad) as total_unidades,
+                    GROUP_CONCAT(
+                        CONCAT(m.med_nombre_quimico, ' (', dv.dv_cantidad, ')')
+                        ORDER BY dv.dv_id 
+                        SEPARATOR ' | '
+                    ) as medicamentos_detalle,
+                    u.us_nombres as vendedor_nombre,
+                    u.us_apellido_paterno as vendedor_apellido,
+                    s.su_nombre as sucursal_nombre,
+                    c.caja_nombre as caja_nombre
+                FROM ventas v
+                LEFT JOIN detalle_venta dv ON v.ve_id = dv.ve_id
+                LEFT JOIN medicamento m ON dv.med_id = m.med_id
+                LEFT JOIN usuarios u ON v.us_id = u.us_id
+                LEFT JOIN sucursales s ON v.su_id = s.su_id
+                LEFT JOIN caja c ON v.caja_id = c.caja_id
+                WHERE v.cl_id = :cl_id
+                GROUP BY v.ve_id
+                ORDER BY v.ve_fecha_emision DESC
+            ";
 
         $stmt = self::conectar()->prepare($sql);
         $stmt->bindParam(':cl_id', $cl_id);

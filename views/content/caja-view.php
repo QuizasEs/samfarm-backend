@@ -184,9 +184,8 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                 </div>
             </form>
 
-            <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/clienteAjax.php" autocomplet="off" method="POST" autocomplete="off" data-form="save">
-                <input type="hidden" name="clienteAjax" value="save">
-
+            <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/clientesAjax.php" method="POST" data-form="save" autocomplete="off">
+                <input type="hidden" name="clientesAjax" value="nuevo">
                 <div class="modal" id="modalCliente" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -196,8 +195,12 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
 
                         <div class="modal-group">
                             <div class="row">
-                                <label class="required">Nombres</label>
-                                <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                                <div class="col">
+                                    <div class="modal-bloque">
+                                        <label class="required">Nombres</label>
+                                        <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row">
@@ -218,8 +221,24 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                             <div class="row">
                                 <div class="col">
                                     <div class="modal-bloque">
-                                        <label>Telefono</label>
+                                        <label class="required">Carnet</label>
+                                        <input type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="modal-bloque">
+                                        <label>Teléfono</label>
                                         <input type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <div class="modal-bloque">
+                                        <label>Dirección</label>
+                                        <input type="text" name="Direccion_cl">
                                     </div>
                                 </div>
                                 <div class="col">
@@ -230,27 +249,10 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col">
-                                    <div class="modal-bloque">
-                                        <label>Direccion</label>
-                                        <input type="text" name="Direccion_cl">
-                                    </div>
-                                </div>
-
-                                <div class="col">
-                                    <div class="modal-bloque">
-                                        <label>Carnet</label>
-                                        <input type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="btn-content">
-                                <a href="javascript:void(0)" class="btn warning" onclick="ModalCliente.cerrarModalCliente()">Cancelar</a>
-                                <button class="btn success">Agregar</button>
+                                <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalNuevo()">Cancelar</a>
+                                <button type="submit" class="btn success">Registrar</button>
                             </div>
-
                         </div>
                     </div>
                 </div>

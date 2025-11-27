@@ -75,11 +75,6 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Obtener productos más vendidos
-     * @param int $limit - Cantidad de productos a retornar
-     * @return string JSON con resultados
-     */
     public function mas_vendidos_controller($limit = 5)
     {
         // Validar sesión y sucursal
