@@ -58,20 +58,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             </div>
 
-            <button type="button" class="btn success" onclick="UsuariosModals.abrirModalNuevo()">
-                <ion-icon name="person-add-outline"></ion-icon> Nuevo Usuario
-            </button>
+            <div class="filtro-dinamico-buttons">
+                <button type="button" class="btn success" onclick="UsuariosModals.abrirModalNuevo()">
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Usuario
+                </button>
 
-            <button type="button" class="btn primary" id="btnExportarExcelUsuarios">
-                <ion-icon name="download-outline"></ion-icon> Exportar Excel
-            </button>
+            </div>
         </form>
 
         <div class="tabla-contenedor"></div>
     </div>
 
     <div class="modal" id="modalNuevoUsuario" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title"><ion-icon name="person-add-outline"></ion-icon> Nuevo Usuario</div>
                 <a class="close" onclick="UsuariosModals.cerrarModalNuevo()"><ion-icon name="close-outline"></ion-icon></a>
@@ -81,16 +80,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="hidden" name="usuariosAjax" value="nuevo">
 
                 <div class="modal-group">
-                    <div class="row">
+                    <div class="modal-title">
                         <h3><ion-icon name="person-outline"></ion-icon> Información Personal</h3>
                     </div>
 
                     <div class="row">
-                        <label class="required">Nombres</label>
-                        <input type="text" name="Nombres_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                    </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombres</label>
+                                <input type="text" name="Nombres_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                            </div>
+                        </div>
 
-                    <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Paterno</label>
@@ -118,28 +119,36 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <input type="text" name="Telefono_reg" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
+
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_reg">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
-                        <label>Correo</label>
-                        <input type="email" name="Correo_reg">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Dirección</label>
+                                <input type="text" name="Direccion_reg">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row">
-                        <label>Dirección</label>
-                        <input type="text" name="Direccion_reg">
-                    </div>
-
-                    <div class="row">
+                    <div class="modale-title">
                         <h3><ion-icon name="key-outline"></ion-icon> Credenciales de Acceso</h3>
                     </div>
 
                     <div class="row">
-                        <label class="required">Nombre de Usuario</label>
-                        <input type="text" name="UsuarioName_reg" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}$" maxlength="100" required>
-                    </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombre de Usuario</label>
+                                <input type="text" name="UsuarioName_reg" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}$" maxlength="100" required>
+                            </div>
+                        </div>
 
-                    <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Contraseña</label>
@@ -154,7 +163,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="modal-title">
                         <h3><ion-icon name="briefcase-outline"></ion-icon> Asignación</h3>
                     </div>
 
@@ -162,7 +171,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Rol</label>
-                                <select name="Rol_reg" required>
+                                <select name="Rol_reg" class="select-filtro" required>
                                     <option value="">Seleccione rol...</option>
                                     <option value="2">Gerente</option>
                                     <option value="3">Vendedor</option>
@@ -172,7 +181,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Sucursal</label>
-                                <select name="Sucursal_reg" required>
+                                <select name="Sucursal_reg" class="select-filtro" required>
                                     <option value="">Seleccione sucursal...</option>
                                     <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
                                         <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
@@ -182,17 +191,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="UsuariosModals.cerrarModalNuevo()">Cancelar</a>
-                        <button type="submit" class="btn success">Registrar Usuario</button>
+                        <button type="submit" class="btn success">Registrar</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
-    <div class="modal" id="modalEditarUsuario" style="display: none;">
-        <div class="modal-content">
+    <!-- editar usuario -->
+    <div class="modal " id="modalEditarUsuario" style="display: none;">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title"><ion-icon name="create-outline"></ion-icon> Editar Usuario</div>
                 <a class="close" onclick="UsuariosModals.cerrarModalEditar()"><ion-icon name="close-outline"></ion-icon></a>
@@ -203,16 +212,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="hidden" name="us_id_editar" id="us_id_editar">
 
                 <div class="modal-group">
-                    <div class="row">
+                    <div class="modal-title">
                         <h3><ion-icon name="person-outline"></ion-icon> Información Personal</h3>
                     </div>
 
                     <div class="row">
-                        <label class="required">Nombres</label>
-                        <input type="text" name="Nombres_edit" id="Nombres_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                    </div>
-
-                    <div class="row">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombres</label>
+                                <input type="text" name="Nombres_edit" id="Nombres_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                            </div>
+                        </div>
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Paterno</label>
@@ -240,28 +250,36 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <input type="text" name="Telefono_edit" id="Telefono_edit" pattern="[0-9]{6,20}" maxlength="20">
                             </div>
                         </div>
+
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_edit" id="Correo_edit">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
-                        <label>Correo</label>
-                        <input type="email" name="Correo_edit" id="Correo_edit">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Dirección</label>
+                                <input type="text" name="Direccion_edit" id="Direccion_edit">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row">
-                        <label>Dirección</label>
-                        <input type="text" name="Direccion_edit" id="Direccion_edit">
-                    </div>
-
-                    <div class="row">
+                    <div class="modal-title">
                         <h3><ion-icon name="key-outline"></ion-icon> Credenciales de Acceso</h3>
                     </div>
 
                     <div class="row">
-                        <label class="required">Nombre de Usuario</label>
-                        <input type="text" name="UsuarioName_edit" id="UsuarioName_edit" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}$" maxlength="100" required>
-                    </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label class="required">Nombre de Usuario</label>
+                                <input type="text" name="UsuarioName_edit" id="UsuarioName_edit" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}$" maxlength="100" required>
+                            </div>
+                        </div>
 
-                    <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Nueva Contraseña (dejar en blanco para no cambiar)</label>
@@ -276,7 +294,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="modal-title">
                         <h3><ion-icon name="briefcase-outline"></ion-icon> Asignación</h3>
                     </div>
 
@@ -284,7 +302,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Rol</label>
-                                <select name="Rol_edit" id="Rol_edit" required>
+                                <select name="Rol_edit" id="Rol_edit" class="select-filtro" required>
                                     <option value="">Seleccione rol...</option>
                                     <option value="2">Gerente</option>
                                     <option value="3">Vendedor</option>
@@ -294,7 +312,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Sucursal</label>
-                                <select name="Sucursal_edit" id="Sucursal_edit" required>
+                                <select name="Sucursal_edit" id="Sucursal_edit" class="select-filtro" required>
                                     <option value="">Seleccione sucursal...</option>
                                     <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
                                         <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
@@ -304,17 +322,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="UsuariosModals.cerrarModalEditar()">Cancelar</a>
-                        <button type="submit" class="btn success">Guardar Cambios</button>
+                        <button type="submit" class="btn success">Guardar</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
+    <!-- detalle de usuario -->
     <div class="modal" id="modalDetalleUsuario" style="display: none;">
-        <div class="modal-content" style="max-width: 1200px;">
+        <div class="modal-content detalle" style="max-width: 1200px;">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="person-circle-outline"></ion-icon>
@@ -327,89 +345,100 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <input type="hidden" id="detalleUsuarioId">
 
-            <div class="modal-group">
-                <div class="row">
+            <div class="modal-group modal-estadisticas">
+                <div class="modal-title">
                     <h3><ion-icon name="information-circle-outline"></ion-icon> Información Personal</h3>
                 </div>
 
                 <div class="row">
-                    <div class="col">
-                        <label>Nombre Completo:</label>
-                        <p id="detalleNombreCompletoUsuario">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Usuario:</label>
-                        <p id="detalleUsername">-</p>
-                    </div>
-                </div>
 
-                <div class="row">
                     <div class="col">
-                        <label>Carnet:</label>
-                        <p id="detalleCarnetUsuario">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Teléfono:</label>
-                        <p id="detalleTelefonoUsuario">-</p>
-                    </div>
-                </div>
+                        <div class="modal-detalles-info">
+                            <div class="detalle-info-bloque">
+                                <label>Nombre Completo:</label>
+                                <p id="detalleNombreCompletoUsuario">-</p>
+                            </div>
+                            <div class="detalle-info-bloque">
 
-                <div class="row">
-                    <div class="col">
-                        <label>Correo:</label>
-                        <p id="detalleCorreoUsuario">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Dirección:</label>
-                        <p id="detalleDireccionUsuario">-</p>
-                    </div>
-                </div>
+                                <label>Usuario:</label>
+                                <p id="detalleUsername">-</p>
+                            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Rol:</label>
-                        <p id="detalleRolUsuario">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Sucursal:</label>
-                        <p id="detalleSucursalUsuario">-</p>
-                    </div>
-                </div>
+                            <div class="detalle-info-bloque">
+                                <label>Carnet:</label>
+                                <p id="detalleCarnetUsuario">-</p>
+                            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Fecha de Registro:</label>
-                        <p id="detalleFechaRegistroUsuario">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Estado:</label>
-                        <p id="detalleEstadoUsuario">-</p>
-                    </div>
-                </div>
+                            <div class="detalle-info-bloque">
+                                <label>Teléfono:</label>
+                                <p id="detalleTelefonoUsuario">-</p>
+                            </div>
 
-                <div class="row">
-                    <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Actividad</h3>
-                </div>
+                            <div class="detalle-info-bloque">
+                                <label>Correo:</label>
+                                <p id="detalleCorreoUsuario">-</p>
+                            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div style="background:#e3f2fd;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#1565c0;">Total Ventas:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#0d47a1;margin:5px 0;" id="detalleTotalVentas">0</p>
+                            <div class="detalle-info-bloque">
+                                <label>Dirección:</label>
+                                <p id="detalleDireccionUsuario">-</p>
+                            </div>
+
+                            <div class="detalle-info-bloque">
+                                <label>Rol:</label>
+                                <p id="detalleRolUsuario">-</p>
+                            </div>
+
+                            <div class="detalle-info-bloque">
+                                <label>Sucursal:</label>
+                                <p id="detalleSucursalUsuario">-</p>
+                            </div>
+
+                            <div class="detalle-info-bloque">
+                                <label>Fecha de Registro:</label>
+                                <p id="detalleFechaRegistroUsuario">-</p>
+                            </div>
+
+                            <div class="detalle-info-bloque">
+                                <label>Estado:</label>
+                                <p id="detalleEstadoUsuario">-</p>
+                            </div>
                         </div>
                     </div>
+
                     <div class="col">
-                        <div style="background:#e8f5e9;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#2e7d32;">Monto Total:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#1b5e20;margin:5px 0;" id="detalleMontoTotalUsuario">Bs. 0.00</p>
+                        <!-- grfico -->
+                        <div class="row">
+                            <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Actividad</h3>
+
+                        </div>
+
+
+                        <div class="row">
+                            <div id="graficoVentasUsuario" style="width:100%;height:350px;background:#f9f9f9;border-radius:8px;"></div>
+                        </div>
+                        <!-- totales -->
+                        <div class="modal-totales">
+                            <div class="col">
+                                <div style="background:#e3f2fd;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#1565c0;">Total Ventas:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#0d47a1;margin:5px 0;" id="detalleTotalVentas">0</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div style="background:#e8f5e9;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#2e7d32;">Monto Total:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#1b5e20;margin:5px 0;" id="detalleMontoTotalUsuario">Bs. 0.00</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="modal-title">
                     <h3><ion-icon name="receipt-outline"></ion-icon> Últimas 10 Ventas</h3>
                 </div>
-
+                <!-- tabla -->
                 <div class="row">
                     <div class="table-container">
                         <table class="table">
@@ -434,14 +463,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn primary" onclick="UsuariosModals.editarDesdeDetalle()">
-                        <ion-icon name="create-outline"></ion-icon> Editar Usuario
+                <div class="modal-btn-content">
+                    <a href="javascript:void(0)" class="btn default" onclick="UsuariosModals.editarDesdeDetalle()">
+                        <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
-                    <a href="javascript:void(0)" class="btn warning" id="btnToggleEstadoDetalleUsuario">
-                        <ion-icon name="power-outline"></ion-icon> Cambiar Estado
+                    <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalleUsuario">
+                        <ion-icon name="power-outline"></ion-icon> Estado
                     </a>
-                    <a href="javascript:void(0)" class="btn default" onclick="UsuariosModals.cerrarModalDetalle()">
+                    <a href="javascript:void(0)" class="btn warning" onclick="UsuariosModals.cerrarModalDetalle()">
                         Cerrar
                     </a>
                 </div>
@@ -628,11 +657,140 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         };
                     }
 
+                    // Cargar tabla de ventas
                     cargarUltimasVentasUsuario(us_id);
+
+                    // NUEVO: Cargar gráfico de ventas mensuales
+                    cargarGraficoVentasMensuales(us_id);
 
                 } catch (error) {
                     console.error('Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el detalle del usuario', 'error');
+                }
+            }
+            async function cargarGraficoVentasMensuales(us_id) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            usuariosAjax: 'ventas_mensuales',
+                            us_id: us_id
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        console.error('Error cargando ventas mensuales:', data.error);
+                        return;
+                    }
+
+                    // Inicializar gráfico ECharts
+                    const chartDom = document.getElementById('graficoVentasUsuario');
+                    const myChart = echarts.init(chartDom);
+
+                    const meses = data.ventas_mensuales.map(item => item.mes);
+                    const cantidades = data.ventas_mensuales.map(item => parseInt(item.cantidad));
+                    const montos = data.ventas_mensuales.map(item => parseFloat(item.monto));
+
+                    const option = {
+                        title: {
+                            text: 'Rendimiento de Ventas',
+                            left: 'center',
+                            textStyle: {
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                color: '#333',
+                            },
+                            top: 10
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'cross'
+                            }
+                        },
+                        legend: {
+                            data: ['Cantidad', 'Monto Bs.'],
+                            top: 40,
+                            textStyle: {
+                                fontSize: 12
+                            }
+                        },
+                        grid: {
+                            left: '15%',
+                            right: '15%',
+                            top: '25%',
+                            bottom: '25%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: meses,
+                            axisLabel: {
+                                rotate: 0,
+                                fontSize: 11,
+                                interval: 0
+                            }
+                        },
+                        yAxis: [{
+                                type: 'value',
+                                name: 'Cantidad',
+                                position: 'left',
+                                axisLabel: {
+                                    formatter: '{value}'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: 'Bs.',
+                                position: 'right',
+                                axisLabel: {
+                                    formatter: '{value}'
+                                }
+                            }
+                        ],
+                        series: [{
+                                name: 'Cantidad',
+                                type: 'bar',
+                                data: cantidades,
+                                itemStyle: {
+                                    color: '#1976D2'
+                                },
+                                label: {
+                                    show: false
+                                }
+                            },
+                            {
+                                name: 'Monto Bs.',
+                                type: 'line',
+                                yAxisIndex: 1,
+                                data: montos,
+                                itemStyle: {
+                                    color: '#4CAF50'
+                                },
+                                lineStyle: {
+                                    width: 2
+                                },
+                                label: {
+                                    show: false
+                                }
+                            }
+                        ]
+                    };
+
+                    myChart.setOption(option);
+
+                    // Responsive simple
+                    window.addEventListener('resize', function() {
+                        myChart.resize();
+                    });
+
+                } catch (error) {
+                    console.error('Error en gráfico:', error);
                 }
             }
 

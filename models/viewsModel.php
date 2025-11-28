@@ -5,12 +5,10 @@
         protected static function get_views_model($vistas){
             $listaBlanca=[
                 "dashboard",
-                "usuarioRegistro",
                 "categoriaLista",
                 "laboratorioLista",
                 "presentacionLista",
                 "usuarioLista",
-                "usuarioActualizar",
                 "medicamentoRegistro",
                 "medicamentoLista",
                 "medicamentoActualizar",

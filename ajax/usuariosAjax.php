@@ -98,9 +98,13 @@ if (isset($_POST['usuariosAjax'])) {
         exit();
     }
     if ($valor === "ultimas_ventas") {
-    echo $ins_usuario->ultimas_ventas_usuario_controller();
-    exit();
-}
+        echo $ins_usuario->ultimas_ventas_usuario_controller();
+        exit();
+    }
+    if ($valor === "ventas_mensuales") {
+        echo $ins_usuario->ventas_mensuales_usuario_controller();
+        exit();
+    }
 
 
 

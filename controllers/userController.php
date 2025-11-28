@@ -663,8 +663,26 @@ class userController extends userModel
             return json_encode(['error' => 'Error al cargar ventas']);
         }
     }
+    public function ventas_mensuales_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
 
-    
+        if ($us_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = userModel::ventas_mensuales_usuario_model($us_id);
+            $ventas_mensuales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return json_encode(['ventas_mensuales' => $ventas_mensuales], JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en ventas_mensuales_usuario_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar estadísticas']);
+        }
+    }
+
+
 
 
 

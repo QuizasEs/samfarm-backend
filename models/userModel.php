@@ -310,6 +310,27 @@ class userModel extends mainModel
         $sql->execute();
         return $sql;
     }
+    protected static function ventas_mensuales_usuario_model($us_id)
+    {
+        $sql = "
+            SELECT 
+                DATE_FORMAT(v.ve_fecha_emision, '%b %Y') as mes,
+                DATE_FORMAT(v.ve_fecha_emision, '%Y-%m') as orden,
+                COUNT(v.ve_id) as cantidad,
+                IFNULL(SUM(v.ve_total), 0) as monto
+            FROM ventas v
+            WHERE v.us_id = :us_id
+                AND v.ve_fecha_emision >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY DATE_FORMAT(v.ve_fecha_emision, '%Y-%m')
+            ORDER BY orden ASC
+        ";
+
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
 
     /* ------------------------------ usuario usuario----------------------------------- */
     /* ------------------------------ usuario usuario----------------------------------- */

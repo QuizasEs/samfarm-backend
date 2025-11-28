@@ -65,16 +65,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             </div>
 
-            <button type="button" class="btn success" onclick="ClientesModals.abrirModalNuevo()">
-                <ion-icon name="person-add-outline"></ion-icon> Nuevo Cliente
-            </button>
+            <div class="filtro-dinamico-buttons">
+                <button type="button" class="btn success" onclick="ClientesModals.abrirModalNuevo()">
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Cliente
+                </button>
 
-            <button type="button" class="btn primary" id="btnExportarExcelClientes">
-                <ion-icon name="download-outline"></ion-icon> Exportar Excel
-            </button>
-            <button type="button" class="btn danger" id="btnExportarPDFClientes">
-                <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
-            </button>
+                <button type="button" class="btn primary" id="btnExportarExcelClientes">
+                    <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                </button>
+                <button type="button" class="btn danger" id="btnExportarPDFClientes">
+                    <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                </button>
+            </div>
+
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -146,7 +149,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalEditar()">Cancelar</a>
                         <button type="submit" class="btn success">Actualizar</button>
                     </div>
@@ -154,7 +157,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </form>
         </div>
     </div>
-
+    <!-- registrar cliente -->
     <div class="modal" id="modalNuevoCliente" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -221,7 +224,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalNuevo()">Cancelar</a>
                         <button type="submit" class="btn success">Registrar</button>
                     </div>
@@ -230,9 +233,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
     </div>
 
-
+    <!-- detalle cliente y estadisticas -->
     <div class="modal" id="modalDetalleCliente" style="display: none;">
-        <div class="modal-content" style="max-width: 1200px;">
+        <div class="modal-content detalle" style="max-width: 1200px;">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="person-circle-outline"></ion-icon>
@@ -245,107 +248,126 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <input type="hidden" id="detalleClienteId">
 
-            <div class="modal-group">
-                <div class="row">
+            <div class="modal-group modal-estadisticas">
+                <div class="modal-title">
                     <h3><ion-icon name="information-circle-outline"></ion-icon> Información Personal</h3>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <label>Nombre Completo:</label>
-                        <p id="detalleNombreCompleto">-</p>
-                    </div>
-                    <div class="col">
-                        <label>CI/Carnet:</label>
-                        <p id="detalleCarnet">-</p>
-                    </div>
-                </div>
+                        <div class="modal-detalles-info">
+                            <div class="detalle-info-bloque">
+                                <label>Nombre Completo:</label>
+                                <p id="detalleNombreCompleto">-</p>
+                            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Teléfono:</label>
-                        <p id="detalleTelefono">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Correo Electrónico:</label>
-                        <p id="detalleCorreo">-</p>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Dirección:</label>
-                        <p id="detalleDireccion">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Fecha de Registro:</label>
-                        <p id="detalleFechaRegistro">-</p>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Estado:</label>
-                        <p id="detalleEstado">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Antigüedad como Cliente:</label>
-                        <p id="detalleAntiguedad">-</p>
-                    </div>
-                </div>
+                            <div class="detalle-info-bloque">
+                                <label>CI/Carnet:</label>
+                                <p id="detalleCarnet">-</p>
+                            </div>
 
-                <div class="row">
-                    <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Compra</h3>
-                </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div style="background:#e8f5e9;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#2e7d32;">Total Compras:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#1b5e20;margin:5px 0;" id="detalleTotalCompras">0</p>
+
+                            <div class="detalle-info-bloque">
+                                <label>Teléfono:</label>
+                                <p id="detalleTelefono">-</p>
+                            </div>
+
+
+
+                            <div class="detalle-info-bloque">
+                                <label>Correo Electrónico:</label>
+                                <p id="detalleCorreo">-</p>
+                            </div>
+
+
+
+                            <div class="detalle-info-bloque">
+                                <label>Dirección:</label>
+                                <p id="detalleDireccion">-</p>
+                            </div>
+
+
+
+                            <div class="detalle-info-bloque">
+                                <label>Fecha de Registro:</label>
+                                <p id="detalleFechaRegistro">-</p>
+                            </div>
+
+
+
+                            <div class="detalle-info-bloque">
+                                <label>Estado:</label>
+                                <p id="detalleEstado">-</p>
+                            </div>
+
+
+
+                            <div class="detalle-info-bloque">
+                                <label>Antigüedad como Cliente:</label>
+                                <p id="detalleAntiguedad">-</p>
+                            </div>
                         </div>
+
                     </div>
                     <div class="col">
-                        <div style="background:#e3f2fd;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#1565c0;">Monto Total Gastado:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#0d47a1;margin:5px 0;" id="detalleMontoTotal">Bs. 0.00</p>
+                        <div class="modal-title">
+                            <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Compra</h3>
                         </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div style="background:#e8f5e9;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#2e7d32;">Total Compras:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#1b5e20;margin:5px 0;" id="detalleTotalCompras">0</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div style="background:#e3f2fd;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#1565c0;">Monto Total Gastado:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#0d47a1;margin:5px 0;" id="detalleMontoTotal">Bs. 0.00</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div style="background:#fff3e0;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#e65100;">Facturas Emitidas:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#bf360c;margin:5px 0;" id="detalleFacturasEmitidas">0</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div style="background:#f3e5f5;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#7b1fa2;">Promedio por Compra:</label>
+                                    <p style="font-size:24px;font-weight:bold;color:#4a148c;margin:5px 0;" id="detallePromedio">Bs. 0.00</p>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div style="background:#fce4ec;padding:15px;border-radius:8px;text-align:center;">
+                                    <label style="color:#c2185b;">Última Compra:</label>
+                                    <p style="font-size:18px;font-weight:bold;color:#880e4f;margin:5px 0;" id="detalleUltimaCompra">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div style="background:#fff3e0;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#e65100;">Facturas Emitidas:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#bf360c;margin:5px 0;" id="detalleFacturasEmitidas">0</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div style="background:#f3e5f5;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#7b1fa2;">Promedio por Compra:</label>
-                            <p style="font-size:24px;font-weight:bold;color:#4a148c;margin:5px 0;" id="detallePromedio">Bs. 0.00</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div style="background:#fce4ec;padding:15px;border-radius:8px;text-align:center;">
-                            <label style="color:#c2185b;">Última Compra:</label>
-                            <p style="font-size:18px;font-weight:bold;color:#880e4f;margin:5px 0;" id="detalleUltimaCompra">-</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
+                <div class="modal-title">
                     <h3><ion-icon name="bar-chart-outline"></ion-icon> Gráfico de Compras Mensuales</h3>
                 </div>
 
                 <div class="row">
                     <div id="graficoComprasMensuales" style="width:100%;height:350px;"></div>
-                </div>
+                </div>F
 
-                <div class="row">
+
+
+                <div class="title">
                     <h3><ion-icon name="receipt-outline"></ion-icon> Últimas 5 Compras</h3>
                 </div>
 
@@ -404,20 +426,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="btn-content">
+                <div class="modal-btn-content">
                     <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.editarDesdeDetalle()">
-                        <ion-icon name="create-outline"></ion-icon> Editar Cliente
+                        <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
-                    <a href="javascript:void(0)" class="btn danger" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
-                        <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                    <a href="javascript:void(0)" class="btn success" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
+                        <ion-icon name="document-text-outline"></ion-icon> PDF
                     </a>
-                    <a href="javascript:void(0)" class="btn success" onclick="ClientesModals.verHistorialCompleto()">
-                        <ion-icon name="time-outline"></ion-icon> Ver Historial
+                    <a href="javascript:void(0)" class="btn default" onclick="ClientesModals.verHistorialCompleto()">
+                        <ion-icon name="time-outline"></ion-icon> Historial
                     </a>
-                    <a href="javascript:void(0)" class="btn warning" id="btnToggleEstadoDetalle">
-                        <ion-icon name="power-outline"></ion-icon> Cambiar Estado
+                    <a href="javascript:void(0)" class="btn default" id="btnToggleEstadoDetalle">
+                        <ion-icon name="power-outline"></ion-icon>Estado
                     </a>
-                    <a href="javascript:void(0)" class="btn default" onclick="ClientesModals.cerrarModalDetalle()">
+                    <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalDetalle()">
                         Cerrar
                     </a>
                 </div>
@@ -727,7 +749,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         const option = {
                             title: {
                                 text: 'Compras de los Últimos 12 Meses',
-                                left: 'center'
+                                left: 'center',
+                                top: 0,
+                                textStyle: {
+                                    fontSize: 16
+                                }
                             },
                             tooltip: {
                                 trigger: 'axis',
@@ -737,11 +763,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             },
                             legend: {
                                 data: ['Cantidad de Compras', 'Monto Total (Bs.)'],
-                                bottom: 0
+                                top: 20,
+                                textStyle: {
+                                    fontSize: 12
+                                }
                             },
                             grid: {
-                                left: '3%',
-                                right: '4%',
+                                left: '12%',
+                                right: '12%',
+                                top: '20%',
                                 bottom: '15%',
                                 containLabel: true
                             },
@@ -749,18 +779,29 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 type: 'category',
                                 data: meses,
                                 axisLabel: {
-                                    rotate: 45
+                                    rotate: 45,
+                                    fontSize: 11,
+                                    margin: 15,
+                                    interval: 0
                                 }
                             },
                             yAxis: [{
                                     type: 'value',
                                     name: 'Compras',
-                                    position: 'left'
+                                    position: 'left',
+                                    axisLabel: {
+                                        formatter: '{value}',
+                                        margin: 10
+                                    }
                                 },
                                 {
                                     type: 'value',
                                     name: 'Monto (Bs.)',
-                                    position: 'right'
+                                    position: 'right',
+                                    axisLabel: {
+                                        formatter: 'Bs. {value}',
+                                        margin: 10
+                                    }
                                 }
                             ],
                             series: [{
@@ -769,7 +810,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     data: compras,
                                     itemStyle: {
                                         color: '#4caf50'
-                                    }
+                                    },
+                                    label: {
+                                        show: false // Eliminado para evitar superposiciones
+                                    },
+                                    barWidth: '60%'
                                 },
                                 {
                                     name: 'Monto Total (Bs.)',
@@ -778,12 +823,30 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     data: montos,
                                     itemStyle: {
                                         color: '#2196f3'
-                                    }
+                                    },
+                                    label: {
+                                        show: false // Eliminado para evitar superposiciones
+                                    },
+                                    lineStyle: {
+                                        width: 2
+                                    },
+                                    symbolSize: 6
                                 }
                             ]
                         };
 
                         myChart.setOption(option);
+
+                        // Ajuste automático después de renderizar
+                        setTimeout(() => {
+                            myChart.resize();
+                        }, 100);
+
+                        // Redimensionar con la ventana
+                        window.addEventListener('resize', function() {
+                            myChart.resize();
+                        });
+
                     } else {
                         document.getElementById('graficoComprasMensuales').innerHTML = '<div style="text-align:center;padding:50px;color:#999;">Sin datos para mostrar</div>';
                     }

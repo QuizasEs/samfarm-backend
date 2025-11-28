@@ -901,9 +901,10 @@ nav .hamburguesa {
 }
 
 /********************************************tablas*************************************/
-.tabla-contenedor{
+.tabla-contenedor {
     width: 100%;
 }
+
 .table-container {
     overflow-x: auto;
     width: 100%;
@@ -945,12 +946,13 @@ nav .hamburguesa {
     border-radius: 10px;
 }
 
-.accion-buttons{
-    display: flex; 
+.accion-buttons {
+    display: flex;
     flex-direction: column;
     gap: 3px;
 
 }
+
 .table {
     min-width: 600px;
     width: 100%;
@@ -1019,12 +1021,13 @@ nav .hamburguesa {
     background-color: var(--dark-hover);
 }
 
-.table-page-footer{
+.table-page-footer {
     text-align: right;
     padding: 10px;
     color: var(--text-secondary);
 }
-.dark .table-page-footer{
+
+.dark .table-page-footer {
     color: var(--dark-text-secondary);
 }
 
@@ -2659,6 +2662,7 @@ td img {
     padding: 10px;
     gap: 10px;
 }
+
 .dark .filtro-dinamico {
     border: 2px solid var(--dark-border-dark);
     background: var(--dark-bg-secondary);
@@ -2674,18 +2678,22 @@ td img {
     justify-content: flex-start;
     align-items: center;
 }
-.filtro-dinamico-search .select-filtro{
+
+.filtro-dinamico-search .select-filtro {
     width: 200px;
     min-width: 100px;
 }
-.filtro-dinamico-search .search{
-    display: flex; gap: 5px;
+
+.filtro-dinamico-search .search {
+    display: flex;
+    gap: 5px;
     width: 400px;
     min-width: 200px;
     flex-wrap: nowrap;
     justify-content: space-evenly;
 }
-.filtro-dinamico-search .search input{
+
+.filtro-dinamico-search .search input {
     width: 80%;
     padding: 18px;
     border-radius: 4px;
@@ -2697,36 +2705,43 @@ td img {
     text-align: center;
     transition: all 0.3s ease-in-out;
 }
-.dark .filtro-dinamico-search .search input{
+
+.dark .filtro-dinamico-search .search input {
     border: 2px solid var(--dark-border-dark);
 
     background: var(--dark-bg-secondary);
     color: var(--dark-text-secondary);
 }
-.filtro-dinamico-search .search input:focus{
+
+.filtro-dinamico-search .search input:focus {
     border: 2px solid var(--accent-primary);
     box-shadow: 5px 5px 5px var(--accent-primary);
     background: var(--bg-primary);
     color: var(--text-primary);
 }
-.filtro-dinamico-search input[type="date"]{
+
+.filtro-dinamico-search input[type="date"] {
     width: 200px;
     min-width: 100px;
 
 }
-.form-fechas{
+
+.form-fechas {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
 }
-.form-fechas small{
-    padding: 2px 5px ;
+
+.form-fechas small {
+    padding: 2px 5px;
     color: var(--text-secondary);
 }
-.dark .form-fechas small{
+
+.dark .form-fechas small {
     color: var(--dark-text-secondary);
 }
-input[type="date"]{
+
+input[type="date"] {
     border: 2px solid var(--accent-primary);
     padding: 10px;
     border-radius: 4px;
@@ -2737,41 +2752,56 @@ input[type="date"]{
 
 }
 
-.dark input[type="date"]{
+.dark input[type="date"] {
     border: 2px solid var(--dark-border-dark);
     background: var(--dark-bg-secondary);
     color: var(--dark-text-secondary);
 
 }
-input[type="date"]:focus{
+
+input[type="date"]:focus {
     color: var(--text-primary);
     background: var(--bg-primary);
     box-shadow: 2px 2px 5px var(--accent-primary);
 }
-.dark input[type="date"]:focus{
+
+.dark input[type="date"]:focus {
     color: var(--dark-text-primary);
     background: var(--dark-bg-primary);
     box-shadow: 2px 2px 5px var(--accent-primary);
 }
-.dark .filtro-dinamico-search .search input:focus{
+
+.dark .filtro-dinamico-search .search input:focus {
     background: var(--dark-bg-primary);
     color: var(--dark-text-primary);
 }
-.filtro-dinamico-search .search button{
+
+.filtro-dinamico-search .search button {
     width: 18%;
     border: none;
     background: transparent;
     cursor: pointer;
-    filter: drop-shadow(1px 1px 5px  rgba(255, 255, 255, 0.404))
+    filter: drop-shadow(1px 1px 5px rgba(255, 255, 255, 0.404))
 }
-.filtro-dinamico-search .search button ion-icon{
-    font-size: 2rem; 
+
+.filtro-dinamico-search .search button ion-icon {
+    font-size: 2rem;
     color: var(--btn-success);
     transition: all 0.3s ease;
 }
-.filtro-dinamico-search .search button ion-icon:hover{
+
+.filtro-dinamico-search .search button ion-icon:hover {
     color: var(--btn-success-hover);
     transform: scale(1.1);
+}
+
+.filtro-dinamico-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 
@@ -2921,8 +2951,8 @@ input[type="date"]:focus{
 }
 
 /* resumen */
-.resumen-content{
-    display: flex; 
+.resumen-content {
+    display: flex;
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
@@ -2933,8 +2963,9 @@ input[type="date"]:focus{
     box-shadow: 5px 5px 5px var(--shadow-light);
     border-radius: 10px;
 }
-.resumen-bloque{
-    display: flex; 
+
+.resumen-bloque {
+    display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
     margin: 10px;
@@ -2968,6 +2999,16 @@ input[type="date"]:focus{
     backdrop-filter: blur(3px);
 }
 
+.modal-content.detalle {
+    min-width: 80%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+    border-radius: 1rem;
+}
+
+
 .modal.show {
     display: flex;
     animation: fadeIn 0.3s ease forwards;
@@ -2977,9 +3018,9 @@ input[type="date"]:focus{
     background-color: var(--bg-primary);
     border-radius: 12px;
     box-shadow: 0 8px 24px var(--shadow-light);
-    width: 95%;
+    /*     width: 95%;
     max-width: 500px;
-    min-width: 230px;
+    min-width: 230px; */
     padding: 20px 20px;
     position: relative;
     display: flex;
@@ -3001,11 +3042,6 @@ input[type="date"]:focus{
     margin-bottom: 20px;
 }
 
-.modal-title {
-    font-size: 1.2rem;
-    color: var(--accent-primary);
-    font-weight: 600;
-}
 
 .close {
     background: none;
@@ -3038,37 +3074,88 @@ input[type="date"]:focus{
     padding: 10px;
 }
 
-.row {
+.modal-detalles-info {
     display: flex;
+    flex-direction: column;
     width: 100%;
-    flex: 1;
-    padding: 5px;
-    justify-content: space-evenly;
+}
+
+.detalle-info-bloque {
+    display: flex;
     flex-wrap: wrap;
-    overflow: hidden;
+    padding: 8px;
+    gap: 5px;
+    color: var(--text-secondary);
     align-items: center;
 }
 
+.detalle-info-bloque label {
+    color: green !important;
+    font-size: 0.95rem;
+
+}
+
+.modal-btn-content {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--accent-secondary);
+    justify-content: flex-start;
+    gap: 3px;
+    padding: 10px;
+}
+
+.modal-totales {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-width: 200px;
+    padding: 5px;
+    justify-content: flex-start; /* Cambiado de center */
+    flex-wrap: wrap;
+    overflow: hidden;
+    align-items: stretch; /* Cambiado de center */
+    gap: 10px;
+}
+
 .col {
-    flex: 1;
-    min-width: 150px;
+    flex: 1 1 200px; /* Cambiado: flex-grow, flex-shrink, flex-basis */
     display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     overflow: hidden;
     gap: 5px;
+    /* Removido: min-width: 150px; */
 }
 
 .modal-bloque {
     display: flex;
     flex-wrap: wrap;
+    width: 100%; /* Cambiado de 250px fijo */
+    max-width: 300px; /* Límite máximo */
     justify-content: center;
     align-items: center;
     padding: 10px 5px;
     gap: 10px;
     overflow: hidden;
+}
+.modal-bloque select{
+    width: 100%;
 }
 
 .required {
@@ -3380,10 +3467,12 @@ input[type="date"]:focus{
 .warning:hover {
     transform: translateY(-2px);
 }
-.primary{
+
+.primary {
     background: var(--bg-primary);
     color: var(--text-primary);
 }
+
 .primary:hover {
     transform: translateY(-2px);
     background-color: var(--bg-secondary);
@@ -3414,7 +3503,8 @@ input[type="date"]:focus{
 }
 
 /* Responsividad */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+
     .modal-content {
         padding: 20px;
         width: 90%;
@@ -3431,6 +3521,13 @@ input[type="date"]:focus{
 
     }
 }
+
+/* @media (max-width: 900px) {
+    .row {
+        flex-direction: column;
+        gap: 10px;
+    }
+} */
 
 /**************************************abrir caja*********************************************/
 
