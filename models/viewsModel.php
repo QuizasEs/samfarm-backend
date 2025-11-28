@@ -31,7 +31,7 @@
                 "comprasHistorialLista",
                 "clienteLista",
                 "devolucionLista",
-                "",
+                "sucursalLista",
                 "",
                 "",
                 "",

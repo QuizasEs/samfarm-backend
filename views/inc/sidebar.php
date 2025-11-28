@@ -130,7 +130,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioRegistro/">Registrar usuario</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioLista/">Usuarios</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>">registrar sucursales</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>sucursalLista">sucursales</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>">Informacion</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>">backup</a></li>
 
