@@ -56,7 +56,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 </div>
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>medicamentoLista/">Medicamento</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Categoria</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>categoriaLista/">Categoria</a></li>
                 </ul>
             </li>
 
@@ -94,11 +94,6 @@ if ($_SESSION['rol_smp'] == 1) {
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>ventasHistorialLista/">Historial de ventas</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>cajaHistorialLista/">Hsitorial de caja</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>comprasHistorialLista/">Historial de compras</a></li>
-                    <li class="sub-link"><a href="#">Ventas</a></li>
-                    <li class="sub-link"><a href="#">Stock</a></li>
-                    <li class="sub-link"><a href="#">Finanzas</a></li>
-                    <li class="sub-link"><a href="#">Empleados</a></li>
-                    <li class="sub-link"><a href="#">Auditorías</a></li>
                 </ul>
             </li>
 
@@ -128,12 +123,8 @@ if ($_SESSION['rol_smp'] == 1) {
                     <ion-icon name="chevron-down-outline"></ion-icon>
                 </div>
                 <ul class="sub-links">
-                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioRegistro/">Registrar usuario</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioLista/">Usuarios</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>sucursalLista">sucursales</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>">Informacion</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>">backup</a></li>
-
                 </ul>
             </li>
 

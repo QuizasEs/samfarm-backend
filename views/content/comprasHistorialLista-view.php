@@ -74,13 +74,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </button>
                 </div>
             </div>
+            <div class="filtro-dinamico-buttons">
 
-            <button type="button" class="btn success" id="btnExportarExcelComprasHistorial">
-                <ion-icon name="download-outline"></ion-icon> Excel
-            </button>
-            <button type="button" class="btn danger" id="btnExportarPDFComprasHistorial">
-                <ion-icon name="document-text-outline"></ion-icon> PDF
-            </button>
+                <button type="button" class="btn success" id="btnExportarExcelComprasHistorial">
+                    <ion-icon name="download-outline"></ion-icon> Excel
+                </button>
+                <button type="button" class="btn danger" id="btnExportarPDFComprasHistorial">
+                    <ion-icon name="document-text-outline"></ion-icon> PDF
+                </button>
+            </div>
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -96,7 +98,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div class="modal" id="modalDetalleCompra" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="document-text-outline"></ion-icon>
@@ -224,7 +226,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="btn-content">
+                <div class="modal-btn-content">
                     <a href="javascript:void(0)" class="btn default" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
                         Cerrar
                     </a>

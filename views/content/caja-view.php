@@ -110,11 +110,10 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                     </div>
 
                     <div class="ventas-finalizar-buttons">
-                        <form class="form FormularioAjax" action="<?php echo SERVER_URL ?>ajax/ventaAjax.php" autocomplet="off" method="POST" autocomplete="off" data-form="save">
-                            <a href="#" class="btn danger">cerrar caja</a>
-                        </form>
-                        <a href="javascript:void(0)" class="btn warning" id="cancelar_venta_btn">cancelar</a>
-                        <button class="btn success" id="btn_realizar_venta">vender</button>
+                        <button type="button" id="btn_cerrar_caja" class="btn danger">
+                            <ion-icon name="lock-closed-outline"></ion-icon> cerrar caja
+                        </button>
+                        <button type="submit" class="btn success" id="btn_realizar_venta">vender</button>
                     </div>
 
                     <div class="filtro-caja">
@@ -287,6 +286,8 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                 </form>
             </div>
         </div>
+        <!-- script busqueda de cliente para caja -->
+
 <?php
     }
 }

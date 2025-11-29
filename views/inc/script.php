@@ -996,12 +996,11 @@
 
 <!-- script que manea ja busqueda de medicamentos lista de compras y envio por post -->
 <script>
-    // Script corregido para el control de stock en ventas
-    // Script completo de ventas con búsqueda por lote y tiempo real
+    // Script corregido para ventas con gestión mejorada de carrito
     (function() {
         const formVenta = document.getElementById('form-venta-caja');
         if (!formVenta) {
-            console.log('⚠️ Formulario de venta no encontrado, script no se ejecuta');
+            console.log('⚠️ Formulario de venta no encontrado');
             return;
         }
 
@@ -1037,7 +1036,7 @@
         const cambioHidden = ensureHidden('cambio_venta', 'cambio_venta');
         const dineroHidden = ensureHidden('dinero_recibido_venta', 'dinero_recibido_venta');
 
-        const medSearch = $('#med_search') || $('.caja-filtro-search input');
+        const medSearch = $('#med_search');
         const filtro_linea = $('#filtro_linea');
         const filtro_presentacion = $('#filtro_presentacion');
         const filtro_funcion = $('#filtro_funcion');
@@ -1048,7 +1047,6 @@
             resultsContainer = document.createElement('div');
             resultsContainer.id = 'med_search_results';
             resultsContainer.className = 'search-results-dropdown';
-
             resultsContainer.style.cssText = `
             display: none;
             position: absolute;
@@ -1063,10 +1061,8 @@
             border-top: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         `;
-
-            const parent = medSearch.parentElement;
-            parent.style.position = 'relative';
-            parent.appendChild(resultsContainer);
+            medSearch.parentElement.style.position = 'relative';
+            medSearch.parentElement.appendChild(resultsContainer);
         }
 
         const tablaBody = $('#tabla_items_venta');
@@ -1094,6 +1090,11 @@
             });
         }
 
+        // ✅ FUNCIÓN MEJORADA: Buscar índice considerando solo med_id
+        function findItemIndex(med_id) {
+            return cart.findIndex(item => String(item.med_id) === String(med_id));
+        }
+
         function renderCart() {
             if (!tablaBody) return;
 
@@ -1105,9 +1106,7 @@
                 cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
                     tr.dataset.med = it.med_id;
-                    tr.dataset.lote = it.lote_id || '';
 
-                    // Mostrar nombre con información del lote si existe
                     let nombreDisplay = escapeHtml(it.nombre);
                     if (it.lote) {
                         nombreDisplay += '<br><small style="color: #666;">' +
@@ -1152,20 +1151,17 @@
         function attachQtyEvents() {
             $all('.qty-inc').forEach(b => {
                 b.onclick = function() {
-                    const idx = parseInt(this.dataset.index);
-                    changeQtyByIndex(idx, 1);
+                    changeQtyByIndex(parseInt(this.dataset.index), 1);
                 };
             });
             $all('.qty-dec').forEach(b => {
                 b.onclick = function() {
-                    const idx = parseInt(this.dataset.index);
-                    changeQtyByIndex(idx, -1);
+                    changeQtyByIndex(parseInt(this.dataset.index), -1);
                 };
             });
             $all('.qty-input').forEach(i => {
                 i.onchange = function() {
-                    const idx = parseInt(this.dataset.index);
-                    setQtyByIndex(idx, parseInt(this.value) || 0);
+                    setQtyByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
                 };
             });
         }
@@ -1199,9 +1195,9 @@
                 Swal.fire({
                     title: 'Sin stock suficiente',
                     html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Intentando agregar: <strong>${nuevo}</strong> unidades</p>`,
+                   ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                   <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                   <p>Intentando agregar: <strong>${nuevo}</strong> unidades</p>`,
                     icon: 'warning',
                     confirmButtonText: 'Entendido'
                 });
@@ -1241,9 +1237,9 @@
                 Swal.fire({
                     title: 'Sin stock suficiente',
                     html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Cantidad ingresada: <strong>${val}</strong> unidades</p>`,
+                   ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                   <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                   <p>Cantidad ingresada: <strong>${val}</strong> unidades</p>`,
                     icon: 'warning',
                     confirmButtonText: 'Entendido'
                 });
@@ -1270,14 +1266,12 @@
             if (dineroHidden) dineroHidden.value = dinero;
         }
 
+        // ✅ FUNCIÓN CORREGIDA: Agregar item considerando solo med_id
         function addItem(m) {
-            // Buscar si existe el mismo medicamento Y lote
-            const idx = cart.findIndex(c =>
-                String(c.med_id) === String(m.med_id) &&
-                (m.lote_id ? String(c.lote_id) === String(m.lote_id) : !c.lote_id)
-            );
+            const idx = findItemIndex(m.med_id);
 
             if (idx !== -1) {
+                // ✅ Ya existe, aumentar cantidad
                 const ex = cart[idx];
                 const nuevaCantidad = ex.cantidad + 1;
 
@@ -1285,22 +1279,28 @@
                     Swal.fire({
                         title: 'Sin stock suficiente',
                         html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
-                           ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
-                           <p>Stock disponible: <strong>${m.stock}</strong> unidades</p>
-                           <p>Ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
+                       <p>Stock disponible: <strong>${m.stock}</strong> unidades</p>
+                       <p>Ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
                         icon: 'warning',
                         confirmButtonText: 'Entendido'
                     });
                     return;
                 }
+
                 ex.cantidad = nuevaCantidad;
+
+                // ✅ Actualizar info de lote si viene de búsqueda
+                if (m.lote_id && !ex.lote_id) {
+                    ex.lote_id = m.lote_id;
+                    ex.lote = m.lote;
+                }
             } else {
+                // ✅ No existe, crear nuevo
                 if (m.stock != null && m.stock <= 0) {
                     Swal.fire({
                         title: 'Sin stock',
                         html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
-                           ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
-                           <p>Este ${m.lote ? 'lote' : 'medicamento'} no tiene stock disponible</p>`,
+                       <p>Este medicamento no tiene stock disponible</p>`,
                         icon: 'error',
                         confirmButtonText: 'Entendido'
                     });
@@ -1322,6 +1322,7 @@
             renderCart();
         }
 
+        // Búsqueda de medicamentos
         function doSearch(term) {
             if (!term || term.trim().length < 1) {
                 if (resultsContainer) {
@@ -1346,10 +1347,10 @@
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
-                console.log('Resultados recibidos:', json);
+                console.log('Resultados:', json);
                 renderResults(json || []);
             }).catch(err => {
-                console.error('Error en búsqueda:', err);
+                console.error('Error búsqueda:', err);
                 if (resultsContainer) {
                     resultsContainer.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
                     resultsContainer.style.display = 'block';
@@ -1374,7 +1375,6 @@
                 const precio = formatMoney(it.precio_venta || 0);
                 const stock = Number(it.stock || 0);
 
-                // Calcular días hasta vencimiento
                 let diasVenc = '';
                 if (it.fecha_vencimiento) {
                     const hoy = new Date();
@@ -1448,6 +1448,7 @@
             });
         }
 
+        // Event listeners
         if (medSearch) {
             medSearch.addEventListener('input', e => {
                 const term = e.target.value.trim();
@@ -1461,7 +1462,6 @@
                     return;
                 }
 
-                // Búsqueda en tiempo real después de 250ms
                 debounce = setTimeout(() => doSearch(term), 250);
             });
 
@@ -1831,6 +1831,131 @@
         console.log("✅ Script de búsqueda de clientes inicializado");
     })();
 </script>
+    <!-- script para cerrar caja -->
+<script>
+    // 🔐 Script para cerrar caja con doble confirmación
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnCerrarCaja = document.getElementById('btn_cerrar_caja');
+
+        if (btnCerrarCaja) {
+            btnCerrarCaja.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 🛡️ Primera confirmación
+                Swal.fire({
+                    title: '¿Cerrar caja?',
+                    html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <p style="margin-bottom: 15px;"><ion-icon name="warning-outline" style="color: #ff9800; font-size: 24px; vertical-align: middle;"></ion-icon> <strong>Esta acción cerrará tu caja actual</strong></p>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> Se realizará un balance automático</li>
+                            <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> El detalle será visible para administradores</li>
+                        </ul>
+                    </div>
+                `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ff9800',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Continuar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // 🛡️ Segunda confirmación (más seria)
+                        Swal.fire({
+                            title: '⚠️ Confirmar cierre de caja',
+                            html: `
+                            <p style="font-size: 16px; margin: 20px 0;">
+                                <strong>¿Estás completamente seguro?</strong>
+                            </p>
+                            <p style="color: #666; margin-bottom: 15px;">
+                                Esta acción es irreversible y cerrará tu sesión de ventas.
+                            </p>
+                        `,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Sí, cerrar caja',
+                            cancelButtonText: 'No, cancelar',
+                            reverseButtons: true
+                        }).then((result2) => {
+                            if (result2.isConfirmed) {
+                                // ✅ Proceder con el cierre
+                                cerrarCajaAjax();
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    });
+
+    /**
+     * 📡 Función AJAX para cerrar caja
+     */
+    async function cerrarCajaAjax() {
+        // Mostrar loading
+        Swal.fire({
+            title: 'Cerrando caja...',
+            html: 'Por favor espera',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const formData = new FormData();
+            formData.append('ventaAjax', 'cerrar-caja');
+
+            const response = await fetch('<?php echo SERVER_URL; ?>ajax/ventaAjax.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            Swal.close();
+
+            // Mostrar resultado
+            if (data.Alerta === 'recargar') {
+                await Swal.fire({
+                    icon: data.Tipo || 'success',
+                    title: data.Titulo || 'Éxito',
+                    html: data.texto || 'Operación exitosa',
+                    confirmButtonText: 'Entendido'
+                });
+
+                // Recargar página
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: data.Tipo || 'info',
+                    title: data.Titulo || 'Atención',
+                    html: data.texto || 'Operación completada',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo cerrar la caja: ' + error.message,
+                confirmButtonText: 'Entendido'
+            });
+        }
+    }
+</script>
+
+<!-- base 64s -->
 <script>
     /* base 64 */
     window.abrirPDFDesdeBase64 = function(base64Data, nombreArchivo) {

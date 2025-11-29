@@ -32,7 +32,7 @@
                 "clienteLista",
                 "devolucionLista",
                 "sucursalLista",
-                "",
+                "categoriaLista",
                 "",
                 "",
                 "",

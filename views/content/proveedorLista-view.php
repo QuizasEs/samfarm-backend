@@ -67,13 +67,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
             </div>
-            <button type="button" class="btn primary" onclick="ProveedoresModals.abrirRegistro()">
-                <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
-            </button>
+            <div class="filtro-dinamico-buttons">
 
-            <button type="button" class="btn success" id="btnExportarExcelProveedor">
-                <ion-icon name="download-outline"></ion-icon> Excel
-            </button>
+                <button type="button" class="btn primary" onclick="ProveedoresModals.abrirRegistro()">
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
+                </button>
+
+                <button type="button" class="btn success" id="btnExportarExcelProveedor">
+                    <ion-icon name="download-outline"></ion-icon> Excel
+                </button>
+            </div>
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -285,7 +288,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</a>
                         <button type="submit" class="btn success">
                             <ion-icon name="checkmark-outline"></ion-icon> Actualizar
@@ -361,7 +364,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</a>
                         <button type="submit" class="btn success">
                             <ion-icon name="checkmark-outline"></ion-icon> Actualizar

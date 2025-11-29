@@ -21,16 +21,16 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 </div>
 
                 <div class="search">
-                    <div class="filtro-dinamico-buttons">
+
                         <input type="text" name="busqueda" id="busqueda_sucursal" placeholder="Buscar por nombre o dirección...">
                         <button type="button" class="btn-search">
                             <ion-icon name="search-outline"></ion-icon>
                         </button>
-                    </div>
+
                 </div>
             </div>
 
-            <div class="filtro-buttons">
+            <div class="filtro-dinamico-buttons">
                 <button type="button" class="btn success" onclick="SucursalesModals.abrirModalNuevo()">
                     <ion-icon name="add-circle-outline"></ion-icon> Nueva Sucursal
                 </button>
