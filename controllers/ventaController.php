@@ -245,6 +245,23 @@ class ventaController extends ventaModel
         $usuario_id = (int)$_SESSION['id_smp'];
         $sucursal_id = (int)$_SESSION['sucursal_smp'];
 
+        $sucursal_check = mainModel::conectar()->prepare("SELECT su_estado FROM sucursales WHERE su_id = :su_id LIMIT 1");
+        $sucursal_check->bindParam(':su_id', $sucursal_id, PDO::PARAM_INT);
+        $sucursal_check->execute();
+
+        if ($sucursal_check->rowCount() <= 0) {
+            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Sucursal inválida', 'texto' => 'La sucursal no existe', 'Tipo' => 'error'];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $sucursal = $sucursal_check->fetch(PDO::FETCH_ASSOC);
+        if ((int)$sucursal['su_estado'] !== 1) {
+            $alerta = ['Alerta' => 'simple', 'Titulo' => 'Sucursal desactivada', 'texto' => 'No puedes realizar ventas en una sucursal desactivada', 'Tipo' => 'error'];
+            echo json_encode($alerta);
+            exit();
+        }
+
         $caja_stmt = self::consulta_caja_model(['us_id' => $usuario_id, 'su_id' => $sucursal_id]);
         if ($caja_stmt->rowCount() <= 0) {
             $alerta = ['Alerta' => 'simple', 'Titulo' => 'Caja cerrada', 'texto' => 'No tienes una caja activa', 'Tipo' => 'error'];

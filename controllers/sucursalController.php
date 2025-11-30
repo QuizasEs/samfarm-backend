@@ -89,6 +89,41 @@ class sucursalController extends sucursalModel
             exit();
         }
 
+        if ($nuevo_estado === 0) {
+            $usuarios_stmt = self::personal_por_sucursal_model($su_id);
+            $usuarios = $usuarios_stmt->fetchAll(PDO::FETCH_ASSOC);
+            $usuarios_activos = array_filter($usuarios, function($u) { return (int)$u['us_estado'] === 1; });
+
+            if (count($usuarios_activos) > 0) {
+                $nombres_usuarios = implode(', ', array_map(function($u) { 
+                    return $u['us_nombres'] . ' ' . ($u['us_apellido_paterno'] ?? ''); 
+                }, $usuarios_activos));
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'No se puede desactivar',
+                    'texto' => "Existen usuarios activos en esta sucursal: {$nombres_usuarios}",
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            $cajas_stmt = self::cajas_abiertas_model($su_id);
+            $cajas_abiertas = $cajas_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (count($cajas_abiertas) > 0) {
+                $nombres_cajas = implode(', ', array_map(function($c) { return $c['caja_nombre']; }, $cajas_abiertas));
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'No se puede desactivar',
+                    'texto' => "Existen cajas abiertas en esta sucursal: {$nombres_cajas}",
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
         try {
             $resultado = self::toggle_estado_model($su_id, $nuevo_estado);
 

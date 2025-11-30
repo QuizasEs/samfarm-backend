@@ -2,7 +2,8 @@ function obtenerAjaxConfig(container) {
     return {
         url: container.dataset.ajaxUrl || "ajax/loteAjax.php",
         param: container.dataset.ajaxParam || "loteAjax",
-        registros: parseInt(container.dataset.ajaxRegistros || 10)
+        registros: parseInt(container.dataset.ajaxRegistros || 10),
+        action: container.dataset.ajaxAction || "listar"
     };
 }
 (function () {
@@ -27,9 +28,10 @@ function obtenerAjaxConfig(container) {
         const ajaxUrl = ajaxCfg.url;
         const paramName = ajaxCfg.param;
         const registrosDefault = ajaxCfg.registros;
+        const ajaxAction = ajaxCfg.action;
 
 
-        console.log('🔧 Configurando tabla:', { ajaxUrl, paramName, registrosDefault });
+        console.log('🔧 Configurando tabla:', { ajaxUrl, paramName, registrosDefault, ajaxAction });
 
         // Área donde se renderiza la tabla
         let destino = container.querySelector(".tabla-contenedor");
@@ -255,7 +257,7 @@ function obtenerAjaxConfig(container) {
             const fullUrl = window.location.origin + base + ajaxUrl.replace(/^\//, "");
             const formData = new URLSearchParams();
 
-            formData.append(paramName, "listar");
+            formData.append(paramName, ajaxAction);
             formData.append("pagina", pagina);
             formData.append("registros", registrosDefault);
 
@@ -293,7 +295,9 @@ function obtenerAjaxConfig(container) {
                 }
             }
 
-            console.log('📤 Enviando datos:', Object.fromEntries(formData));
+            const formDataObj = Object.fromEntries(formData);
+            console.log('📤 Enviando datos:', formDataObj);
+            console.log('📤 Valor de parámetro [' + paramName + ']:', formDataObj[paramName]);
 
             try {
                 const res = await fetch(fullUrl, {

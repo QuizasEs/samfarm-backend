@@ -76,7 +76,8 @@ if ($_SESSION['rol_smp'] == 1) {
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>inventarioLista/">Inventario</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>compraOrden">Registrar compra</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorLista/">Proveedor</a></li>
-                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>">Pedidos</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>transferirLista/">Tranferencias</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>recepcionarLista/">Recepcionar</a></li>
                 </ul>
             </li>
 
@@ -207,6 +208,8 @@ if ($_SESSION['rol_smp'] == 1) {
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>medicamentoLista/">Medicamentos</a></li>
                     <li class="sub-link"><a href="#">Lotes y vencimientos</a></li>
                     <li class="sub-link"><a href="#">Movimientos de stock</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>transferirLista/">Transferencias</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>recepcionarLista/">Recepcionar</a></li>
                 </ul>
             </li>
 
