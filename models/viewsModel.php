@@ -35,7 +35,7 @@
                 "categoriaLista",
                 "transferirLista",
                 "recepcionarLista",
-                "",
+                "transferirHistorialLista",
                 "",
                 "",
             ];

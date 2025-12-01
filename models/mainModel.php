@@ -180,7 +180,7 @@ class mainModel
 
         $ci = 0;
         for ($i = $pagina; $i <= $Npaginas; $i++) {
-            if ($i >= $botones) {
+            if ($ci >= $botones) {
                 break;
             }
 

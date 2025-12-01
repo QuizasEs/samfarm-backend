@@ -2636,3 +2636,147 @@
         };
     })();
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const API_URL = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php';
+        console.log('Dashboard API URL:', API_URL);
+
+        const chartVencimientos = document.getElementById('chartVencimientos');
+        if (chartVencimientos) {
+            const myChart = echarts.init(chartVencimientos);
+            
+            fetch(API_URL + '?dashboardAjax=obtener_vencimientos_ajax')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Vencimientos data:', data);
+                    if (data.success) {
+                        const opcion = {
+                            tooltip: { trigger: 'item' },
+                            legend: { orient: 'vertical', left: 'left' },
+                            series: [{
+                                name: 'Vencimientos',
+                                type: 'pie',
+                                radius: '50%',
+                                data: [
+                                    { value: data.data.expirados || 0, name: 'Expirados', itemStyle: { color: '#d32f2f' } },
+                                    { value: data.data.proximos || 0, name: 'Próximos 30 días', itemStyle: { color: '#ffa500' } },
+                                    { value: data.data.disponibles || 0, name: 'Disponibles', itemStyle: { color: '#4caf50' } }
+                                ]
+                            }]
+                        };
+                        myChart.setOption(opcion);
+                    } else {
+                        console.error('API response failed:', data);
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        }
+
+        const chartStockMinimo = document.getElementById('chartStockMinimo');
+        if (chartStockMinimo) {
+            const myChart = echarts.init(chartStockMinimo);
+            
+            fetch(API_URL + '?dashboardAjax=obtener_stock_minimo_ajax')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Stock minimo data:', data);
+                    if (data.success && data.data.length > 0) {
+                        const productos = data.data.map(item => item.med_nombre_quimico);
+                        const stock = data.data.map(item => parseInt(item.inv_total_unidades));
+                        
+                        const opcion = {
+                            tooltip: { trigger: 'axis' },
+                            xAxis: { type: 'category', data: productos, axisLabel: { interval: 0, rotate: 45 } },
+                            yAxis: { type: 'value' },
+                            series: [{
+                                data: stock,
+                                type: 'bar',
+                                itemStyle: { color: '#ffa500' }
+                            }],
+                            grid: { bottom: 100 }
+                        };
+                        myChart.setOption(opcion);
+                    } else {
+                        console.error('No data or API response failed:', data);
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        }
+
+        const chartProductosVendidos = document.getElementById('chartProductosVendidos');
+        if (chartProductosVendidos) {
+            const myChart = echarts.init(chartProductosVendidos);
+            
+            fetch(API_URL + '?dashboardAjax=obtener_productos_vendidos_ajax')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Productos vendidos data:', data);
+                    if (data.success && data.data.length > 0) {
+                        const productos = data.data.map(item => item.med_nombre_quimico);
+                        const cantidades = data.data.map(item => parseInt(item.cantidad_vendida));
+                        
+                        const opcion = {
+                            tooltip: { trigger: 'axis' },
+                            xAxis: { type: 'category', data: productos, axisLabel: { interval: 0, rotate: 45 } },
+                            yAxis: { type: 'value' },
+                            series: [{
+                                data: cantidades,
+                                type: 'bar',
+                                itemStyle: { color: '#2196f3' }
+                            }],
+                            grid: { bottom: 100 }
+                        };
+                        myChart.setOption(opcion);
+                    } else {
+                        console.error('No data or API response failed:', data);
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        }
+
+        const chartVentasMensuales = document.getElementById('chartVentasMensuales');
+        if (chartVentasMensuales) {
+            const myChart = echarts.init(chartVentasMensuales);
+            
+            fetch(API_URL + '?dashboardAjax=obtener_ventas_mensuales_ajax')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Ventas mensuales data:', data);
+                    if (data.success && data.data.length > 0) {
+                        const meses = data.data.map(item => item.mes);
+                        const totales = data.data.map(item => parseFloat(item.total_mes));
+                        
+                        const opcion = {
+                            tooltip: { trigger: 'axis' },
+                            xAxis: { type: 'category', data: meses },
+                            yAxis: { type: 'value' },
+                            series: [{
+                                data: totales,
+                                type: 'bar',
+                                itemStyle: { color: '#4caf50' }
+                            }],
+                            grid: { bottom: 50 }
+                        };
+                        myChart.setOption(opcion);
+                    } else {
+                        console.error('No data or API response failed:', data);
+                    }
+                })
+                .catch(error => console.error('Fetch error:', error));
+        }
+    });
+</script>

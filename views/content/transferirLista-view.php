@@ -562,14 +562,35 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     if (data.Tipo === 'success' && data.pdf_base64) {
+                        const result = await Swal.fire({
+                            icon: 'success',
+                            title: data.Titulo,
+                            html: data.texto + '<br><br><p style="color: #666; font-size: 13px;">El PDF se descargará automáticamente</p>',
+                            confirmButtonText: 'Entendido',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        });
+
+                        window.abrirPDFDesdeBase64(data.pdf_base64, 'Transferencia_' + data.tr_numero + '.pdf');
+
+                        items = [];
+                        renderizarListaItems();
+                        document.getElementById('observaciones-transfer').value = '';
+                        document.getElementById('resultado-busqueda-lotes-transfer').innerHTML = `
+                    <p style="text-align:center; padding: 20px; color: #666;">
+                        <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon><br>
+                        Use los filtros para buscar lotes disponibles
+                    </p>
+                `;
+                    } else if (data.Tipo === 'success') {
                         await Swal.fire({
                             icon: 'success',
                             title: data.Titulo,
                             html: data.texto,
-                            confirmButtonText: 'Entendido'
+                            confirmButtonText: 'Entendido',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
                         });
-
-                        window.abrirPDFDesdeBase64(data.pdf_base64, 'Transferencia.pdf');
 
                         items = [];
                         renderizarListaItems();

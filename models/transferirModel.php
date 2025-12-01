@@ -17,15 +17,19 @@ class transferirModel extends mainModel
                         lm.lm_precio_compra,
                         lm.lm_precio_venta,
                         lm.lm_fecha_vencimiento,
+                        lm.pr_id,
+                        lm.pr_id_compra,
                         DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_vencer,
                         m.med_id,
                         m.med_nombre_quimico,
                         m.med_principio_activo,
                         m.med_presentacion,
-                        la.la_nombre_comercial AS laboratorio
+                        la.la_nombre_comercial AS laboratorio,
+                        pr.pr_nombres AS proveedor
                     FROM lote_medicamento lm
                     INNER JOIN medicamento m ON m.med_id = lm.med_id
                     LEFT JOIN laboratorios la ON la.la_id = m.la_id
+                    LEFT JOIN proveedores pr ON pr.pr_id = lm.pr_id
                     WHERE lm.su_id = :su_id
                     AND lm.lm_estado = 'activo'
                     AND lm.lm_cant_actual_unidades > 0
@@ -48,7 +52,7 @@ class transferirModel extends mainModel
             $params[':fecha_max'] = $fecha_venc_max;
         }
 
-        $sql .= " ORDER BY lm.lm_fecha_vencimiento ASC";
+        $sql .= " ORDER BY lm.lm_fecha_vencimiento ASC, lm.lm_numero_lote ASC";
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute($params);
@@ -218,11 +222,13 @@ class transferirModel extends mainModel
                             t.*,
                             so.su_nombre AS sucursal_origen,
                             sd.su_nombre AS sucursal_destino,
-                            CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor
+                            CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor,
+                            CONCAT(ur.us_nombres, ' ', ur.us_apellido_paterno) AS usuario_receptor
                         FROM transferencias t
                         INNER JOIN sucursales so ON so.su_id = t.su_origen_id
                         INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
                         INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
+                        LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
                         WHERE t.tr_id = :tr_id
                         LIMIT 1";
 
@@ -244,5 +250,172 @@ class transferirModel extends mainModel
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute([':tr_id' => $tr_id]);
         return $stmt;
+    }
+
+    protected static function listar_historial_transferencias_model(
+        $pagina,
+        $registros,
+        $su_origen = '',
+        $su_destino = '',
+        $us_emisor = '',
+        $estado = '',
+        $fecha_desde = '',
+        $fecha_hasta = '',
+        $busqueda = '',
+        $rol = 1,
+        $su_usuario = ''
+    ) {
+        $inicio = ($pagina - 1) * $registros;
+        $params = [];
+
+        $sql = "SELECT 
+                    t.tr_id,
+                    t.tr_numero,
+                    t.su_origen_id,
+                    t.su_destino_id,
+                    t.us_emisor_id,
+                    t.us_receptor_id,
+                    t.tr_total_items,
+                    t.tr_total_cajas,
+                    t.tr_total_unidades,
+                    t.tr_total_valorado,
+                    t.tr_estado,
+                    t.tr_observaciones,
+                    t.tr_motivo_rechazo,
+                    t.tr_fecha_envio,
+                    t.tr_fecha_respuesta,
+                    so.su_nombre AS sucursal_origen,
+                    sd.su_nombre AS sucursal_destino,
+                    CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor,
+                    CONCAT(ur.us_nombres, ' ', ur.us_apellido_paterno) AS usuario_receptor
+                FROM transferencias t
+                INNER JOIN sucursales so ON so.su_id = t.su_origen_id
+                INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
+                INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
+                LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
+                WHERE 1=1";
+
+        if ($rol != 1) {
+            $sql .= " AND (t.su_origen_id = :su_usuario OR t.su_destino_id = :su_usuario)";
+            $params[':su_usuario'] = $su_usuario;
+        }
+
+        if (!empty($su_origen)) {
+            $sql .= " AND t.su_origen_id = :su_origen";
+            $params[':su_origen'] = $su_origen;
+        }
+
+        if (!empty($su_destino)) {
+            $sql .= " AND t.su_destino_id = :su_destino";
+            $params[':su_destino'] = $su_destino;
+        }
+
+        if (!empty($us_emisor)) {
+            $sql .= " AND t.us_emisor_id = :us_emisor";
+            $params[':us_emisor'] = $us_emisor;
+        }
+
+        if (!empty($estado)) {
+            $sql .= " AND t.tr_estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        if (!empty($fecha_desde)) {
+            $sql .= " AND DATE(t.tr_fecha_envio) >= :fecha_desde";
+            $params[':fecha_desde'] = $fecha_desde;
+        }
+
+        if (!empty($fecha_hasta)) {
+            $sql .= " AND DATE(t.tr_fecha_envio) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $fecha_hasta;
+        }
+
+        if (!empty($busqueda)) {
+            $sql .= " AND t.tr_numero LIKE :busqueda";
+            $params[':busqueda'] = "%{$busqueda}%";
+        }
+
+        $sql .= " ORDER BY t.tr_fecha_envio DESC LIMIT :inicio, :registros";
+        $params[':inicio'] = $inicio;
+        $params[':registros'] = $registros;
+
+        $stmt = mainModel::conectar()->prepare($sql);
+        foreach ($params as $key => $value) {
+            if (strpos($key, 'inicio') !== false || strpos($key, 'registros') !== false) {
+                $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
+        }
+        $stmt->execute();
+        return $stmt;
+    }
+
+    protected static function contar_historial_transferencias_model(
+        $su_origen = '',
+        $su_destino = '',
+        $us_emisor = '',
+        $estado = '',
+        $fecha_desde = '',
+        $fecha_hasta = '',
+        $busqueda = '',
+        $rol = 1,
+        $su_usuario = ''
+    ) {
+        $params = [];
+
+        $sql = "SELECT COUNT(*) as total
+                FROM transferencias t
+                INNER JOIN sucursales so ON so.su_id = t.su_origen_id
+                INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
+                INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
+                LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
+                WHERE 1=1";
+
+        if ($rol != 1) {
+            $sql .= " AND (t.su_origen_id = :su_usuario OR t.su_destino_id = :su_usuario)";
+            $params[':su_usuario'] = $su_usuario;
+        }
+
+        if (!empty($su_origen)) {
+            $sql .= " AND t.su_origen_id = :su_origen";
+            $params[':su_origen'] = $su_origen;
+        }
+
+        if (!empty($su_destino)) {
+            $sql .= " AND t.su_destino_id = :su_destino";
+            $params[':su_destino'] = $su_destino;
+        }
+
+        if (!empty($us_emisor)) {
+            $sql .= " AND t.us_emisor_id = :us_emisor";
+            $params[':us_emisor'] = $us_emisor;
+        }
+
+        if (!empty($estado)) {
+            $sql .= " AND t.tr_estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        if (!empty($fecha_desde)) {
+            $sql .= " AND DATE(t.tr_fecha_envio) >= :fecha_desde";
+            $params[':fecha_desde'] = $fecha_desde;
+        }
+
+        if (!empty($fecha_hasta)) {
+            $sql .= " AND DATE(t.tr_fecha_envio) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $fecha_hasta;
+        }
+
+        if (!empty($busqueda)) {
+            $sql .= " AND t.tr_numero LIKE :busqueda";
+            $params[':busqueda'] = "%{$busqueda}%";
+        }
+
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute($params);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total = isset($resultado['total']) ? (int)$resultado['total'] : 0;
+        return $total;
     }
 }

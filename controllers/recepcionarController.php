@@ -96,13 +96,18 @@ class recepcionarController extends recepcionarModel
                 $precio_venta = $detalle['dt_precio_venta'];
                 $subtotal = $detalle['dt_subtotal_valorado'];
                 $fecha_venc = $detalle['lm_fecha_vencimiento'];
+                $numero_lote_original = $detalle['dt_numero_lote_origen'];
 
-                $numero_lote_nuevo = "RECEP-" . date('Ymd') . "-" . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                $lote_origen = recepcionarModel::obtener_lote_por_id_model($lm_origen_id)->fetch();
+                $pr_id = $lote_origen['pr_id'] ?? null;
+                $pr_id_compra = $lote_origen['pr_id_compra'] ?? null;
 
                 $datos_lote_nuevo = [
                     ':med_id' => $med_id,
                     ':su_id' => $su_receptor,
-                    ':lm_numero_lote' => $numero_lote_nuevo,
+                    ':pr_id' => $pr_id,
+                    ':pr_id_compra' => $pr_id_compra,
+                    ':lm_numero_lote' => $numero_lote_original,
                     ':lm_cant_blister' => $detalle['lm_cant_blister'],
                     ':lm_cant_unidad' => $detalle['lm_cant_unidad'],
                     ':lm_cant_actual_cajas' => $cajas,
@@ -151,7 +156,7 @@ class recepcionarController extends recepcionarModel
 
             recepcionarModel::actualizar_estado_transferencia_model($tr_id, 'aceptada', $us_receptor);
 
-            $config_informe = [
+            $config_informe_recepcion = [
                 'tipo_informe' => 'transferencia_entrada',
                 'tr_id' => $tr_id,
                 'tr_numero' => $transferencia['tr_numero'],
@@ -160,14 +165,15 @@ class recepcionarController extends recepcionarModel
                 'total_items' => count($detalles),
                 'total_cajas' => $transferencia['tr_total_cajas'],
                 'total_unidades' => $transferencia['tr_total_unidades'],
-                'total_valorado' => $transferencia['tr_total_valorado']
+                'total_valorado' => $transferencia['tr_total_valorado'],
+                'tr_estado' => 'aceptada'
             ];
 
             recepcionarModel::registrar_informe_recepcion_model([
                 ':inf_nombre' => "Recepción de Transferencia {$transferencia['tr_numero']}",
                 ':inf_tipo' => 'transferencia_recepcion',
                 ':inf_usuario' => $us_receptor,
-                ':inf_config' => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
+                ':inf_config' => json_encode($config_informe_recepcion, JSON_UNESCAPED_UNICODE)
             ]);
 
             $conexion->commit();
@@ -260,20 +266,21 @@ class recepcionarController extends recepcionarModel
 
             recepcionarModel::actualizar_estado_transferencia_model($tr_id, 'rechazada', $us_receptor, $motivo);
 
-            $config_informe = [
+            $config_informe_rechazo = [
                 'tipo_informe' => 'transferencia_rechazo',
                 'tr_id' => $tr_id,
                 'tr_numero' => $transferencia['tr_numero'],
                 'su_destino' => $su_receptor,
                 'us_receptor' => $us_receptor,
-                'motivo_rechazo' => $motivo
+                'motivo_rechazo' => $motivo,
+                'tr_estado' => 'rechazada'
             ];
 
             recepcionarModel::registrar_informe_recepcion_model([
                 ':inf_nombre' => "Rechazo de Transferencia {$transferencia['tr_numero']}",
                 ':inf_tipo' => 'transferencia_rechazo',
                 ':inf_usuario' => $us_receptor,
-                ':inf_config' => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
+                ':inf_config' => json_encode($config_informe_rechazo, JSON_UNESCAPED_UNICODE)
             ]);
 
             $conexion->commit();

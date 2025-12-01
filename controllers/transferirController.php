@@ -17,6 +17,8 @@ class transferirController extends transferirModel
 
         if ($rol == 1 && isset($_POST['su_origen']) && !empty($_POST['su_origen'])) {
             $su_origen = mainModel::limpiar_cadena($_POST['su_origen']);
+        } elseif ($rol != 1) {
+            $su_origen = $_SESSION['sucursal_smp'];
         }
 
         $busqueda = mainModel::limpiar_cadena($_POST['busqueda'] ?? '');
@@ -43,12 +45,17 @@ class transferirController extends transferirModel
 
         $su_origen = $_SESSION['sucursal_smp'];
         $us_emisor = $_SESSION['id_smp'];
+        $rol = $_SESSION['rol_smp'];
         $observaciones = mainModel::limpiar_cadena($_POST['observaciones'] ?? '');
 
         $sucursales_destino = array_unique(array_column($items, 'su_destino'));
 
         if (in_array($su_origen, $sucursales_destino)) {
             return json_encode(['error' => 'No puede transferir a su propia sucursal']);
+        }
+
+        if ($rol != 1 && count($sucursales_destino) > 1) {
+            return json_encode(['error' => 'Gerente solo puede transferir a una sucursal destino a la vez']);
         }
 
         $tr_numero = $this->generar_numero_transferencia_controller();
@@ -144,8 +151,6 @@ class transferirController extends transferirModel
 
             transferirModel::actualizar_totales_transferencia_model($tr_id, $total_cajas, $total_unidades, $total_valorado);
 
-            $pdf_base64 = $this->generar_pdf_transferencia_controller($tr_id);
-
             $config_informe = [
                 'tipo_informe' => 'transferencia_salida',
                 'tr_id' => $tr_id,
@@ -155,7 +160,8 @@ class transferirController extends transferirModel
                 'total_items' => count($items),
                 'total_cajas' => $total_cajas,
                 'total_unidades' => $total_unidades,
-                'total_valorado' => $total_valorado
+                'total_valorado' => $total_valorado,
+                'tr_estado' => 'pendiente'
             ];
 
             transferirModel::registrar_informe_model([
@@ -167,10 +173,13 @@ class transferirController extends transferirModel
 
             $conexion->commit();
 
+            $pdf_base64 = $this->generar_pdf_transferencia_controller($tr_id);
+
             return json_encode([
                 'Tipo' => 'success',
-                'Titulo' => 'Transferencia generada',
-                'texto' => "Número: {$tr_numero}<br>Total: Bs. " . number_format($total_valorado, 2),
+                'Titulo' => 'Transferencia generada exitosamente',
+                'texto' => "Número: <strong>{$tr_numero}</strong><br>Total: <strong>Bs. " . number_format($total_valorado, 2) . "</strong>",
+                'tr_numero' => $tr_numero,
                 'pdf_base64' => $pdf_base64
             ], JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
@@ -295,3 +304,5 @@ class transferirController extends transferirModel
         return $texto;
     }
 }
+
+

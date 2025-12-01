@@ -3,6 +3,14 @@ require_once "mainModel.php";
 
 class recepcionarModel extends mainModel
 {
+    protected static function obtener_lote_por_id_model($lm_id)
+    {
+        $sql = "SELECT * FROM lote_medicamento WHERE lm_id = :lm_id LIMIT 1";
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute([':lm_id' => $lm_id]);
+        return $stmt;
+    }
+
     protected static function listar_transferencias_pendientes_model($su_destino, $rol, $estado = 'pendiente')
     {
         $sql = "SELECT 
@@ -107,10 +115,10 @@ class recepcionarModel extends mainModel
     protected static function crear_lote_destino_model($datos)
     {
         $sql = "INSERT INTO lote_medicamento 
-                (med_id, su_id, lm_numero_lote, lm_cant_blister, lm_cant_unidad, 
+                (med_id, su_id, pr_id, pr_id_compra, lm_numero_lote, lm_cant_blister, lm_cant_unidad, 
                  lm_cant_actual_cajas, lm_cant_actual_unidades, lm_precio_compra, 
                  lm_precio_venta, lm_fecha_vencimiento, lm_estado, lm_origen_id)
-                VALUES (:med_id, :su_id, :lm_numero_lote, :lm_cant_blister, :lm_cant_unidad,
+                VALUES (:med_id, :su_id, :pr_id, :pr_id_compra, :lm_numero_lote, :lm_cant_blister, :lm_cant_unidad,
                         :lm_cant_actual_cajas, :lm_cant_actual_unidades, :lm_precio_compra,
                         :lm_precio_venta, :lm_fecha_vencimiento, :lm_estado, :lm_origen_id)";
 

@@ -1,0 +1,9 @@
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => o
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)

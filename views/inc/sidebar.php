@@ -95,11 +95,13 @@ if ($_SESSION['rol_smp'] == 1) {
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>ventasHistorialLista/">Historial de ventas</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>cajaHistorialLista/">Hsitorial de caja</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>comprasHistorialLista/">Historial de compras</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>transferirHistorialLista/">Movimientos</a></li>
+
                 </ul>
             </li>
 
             <!-- ALERTAS -->
-            <li class="link">
+            <!-- <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="alert-circle-outline"></ion-icon>
@@ -113,7 +115,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     <li class="sub-link"><a href="#">Pendientes</a></li>
                     <li class="sub-link"><a href="#">Errores del sistema</a></li>
                 </ul>
-            </li>
+            </li> -->
             <!-- configuracion -->
             <li class="link">
                 <div class="menu-item">

@@ -19,7 +19,14 @@ if (isset($_POST['transferirAjax'])) {
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario != 1 && $rol_usuario != 2) {
         echo json_encode([
-            "error" => "No cuenta con los privilegios necesarios. Rol actual: " . $rol_usuario
+            "error" => "No cuenta con los privilegios necesarios. Solo Admin y Gerente pueden transferir. Rol actual: " . $rol_usuario
+        ]);
+        exit();
+    }
+    
+    if (!isset($_SESSION['sucursal_smp']) || empty($_SESSION['sucursal_smp'])) {
+        echo json_encode([
+            "error" => "Sucursal no asignada en la sesión"
         ]);
         exit();
     }
