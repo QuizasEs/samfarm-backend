@@ -495,227 +495,7 @@ class compraHistorialController extends compraHistorialModel
             $sucursal_texto = isset($filtros['su_id']) ? 'Sucursal_' . $filtros['su_id'] : 'Todas_Sucursales';
             $filename = "Historial_Compras_{$sucursal_texto}_{$fecha}.xls";
 
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-
-            echo '<!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { 
-                    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; 
-                    font-size: 11pt; 
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    margin: 0;
-                    padding: 20px;
-                }
-                
-                .container {
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                    overflow: hidden;
-                    margin: 0 auto;
-                    max-width: 1400px;
-                }
-                
-                .header {
-                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                    color: white;
-                    font-size: 22pt;
-                    font-weight: 300;
-                    text-align: center;
-                    padding: 25px;
-                    margin-bottom: 0;
-                    letter-spacing: 1px;
-                    position: relative;
-                }
-                
-                .header::after {
-                    content: "";
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 4px;
-                    background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-                }
-                
-                .info {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    padding: 20px;
-                    border-bottom: 1px solid #dee2e6;
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 15px;
-                    font-size: 10pt;
-                }
-                
-                .info-item {
-                    background: white;
-                    padding: 12px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                    border-left: 4px solid #3498db;
-                }
-                
-                .info-item strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 5px;
-                    font-size: 9pt;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                table {
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    width: 100%;
-                    font-size: 10pt;
-                    background: white;
-                }
-                
-                th {
-                    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                    color: white;
-                    font-weight: 500;
-                    text-align: center;
-                    padding: 14px 10px;
-                    border: none;
-                    position: relative;
-                    font-size: 9pt;
-                    letter-spacing: 0.5px;
-                    text-transform: uppercase;
-                }
-                
-                th::after {
-                    content: "";
-                    position: absolute;
-                    right: 0;
-                    top: 25%;
-                    height: 50%;
-                    width: 1px;
-                    background: rgba(255,255,255,0.3);
-                }
-                
-                th:last-child::after {
-                    display: none;
-                }
-                
-                td {
-                    padding: 12px 10px;
-                    border-bottom: 1px solid #f8f9fa;
-                    text-align: left;
-                    transition: all 0.2s ease;
-                }
-                
-                tr:hover td {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                }
-                
-                .numero {
-                    text-align: right;
-                    font-weight: 600;
-                    font-family: "Courier New", monospace;
-                    color: #2c3e50;
-                }
-                
-                .moneda {
-                    text-align: right;
-                    font-weight: 700;
-                    font-family: "Courier New", monospace;
-                    color: #27ae60;
-                    background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-                    border-left: 3px solid #27ae60;
-                }
-                
-                .total-row {
-                    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                    color: white;
-                    font-weight: 600;
-                    font-size: 11pt;
-                }
-                
-                .total-row td {
-                    border: none;
-                    padding: 16px 10px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                .total-row .numero, .total-row .moneda {
-                    color: white;
-                    background: none;
-                    border-left: none;
-                    font-size: 11pt;
-                }
-                
-                .estado-activo {
-                    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
-                    color: #2e7d32;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #4caf50;
-                }
-                
-                .estado-pendiente {
-                    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
-                    color: #ef6c00;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #ff9800;
-                }
-                
-                .footer {
-                    margin-top: 0;
-                    padding: 25px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-top: 1px solid #dee2e6;
-                    font-size: 9pt;
-                    color: #6c757d;
-                    text-align: center;
-                }
-                
-                .footer strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 8px;
-                    font-size: 10pt;
-                }
-                
-                tbody tr:not(.total-row) {
-                    border-left: 3px solid transparent;
-                    transition: border-left 0.3s ease;
-                }
-                
-                tbody tr:not(.total-row):hover {
-                    border-left: 3px solid #3498db;
-                }
-                
-                @media print {
-                    body { background: white; }
-                    .container { box-shadow: none; }
-                }
-            </style>
-        </head>
-        <body>';
-
-            echo '<div class="container">
-                    <div class="header">
-                        📦 HISTORIAL DE COMPRAS - SAMFARM PHARMA
-                    </div>';
+            $headers = array_keys($datos[0]);
 
             $periodo = '';
             if (!empty($fecha_desde) && !empty($fecha_hasta)) {
@@ -724,88 +504,30 @@ class compraHistorialController extends compraHistorialModel
                 $periodo = 'Todo el historial';
             }
 
-            echo '<div class="info">
-                        <div class="info-item">
-                            <strong>📅 Periodo</strong>
-                            ' . $periodo . '
-                        </div>
-                        <div class="info-item">
-                            <strong>👤 Usuario</strong>
-                            ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>🏢 Sucursal</strong>
-                            ' . (isset($filtros['su_id']) ? 'Sucursal ID ' . $filtros['su_id'] : 'Todas las Sucursales') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>📋 Total de Registros</strong>
-                            ' . count($datos) . '
-                        </div>
-                    </div>';
+            $info_superior = [
+                'Periodo' => $periodo,
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                'Sucursal' => isset($filtros['su_id']) ? 'Sucursal ID ' . $filtros['su_id'] : 'Todas las Sucursales',
+                'Total de Registros' => count($datos)
+            ];
 
-            echo '<table>';
-
-            echo '<thead><tr>';
-            $headers = array_keys($datos[0]);
-            foreach ($headers as $header) {
-                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
-            }
-            echo '</tr></thead>';
-
-            echo '<tbody>';
-
-            $total_general = 0;
-            $total_items = 0;
-            $total_lotes = 0;
-
-            foreach ($datos as $row) {
-                echo '<tr>';
-
-                foreach ($headers as $key) {
-                    $valor = $row[$key];
-
-                    if ($key === 'Items' || $key === 'Total Lotes' || $key === 'Lotes Activos' || $key === 'Lotes Pendientes') {
-                        echo '<td class="numero">' . number_format($valor, 0, ',', '.') . '</td>';
-                        
-                        if ($key === 'Items') $total_items += $valor;
-                        if ($key === 'Total Lotes') $total_lotes += $valor;
-                        
-                    } elseif ($key === 'Subtotal (Bs)' || $key === 'Impuestos (Bs)' || $key === 'Total (Bs)') {
-                        echo '<td class="moneda">Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-                        
-                        if ($key === 'Total (Bs)') $total_general += $valor;
-                        
-                    } elseif ($key === 'Lotes Activos' && $valor > 0) {
-                        echo '<td class="estado-activo">' . number_format($valor, 0) . ' Activo(s)</td>';
-                    } elseif ($key === 'Lotes Pendientes' && $valor > 0) {
-                        echo '<td class="estado-pendiente">' . number_format($valor, 0) . ' Pendiente(s)</td>';
-                    } else {
-                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
-                    }
-                }
-
-                echo '</tr>';
-            }
-
-            $num_cols = count($headers);
-            echo '<tr class="total-row">
-                    <td colspan="' . ($num_cols - 3) . '" style="text-align: right; padding-right: 20px;">📊 TOTALES GENERALES:</td>
-                    <td class="numero">' . number_format($total_items, 0, ',', '.') . '</td>
-                    <td class="numero">' . number_format($total_lotes, 0, ',', '.') . '</td>
-                    <td class="moneda">Bs ' . number_format($total_general, 2, ',', '.') . '</td>
-                </tr>';
-
-            echo '</tbody></table>';
-
-            echo '<div class="footer">
-                        <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>
-                        Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
-                    </div>
-                </div>';
-
-            echo '</body></html>';
-
-            exit();
+            mainModel::generar_excel_reporte([
+                'titulo' => '📦 HISTORIAL DE COMPRAS - SAMFARM PHARMA',
+                'datos' => $datos,
+                'headers' => $headers,
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Items' => 'numero',
+                    'Total Lotes' => 'numero',
+                    'Lotes Activos' => 'numero',
+                    'Lotes Pendientes' => 'numero',
+                    'Subtotal (Bs)' => 'moneda',
+                    'Impuestos (Bs)' => 'moneda',
+                    'Total (Bs)' => 'moneda'
+                ],
+                'columnas_totales' => ['Total (Bs)'],
+                'info_superior' => $info_superior
+            ]);
 
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());

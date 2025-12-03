@@ -33,9 +33,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <div id="resultado_venta_container" style="display: none;">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="document-text-outline"></ion-icon> Información de la Venta
-            </h3>
+            </h2>
         </div>
 
         <div class="form">
@@ -90,9 +90,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <input type="hidden" id="venta_su_id">
 
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="list-outline"></ion-icon> Productos de la Venta
-            </h3>
+            </h2>
         </div>
 
         <div class="table-container">

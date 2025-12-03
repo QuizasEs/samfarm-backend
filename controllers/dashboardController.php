@@ -1,6 +1,6 @@
 <?php
 
-require_once './models/mainModel.php';
+require_once __DIR__ . '/../models/mainModel.php';
 
 class dashboardController extends mainModel
 {

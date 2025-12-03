@@ -379,4 +379,29 @@ class inventarioModel extends mainModel
         $stmt->execute();
         return $stmt;
     }
+
+    protected static function actualizar_configuracion_inventario_model($inv_id, $inv_minimo, $inv_maximo)
+    {
+        try {
+            $db = mainModel::conectar();
+
+            $sql = "UPDATE inventarios 
+                    SET inv_minimo = :inv_minimo,
+                        inv_maximo = :inv_maximo,
+                        inv_actualizado_en = NOW()
+                    WHERE inv_id = :inv_id";
+
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':inv_id', $inv_id, PDO::PARAM_INT);
+            $stmt->bindParam(':inv_minimo', $inv_minimo, PDO::PARAM_INT);
+            $stmt->bindParam(':inv_maximo', $inv_maximo, is_null($inv_maximo) ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->execute();
+
+            error_log("Configuración actualizada: inv_id={$inv_id}, minimo={$inv_minimo}, maximo={$inv_maximo}");
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error en actualizar_configuracion_inventario_model: " . $e->getMessage());
+            return false;
+        }
+    }
 }

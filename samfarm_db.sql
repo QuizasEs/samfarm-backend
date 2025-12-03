@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-11-2025 a las 21:45:40
+-- Tiempo de generación: 03-12-2025 a las 02:03:12
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 7.4.33
 
@@ -40,15 +40,6 @@ CREATE TABLE `caja` (
   `caja_observacion` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `caja`
---
-
-INSERT INTO `caja` (`caja_id`, `su_id`, `us_id`, `caja_nombre`, `caja_saldo_inicial`, `caja_saldo_final`, `caja_activa`, `caja_creado_en`, `caja_cerrado_en`, `caja_observacion`) VALUES
-(7, 1, 1, 'Caja admin', '200.00', NULL, 1, '2025-11-26 14:44:32', NULL, NULL),
-(8, 2, 3, 'Caja gerente', '200.00', NULL, 1, '2025-11-27 20:27:35', NULL, NULL),
-(9, 1, 3, 'Caja gerente', '200.00', NULL, 1, '2025-11-27 20:28:45', NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -68,24 +59,6 @@ CREATE TABLE `clientes` (
   `cl_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `cl_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `clientes`
---
-
-INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apellido_materno`, `cl_telefono`, `cl_correo`, `cl_direccion`, `cl_carnet`, `cl_creado_en`, `cl_actualizado_en`, `cl_estado`) VALUES
-(1, 'dadasda', 'asd', 'dasdas', '423423', '', 'dfsdfsdfsd', '234234', '2025-11-16 18:31:40', '2025-11-16 18:31:40', 1),
-(2, 'dadasda', 'asd', 'dasdas', '423423', '', 'dfsdfsdfsd', '234234', '2025-11-16 18:31:51', '2025-11-16 18:31:51', 1),
-(3, 'juan', 'quiroga', 'Mamani', '', '', '', '1123123', '2025-11-16 18:35:17', '2025-11-26 21:59:35', 1),
-(4, 'juan', 'quiroga', '', '', '', '', '', '2025-11-16 18:36:47', '2025-11-26 19:01:52', 0),
-(5, 'teodoro', 'jasinto', '', '', '', '', '', '2025-11-16 18:37:19', '2025-11-16 18:37:19', 1),
-(6, 'teodoro', 'gusman', '', '', '', '', '', '2025-11-16 18:37:45', '2025-11-16 18:37:45', 1),
-(7, 'jorge', 'gusman', '', '', '', '', '', '2025-11-16 18:38:13', '2025-11-25 21:42:13', 0),
-(8, 'Fabricio', 'romero', '', '', '', '', '0000000000', '2025-11-18 10:31:15', '2025-11-18 10:31:15', 1),
-(9, 'asdas', 'dasd', '', '', '', '', '', '2025-11-26 20:54:51', '2025-11-26 20:54:51', 1),
-(10, 'sads', 'dasdsada', '', '', '', '', '', '2025-11-26 20:59:55', '2025-11-26 20:59:55', 1),
-(11, 'fssd', 'sfsd', '', '', '', '', '21324651', '2025-11-26 21:32:15', '2025-11-26 21:32:15', 1),
-(12, 'fadfad', 'fasdfasdf', '', '', '', '', '353453453', '2025-11-26 21:34:30', '2025-11-26 21:34:30', 1);
 
 -- --------------------------------------------------------
 
@@ -113,20 +86,6 @@ CREATE TABLE `compras` (
   `co_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `co_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `compras`
---
-
-INSERT INTO `compras` (`co_id`, `co_numero`, `co_fecha`, `la_id`, `us_id`, `su_id`, `pr_id`, `co_subtotal`, `co_impuesto`, `co_total`, `co_numero_factura`, `co_fecha_factura`, `co_tipo_documento`, `co_nit_proveedor`, `co_razon_social`, `co_creado_en`, `co_actualizado_en`, `co_estado`) VALUES
-(1, 'COMP-2025-0001', '2025-11-13 13:55:49', 7, 1, 1, 1, '42.00', '5.46', '47.46', '242342323423', '2025-11-30', 'compra', NULL, 'jose', '2025-11-13 13:55:49', '2025-11-13 13:55:49', 1),
-(2, 'COMP-2025-0002', '2025-11-16 13:30:17', 2, 1, 1, 3, '54756.00', '7118.28', '61874.28', '2342', '2025-11-22', 'compra', NULL, 'fsdfsdf', '2025-11-16 13:30:17', '2025-11-16 13:30:17', 1),
-(3, 'COMP-2025-0003', '2025-11-18 10:26:29', 4, 1, 1, 1, '100.00', '13.00', '113.00', '12312312', '2025-11-28', 'compra', NULL, 'jose', '2025-11-18 10:26:29', '2025-11-18 10:26:29', 1),
-(4, 'COMP-2025-0004', '2025-11-19 18:13:28', 3, 1, 1, 3, '4500.00', '585.00', '5085.00', '123123', '2025-11-30', 'compra', NULL, 'dadasda', '2025-11-19 18:13:28', '2025-11-19 18:13:28', 1),
-(5, 'COMP-2025-0005', '2025-11-19 18:18:05', 4, 1, 1, 2, '200.00', '26.00', '226.00', '3213', '2025-11-14', 'compra', NULL, 'asaasdas', '2025-11-19 18:18:05', '2025-11-19 18:18:05', 1),
-(6, 'COMP-2025-0006', '2025-11-19 19:16:53', 6, 1, 1, 4, '900.00', '117.00', '1017.00', '423423', '2025-11-22', 'compra', NULL, '423423423', '2025-11-19 19:16:53', '2025-11-19 19:16:53', 1),
-(7, 'COMP-2025-0007', '2025-11-19 20:31:32', 6, 1, 1, 3, '3200.00', '416.00', '3616.00', '65484', '2025-11-28', 'compra', NULL, 'jjbhjg', '2025-11-19 20:31:32', '2025-11-19 20:31:32', 1),
-(8, 'COMP-2025-0008', '2025-11-22 16:37:12', 6, 1, 1, 6, '4500.00', '585.00', '5085.00', '132132154541', '2025-11-22', 'compra', NULL, 'ugo dabila', '2025-11-22 16:37:12', '2025-11-22 16:37:12', 1);
 
 -- --------------------------------------------------------
 
@@ -170,22 +129,6 @@ CREATE TABLE `detalle_compra` (
   `dc_subtotal` decimal(14,2) NOT NULL,
   `dc_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `detalle_compra`
---
-
-INSERT INTO `detalle_compra` (`dc_id`, `co_id`, `med_id`, `lm_id`, `dc_cantidad`, `dc_precio_unitario`, `dc_descuento`, `dc_subtotal`, `dc_estado`) VALUES
-(1, 1, 5, 1, 6, '7.00', '0.00', '42.00', 1),
-(2, 2, 4, 2, 234, '234.00', '0.00', '54756.00', 1),
-(3, 3, 4, 3, 400, '10.00', '0.00', '100.00', 1),
-(4, 4, 8, 4, 50, '10.00', '0.00', '500.00', 1),
-(5, 4, 9, 5, 3840, '50.00', '0.00', '4000.00', 1),
-(6, 5, 6, 6, 40, '5.00', '0.00', '200.00', 1),
-(7, 6, 1, 7, 10, '50.00', '0.00', '500.00', 1),
-(8, 6, 1, 8, 10, '40.00', '0.00', '400.00', 1),
-(9, 7, 1, 9, 4800, '40.00', '0.00', '3200.00', 1),
-(10, 8, 3, 10, 2700, '50.00', '0.00', '4500.00', 1);
 
 -- --------------------------------------------------------
 
@@ -244,52 +187,6 @@ CREATE TABLE `detalle_venta` (
   `dv_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `detalle_venta`
---
-
-INSERT INTO `detalle_venta` (`dv_id`, `ve_id`, `med_id`, `lm_id`, `dv_cantidad`, `dv_unidad`, `dv_precio_unitario`, `dv_descuento`, `dv_subtotal`, `dv_estado`) VALUES
-(1, 1, 4, NULL, 10, 'unidad', '1.00', '0.00', '10.00', 1),
-(14, 14, 5, 1, 1, 'unidad', '4.00', '0.00', '4.00', 0),
-(15, 15, 4, 2, 10, 'unidad', '1.00', '0.00', '10.00', 1),
-(16, 16, 4, 2, 10, 'unidad', '1.00', '0.00', '10.00', 1),
-(17, 17, 4, 2, 1, 'unidad', '1.00', '0.00', '1.00', 1),
-(18, 18, 5, 1, 5, 'unidad', '4.00', '0.00', '20.00', 1),
-(19, 20, 4, 2, 213, 'unidad', '1.00', '0.00', '213.00', 1),
-(20, 20, 4, 3, 400, 'unidad', '1.00', '0.00', '400.00', 1),
-(21, 21, 1, 7, 4, 'unidad', '55.00', '0.00', '220.00', 1),
-(22, 22, 9, 5, 2, 'unidad', '4.00', '0.00', '8.00', 1),
-(23, 23, 8, 4, 5, 'unidad', '12.00', '0.00', '60.00', 1),
-(24, 24, 6, 6, 3, 'unidad', '6.00', '0.00', '18.00', 1),
-(25, 25, 1, 7, 1, 'unidad', '50.00', '0.00', '50.00', 1),
-(26, 26, 1, 7, 3, 'unidad', '50.00', '0.00', '150.00', 1),
-(27, 27, 1, 7, 2, 'unidad', '50.00', '0.00', '100.00', 1),
-(28, 27, 1, 8, 4, 'unidad', '50.00', '0.00', '200.00', 1),
-(29, 28, 6, 6, 1, 'unidad', '6.00', '0.00', '6.00', 1),
-(30, 29, 6, 6, 36, 'unidad', '6.00', '0.00', '216.00', 1),
-(37, 36, 1, 8, 1, 'unidad', '2.00', '0.00', '2.00', 1),
-(38, 37, 9, 5, 1500, 'unidad', '4.00', '0.00', '6000.00', 1),
-(39, 38, 8, 4, 1, 'unidad', '12.00', '0.00', '12.00', 1),
-(40, 38, 1, 8, 1, 'unidad', '2.00', '0.00', '2.00', 1),
-(41, 38, 9, 5, 1, 'unidad', '4.00', '0.00', '4.00', 1),
-(42, 39, 1, 8, 4, 'unidad', '2.00', '0.00', '8.00', 1),
-(43, 40, 1, 9, 1, 'unidad', '2.00', '0.00', '2.00', 1),
-(44, 41, 1, 9, 9, 'unidad', '2.00', '0.00', '18.00', 1),
-(45, 42, 1, 9, 1, 'unidad', '2.00', '0.00', '2.00', 1),
-(46, 42, 9, 5, 1, 'unidad', '4.00', '0.00', '4.00', 1),
-(47, 43, 9, 5, 6, 'unidad', '4.00', '0.00', '24.00', 1),
-(48, 44, 9, 5, 1, 'unidad', '4.00', '0.00', '4.00', 1),
-(49, 45, 3, 10, 1, 'unidad', '1.00', '0.00', '1.00', 0),
-(50, 46, 9, 5, 4, 'unidad', '4.00', '0.00', '16.00', 1),
-(51, 47, 9, 5, 3, 'unidad', '4.00', '0.00', '12.00', 1),
-(52, 47, 1, 9, 5, 'unidad', '2.00', '0.00', '10.00', 1),
-(53, 47, 8, 4, 2, 'unidad', '12.00', '0.00', '24.00', 1),
-(54, 47, 3, 10, 3, 'unidad', '1.00', '0.00', '3.00', 1),
-(55, 47, 1, 9, 3, 'unidad', '2.00', '0.00', '6.00', 1),
-(56, 48, 9, 5, 3, 'unidad', '4.00', '0.00', '12.00', 1),
-(57, 48, 9, 5, 3, 'unidad', '4.00', '0.00', '12.00', 1),
-(58, 49, 9, 5, 3, 'unidad', '4.00', '0.00', '12.00', 1);
-
 -- --------------------------------------------------------
 
 --
@@ -308,14 +205,6 @@ CREATE TABLE `devoluciones` (
   `dev_fecha` datetime NOT NULL DEFAULT current_timestamp(),
   `dev_estado` enum('pendiente','aceptada','rechazada') NOT NULL DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `devoluciones`
---
-
-INSERT INTO `devoluciones` (`dev_id`, `ve_id`, `fa_id`, `su_id`, `us_id`, `dev_total`, `dev_cantidad`, `dev_motivo`, `dev_fecha`, `dev_estado`) VALUES
-(1, 14, 13, 1, 1, '4.00', 1, 'por fecha vencida', '2025-11-26 18:58:12', 'aceptada'),
-(2, 45, 43, 1, 1, '1.00', 1, 'fdsgsgsd', '2025-11-26 22:10:35', 'aceptada');
 
 -- --------------------------------------------------------
 
@@ -337,41 +226,6 @@ CREATE TABLE `factura` (
   `fa_estado` tinyint(1) NOT NULL DEFAULT 1,
   `fa_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `factura`
---
-
-INSERT INTO `factura` (`fa_id`, `ve_id`, `cl_id`, `us_id`, `su_id`, `fa_numero`, `fa_fecha_emision`, `fa_monto_total`, `fa_codigo_control`, `fa_cuf`, `fa_estado`, `fa_creado_en`) VALUES
-(13, 14, 3, 1, 1, 'F-1-20251118212524-321', '2025-11-18 21:25:24', '4.00', NULL, NULL, 1, '2025-11-18 21:25:24'),
-(14, 15, 7, 1, 1, 'F-1-20251118213518-763', '2025-11-18 21:35:18', '10.00', NULL, NULL, 1, '2025-11-18 21:35:18'),
-(15, 16, NULL, 1, 1, 'F-1-20251118213900-238', '2025-11-18 21:39:00', '10.00', NULL, NULL, 1, '2025-11-18 21:39:00'),
-(16, 17, NULL, 1, 1, 'F-1-20251118213932-712', '2025-11-18 21:39:32', '1.00', NULL, NULL, 1, '2025-11-18 21:39:32'),
-(17, 18, 4, 1, 1, 'F-1-20251119182056-490', '2025-11-19 18:20:56', '20.00', NULL, NULL, 1, '2025-11-19 18:20:56'),
-(18, 20, NULL, 1, 1, 'F-1-20251119191058-905', '2025-11-19 19:10:58', '613.00', NULL, NULL, 1, '2025-11-19 19:10:58'),
-(19, 21, NULL, 1, 1, 'F-1-20251119195235-435', '2025-11-19 19:52:35', '220.00', NULL, NULL, 1, '2025-11-19 19:52:35'),
-(20, 22, NULL, 1, 1, 'F-1-20251119200054-901', '2025-11-19 20:00:54', '8.00', NULL, NULL, 1, '2025-11-19 20:00:54'),
-(21, 23, NULL, 1, 1, 'F-1-20251119201401-536', '2025-11-19 20:14:01', '60.00', NULL, NULL, 1, '2025-11-19 20:14:01'),
-(22, 24, NULL, 1, 1, 'F-1-20251119201536-832', '2025-11-19 20:15:36', '18.00', NULL, NULL, 1, '2025-11-19 20:15:36'),
-(23, 25, NULL, 1, 1, 'F-1-20251119201750-601', '2025-11-19 20:17:50', '50.00', NULL, NULL, 1, '2025-11-19 20:17:50'),
-(24, 26, NULL, 1, 1, 'F-1-20251119202507-888', '2025-11-19 20:25:07', '150.00', NULL, NULL, 1, '2025-11-19 20:25:07'),
-(25, 27, NULL, 1, 1, 'F-1-20251119202638-787', '2025-11-19 20:26:38', '300.00', NULL, NULL, 1, '2025-11-19 20:26:38'),
-(26, 28, NULL, 1, 1, 'F-1-20251119203410-148', '2025-11-19 20:34:10', '6.00', NULL, NULL, 1, '2025-11-19 20:34:10'),
-(27, 29, NULL, 1, 1, 'F-1-20251121181757-418', '2025-11-21 18:17:57', '216.00', NULL, NULL, 1, '2025-11-21 18:17:57'),
-(34, 36, NULL, 1, 1, 'F-1-20251121191419-689', '2025-11-21 19:14:19', '2.00', NULL, NULL, 1, '2025-11-21 19:14:19'),
-(35, 37, NULL, 1, 1, 'F-1-20251121191505-329', '2025-11-21 19:15:05', '6000.00', NULL, NULL, 1, '2025-11-21 19:15:05'),
-(36, 38, NULL, 1, 1, 'F-1-20251121191554-518', '2025-11-21 19:15:54', '18.00', NULL, NULL, 1, '2025-11-21 19:15:54'),
-(37, 39, NULL, 1, 1, 'F-1-20251123143046-670', '2025-11-23 14:30:46', '8.00', NULL, NULL, 1, '2025-11-23 14:30:46'),
-(38, 40, NULL, 1, 1, 'F-1-20251124004759-890', '2025-11-24 00:47:59', '2.00', NULL, NULL, 1, '2025-11-24 00:47:59'),
-(39, 41, NULL, 1, 1, 'F-1-20251124185328-130', '2025-11-24 18:53:28', '18.00', NULL, NULL, 1, '2025-11-24 18:53:28'),
-(40, 42, NULL, 1, 1, 'F-1-20251124185352-661', '2025-11-24 18:53:52', '6.00', NULL, NULL, 1, '2025-11-24 18:53:52'),
-(41, 43, NULL, 1, 1, 'F-1-20251126142949-627', '2025-11-26 14:29:49', '24.00', NULL, NULL, 1, '2025-11-26 14:29:49'),
-(42, 44, 3, 1, 1, 'F-1-20251126190218-219', '2025-11-26 19:02:18', '4.00', NULL, NULL, 1, '2025-11-26 19:02:18'),
-(43, 45, NULL, 1, 1, 'F-1-20251126220551-630', '2025-11-26 22:05:51', '1.00', NULL, NULL, 1, '2025-11-26 22:05:51'),
-(44, 46, NULL, 3, 1, 'F-1-20251127202924-593', '2025-11-27 20:29:24', '16.00', NULL, NULL, 1, '2025-11-27 20:29:24'),
-(45, 47, 3, 3, 1, 'F-1-20251127202957-736', '2025-11-27 20:29:57', '55.00', NULL, NULL, 1, '2025-11-27 20:29:57'),
-(46, 48, 3, 3, 1, 'F-1-20251127203019-650', '2025-11-27 20:30:19', '24.00', NULL, NULL, 1, '2025-11-27 20:30:19'),
-(47, 49, NULL, 1, 1, 'F-1-20251128185730-511', '2025-11-28 18:57:30', '12.00', NULL, NULL, 1, '2025-11-28 18:57:30');
 
 -- --------------------------------------------------------
 
@@ -437,56 +291,6 @@ CREATE TABLE `historial_lote` (
   `hl_fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `historial_lote`
---
-
-INSERT INTO `historial_lote` (`hl_id`, `lm_id`, `us_id`, `hl_accion`, `hl_descripcion`, `hl_fecha`) VALUES
-(1, 1, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0001 en estado \'en_espera\'.', '2025-11-13 13:55:49'),
-(2, 2, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0002 en estado \'en_espera\'.', '2025-11-16 13:30:17'),
-(3, 1, 1, 'activacion', 'Lote activado por admin', '2025-11-17 14:35:47'),
-(4, 2, 1, 'activacion', 'Lote activado por admin', '2025-11-17 14:57:06'),
-(5, 3, 1, 'creacion', 'Lote creado automáticamente por compra #COMP-2025-0003 en estado \'en_espera\'.', '2025-11-18 10:26:29'),
-(6, 2, 1, 'ajuste', 'Actualización de datos del lote (cantidades/precios/fecha de vencimiento)', '2025-11-18 10:27:23'),
-(7, 3, 1, 'activacion', 'Lote activado por admin', '2025-11-18 10:27:56'),
-(8, 4, 1, 'creacion', 'Lote creado por compra #COMP-2025-0004 en estado \'en_espera\'.', '2025-11-19 18:13:28'),
-(9, 5, 1, 'creacion', 'Lote creado por compra #COMP-2025-0004 en estado \'activo\'.', '2025-11-19 18:13:28'),
-(10, 5, 1, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0004.', '2025-11-19 18:13:28'),
-(11, 4, 1, 'activacion', 'Lote activado por admin', '2025-11-19 18:13:59'),
-(12, 6, 1, 'creacion', 'Lote creado por compra #COMP-2025-0005 en estado \'en_espera\'.', '2025-11-19 18:18:05'),
-(13, 6, 1, 'activacion', 'Lote activado por admin', '2025-11-19 18:18:14'),
-(14, 7, 1, 'creacion', 'Lote creado por compra #COMP-2025-0006 en estado \'activo\'.', '2025-11-19 19:16:53'),
-(15, 7, 1, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0006.', '2025-11-19 19:16:53'),
-(16, 8, 1, 'creacion', 'Lote creado por compra #COMP-2025-0006 en estado \'activo\'.', '2025-11-19 19:16:53'),
-(17, 8, 1, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0006.', '2025-11-19 19:16:53'),
-(18, 9, 1, 'creacion', 'Lote creado por compra #COMP-2025-0007 en estado \'en_espera\'.', '2025-11-19 20:31:32'),
-(19, 9, 1, 'activacion', 'Lote activado por admin', '2025-11-19 20:32:18'),
-(20, 6, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 18:17:57'),
-(27, 8, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 19:14:19'),
-(28, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 19:15:05'),
-(29, 4, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 19:15:54'),
-(30, 8, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 19:15:54'),
-(31, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-21 19:15:54'),
-(32, 10, 1, 'creacion', 'Lote creado por compra #COMP-2025-0008 en estado \'activo\'.', '2025-11-22 16:37:12'),
-(33, 10, 1, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0008.', '2025-11-22 16:37:12'),
-(34, 8, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-23 14:30:46'),
-(35, 9, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-24 00:47:59'),
-(36, 9, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-24 18:53:28'),
-(37, 9, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-24 18:53:52'),
-(38, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-24 18:53:52'),
-(39, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-26 14:29:49'),
-(40, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-26 19:02:18'),
-(41, 10, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-26 22:05:51'),
-(42, 5, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:24'),
-(43, 5, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:57'),
-(44, 9, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:57'),
-(45, 4, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:57'),
-(46, 10, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:57'),
-(47, 9, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:29:57'),
-(48, 5, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:30:19'),
-(49, 5, 3, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-27 20:30:19'),
-(50, 5, 1, 'terminacion', 'Lote agotado por ventas, cambiado a estado \'terminado\' automáticamente', '2025-11-28 18:57:30');
-
 -- --------------------------------------------------------
 
 --
@@ -501,58 +305,6 @@ CREATE TABLE `informes` (
   `inf_config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `inf_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `informes`
---
-
-INSERT INTO `informes` (`inf_id`, `inf_nombre`, `inf_tipo`, `inf_usuario`, `inf_config`, `inf_creado_en`) VALUES
-(1, 'Compra COMP-2025-0001 - jose', 'compra', 1, '{\"compra_id\":1,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"1\",\"laboratorio_id\":\"7\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-30\",\"numero_factura\":\"242342323423\",\"razon_social\":\"jose\",\"subtotal\":\"42.00\",\"impuestos\":\"5.46\",\"total\":\"47.46\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"5\",\"numero_lote\":\"MED-0001\",\"cantidad\":6,\"precio_compra\":7,\"precio_venta\":4,\"vencimiento\":\"2025-11-28\",\"activar_lote\":0}]}', '2025-11-13 13:55:49'),
-(2, 'Compra COMP-2025-0002 - fsdfsdf', 'compra', 1, '{\"compra_id\":2,\"numero_compra\":\"COMP-2025-0002\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"2\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"2342\",\"razon_social\":\"fsdfsdf\",\"subtotal\":\"54756.00\",\"impuestos\":\"7118.28\",\"total\":\"61874.28\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"4\",\"numero_lote\":\"MED-0002\",\"cantidad\":234,\"precio_compra\":234,\"precio_venta\":523,\"vencimiento\":\"2025-12-03\",\"activar_lote\":0}]}', '2025-11-16 13:30:17'),
-(3, 'Activación de Lote #MED-0001 (Omeprazol)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"1\",\"numero_lote\":\"MED-0001\",\"medicamento_id\":5,\"medicamento_nombre\":\"Omeprazol\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-17 14:35:47\",\"precio_compra\":7,\"precio_venta\":4,\"cantidad_cajas\":6,\"cantidad_unidades\":36,\"subtotal_lote\":42,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-17 14:35:47'),
-(4, 'Activación de Lote #MED-0002 (Loratadina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"2\",\"numero_lote\":\"MED-0002\",\"medicamento_id\":4,\"medicamento_nombre\":\"Loratadina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-17 14:57:06\",\"precio_compra\":234,\"precio_venta\":523,\"cantidad_cajas\":234,\"cantidad_unidades\":54756,\"subtotal_lote\":54756,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-17 14:57:06'),
-(5, 'Compra COMP-2025-0003 - jose', 'compra', 1, '{\"compra_id\":3,\"numero_compra\":\"COMP-2025-0003\",\"proveedor_id\":\"1\",\"laboratorio_id\":\"4\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-28\",\"numero_factura\":\"12312312\",\"razon_social\":\"jose\",\"subtotal\":\"100.00\",\"impuestos\":\"13.00\",\"total\":\"113.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"4\",\"numero_lote\":\"MED-0003\",\"cantidad\":10,\"precio_compra\":10,\"precio_venta\":1,\"vencimiento\":\"2025-12-07\",\"activar_lote\":0}]}', '2025-11-18 10:26:29'),
-(6, 'Activación de Lote #MED-0003 (Loratadina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"3\",\"numero_lote\":\"MED-0003\",\"medicamento_id\":4,\"medicamento_nombre\":\"Loratadina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-18 10:27:56\",\"precio_compra\":10,\"precio_venta\":1,\"cantidad_cajas\":10,\"cantidad_unidades\":16000,\"subtotal_lote\":4000,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-18 10:27:56'),
-(7, 'Nota Venta SU1-1763476327', 'nota_venta', 1, '{\"ve_id\":1,\"ve_numero_documento\":\"SU1-1763476327\",\"usuario_id\":1,\"sucursal_id\":1,\"cliente_id\":8,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"efectivo\"}', '2025-11-18 10:32:07'),
-(20, 'Nota Venta F-1-20251118212524-321', 'nota_venta', 1, '{\"ve_id\":14,\"fa_id\":13,\"ve_numero_documento\":\"SU1-1763515524\",\"fa_numero\":\"F-1-20251118212524-321\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"cantidad\":1,\"precio\":4,\"subtotal\":4}],\"subtotal\":4,\"total\":4,\"metodo_pago\":\"efectivo\"}', '2025-11-18 21:25:24'),
-(21, 'Nota Venta F-1-20251118213518-763', 'nota_venta', 1, '{\"ve_id\":15,\"fa_id\":14,\"ve_numero_documento\":\"SU1-1763516118\",\"fa_numero\":\"F-1-20251118213518-763\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"efectivo\"}', '2025-11-18 21:35:18'),
-(22, 'Nota Venta F-1-20251118213900-238', 'nota_venta', 1, '{\"ve_id\":16,\"fa_id\":15,\"ve_numero_documento\":\"SU1-1763516340\",\"fa_numero\":\"F-1-20251118213900-238\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":10,\"precio\":1,\"subtotal\":10}],\"subtotal\":10,\"total\":10,\"metodo_pago\":\"\"}', '2025-11-18 21:39:00'),
-(23, 'Nota Venta F-1-20251118213932-712', 'nota_venta', 1, '{\"ve_id\":17,\"fa_id\":16,\"ve_numero_documento\":\"SU1-1763516372\",\"fa_numero\":\"F-1-20251118213932-712\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":1,\"precio\":1,\"subtotal\":1}],\"subtotal\":1,\"total\":1,\"metodo_pago\":\"\"}', '2025-11-18 21:39:32'),
-(24, 'Compra COMP-2025-0004 - dadasda', 'compra', 1, '{\"compra_id\":4,\"numero_compra\":\"COMP-2025-0004\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"3\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-30\",\"numero_factura\":\"123123\",\"razon_social\":\"dadasda\",\"subtotal\":\"4500.00\",\"impuestos\":\"585.00\",\"total\":\"5085.00\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"8\",\"numero_lote\":\"MED-0004\",\"cantidad\":50,\"precio_compra\":10,\"precio_venta\":12,\"vencimiento\":\"2025-11-30\",\"activar_lote\":0},{\"medicamento_id\":\"9\",\"numero_lote\":\"MED-0005\",\"cantidad\":80,\"precio_compra\":50,\"precio_venta\":4,\"vencimiento\":\"2025-11-30\",\"activar_lote\":1}]}', '2025-11-19 18:13:29'),
-(25, 'Activación de Lote #MED-0004 (Salbutamol)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"4\",\"numero_lote\":\"MED-0004\",\"medicamento_id\":8,\"medicamento_nombre\":\"Salbutamol\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-19 18:13:59\",\"precio_compra\":10,\"precio_venta\":12,\"cantidad_cajas\":50,\"cantidad_unidades\":2500,\"subtotal_lote\":500,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-19 18:13:59'),
-(26, 'Compra COMP-2025-0005 - asaasdas', 'compra', 1, '{\"compra_id\":5,\"numero_compra\":\"COMP-2025-0005\",\"proveedor_id\":\"2\",\"laboratorio_id\":\"4\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-14\",\"numero_factura\":\"3213\",\"razon_social\":\"asaasdas\",\"subtotal\":\"200.00\",\"impuestos\":\"26.00\",\"total\":\"226.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"6\",\"numero_lote\":\"MED-0006\",\"cantidad\":40,\"precio_compra\":5,\"precio_venta\":6,\"vencimiento\":\"2025-11-30\",\"activar_lote\":0}]}', '2025-11-19 18:18:05'),
-(27, 'Activación de Lote #MED-0006 (Metformina)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"6\",\"numero_lote\":\"MED-0006\",\"medicamento_id\":6,\"medicamento_nombre\":\"Metformina\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-19 18:18:14\",\"precio_compra\":5,\"precio_venta\":6,\"cantidad_cajas\":40,\"cantidad_unidades\":1600,\"subtotal_lote\":200,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-19 18:18:14'),
-(28, 'Nota Venta F-1-20251119182056-490', 'nota_venta', 1, '{\"ve_id\":18,\"fa_id\":17,\"ve_numero_documento\":\"SU1-1763590856\",\"fa_numero\":\"F-1-20251119182056-490\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"cantidad\":5,\"precio\":4,\"subtotal\":20}],\"subtotal\":20,\"total\":20,\"metodo_pago\":\"\"}', '2025-11-19 18:20:56'),
-(29, 'Nota Venta F-1-20251119191058-905', 'nota_venta', 1, '{\"ve_id\":20,\"fa_id\":18,\"ve_numero_documento\":\"SU1-1763593857\",\"fa_numero\":\"F-1-20251119191058-905\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"4\",\"cantidad\":613,\"precio\":1,\"subtotal\":613}],\"subtotal\":613,\"total\":613,\"metodo_pago\":\"\"}', '2025-11-19 19:10:58'),
-(30, 'Compra COMP-2025-0006 - 423423423', 'compra', 1, '{\"compra_id\":6,\"numero_compra\":\"COMP-2025-0006\",\"proveedor_id\":\"4\",\"laboratorio_id\":\"6\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"423423\",\"razon_social\":\"423423423\",\"subtotal\":\"900.00\",\"impuestos\":\"117.00\",\"total\":\"1017.00\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-0007\",\"cantidad\":10,\"precio_compra\":50,\"precio_venta\":55,\"vencimiento\":\"2025-11-30\",\"activar_lote\":1},{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-0008\",\"cantidad\":10,\"precio_compra\":40,\"precio_venta\":50,\"vencimiento\":\"2025-11-30\",\"activar_lote\":1}]}', '2025-11-19 19:16:53'),
-(31, 'Nota Venta F-1-20251119195235-435', 'nota_venta', 1, '{\"ve_id\":21,\"fa_id\":19,\"ve_numero_documento\":\"SU1-1763596355\",\"fa_numero\":\"F-1-20251119195235-435\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"7\",\"cantidad\":4,\"precio\":55,\"subtotal\":220}],\"subtotal\":220,\"total\":220,\"metodo_pago\":\"\"}', '2025-11-19 19:52:35'),
-(32, 'Nota Venta F-1-20251119200054-901', 'nota_venta', 1, '{\"ve_id\":22,\"fa_id\":20,\"ve_numero_documento\":\"SU1-1763596854\",\"fa_numero\":\"F-1-20251119200054-901\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":\"5\",\"cantidad\":2,\"precio\":4,\"subtotal\":8}],\"subtotal\":8,\"total\":8,\"metodo_pago\":\"QR\"}', '2025-11-19 20:00:54'),
-(33, 'Nota Venta F-1-20251119201401-536', 'nota_venta', 1, '{\"ve_id\":23,\"fa_id\":21,\"ve_numero_documento\":\"SU1-1763597641\",\"fa_numero\":\"F-1-20251119201401-536\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"8\",\"lote_id\":\"4\",\"cantidad\":5,\"precio\":12,\"subtotal\":60}],\"subtotal\":60,\"total\":60,\"metodo_pago\":\"QR\"}', '2025-11-19 20:14:01'),
-(34, 'Nota Venta F-1-20251119201536-832', 'nota_venta', 1, '{\"ve_id\":24,\"fa_id\":22,\"ve_numero_documento\":\"SU1-1763597736\",\"fa_numero\":\"F-1-20251119201536-832\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"6\",\"lote_id\":\"6\",\"cantidad\":3,\"precio\":6,\"subtotal\":18}],\"subtotal\":18,\"total\":18,\"metodo_pago\":\"targeta\"}', '2025-11-19 20:15:36'),
-(35, 'Nota Venta F-1-20251119201750-601', 'nota_venta', 1, '{\"ve_id\":25,\"fa_id\":23,\"ve_numero_documento\":\"SU1-1763597870\",\"fa_numero\":\"F-1-20251119201750-601\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"8\",\"cantidad\":1,\"precio\":50,\"subtotal\":50}],\"subtotal\":50,\"total\":50,\"metodo_pago\":\"\"}', '2025-11-19 20:17:50'),
-(36, 'Nota Venta F-1-20251119202507-888', 'nota_venta', 1, '{\"ve_id\":26,\"fa_id\":24,\"ve_numero_documento\":\"SU1-1763598307\",\"fa_numero\":\"F-1-20251119202507-888\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"8\",\"cantidad\":3,\"precio\":50,\"subtotal\":150}],\"subtotal\":150,\"total\":150,\"metodo_pago\":\"efectivo\"}', '2025-11-19 20:25:07'),
-(37, 'Nota Venta F-1-20251119202638-787', 'nota_venta', 1, '{\"ve_id\":27,\"fa_id\":25,\"ve_numero_documento\":\"SU1-1763598398\",\"fa_numero\":\"F-1-20251119202638-787\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"8\",\"cantidad\":6,\"precio\":50,\"subtotal\":300}],\"subtotal\":300,\"total\":300,\"metodo_pago\":\"efectivo\"}', '2025-11-19 20:26:38'),
-(38, 'Compra COMP-2025-0007 - jjbhjg', 'compra', 1, '{\"compra_id\":7,\"numero_compra\":\"COMP-2025-0007\",\"proveedor_id\":\"3\",\"laboratorio_id\":\"6\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-28\",\"numero_factura\":\"65484\",\"razon_social\":\"jjbhjg\",\"subtotal\":\"3200.00\",\"impuestos\":\"416.00\",\"total\":\"3616.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"1\",\"numero_lote\":\"MED-0009\",\"cantidad\":80,\"precio_compra\":40,\"precio_venta\":2,\"vencimiento\":\"2025-11-30\",\"activar_lote\":0}]}', '2025-11-19 20:31:32'),
-(39, 'Activación de Lote #MED-0009 (Paracetamol)', 'Activacion', 1, '{\"tipo_informe\":\"activacion_lote\",\"lote_id\":\"9\",\"numero_lote\":\"MED-0009\",\"medicamento_id\":1,\"medicamento_nombre\":\"Paracetamol\",\"sucursal_id\":1,\"usuario_id\":\"1\",\"usuario_nombre\":\"admin\",\"fecha_activacion\":\"2025-11-19 20:32:18\",\"precio_compra\":40,\"precio_venta\":2,\"cantidad_cajas\":80,\"cantidad_unidades\":2304000,\"subtotal_lote\":192000,\"observaciones\":\"Activación inicial del lote e ingreso a inventario.\"}', '2025-11-19 20:32:18'),
-(40, 'Nota Venta F-1-20251119203410-148', 'nota_venta', 1, '{\"ve_id\":28,\"fa_id\":26,\"ve_numero_documento\":\"SU1-1763598850\",\"fa_numero\":\"F-1-20251119203410-148\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"6\",\"lote_id\":null,\"cantidad\":1,\"precio\":6,\"subtotal\":6}],\"subtotal\":6,\"total\":6,\"metodo_pago\":\"efectivo\"}', '2025-11-19 20:34:10'),
-(41, 'Nota Venta F-1-20251121181757-418', 'nota_venta', 1, '{\"ve_id\":29,\"fa_id\":27,\"ve_numero_documento\":\"SU1-1763763477\",\"fa_numero\":\"F-1-20251121181757-418\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"6\",\"lote_id\":\"6\",\"cantidad\":36,\"precio\":6,\"subtotal\":216}],\"subtotal\":216,\"total\":216,\"metodo_pago\":\"efectivo\"}', '2025-11-21 18:17:57'),
-(48, 'Nota Venta F-1-20251121191419-689', 'nota_venta', 1, '{\"ve_id\":36,\"fa_id\":34,\"ve_numero_documento\":\"SU1-1763766859\",\"fa_numero\":\"F-1-20251121191419-689\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":null,\"cantidad\":1,\"precio\":2,\"subtotal\":2}],\"subtotal\":2,\"total\":2,\"metodo_pago\":\"efectivo\"}', '2025-11-21 19:14:19'),
-(49, 'Nota Venta F-1-20251121191505-329', 'nota_venta', 1, '{\"ve_id\":37,\"fa_id\":35,\"ve_numero_documento\":\"SU1-1763766905\",\"fa_numero\":\"F-1-20251121191505-329\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":1500,\"precio\":4,\"subtotal\":6000}],\"subtotal\":6000,\"total\":6000,\"metodo_pago\":\"efectivo\"}', '2025-11-21 19:15:05'),
-(50, 'Nota Venta F-1-20251121191554-518', 'nota_venta', 1, '{\"ve_id\":38,\"fa_id\":36,\"ve_numero_documento\":\"SU1-1763766954\",\"fa_numero\":\"F-1-20251121191554-518\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"8\",\"lote_id\":null,\"cantidad\":1,\"precio\":12,\"subtotal\":12},{\"med_id\":\"1\",\"lote_id\":null,\"cantidad\":1,\"precio\":2,\"subtotal\":2},{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":1,\"precio\":4,\"subtotal\":4}],\"subtotal\":18,\"total\":18,\"metodo_pago\":\"efectivo\"}', '2025-11-21 19:15:54'),
-(51, 'Compra COMP-2025-0008 - ugo dabila', 'compra', 1, '{\"compra_id\":8,\"numero_compra\":\"COMP-2025-0008\",\"proveedor_id\":\"6\",\"laboratorio_id\":\"6\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-11-22\",\"numero_factura\":\"132132154541\",\"razon_social\":\"ugo dabila\",\"subtotal\":\"4500.00\",\"impuestos\":\"585.00\",\"total\":\"5085.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"3\",\"numero_lote\":\"MED-0010\",\"cantidad\":90,\"precio_compra\":50,\"precio_venta\":1,\"vencimiento\":\"2026-01-25\",\"activar_lote\":1}]}', '2025-11-22 16:37:12'),
-(52, 'Nota Venta F-1-20251123143046-670', 'nota_venta', 1, '{\"ve_id\":39,\"fa_id\":37,\"ve_numero_documento\":\"SU1-1763922646\",\"fa_numero\":\"F-1-20251123143046-670\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"9\",\"cantidad\":4,\"precio\":2,\"subtotal\":8}],\"subtotal\":8,\"total\":8,\"metodo_pago\":\"efectivo\"}', '2025-11-23 14:30:46'),
-(53, 'Nota Venta F-1-20251124004759-890', 'nota_venta', 1, '{\"ve_id\":40,\"fa_id\":38,\"ve_numero_documento\":\"SU1-1763959679\",\"fa_numero\":\"F-1-20251124004759-890\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":null,\"cantidad\":1,\"precio\":2,\"subtotal\":2}],\"subtotal\":2,\"total\":2,\"metodo_pago\":\"efectivo\"}', '2025-11-24 00:47:59'),
-(54, 'Nota Venta F-1-20251124185328-130', 'nota_venta', 1, '{\"ve_id\":41,\"fa_id\":39,\"ve_numero_documento\":\"SU1-1764024808\",\"fa_numero\":\"F-1-20251124185328-130\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"9\",\"cantidad\":9,\"precio\":2,\"subtotal\":18}],\"subtotal\":18,\"total\":18,\"metodo_pago\":\"efectivo\"}', '2025-11-24 18:53:28'),
-(55, 'Nota Venta F-1-20251124185352-661', 'nota_venta', 1, '{\"ve_id\":42,\"fa_id\":40,\"ve_numero_documento\":\"SU1-1764024832\",\"fa_numero\":\"F-1-20251124185352-661\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"1\",\"lote_id\":\"9\",\"cantidad\":1,\"precio\":2,\"subtotal\":2},{\"med_id\":\"9\",\"lote_id\":\"5\",\"cantidad\":1,\"precio\":4,\"subtotal\":4}],\"subtotal\":6,\"total\":6,\"metodo_pago\":\"efectivo\"}', '2025-11-24 18:53:52'),
-(56, 'Nota Venta F-1-20251126142949-627', 'nota_venta', 1, '{\"ve_id\":43,\"fa_id\":41,\"ve_numero_documento\":\"SU1-1764181789\",\"fa_numero\":\"F-1-20251126142949-627\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":6,\"precio\":4,\"subtotal\":24}],\"subtotal\":24,\"total\":24,\"metodo_pago\":\"efectivo\"}', '2025-11-26 14:29:49'),
-(57, 'Devolución #1 - Venta #14', 'devolucion', 1, '{\"dev_id\":1,\"ve_id\":14,\"fa_id\":13,\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"dv_id\":\"14\",\"med_id\":\"5\",\"lm_id\":\"1\",\"cantidad\":1,\"precio_unitario\":\"4.00\",\"motivo\":\"por fecha vencida\",\"tipo\":\"devolucion\"}],\"total_devolucion\":4,\"cantidad_items\":1,\"motivo\":\"por fecha vencida\",\"fecha\":\"2025-11-26 18:58:12\"}', '2025-11-26 18:58:12'),
-(58, 'Nota Venta F-1-20251126190218-219', 'nota_venta', 1, '{\"ve_id\":44,\"fa_id\":42,\"ve_numero_documento\":\"SU1-1764198138\",\"fa_numero\":\"F-1-20251126190218-219\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":1,\"precio\":4,\"subtotal\":4}],\"subtotal\":4,\"total\":4,\"metodo_pago\":\"efectivo\"}', '2025-11-26 19:02:18'),
-(59, 'Nota Venta F-1-20251126220551-630', 'nota_venta', 1, '{\"ve_id\":45,\"fa_id\":43,\"ve_numero_documento\":\"SU1-1764209151\",\"fa_numero\":\"F-1-20251126220551-630\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"3\",\"lote_id\":\"10\",\"cantidad\":1,\"precio\":1,\"subtotal\":1}],\"subtotal\":1,\"total\":1,\"metodo_pago\":\"efectivo\"}', '2025-11-26 22:05:51'),
-(60, 'Devolución #2 - Venta #45', 'devolucion', 1, '{\"dev_id\":2,\"ve_id\":45,\"fa_id\":43,\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"dv_id\":\"49\",\"med_id\":\"3\",\"lm_id\":\"10\",\"cantidad\":1,\"precio_unitario\":\"1.00\",\"motivo\":\"fdsgsgsd\",\"tipo\":\"cambio\"}],\"total_devolucion\":1,\"cantidad_items\":1,\"motivo\":\"fdsgsgsd\",\"fecha\":\"2025-11-26 22:10:35\"}', '2025-11-26 22:10:35'),
-(61, 'Nota Venta F-1-20251127202924-593', 'nota_venta', 3, '{\"ve_id\":46,\"fa_id\":44,\"ve_numero_documento\":\"SU1-1764289764\",\"fa_numero\":\"F-1-20251127202924-593\",\"usuario_id\":3,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":4,\"precio\":4,\"subtotal\":16}],\"subtotal\":16,\"total\":16,\"metodo_pago\":\"efectivo\"}', '2025-11-27 20:29:24'),
-(62, 'Nota Venta F-1-20251127202957-736', 'nota_venta', 3, '{\"ve_id\":47,\"fa_id\":45,\"ve_numero_documento\":\"SU1-1764289797\",\"fa_numero\":\"F-1-20251127202957-736\",\"usuario_id\":3,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":3,\"precio\":4,\"subtotal\":12},{\"med_id\":\"1\",\"lote_id\":null,\"cantidad\":5,\"precio\":2,\"subtotal\":10},{\"med_id\":\"8\",\"lote_id\":null,\"cantidad\":2,\"precio\":12,\"subtotal\":24},{\"med_id\":\"3\",\"lote_id\":null,\"cantidad\":3,\"precio\":1,\"subtotal\":3},{\"med_id\":\"1\",\"lote_id\":\"9\",\"cantidad\":3,\"precio\":2,\"subtotal\":6}],\"subtotal\":55,\"total\":55,\"metodo_pago\":\"efectivo\"}', '2025-11-27 20:29:57'),
-(63, 'Nota Venta F-1-20251127203019-650', 'nota_venta', 3, '{\"ve_id\":48,\"fa_id\":46,\"ve_numero_documento\":\"SU1-1764289819\",\"fa_numero\":\"F-1-20251127203019-650\",\"usuario_id\":3,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":null,\"cantidad\":3,\"precio\":4,\"subtotal\":12},{\"med_id\":\"9\",\"lote_id\":\"5\",\"cantidad\":3,\"precio\":4,\"subtotal\":12}],\"subtotal\":24,\"total\":24,\"metodo_pago\":\"efectivo\"}', '2025-11-27 20:30:19'),
-(64, 'Nota Venta F-1-20251128185730-511', 'nota_venta', 1, '{\"ve_id\":49,\"fa_id\":47,\"ve_numero_documento\":\"SU1-1764370650\",\"fa_numero\":\"F-1-20251128185730-511\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"9\",\"lote_id\":\"5\",\"cantidad\":3,\"precio\":4,\"subtotal\":12}],\"subtotal\":12,\"total\":12,\"metodo_pago\":\"efectivo\"}', '2025-11-28 18:57:30');
 
 -- --------------------------------------------------------
 
@@ -574,19 +326,6 @@ CREATE TABLE `inventarios` (
   `inv_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `inv_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `inventarios`
---
-
-INSERT INTO `inventarios` (`inv_id`, `med_id`, `su_id`, `inv_total_cajas`, `inv_total_unidades`, `inv_total_valorado`, `inv_minimo`, `inv_maximo`, `inv_codigo_barras`, `inv_stock_alerta`, `inv_actualizado_en`, `inv_creado_en`) VALUES
-(1, 5, 1, 0, 0, '42.00', 0, NULL, NULL, 0, '2025-11-19 18:20:56', '2025-11-17 14:35:47'),
-(2, 4, 1, 0, 0, '58756.00', 0, NULL, NULL, 0, '2025-11-19 19:10:58', '2025-11-17 14:57:06'),
-(4, 9, 1, 48, 2313, '4000.00', 0, NULL, NULL, 0, '2025-11-28 18:57:30', '2025-11-19 18:13:28'),
-(5, 8, 1, 2542, 2542, '1000.00', 0, NULL, NULL, 0, '2025-11-27 20:29:57', '2025-11-19 18:13:59'),
-(7, 6, 1, 1600, 1600, '400.00', 0, NULL, NULL, 0, '2025-11-21 18:17:57', '2025-11-19 18:18:14'),
-(9, 1, 1, 38479, 2308781, '196100.00', 0, NULL, NULL, 0, '2025-11-27 20:29:57', '2025-11-19 19:16:53'),
-(13, 3, 1, 89, 2695, '4500.00', 0, NULL, NULL, 0, '2025-11-27 20:29:57', '2025-11-22 16:37:12');
 
 -- --------------------------------------------------------
 
@@ -646,22 +385,6 @@ CREATE TABLE `lote_medicamento` (
   `lm_origen_id` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'si este registro proviene de la división/transferencia de otro lm_id',
   `lm_tr_bloqueado` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'ID de transferencia que tiene bloqueado este stock'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `lote_medicamento`
---
-
-INSERT INTO `lote_medicamento` (`lm_id`, `med_id`, `su_id`, `pr_id`, `pr_id_compra`, `lm_numero_lote`, `lm_cant_caja`, `lm_cant_blister`, `lm_cant_unidad`, `lm_cant_actual_cajas`, `lm_cant_actual_unidades`, `lm_precio_compra`, `lm_precio_venta`, `lm_fecha_ingreso`, `lm_fecha_vencimiento`, `lm_estado`, `lm_creado_en`, `lm_actualizado_en`, `lm_origen_id`, `lm_tr_bloqueado`) VALUES
-(1, 5, 1, 1, 1, 'MED-0001', 6, 1, 1, 0, 0, '7.00', '4.00', '2025-11-13 13:55:49', '2025-11-28', 'terminado', '2025-11-13 13:55:49', '2025-11-21 18:20:12', NULL, NULL),
-(2, 4, 1, 3, 2, 'MED-0002', 234, 1, 1, 0, 0, '234.00', '523.00', '2025-11-16 13:30:17', '2025-12-03', 'terminado', '2025-11-16 13:30:17', '2025-11-21 18:20:12', NULL, NULL),
-(3, 4, 1, 1, 3, 'MED-0003', 10, 4, 10, 0, 0, '10.00', '1.00', '2025-11-18 10:26:29', '2025-12-07', 'terminado', '2025-11-18 10:26:29', '2025-11-21 18:20:12', NULL, NULL),
-(4, 8, 1, 3, 4, 'MED-0004', 50, 1, 1, 42, 42, '10.00', '12.00', '2025-11-19 18:13:28', '2025-11-30', 'activo', '2025-11-19 18:13:28', '2025-11-27 20:29:57', NULL, NULL),
-(5, 9, 1, 3, 4, 'MED-0005', 80, 6, 8, 48, 2313, '50.00', '4.00', '2025-11-19 18:13:28', '2025-11-30', 'activo', '2025-11-19 18:13:28', '2025-11-28 18:57:30', NULL, NULL),
-(6, 6, 1, 2, 5, 'MED-0006', 40, 1, 1, 0, 0, '5.00', '6.00', '2025-11-19 18:18:05', '2025-11-30', 'terminado', '2025-11-19 18:18:05', '2025-11-21 18:17:57', NULL, NULL),
-(7, 1, 1, 4, 6, 'MED-0007', 10, 1, 1, 0, 0, '50.00', '55.00', '2025-11-19 19:16:53', '2025-11-30', 'terminado', '2025-11-19 19:16:53', '2025-11-21 18:20:12', NULL, NULL),
-(8, 1, 1, 4, 6, 'MED-0008', 10, 1, 1, 0, 0, '40.00', '50.00', '2025-11-19 19:16:53', '2025-11-30', 'terminado', '2025-11-19 19:16:53', '2025-11-23 14:30:46', NULL, NULL),
-(9, 1, 1, 3, 7, 'MED-0009', 80, 6, 10, 79, 4781, '40.00', '2.00', '2025-11-19 20:31:32', '2025-11-30', 'activo', '2025-11-19 20:31:32', '2025-11-27 20:29:57', NULL, NULL),
-(10, 3, 1, 6, 8, 'MED-0010', 90, 5, 6, 89, 2695, '50.00', '1.00', '2025-11-22 16:37:12', '2026-01-25', 'activo', '2025-11-22 16:37:12', '2025-11-27 20:29:57', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -741,18 +464,6 @@ CREATE TABLE `movimiento_caja` (
   `mc_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `movimiento_caja`
---
-
-INSERT INTO `movimiento_caja` (`mc_id`, `caja_id`, `us_id`, `mc_tipo`, `mc_monto`, `mc_concepto`, `mc_referencia_tipo`, `mc_referencia_id`, `mc_fecha`) VALUES
-(43, 7, 1, 'venta', '4.00', 'Venta SU1-1764198138', 'venta', 44, '2025-11-26 19:02:18'),
-(44, 7, 1, 'venta', '1.00', 'Venta SU1-1764209151', 'venta', 45, '2025-11-26 22:05:51'),
-(45, 9, 3, 'venta', '16.00', 'Venta SU1-1764289764', 'venta', 46, '2025-11-27 20:29:24'),
-(46, 9, 3, 'venta', '55.00', 'Venta SU1-1764289797', 'venta', 47, '2025-11-27 20:29:57'),
-(47, 9, 3, 'venta', '24.00', 'Venta SU1-1764289819', 'venta', 48, '2025-11-27 20:30:19'),
-(48, 7, 1, 'venta', '12.00', 'Venta SU1-1764370650', 'venta', 49, '2025-11-28 18:57:30');
-
 -- --------------------------------------------------------
 
 --
@@ -774,68 +485,6 @@ CREATE TABLE `movimiento_inventario` (
   `mi_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `mi_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `movimiento_inventario`
---
-
-INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
-(1, 1, 5, 1, 1, 'entrada', 36, 'unidad', 'activacion', 1, 'Ingreso por Activacion de lote MED-0001', '2025-11-17 14:35:47', 1),
-(2, 2, 4, 1, 1, 'entrada', 54756, 'unidad', 'activacion', 2, 'Ingreso por Activacion de lote MED-0002', '2025-11-17 14:57:06', 1),
-(3, 3, 4, 1, 1, 'entrada', 16000, 'unidad', 'activacion', 3, 'Ingreso por Activacion de lote MED-0003', '2025-11-18 10:27:56', 1),
-(4, NULL, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 1, 'Venta #SU1-1763476327', '2025-11-18 10:32:07', 1),
-(17, 1, 5, 1, 1, 'salida', 1, 'unidad', 'venta', 14, 'Venta SU1-1763515524 (lm_id 1)', '2025-11-18 21:25:24', 1),
-(18, 2, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 15, 'Venta SU1-1763516118 (lm_id 2)', '2025-11-18 21:35:18', 1),
-(19, 2, 4, 1, 1, 'salida', 10, 'unidad', 'venta', 16, 'Venta SU1-1763516340 (lm_id 2)', '2025-11-18 21:39:00', 1),
-(20, 2, 4, 1, 1, 'salida', 1, 'unidad', 'venta', 17, 'Venta SU1-1763516372 (lm_id 2)', '2025-11-18 21:39:32', 1),
-(21, 5, 9, 1, 1, 'entrada', 3840, 'unidad', 'compra', 4, 'Ingreso por compra COMP-2025-0004', '2025-11-19 18:13:28', 1),
-(22, 4, 8, 1, NULL, 'entrada', 50, 'unidad', 'activacion_lote', 4, 'Activación manual de lote MED-0004', '2025-11-19 18:13:59', 1),
-(23, 4, 8, 1, 1, 'entrada', 2500, 'unidad', 'activacion', 4, 'Ingreso por Activacion de lote MED-0004', '2025-11-19 18:13:59', 1),
-(24, 6, 6, 1, 1, 'entrada', 40, 'unidad', 'activacion_lote', 6, 'Activación manual de lote MED-0006', '2025-11-19 18:18:14', 1),
-(25, 6, 6, 1, 1, 'entrada', 1600, 'unidad', 'activacion', 6, 'Ingreso por Activacion de lote MED-0006', '2025-11-19 18:18:14', 1),
-(26, 1, 5, 1, 1, 'salida', 5, 'unidad', 'venta', 18, 'Venta SU1-1763590856 (lm_id 1)', '2025-11-19 18:20:56', 1),
-(27, 2, 4, 1, 1, 'salida', 213, 'unidad', 'venta', 20, 'Venta SU1-1763593857 (lm_id 2)', '2025-11-19 19:10:57', 1),
-(28, 3, 4, 1, 1, 'salida', 400, 'unidad', 'venta', 20, 'Venta SU1-1763593857 (lm_id 3)', '2025-11-19 19:10:57', 1),
-(29, 7, 1, 1, 1, 'entrada', 10, 'unidad', 'compra', 6, 'Ingreso por compra COMP-2025-0006', '2025-11-19 19:16:53', 1),
-(30, 8, 1, 1, 1, 'entrada', 10, 'unidad', 'compra', 6, 'Ingreso por compra COMP-2025-0006', '2025-11-19 19:16:53', 1),
-(31, 7, 1, 1, 1, 'salida', 4, 'unidad', 'venta', 21, 'Venta SU1-1763596355 (lm_id 7)', '2025-11-19 19:52:35', 1),
-(32, 5, 9, 1, 1, 'salida', 2, 'unidad', 'venta', 22, 'Venta SU1-1763596854 (lm_id 5)', '2025-11-19 20:00:54', 1),
-(33, 4, 8, 1, 1, 'salida', 5, 'unidad', 'venta', 23, 'Venta SU1-1763597641 (lm_id 4)', '2025-11-19 20:14:01', 1),
-(34, 6, 6, 1, 1, 'salida', 3, 'unidad', 'venta', 24, 'Venta SU1-1763597736 (lm_id 6)', '2025-11-19 20:15:36', 1),
-(35, 7, 1, 1, 1, 'salida', 1, 'unidad', 'venta', 25, 'Venta SU1-1763597870 (lm_id 7)', '2025-11-19 20:17:50', 1),
-(36, 7, 1, 1, 1, 'salida', 3, 'unidad', 'venta', 26, 'Venta SU1-1763598307 (lm_id 7)', '2025-11-19 20:25:07', 1),
-(37, 7, 1, 1, 1, 'salida', 2, 'unidad', 'venta', 27, 'Venta SU1-1763598398 (lm_id 7)', '2025-11-19 20:26:38', 1),
-(38, 8, 1, 1, 1, 'salida', 4, 'unidad', 'venta', 27, 'Venta SU1-1763598398 (lm_id 8)', '2025-11-19 20:26:38', 1),
-(39, 9, 1, 1, 1, 'entrada', 4800, 'unidad', 'activacion_lote', 9, 'Activación manual de lote MED-0009', '2025-11-19 20:32:18', 1),
-(40, 9, 1, 1, 1, 'entrada', 2304000, 'unidad', 'activacion', 9, 'Ingreso por Activacion de lote MED-0009', '2025-11-19 20:32:18', 1),
-(41, 6, 6, 1, 1, 'salida', 1, 'unidad', 'venta', 28, 'Venta SU1-1763598850 (lm_id 6)', '2025-11-19 20:34:10', 1),
-(42, 6, 6, 1, 1, 'salida', 36, 'unidad', 'venta', 29, 'Venta SU1-1763763477 (lm_id 6)', '2025-11-21 18:17:57', 1),
-(49, 8, 1, 1, 1, 'salida', 1, 'unidad', 'venta', 36, 'Venta SU1-1763766859 (lm_id 8)', '2025-11-21 19:14:19', 1),
-(50, 5, 9, 1, 1, 'salida', 1500, 'unidad', 'venta', 37, 'Venta SU1-1763766905 (lm_id 5)', '2025-11-21 19:15:05', 1),
-(51, 4, 8, 1, 1, 'salida', 1, 'unidad', 'venta', 38, 'Venta SU1-1763766954 (lm_id 4)', '2025-11-21 19:15:54', 1),
-(52, 8, 1, 1, 1, 'salida', 1, 'unidad', 'venta', 38, 'Venta SU1-1763766954 (lm_id 8)', '2025-11-21 19:15:54', 1),
-(53, 5, 9, 1, 1, 'salida', 1, 'unidad', 'venta', 38, 'Venta SU1-1763766954 (lm_id 5)', '2025-11-21 19:15:54', 1),
-(54, 10, 3, 1, 1, 'entrada', 2700, 'unidad', 'compra', 8, 'Ingreso por compra COMP-2025-0008', '2025-11-22 16:37:12', 1),
-(55, 8, 1, 1, 1, 'salida', 4, 'unidad', 'venta', 39, 'Venta SU1-1763922646 (lm_id 8)', '2025-11-23 14:30:46', 1),
-(56, 9, 1, 1, 1, 'salida', 1, 'unidad', 'venta', 40, 'Venta SU1-1763959679 (lm_id 9)', '2025-11-24 00:47:59', 1),
-(57, 9, 1, 1, 1, 'salida', 9, 'unidad', 'venta', 41, 'Venta SU1-1764024808 (lm_id 9)', '2025-11-24 18:53:28', 1),
-(58, 9, 1, 1, 1, 'salida', 1, 'unidad', 'venta', 42, 'Venta SU1-1764024832 (lm_id 9)', '2025-11-24 18:53:52', 1),
-(59, 5, 9, 1, 1, 'salida', 1, 'unidad', 'venta', 42, 'Venta SU1-1764024832 (lm_id 5)', '2025-11-24 18:53:52', 1),
-(60, 5, 9, 1, 1, 'salida', 6, 'unidad', 'venta', 43, 'Venta SU1-1764181789 (lm_id 5)', '2025-11-26 14:29:49', 1),
-(61, 1, 5, 1, 1, 'baja', 1, 'unidad', 'devolucion', 1, 'Devolución: por fecha vencida', '2025-11-26 18:58:12', 1),
-(62, 5, 9, 1, 1, 'salida', 1, 'unidad', 'venta', 44, 'Venta SU1-1764198138 (lm_id 5)', '2025-11-26 19:02:18', 1),
-(63, 10, 3, 1, 1, 'salida', 1, 'unidad', 'venta', 45, 'Venta SU1-1764209151 (lm_id 10)', '2025-11-26 22:05:51', 1),
-(64, 10, 3, 1, 1, 'baja', 1, 'unidad', 'devolucion', 2, 'Devolución: fdsgsgsd', '2025-11-26 22:10:35', 1),
-(65, 10, 3, 1, 1, 'salida', 1, 'unidad', 'cambio', 2, 'Cambio por devolución: fdsgsgsd', '2025-11-26 22:10:35', 1),
-(66, 5, 9, 1, 3, 'salida', 4, 'unidad', 'venta', 46, 'Venta SU1-1764289764 (lm_id 5)', '2025-11-27 20:29:24', 1),
-(67, 5, 9, 1, 3, 'salida', 3, 'unidad', 'venta', 47, 'Venta SU1-1764289797 (lm_id 5)', '2025-11-27 20:29:57', 1),
-(68, 9, 1, 1, 3, 'salida', 5, 'unidad', 'venta', 47, 'Venta SU1-1764289797 (lm_id 9)', '2025-11-27 20:29:57', 1),
-(69, 4, 8, 1, 3, 'salida', 2, 'unidad', 'venta', 47, 'Venta SU1-1764289797 (lm_id 4)', '2025-11-27 20:29:57', 1),
-(70, 10, 3, 1, 3, 'salida', 3, 'unidad', 'venta', 47, 'Venta SU1-1764289797 (lm_id 10)', '2025-11-27 20:29:57', 1),
-(71, 9, 1, 1, 3, 'salida', 3, 'unidad', 'venta', 47, 'Venta SU1-1764289797 (lm_id 9)', '2025-11-27 20:29:57', 1),
-(72, 5, 9, 1, 3, 'salida', 3, 'unidad', 'venta', 48, 'Venta SU1-1764289819 (lm_id 5)', '2025-11-27 20:30:19', 1),
-(73, 5, 9, 1, 3, 'salida', 3, 'unidad', 'venta', 48, 'Venta SU1-1764289819 (lm_id 5)', '2025-11-27 20:30:19', 1),
-(74, 5, 9, 1, 1, 'salida', 3, 'unidad', 'venta', 49, 'Venta SU1-1764370650 (lm_id 5)', '2025-11-28 18:57:30', 1);
 
 -- --------------------------------------------------------
 
@@ -953,7 +602,8 @@ CREATE TABLE `sucursales` (
 
 INSERT INTO `sucursales` (`su_id`, `su_nombre`, `su_direccion`, `su_telefono`, `su_creado_en`, `su_actualizado_en`, `su_estado`) VALUES
 (1, 'Sucursal Central', 'Av. Principal 123, Ciudad', '+591-2-1234567', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1),
-(2, 'sucursal 2', 'calle siempre viva', '123456789', '2025-11-20 21:18:42', '2025-11-20 21:18:42', 1);
+(2, 'sucursal 2', 'calle siempre viva', '123456789', '2025-11-20 21:18:42', '2025-11-20 21:18:42', 1),
+(3, 'dasd', 'sadas', '21312', '2025-12-02 20:37:20', '2025-12-02 20:37:20', 1);
 
 -- --------------------------------------------------------
 
@@ -1049,7 +699,8 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`us_id`, `us_nombres`, `us_apellido_paterno`, `us_apellido_materno`, `us_numero_carnet`, `us_telefono`, `us_correo`, `us_direccion`, `us_username`, `us_password_hash`, `us_token_recuperacion`, `us_token_expiracion`, `us_creado_en`, `us_actualizado_en`, `us_estado`, `su_id`, `ro_id`) VALUES
 (1, 'admin', 'admin', 'admin', '000000000', '000000000', 'admin@admin.com', 'admin calle admin', 'admin', 'dlo5ZmZvbmRjME41dGlDY01tTGcrUT09', NULL, NULL, '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1, 1, 1),
 (2, 'usuario', 'usuario', 'usuario', '1235497866656', '122565165464', 'usuario@usuario.usuario', 'usuariousuario', 'usuario', 'Q0oxTTdMNktnMzhoQjBDOXFJWXI1Zz09', NULL, NULL, '2025-11-20 21:30:31', '2025-11-27 18:04:46', 0, 2, 3),
-(3, 'gerente', 'gerente', 'gerente', '123321321', '', '', 'gerente', 'gerente', 'ZFA3UHhUdGwrVERjWjVCSmhWaFJpdz09', NULL, NULL, '2025-11-27 18:05:22', '2025-11-27 20:54:02', 1, 1, 2);
+(3, 'gerente', 'gerente', 'gerente', '123321321', '', NULL, 'gerente', 'gerente', 'ZFA3UHhUdGwrVERjWjVCSmhWaFJpdz09', NULL, NULL, '2025-11-27 18:05:22', '2025-12-02 20:47:16', 1, 1, 2),
+(5, 'caja', 'caja', 'caja', '51325346452634', '', '', '', 'caja', 'M29oVHhvbnExOFQ5TS9ha1hmRG11QT09', NULL, NULL, '2025-12-02 20:47:20', '2025-12-02 20:47:50', 1, 2, 3);
 
 -- --------------------------------------------------------
 
@@ -1075,42 +726,6 @@ CREATE TABLE `ventas` (
   `ve_numero_control` varchar(100) DEFAULT NULL,
   `ve_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `ventas`
---
-
-INSERT INTO `ventas` (`ve_id`, `ve_numero_documento`, `ve_fecha_emision`, `cl_id`, `us_id`, `su_id`, `caja_id`, `ve_subtotal`, `ve_impuesto`, `ve_total`, `ve_actualizado_en`, `ve_metodo_pago`, `ve_tipo_documento`, `ve_estado_documento`, `ve_numero_control`, `ve_estado`) VALUES
-(1, 'SU1-1763476327', '2025-11-18 10:32:07', 8, 1, 1, NULL, '10.00', '0.00', '10.00', '2025-11-18 10:32:07', 'efectivo', 'nota de venta', 'emitida', NULL, 1),
-(14, 'SU1-1763515524', '2025-11-18 21:25:24', 3, 1, 1, NULL, '4.00', '0.00', '4.00', '2025-11-26 18:58:12', 'efectivo', 'nota de venta', 'devuelto', NULL, 1),
-(15, 'SU1-1763516118', '2025-11-18 21:35:18', 7, 1, 1, NULL, '10.00', '0.00', '10.00', '2025-11-18 21:35:18', 'efectivo', 'nota de venta', 'emitida', NULL, 1),
-(16, 'SU1-1763516340', '2025-11-18 21:39:00', NULL, 1, 1, NULL, '10.00', '0.00', '10.00', '2025-11-18 21:39:00', 'efectivo', '', 'emitida', NULL, 1),
-(17, 'SU1-1763516372', '2025-11-18 21:39:32', NULL, 1, 1, NULL, '1.00', '0.00', '1.00', '2025-11-18 21:39:32', 'efectivo', '', 'emitida', NULL, 1),
-(18, 'SU1-1763590856', '2025-11-19 18:20:56', 4, 1, 1, NULL, '20.00', '0.00', '20.00', '2025-11-19 18:20:56', 'efectivo', '', 'emitida', NULL, 1),
-(20, 'SU1-1763593857', '2025-11-19 19:10:57', NULL, 1, 1, NULL, '613.00', '0.00', '613.00', '2025-11-19 19:10:57', 'efectivo', '', 'emitida', NULL, 1),
-(21, 'SU1-1763596355', '2025-11-19 19:52:35', NULL, 1, 1, NULL, '220.00', '0.00', '220.00', '2025-11-19 19:52:35', 'efectivo', '', 'emitida', NULL, 1),
-(22, 'SU1-1763596854', '2025-11-19 20:00:54', NULL, 1, 1, NULL, '8.00', '0.00', '8.00', '2025-11-19 20:00:54', 'efectivo', 'nota de venta', 'emitida', NULL, 1),
-(23, 'SU1-1763597641', '2025-11-19 20:14:01', NULL, 1, 1, NULL, '60.00', '0.00', '60.00', '2025-11-19 20:14:01', 'QR', 'factura', 'emitida', NULL, 1),
-(24, 'SU1-1763597736', '2025-11-19 20:15:36', NULL, 1, 1, NULL, '18.00', '0.00', '18.00', '2025-11-19 20:15:36', 'targeta', '', '\'emitida\'', NULL, 1),
-(25, 'SU1-1763597870', '2025-11-19 20:17:50', NULL, 1, 1, NULL, '50.00', '0.00', '50.00', '2025-11-19 20:17:50', '', '', '\'emitida\'', NULL, 1),
-(26, 'SU1-1763598307', '2025-11-19 20:25:07', NULL, 1, 1, NULL, '150.00', '0.00', '150.00', '2025-11-19 20:25:07', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(27, 'SU1-1763598398', '2025-11-19 20:26:38', NULL, 1, 1, NULL, '300.00', '0.00', '300.00', '2025-11-19 20:26:38', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(28, 'SU1-1763598850', '2025-11-19 20:34:10', NULL, 1, 1, NULL, '6.00', '0.00', '6.00', '2025-11-19 20:34:10', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(29, 'SU1-1763763477', '2025-11-21 18:17:57', NULL, 1, 1, NULL, '216.00', '0.00', '216.00', '2025-11-21 18:17:57', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(36, 'SU1-1763766859', '2025-11-21 19:14:19', NULL, 1, 1, NULL, '2.00', '0.00', '2.00', '2025-11-21 19:14:19', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(37, 'SU1-1763766905', '2025-11-21 19:15:05', NULL, 1, 1, NULL, '6000.00', '0.00', '6000.00', '2025-11-21 19:15:05', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(38, 'SU1-1763766954', '2025-11-21 19:15:54', NULL, 1, 1, NULL, '18.00', '0.00', '18.00', '2025-11-21 19:15:54', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(39, 'SU1-1763922646', '2025-11-23 14:30:46', NULL, 1, 1, NULL, '8.00', '0.00', '8.00', '2025-11-23 14:30:46', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(40, 'SU1-1763959679', '2025-11-24 00:47:59', NULL, 1, 1, NULL, '2.00', '0.00', '2.00', '2025-11-24 00:47:59', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(41, 'SU1-1764024808', '2025-11-24 18:53:28', NULL, 1, 1, NULL, '18.00', '0.00', '18.00', '2025-11-24 18:53:28', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(42, 'SU1-1764024832', '2025-11-24 18:53:52', NULL, 1, 1, NULL, '6.00', '0.00', '6.00', '2025-11-24 18:53:52', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(43, 'SU1-1764181789', '2025-11-26 14:29:49', NULL, 1, 1, NULL, '24.00', '0.00', '24.00', '2025-11-26 14:29:49', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(44, 'SU1-1764198138', '2025-11-26 19:02:18', 3, 1, 1, 7, '4.00', '0.00', '4.00', '2025-11-26 19:02:18', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(45, 'SU1-1764209151', '2025-11-26 22:05:51', NULL, 1, 1, 7, '1.00', '0.00', '1.00', '2025-11-26 22:10:35', 'efectivo', 'nota de venta', 'devuelto', NULL, 1),
-(46, 'SU1-1764289764', '2025-11-27 20:29:24', NULL, 3, 1, 9, '16.00', '0.00', '16.00', '2025-11-27 20:29:24', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(47, 'SU1-1764289797', '2025-11-27 20:29:57', 3, 3, 1, 9, '55.00', '0.00', '55.00', '2025-11-27 20:29:57', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(48, 'SU1-1764289819', '2025-11-27 20:30:19', 3, 3, 1, 9, '24.00', '0.00', '24.00', '2025-11-27 20:30:19', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(49, 'SU1-1764370650', '2025-11-28 18:57:30', NULL, 1, 1, 7, '12.00', '0.00', '12.00', '2025-11-28 18:57:30', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -1454,7 +1069,7 @@ ALTER TABLE `configuracion_empresa`
 -- AUTO_INCREMENT de la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_peticion`
@@ -1466,19 +1081,19 @@ ALTER TABLE `detalle_peticion`
 -- AUTO_INCREMENT de la tabla `detalle_transferencia`
 --
 ALTER TABLE `detalle_transferencia`
-  MODIFY `dt_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `dt_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
-  MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
@@ -1550,7 +1165,7 @@ ALTER TABLE `movimiento_caja`
 -- AUTO_INCREMENT de la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT de la tabla `peticiones`
@@ -1580,7 +1195,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `sucursales`
 --
 ALTER TABLE `sucursales`
-  MODIFY `su_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `su_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `transferencias`
@@ -1598,7 +1213,7 @@ ALTER TABLE `uso_farmacologico`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `us_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `us_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas`
@@ -1800,36 +1415,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-
-
-
-/* Breve descripción de cada tabla (para usar como prompt o documentación)
-Tabla	Descripción breve
-
-
-sucursales	Registra las sucursales físicas donde se manejan inventarios y ventas.
-proveedores	Contiene los proveedores de medicamentos, sin vinculación directa a laboratorios.
-laboratorios	Clasifica los laboratorios productores de medicamentos.
-forma_farmaceutica	Define la forma farmacéutica de cada medicamento (jarabe, cápsula, inyectable, etc.).
-uso_farmacologico	Clasifica medicamentos según su uso (analgésico, antibiótico, etc.).
-via_de_administracion	Indica la vía de aplicación del medicamento (oral, tópica, etc.).
-roles	Define los roles del sistema (administrador, gerente, usuario).
-usuarios	Registra los usuarios del sistema y sus credenciales.
-clientes	Guarda los datos de clientes frecuentes para emitir notas y facturas.
-medicamento	Almacena la información base de los medicamentos (composición, código de barras, laboratorio, presentación, precios).
-lote_medicamento	Registra los lotes físicos de medicamentos, cantidades por caja/blíster/unidad, fechas y sucursal donde se encuentran. Fuente principal de stock.
-inventarios	Tabla resumen del stock total por medicamento y sucursal; consolida datos de los lotes.
-compras	Encabezado de cada compra o reabastecimiento de medicamentos a la farmacia.
-detalle_compra	Detalla los medicamentos comprados en cada orden de compra.
-ventas	Encabezado de las ventas realizadas en las sucursales.
-detalle_venta	Detalle de cada producto vendido (por unidad o por caja), con referencia opcional a lote.
-factura	Registro de facturas generadas en ventas, con posibilidad de integrarse a SIAT.
-facturacion_electronica	Tabla preparada para la integración con el sistema SIAT de Bolivia (CUF, QR, estado, etc.).
-movimiento_inventario	Registro histórico de movimientos de stock (entradas, salidas, transferencias, ajustes).
-historial_lote	Historial de acciones sobre lotes (creación, activación, caducidad, baja, etc.).
-merma	Registra pérdidas de inventario por deterioro, vencimiento u otros motivos.
-caja	Define las cajas de punto de venta asociadas a cada sucursal.
-movimiento_caja	Registra entradas y salidas de efectivo de cada caja.
-informes	Guarda configuraciones o reportes generados por los usuarios.
-devoluciones	Registra las devoluciones de productos por los clientes, sin reingreso automático a stock. */
+ALTER TABLE `usuarios` DROP INDEX `ux_usuarios_correo`;

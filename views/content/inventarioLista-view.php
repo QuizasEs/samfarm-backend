@@ -11,9 +11,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-param="inventarioAjax"
         data-ajax-registros="10">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="bandage-outline"></ion-icon> Inventario
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico">
@@ -88,9 +88,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <div class="tabla-contenedor"></div>
     </div>
 
-    <!-- ========================================
-     MODAL 1: VER DETALLE DE INVENTARIO
-     ======================================== -->
+
     <div class="modal" id="modalDetalleInventario" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -176,73 +174,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
     </div>
 
-    <!-- ========================================
-     MODAL 2: TRANSFERIR INVENTARIO
-     ======================================== -->
-    <div class="modal" id="modalTransferirInventario" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="swap-horizontal-outline"></ion-icon>
-                    Transferir Inventario - <span id="modalTransferirMedicamento">...</span>
-                </div>
-                <a class="close" onclick="InventarioModals.cerrar('modalTransferirInventario')">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
-            </div>
 
-            <input type="hidden" id="modalTransferirInvId">
-            <input type="hidden" id="modalTransferirMedId">
-            <input type="hidden" id="modalTransferirSuOrigenId">
-
-            <div class="modal-group">
-                <div class="row">
-                    <label for="transferirSucursalDestino" class="required">Sucursal Destino</label>
-                    <select id="transferirSucursalDestino" required>
-                        <option value="">Seleccione sucursal...</option>
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="row">
-                    <label for="transferirLote" class="required">Lote a Transferir</label>
-                    <select id="transferirLote" required>
-                        <option value="">Seleccione lote...</option>
-                    </select>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label for="transferirCantidad" class="required">Cantidad (Unidades)</label>
-                            <input type="number" id="transferirCantidad" min="1" required>
-                            <small id="transferirStockDisponible" style="color: #666;"></small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <label for="transferirMotivo">Motivo de Transferencia</label>
-                    <textarea id="transferirMotivo" rows="3" placeholder="Opcional..."></textarea>
-                </div>
-
-                <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="InventarioModals.cerrar('modalTransferirInventario')">
-                        Cancelar
-                    </a>
-                    <a href="javascript:void(0)" class="btn success" onclick="InventarioModals.procesarTransferencia()">
-                        <ion-icon name="checkmark-outline"></ion-icon> Transferir
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================
-     MODAL 3: HISTORIAL DE MOVIMIENTOS
-     ======================================== -->
     <div class="modal" id="modalHistorialInventario" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -284,6 +216,53 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="btn-content">
                     <a href="javascript:void(0)" class="btn default" onclick="InventarioModals.cerrar('modalHistorialInventario')">
                         Cerrar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="modalConfiguracionInventario" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <ion-icon name="settings-outline"></ion-icon>
+                    Configurar Inventario - <span id="modalConfiguracionMedicamento">...</span>
+                </div>
+                <a class="close" onclick="InventarioModals.cerrar('modalConfiguracionInventario')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </a>
+            </div>
+
+            <input type="hidden" id="modalConfiguracionInvId">
+            <input type="hidden" id="modalConfiguracionMedId">
+            <input type="hidden" id="modalConfiguracionSuId">
+
+            <div class="modal-group">
+                <div class="row">
+                    <div class="col">
+                        <div class="modal-bloque">
+                            <label for="configuracionMinimo">Cantidad Mínima</label>
+                            <input type="number" id="configuracionMinimo" min="0" value="0">
+                            <small style="color: #666;">Unidades mínimas antes de alertar</small>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="modal-bloque">
+                            <label for="configuracionMaximo">Cantidad Máxima</label>
+                            <input type="number" id="configuracionMaximo" min="0" placeholder="Opcional">
+                            <small style="color: #666;">Unidades máximas permitidas (dejar vacío sin límite)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-content">
+                    <a href="javascript:void(0)" class="btn warning" onclick="InventarioModals.cerrar('modalConfiguracionInventario')">
+                        Cancelar
+                    </a>
+                    <a href="javascript:void(0)" class="btn success" onclick="InventarioModals.guardarConfiguracion()">
+                        <ion-icon name="checkmark-outline"></ion-icon> Guardar
                     </a>
                 </div>
             </div>

@@ -123,8 +123,7 @@ class loteController extends loteModel
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
         $consulta = "
-            SELECT 
-                SQL_CALC_FOUND_ROWS 
+            SELECT DISTINCT
                 lm.lm_id,
                 lm.lm_numero_lote,
                 m.med_nombre_quimico,
@@ -148,6 +147,15 @@ class loteController extends loteModel
             ORDER BY lm.lm_fecha_ingreso DESC 
             LIMIT $inicio, $registros
         ";
+        
+        $consulta_total = "
+            SELECT COUNT(DISTINCT lm.lm_id) as total
+            FROM lote_medicamento lm
+            INNER JOIN medicamento m ON lm.med_id = m.med_id
+            INNER JOIN sucursales s ON lm.su_id = s.su_id
+            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            $whereSQL
+        ";
 
         error_log("=== SQL GENERADO ===");
         error_log($consulta);
@@ -157,8 +165,9 @@ class loteController extends loteModel
             $datosStmt = $conexion->query($consulta);
             $datos = $datosStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $totalStmt = $conexion->query('SELECT FOUND_ROWS()');
-            $total = (int) $totalStmt->fetchColumn();
+            $totalStmt = $conexion->query($consulta_total);
+            $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
+            $total = (int) $totalRow['total'];
 
             error_log("Resultados: " . count($datos) . " de $total total");
         } catch (PDOException $e) {
@@ -266,7 +275,10 @@ class loteController extends loteModel
                         : $estado_html)
                     . '</td>
                         <td class="buttons">
-                            <a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>
+                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_cantidad_actual'] > 0
+                                ? '<a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>'
+                                : '<span style="color:#999;font-size:12px;">No disponible</span>')
+                            . '
                         </td>
                     </tr>
                 ';

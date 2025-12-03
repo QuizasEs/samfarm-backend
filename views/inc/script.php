@@ -2270,13 +2270,89 @@
             }
         });
 
+        // ==================== MODAL CONFIGURACION ====================
+        const configuracion = {
+            async abrir(invId, medId, suId, medicamento, minimoActual = 0, maximoActual = null) {
+                console.log('⚙️ Abriendo configuración:', {
+                    invId,
+                    medId,
+                    suId,
+                    medicamento,
+                    minimoActual,
+                    maximoActual
+                });
+
+                document.getElementById('modalConfiguracionMedicamento').textContent = medicamento;
+                document.getElementById('modalConfiguracionInvId').value = invId;
+                document.getElementById('modalConfiguracionMedId').value = medId;
+                document.getElementById('modalConfiguracionSuId').value = suId;
+                document.getElementById('configuracionMinimo').value = minimoActual || 0;
+                document.getElementById('configuracionMaximo').value = maximoActual || '';
+
+                utils.abrir('modalConfiguracionInventario');
+            },
+
+            async guardar() {
+                const invId = document.getElementById('modalConfiguracionInvId').value;
+                const invMinimo = parseInt(document.getElementById('configuracionMinimo').value) || 0;
+                const invMaximoInput = document.getElementById('configuracionMaximo').value;
+                const invMaximo = invMaximoInput !== '' ? parseInt(invMaximoInput) : null;
+
+                console.log('💾 Guardando configuración:', {
+                    invId,
+                    invMinimo,
+                    invMaximo
+                });
+
+                if (!invId) {
+                    Swal.fire('Error', 'Inventario no válido', 'error');
+                    return;
+                }
+
+                if (invMinimo < 0) {
+                    Swal.fire('Validación', 'La cantidad mínima no puede ser negativa', 'warning');
+                    return;
+                }
+
+                if (invMaximo !== null && invMaximo < invMinimo) {
+                    Swal.fire('Validación', 'La cantidad máxima debe ser mayor o igual a la mínima', 'warning');
+                    return;
+                }
+
+                try {
+                    const data = await utils.ajax({
+                        inventarioAjax: 'configurar',
+                        inv_id: invId,
+                        inv_minimo: invMinimo,
+                        inv_maximo: invMaximo || ''
+                    });
+
+                    if (data.Tipo === 'success') {
+                        Swal.fire('Éxito', data.texto, 'success');
+                        utils.cerrar('modalConfiguracionInventario');
+                        
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        Swal.fire('Error', data.texto, 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    Swal.fire('Error', 'No se pudo guardar la configuración', 'error');
+                }
+            }
+        };
+
         // ==================== API PÚBLICA ====================
         return {
             cerrar: utils.cerrar,
             verDetalle: detalle.abrir,
             abrirTransferencia: transferir.abrir,
             procesarTransferencia: transferir.procesar,
-            verHistorial: historial.abrir
+            verHistorial: historial.abrir,
+            abrirConfiguracion: configuracion.abrir,
+            guardarConfiguracion: configuracion.guardar
         };
     })();
 

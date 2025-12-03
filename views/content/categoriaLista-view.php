@@ -9,12 +9,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-registros="6"
         data-ajax-action="listar_uso">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="fitness-outline"></ion-icon> Uso Farmacológico
-            </h3>
-            <button type="button" class="btn success" onclick="abrirModalAgregarUsoFarmacologico()">
-                <ion-icon name="add-circle-outline"></ion-icon> Nuevo Uso
-            </button>
+            </h2>
+
         </div>
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
@@ -22,6 +20,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="text" name="busqueda" placeholder="Buscar por nombre...">
                     <button type="button" class="btn-search">
                         <ion-icon name="search"></ion-icon>
+                    </button>
+                </div>
+                <div class="filtro-dinamico-buttons">
+                    <button type="button" class="btn success" onclick="abrirModalAgregarUsoFarmacologico()">
+                        <ion-icon name="add-circle-outline"></ion-icon> Nuevo Uso
                     </button>
                 </div>
             </div>
@@ -46,15 +49,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_uso" class="required">Nombre</label>
-                            <input type="text" name="nombre_uso" id="nombre_uso" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_uso" class="required">Nombre</label>
+                                <input type="text" name="nombre_uso" id="nombre_uso" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_uso">Imagen</label>
-                            <input type="file" name="imgLoad_uso" id="imgLoad_uso" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_uso">Imagen</label>
+                                <input type="file" name="imgLoad_uso" id="imgLoad_uso" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -66,7 +73,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalAgregarUsoFarmacologico()">
                             Cancelar
                         </button>
@@ -98,15 +105,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_uso_edit" class="required">Nombre</label>
-                            <input type="text" name="nombre_uso_edit" id="nombre_uso_edit" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_uso_edit" class="required">Nombre</label>
+                                <input type="text" name="nombre_uso_edit" id="nombre_uso_edit" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_uso_edit">Imagen</label>
-                            <input type="file" name="imgLoad_uso_edit" id="imgLoad_uso_edit" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_uso_edit">Imagen</label>
+                                <input type="file" name="imgLoad_uso_edit" id="imgLoad_uso_edit" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -118,7 +129,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalEditarUsoFarmacologico()">
                             Cancelar
                         </button>
@@ -139,12 +150,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-registros="6"
         data-ajax-action="listar_via">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="medkit-outline"></ion-icon> Vía de Administración
-            </h3>
-            <button type="button" class="btn success" onclick="abrirModalAgregarViaAdministracion()">
-                <ion-icon name="add-circle-outline"></ion-icon> Nueva Vía
-            </button>
+            </h2>
+
         </div>
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
@@ -154,6 +163,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <ion-icon name="search"></ion-icon>
                     </button>
                 </div>
+            </div>
+            <div class="filtro-dinamico-buttons">
+                <button type="button" class="btn success" onclick="abrirModalAgregarViaAdministracion()">
+                    <ion-icon name="add-circle-outline"></ion-icon> Nueva Vía
+                </button>
             </div>
         </form>
         <div class="tabla-contenedor"></div>
@@ -176,15 +190,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_via" class="required">Nombre</label>
-                            <input type="text" name="nombre_via" id="nombre_via" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_via" class="required">Nombre</label>
+                                <input type="text" name="nombre_via" id="nombre_via" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_via">Imagen</label>
-                            <input type="file" name="imgLoad_via" id="imgLoad_via" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_via">Imagen</label>
+                                <input type="file" name="imgLoad_via" id="imgLoad_via" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -196,7 +214,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalAgregarViaAdministracion()">
                             Cancelar
                         </button>
@@ -228,15 +246,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_via_edit" class="required">Nombre</label>
-                            <input type="text" name="nombre_via_edit" id="nombre_via_edit" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_via_edit" class="required">Nombre</label>
+                                <input type="text" name="nombre_via_edit" id="nombre_via_edit" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_via_edit">Imagen</label>
-                            <input type="file" name="imgLoad_via_edit" id="imgLoad_via_edit" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_via_edit">Imagen</label>
+                                <input type="file" name="imgLoad_via_edit" id="imgLoad_via_edit" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -248,7 +270,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalEditarViaAdministracion()">
                             Cancelar
                         </button>
@@ -604,12 +626,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-registros="6"
         data-ajax-action="listar_forma">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="flask-outline"></ion-icon> Forma Farmacéutica
-            </h3>
-            <button type="button" class="btn success" onclick="abrirModalAgregarFormaFarmaceutica()">
-                <ion-icon name="add-circle-outline"></ion-icon> Nueva Forma
-            </button>
+            </h2>
+
         </div>
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
@@ -620,6 +640,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </button>
                 </div>
             </div>
+            <button type="button" class="btn success" onclick="abrirModalAgregarFormaFarmaceutica()">
+                <ion-icon name="add-circle-outline"></ion-icon> Nueva Forma
+            </button>
         </form>
         <div class="tabla-contenedor"></div>
     </div>
@@ -641,15 +664,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_forma" class="required">Nombre</label>
-                            <input type="text" name="nombre_forma" id="nombre_forma" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_forma" class="required">Nombre</label>
+                                <input type="text" name="nombre_forma" id="nombre_forma" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_forma">Imagen</label>
-                            <input type="file" name="imgLoad_forma" id="imgLoad_forma" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_forma">Imagen</label>
+                                <input type="file" name="imgLoad_forma" id="imgLoad_forma" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -661,7 +688,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalAgregarFormaFarmaceutica()">
                             Cancelar
                         </button>
@@ -693,15 +720,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_forma_edit" class="required">Nombre</label>
-                            <input type="text" name="nombre_forma_edit" id="nombre_forma_edit" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_forma_edit" class="required">Nombre</label>
+                                <input type="text" name="nombre_forma_edit" id="nombre_forma_edit" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_forma_edit">Imagen</label>
-                            <input type="file" name="imgLoad_forma_edit" id="imgLoad_forma_edit" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_forma_edit">Imagen</label>
+                                <input type="file" name="imgLoad_forma_edit" id="imgLoad_forma_edit" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -713,7 +744,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalEditarFormaFarmaceutica()">
                             Cancelar
                         </button>
@@ -725,7 +756,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
     </div>
-
+    <!-- forma farmaceutica script -->
     <script>
         function abrirModalAgregarFormaFarmaceutica() {
             const modal = document.getElementById('modalAgregarFormaFarmaceutica');
@@ -901,12 +932,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-registros="6"
         data-ajax-action="listar_laboratorio">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="flask-beaker-outline"></ion-icon> Laboratorio
-            </h3>
-            <button type="button" class="btn success" onclick="abrirModalAgregarLaboratorio()">
-                <ion-icon name="add-circle-outline"></ion-icon> Nuevo Laboratorio
-            </button>
+            </h2>
+
         </div>
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
@@ -917,6 +946,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </button>
                 </div>
             </div>
+            <button type="button" class="btn success" onclick="abrirModalAgregarLaboratorio()">
+                <ion-icon name="add-circle-outline"></ion-icon> Nuevo Laboratorio
+            </button>
         </form>
         <div class="tabla-contenedor"></div>
     </div>
@@ -938,15 +970,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_laboratorio" class="required">Nombre</label>
-                            <input type="text" name="nombre_laboratorio" id="nombre_laboratorio" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_laboratorio" class="required">Nombre</label>
+                                <input type="text" name="nombre_laboratorio" id="nombre_laboratorio" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_laboratorio">Logo</label>
-                            <input type="file" name="imgLoad_laboratorio" id="imgLoad_laboratorio" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_laboratorio">Logo</label>
+                                <input type="file" name="imgLoad_laboratorio" id="imgLoad_laboratorio" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -958,7 +994,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalAgregarLaboratorio()">
                             Cancelar
                         </button>
@@ -990,15 +1026,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="row">
                         <div class="col">
-                            <label for="nombre_laboratorio_edit" class="required">Nombre</label>
-                            <input type="text" name="nombre_laboratorio_edit" id="nombre_laboratorio_edit" required maxlength="250">
+                            <div class="modal-bloque">
+                                <label for="nombre_laboratorio_edit" class="required">Nombre</label>
+                                <input type="text" name="nombre_laboratorio_edit" id="nombre_laboratorio_edit" required maxlength="250">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
-                            <label for="imgLoad_laboratorio_edit">Logo</label>
-                            <input type="file" name="imgLoad_laboratorio_edit" id="imgLoad_laboratorio_edit" accept="image/*">
+                            <div class="modal-bloque">
+                                <label for="imgLoad_laboratorio_edit">Logo</label>
+                                <input type="file" name="imgLoad_laboratorio_edit" id="imgLoad_laboratorio_edit" accept="image/*">
+                            </div>
                         </div>
                     </div>
 
@@ -1010,7 +1050,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <button type="button" class="btn warning" onclick="cerrarModalEditarLaboratorio()">
                             Cancelar
                         </button>
@@ -1022,7 +1062,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
     </div>
-
+    <!-- script para laboratorios  -->
     <script>
         function abrirModalAgregarLaboratorio() {
             const modal = document.getElementById('modalAgregarLaboratorio');

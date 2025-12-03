@@ -170,13 +170,7 @@ class sucursalController extends sucursalModel
                 return;
             }
 
-            $fecha = date('Y-m-d_His');
-            $filename = "Sucursales_{$fecha}.pdf";
-
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
+            $filename = "Sucursales_" . date('Y-m-d_His') . ".pdf";
 
             $root = dirname(__DIR__);
             require_once $root . "/libs/fpdf/fpdf.php";
@@ -230,8 +224,7 @@ class sucursalController extends sucursalModel
             $pdf->SetTextColor(100, 100, 100);
             $pdf->Cell(0, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'SAMFARM PHARMA - Sistema de Gestión Farmacéutica'), 0, 1, 'C');
 
-            $pdf->Output('D', $filename);
-            exit();
+            $pdf->Output('I', $filename);
         } catch (Exception $e) {
             error_log("Error exportando PDF: " . $e->getMessage());
             echo "Error al generar archivo: " . $e->getMessage();

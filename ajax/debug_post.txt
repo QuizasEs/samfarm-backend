@@ -1,9 +1,24 @@
 Array
 (
-    [compraAjax] => buscar_medicamentos
-    [termino] => o
-    [forma] => 
-    [via] => 
-    [laboratorio] => 
-    [uso] => 
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0010
+    [razon_reg] => Laboratorios Bolivia - NIT: 123456791
+    [Proveedor_reg] => 4
+    [Laboratorio_factura_reg] => 3
+    [Fecha_factura_reg] => 2025-12-02
+    [Numero_factura_reg] => 13123123
+    [impuestos_reg] => 
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => ra
+    [Cantidad_reg] => 13
+    [Vencimiento_reg] => 2025-12-26
+    [Cantidad_blister_reg] => 
+    [Cantidad_unidades_reg] => 
+    [Precio_compra_reg] => 14
+    [precio_venta_reg] => 15
+    [lotes_json] => [{"id_medicamento":"10","nombre":"Diazepam","numero":"MED-0011","cantidad":13,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-26","precioCompra":14,"precioVenta":15,"activar_lote":1}]
+    [totales_json] => {"subtotal":"182.00","impuestos":"23.66","total":"205.66","cantidadLotes":1}
 )

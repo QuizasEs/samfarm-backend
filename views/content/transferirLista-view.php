@@ -7,9 +7,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <div class="container">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico" id="form-buscar-lotes-transfer">

@@ -73,7 +73,6 @@ class compraController extends compraModel
     {
         /* validamos y limpiamos cadena entrante */
         $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
-        $razon_social = mainModel::limpiar_cadena($_POST['razon_reg']);
         $proveedor_id = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
         $laboratorio_id = mainModel::limpiar_cadena($_POST['Laboratorio_factura_reg']);
         $fecha_factura = mainModel::limpiar_cadena($_POST['Fecha_factura_reg']);
@@ -88,9 +87,32 @@ class compraController extends compraModel
         $lotes = json_decode($lotes_json, true);
         $totales = json_decode($totales_json, true);
 
+        /* obtener datos del proveedor para construir razón social */
+        $conexion = mainModel::conectar();
+        $stmt_proveedor = $conexion->prepare("SELECT pr_nombres, pr_nit FROM proveedores WHERE pr_id = :pr_id");
+        $stmt_proveedor->bindParam(':pr_id', $proveedor_id);
+        $stmt_proveedor->execute();
+        $proveedor = $stmt_proveedor->fetch(PDO::FETCH_ASSOC);
+
+        if (!$proveedor) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Proveedor no válido',
+                'texto' => 'El proveedor seleccionado no existe.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $razon_social = $proveedor['pr_nombres'];
+        if (!empty($proveedor['pr_nit'])) {
+            $razon_social .= ' - NIT: ' . $proveedor['pr_nit'];
+        }
+
         /* validamos los campos obligatorios */
         if (
-            empty($numero_compra) || empty($razon_social) || empty($proveedor_id) ||
+            empty($numero_compra) || empty($proveedor_id) ||
             empty($laboratorio_id) || empty($fecha_factura) || empty($numero_factura)
         ) {
             $alerta = [

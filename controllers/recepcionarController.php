@@ -108,6 +108,7 @@ class recepcionarController extends recepcionarModel
                     ':pr_id' => $pr_id,
                     ':pr_id_compra' => $pr_id_compra,
                     ':lm_numero_lote' => $numero_lote_original,
+                    ':lm_cant_caja' => $cajas,
                     ':lm_cant_blister' => $detalle['lm_cant_blister'],
                     ':lm_cant_unidad' => $detalle['lm_cant_unidad'],
                     ':lm_cant_actual_cajas' => $cajas,

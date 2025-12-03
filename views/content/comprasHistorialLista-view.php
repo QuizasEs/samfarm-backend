@@ -8,9 +8,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-param="comprasHistorialAjax"
         data-ajax-registros="10">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="receipt-outline"></ion-icon> Historial de Compras
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico">
@@ -90,9 +90,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <div class="container" id="grafico-compras-container">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras
-            </h3>
+            </h2>
         </div>
         <div id="grafico-compras-periodo" style="width: 100%; height: 400px;"></div>
     </div>

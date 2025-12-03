@@ -14,9 +14,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-registros="10">
 
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="swap-horizontal-outline"></ion-icon> Historial de Transferencias
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico">
@@ -151,6 +151,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="row" style="margin-top: 20px; gap: 10px;">
+                    <button type="button" id="btnAceptarTransferencia" class="btn success" onclick="TransferirHistorialModals.aceptarTransferencia(document.getElementById('modalDetalleTrId').value)" style="flex: 1; display:none;">
+                        <ion-icon name="checkmark-outline"></ion-icon> Aceptar Transferencia
+                    </button>
                     <button type="button" class="btn success" onclick="TransferirHistorialModals.descargarPDF(document.getElementById('modalDetalleTrId').value)" style="flex: 1;">
                         <ion-icon name="download-outline"></ion-icon> Descargar PDF
                     </button>
@@ -173,6 +176,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         console.log('📋 Inicializando módulo TransferirHistorialModals');
 
         const API_URL = '<?php echo SERVER_URL; ?>ajax/transferirHistorialAjax.php';
+        const API_URL_TRANSFER = '<?php echo SERVER_URL; ?>ajax/transferirAjax.php';
 
         const utils = {
             async ajax(params) {
@@ -265,6 +269,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleTotalCajas').textContent = tr.tr_total_cajas;
                     document.getElementById('detalleTotalUnidades').textContent = utils.formatearNumero(tr.tr_total_unidades);
                     document.getElementById('detalleTotal').textContent = utils.formatearMoneda(tr.tr_total_valorado);
+                    
+                    const btnAceptar = document.getElementById('btnAceptarTransferencia');
+                    if (tr.tr_estado === 'pendiente') {
+                        btnAceptar.style.display = 'flex';
+                    } else {
+                        btnAceptar.style.display = 'none';
+                    }
 
                     const tbody = document.getElementById('tablaItemsTransferencia');
                     if (data.detalles && data.detalles.length > 0) {
@@ -347,10 +358,76 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
         });
 
+        const acciones = {
+            async aceptar(trId) {
+                console.log('✅ Aceptando transferencia:', trId);
+
+                Swal.fire({
+                    title: 'Confirmar',
+                    text: '¿Está seguro de aceptar esta transferencia?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Aceptar',
+                    cancelButtonText: 'Cancelar'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Procesando...',
+                            text: 'Por favor espere',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        try {
+                            const response = await fetch(API_URL_TRANSFER, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: new URLSearchParams({
+                                    transferirAjax: 'aceptar',
+                                    tr_id: trId
+                                })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}`);
+                            }
+
+                            const data = await response.json();
+
+                            Swal.close();
+
+                            if (data.error) {
+                                Swal.fire('Error', data.error, 'error');
+                            } else if (data.Tipo === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: data.Titulo,
+                                    text: data.texto,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    document.getElementById('btnAceptarTransferencia').style.display = 'none';
+                                    detalle.abrir(trId, '');
+                                });
+                            } else {
+                                Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
+                            }
+                        } catch (error) {
+                            console.error('❌ Error:', error);
+                            Swal.fire('Error', 'No se pudo aceptar la transferencia', 'error');
+                        }
+                    }
+                });
+            }
+        };
+
         const publicAPI = {
             cerrar: utils.cerrar,
             verDetalle: detalle.abrir,
-            descargarPDF: descarga.pdf
+            descargarPDF: descarga.pdf,
+            aceptarTransferencia: acciones.aceptar
         };
         
         console.log('✅ Módulo TransferirHistorialModals creado correctamente', publicAPI);

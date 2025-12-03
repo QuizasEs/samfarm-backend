@@ -15,6 +15,9 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
         $datos_select = $ins_med->datos_extras_controller();
 ?>
         <div class="container">
+            <div class="title">
+                <h2><ion-icon name="wallet-outline"></ion-icon> caja</h2>
+            </div>
             <form id="form-venta-caja" class="form FormularioAjax" action="<?php echo SERVER_URL ?>ajax/ventaAjax.php" autocomplet="off" method="POST" autocomplete="off" data-form="save">
                 <input type="hidden" name="ventaAjax" value="save">
 

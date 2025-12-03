@@ -5,7 +5,7 @@ require_once "mainModel.php";
 class loteModel extends mainModel
 {
     /* modelo que optiene datos del lote  */
-    protected static function datos_lote_model($id)
+    public static function datos_lote_model($id)
     {
         $sql = mainModel::conectar()->prepare("
             SELECT 

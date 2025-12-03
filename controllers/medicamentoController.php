@@ -624,9 +624,8 @@ class medicamentoController extends medicamentoModel
     public function ultimo_lote_controller()
     {
         $sql = mainModel::ejecutar_consulta_simple("
-            SELECT * FROM `lote_medicamento` ORDER BY lm_id DESC LIMIT 1
+            SELECT lm_numero_lote FROM `lote_medicamento` WHERE lm_numero_lote REGEXP '^MED-[0-9]+$' ORDER BY CAST(SUBSTRING_INDEX(lm_numero_lote, '-', -1) AS UNSIGNED) DESC LIMIT 1
         ");
-
 
         $data = $sql->fetch();
         return $data['lm_numero_lote'] ?? 0;
@@ -636,7 +635,7 @@ class medicamentoController extends medicamentoModel
     public function ultima_compra_controller()
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT * FROM `compras` ORDER BY co_id DESC LIMIT 1
+            SELECT co_numero FROM `compras` WHERE co_numero REGEXP '^COMP-[0-9]{4}-[0-9]+$' ORDER BY CAST(SUBSTRING_INDEX(co_numero, '-', -1) AS UNSIGNED) DESC LIMIT 1
         ");
         $sql->execute();
 

@@ -1,0 +1,154 @@
+
+=== SOLICITUD 2025-12-03 00:58:31 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => ra
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 00:58:42 ===
+Array
+(
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0010
+    [razon_reg] => Droguería Inti - NIT: 123456790
+    [Proveedor_reg] => 3
+    [Laboratorio_factura_reg] => 4
+    [Fecha_factura_reg] => 2025-12-27
+    [Numero_factura_reg] => 4232342342
+    [impuestos_reg] => 5
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => ra
+    [Cantidad_reg] => 14
+    [Vencimiento_reg] => 2025-12-19
+    [Cantidad_blister_reg] => 
+    [Cantidad_unidades_reg] => 
+    [Precio_compra_reg] => 15
+    [precio_venta_reg] => 16
+    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
+    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
+)
+
+EXCEPTION: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '0' for key 'PRIMARY'
+#0 C:\xampp\htdocs\samfarm-backend\models\compraModel.php(28): PDOStatement->execute()
+#1 C:\xampp\htdocs\samfarm-backend\controllers\compraController.php(168): compraModel::agregar_compra_model(Array)
+#2 C:\xampp\htdocs\samfarm-backend\ajax\compraAjax.php(60): compraController->agregar_compra_controller()
+#3 {main}
+
+=== SOLICITUD 2025-12-03 01:04:15 ===
+Array
+(
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0010
+    [razon_reg] => Droguería Inti - NIT: 123456790
+    [Proveedor_reg] => 3
+    [Laboratorio_factura_reg] => 4
+    [Fecha_factura_reg] => 2025-12-27
+    [Numero_factura_reg] => 4232342342
+    [impuestos_reg] => 5
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => ra
+    [Cantidad_reg] => 14
+    [Vencimiento_reg] => 2025-12-19
+    [Cantidad_blister_reg] => 
+    [Cantidad_unidades_reg] => 
+    [Precio_compra_reg] => 15
+    [precio_venta_reg] => 16
+    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
+    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
+)
+
+EXCEPTION: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '0' for key 'PRIMARY'
+#0 C:\xampp\htdocs\samfarm-backend\models\compraModel.php(29): PDOStatement->execute()
+#1 C:\xampp\htdocs\samfarm-backend\controllers\compraController.php(168): compraModel::agregar_compra_model(Array)
+#2 C:\xampp\htdocs\samfarm-backend\ajax\compraAjax.php(60): compraController->agregar_compra_controller()
+#3 {main}
+
+=== SOLICITUD 2025-12-03 01:17:53 ===
+Array
+(
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0010
+    [razon_reg] => Droguería Inti - NIT: 123456790
+    [Proveedor_reg] => 3
+    [Laboratorio_factura_reg] => 4
+    [Fecha_factura_reg] => 2025-12-27
+    [Numero_factura_reg] => 4232342342
+    [impuestos_reg] => 5
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => ra
+    [Cantidad_reg] => 14
+    [Vencimiento_reg] => 2025-12-19
+    [Cantidad_blister_reg] => 
+    [Cantidad_unidades_reg] => 
+    [Precio_compra_reg] => 15
+    [precio_venta_reg] => 16
+    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
+    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
+)
+
+
+=== SOLICITUD 2025-12-03 02:04:05 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => ap
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 02:04:06 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => para
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 02:05:01 ===
+Array
+(
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0001
+    [razon_reg] => jonas - NIT: 31348612316542310
+    [Proveedor_reg] => 7
+    [Laboratorio_factura_reg] => 8
+    [Fecha_factura_reg] => 2025-12-02
+    [Numero_factura_reg] => 1231414124
+    [impuestos_reg] => 
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => para
+    [Cantidad_reg] => 40
+    [Vencimiento_reg] => 2025-12-03
+    [Cantidad_blister_reg] => 
+    [Cantidad_unidades_reg] => 
+    [Precio_compra_reg] => 44
+    [precio_venta_reg] => 50
+    [lotes_json] => [{"id_medicamento":"1","nombre":"Paracetamol","numero":"MED-0001","cantidad":80,"cantidad_blister":4,"cantidad_unidades":6,"vencimiento":"2025-12-31","precioCompra":50,"precioVenta":2,"activar_lote":1},{"id_medicamento":"5","nombre":"Omeprazol","numero":"MED-0002","cantidad":40,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-03","precioCompra":44,"precioVenta":50,"activar_lote":1}]
+    [totales_json] => {"subtotal":"5760.00","impuestos":"748.80","total":"6508.80","cantidadLotes":2}
+)
+

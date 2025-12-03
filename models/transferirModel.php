@@ -418,4 +418,97 @@ class transferirModel extends mainModel
         $total = isset($resultado['total']) ? (int)$resultado['total'] : 0;
         return $total;
     }
+
+    protected static function crear_lote_en_destino_model($datos)
+    {
+        $sql = "INSERT INTO lote_medicamento
+                (med_id, su_id, lm_numero_lote, lm_cant_caja, lm_cant_blister, lm_cant_unidad,
+                 lm_cant_actual_cajas, lm_cant_actual_unidades, lm_precio_compra, lm_precio_venta,
+                 lm_fecha_ingreso, lm_fecha_vencimiento, lm_estado, lm_origen_id)
+                VALUES
+                (:med_id, :su_id, :lm_numero_lote, :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad,
+                 :lm_cant_actual_cajas, :lm_cant_actual_unidades, :lm_precio_compra, :lm_precio_venta,
+                 NOW(), :lm_fecha_vencimiento, :lm_estado, :lm_origen_id)";
+        
+        $datos_completos = array_merge($datos, ['lm_estado' => 'activo']);
+        
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute($datos_completos);
+        return mainModel::conectar()->lastInsertId();
+    }
+
+    protected static function actualizar_inventario_destino_model($med_id, $su_destino, $cajas, $unidades, $valorado)
+    {
+        $sql = "SELECT inv_id FROM inventarios WHERE med_id = :med_id AND su_id = :su_id LIMIT 1";
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute([':med_id' => $med_id, ':su_id' => $su_destino]);
+        $inv = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($inv) {
+            $sql = "UPDATE inventarios
+                    SET inv_total_cajas = inv_total_cajas + :cajas,
+                        inv_total_unidades = inv_total_unidades + :unidades,
+                        inv_total_valorado = inv_total_valorado + :valorado,
+                        inv_actualizado_en = NOW()
+                    WHERE inv_id = :inv_id";
+            
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->execute([
+                ':inv_id' => $inv['inv_id'],
+                ':cajas' => $cajas,
+                ':unidades' => $unidades,
+                ':valorado' => $valorado
+            ]);
+        } else {
+            $sql = "INSERT INTO inventarios
+                    (med_id, su_id, inv_total_cajas, inv_total_unidades, inv_total_valorado)
+                    VALUES
+                    (:med_id, :su_id, :cajas, :unidades, :valorado)";
+            
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->execute([
+                ':med_id' => $med_id,
+                ':su_id' => $su_destino,
+                ':cajas' => $cajas,
+                ':unidades' => $unidades,
+                ':valorado' => $valorado
+            ]);
+        }
+
+        return $stmt;
+    }
+
+    protected static function registrar_movimiento_entrada_model($datos)
+    {
+        $sql = "INSERT INTO movimiento_inventario
+                (lm_id, med_id, su_id, us_id, mi_tipo, mi_cantidad, mi_unidad, mi_referencia_tipo, mi_referencia_id, mi_motivo)
+                VALUES
+                (:lm_id, :med_id, :su_id, :us_id, :mi_tipo, :mi_cantidad, :mi_unidad, :mi_referencia_tipo, :mi_referencia_id, :mi_motivo)";
+        
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute($datos);
+        return $stmt;
+    }
+
+    protected static function actualizar_estado_transferencia_model($tr_id, $estado, $us_receptor_id = null)
+    {
+        $sql = "UPDATE transferencias
+                SET tr_estado = :estado,
+                    tr_fecha_respuesta = NOW()";
+        
+        if ($us_receptor_id) {
+            $sql .= ", us_receptor_id = :us_receptor_id";
+        }
+        
+        $sql .= " WHERE tr_id = :tr_id";
+        
+        $stmt = mainModel::conectar()->prepare($sql);
+        $params = [':tr_id' => $tr_id, ':estado' => $estado];
+        if ($us_receptor_id) {
+            $params[':us_receptor_id'] = $us_receptor_id;
+        }
+        
+        $stmt->execute($params);
+        return $stmt;
+    }
 }

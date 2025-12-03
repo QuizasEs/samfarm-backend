@@ -106,6 +106,12 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
+    /* ===== GUARDAR CONFIGURACIÓN DE INVENTARIO ===== */
+    if ($valor == "configurar") {
+        echo $ins_inventario->guardar_configuracion_inventario_controller();
+        exit();
+    }
+
     // Si llegamos aquí, la acción no existe
     echo json_encode([
         "Alerta" => "simple",

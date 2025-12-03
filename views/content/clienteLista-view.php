@@ -8,9 +8,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-param="clientesAjax"
         data-ajax-registros="10">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="people-outline"></ion-icon> Gestión de Clientes
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico">

@@ -10,7 +10,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 
 ?>
 <div class="title">
-    <h1>Registrar Compra</h1>
+    <h2><ion-icon name="cart-outline"></ion-icon> Registrar Compra</h2>
 </div>
 
 <div class="container">
@@ -22,6 +22,22 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
 
         <script>
+            function actualizarRazonSocial() {
+                const proveedorSelect = document.getElementById('Proveedor_reg');
+                const razonSocialInput = document.getElementById('razon_reg');
+                
+                const proveedorOption = proveedorSelect.options[proveedorSelect.selectedIndex];
+                const proveedorNombre = proveedorOption.text || '';
+                const proveedorNit = proveedorOption.getAttribute('data-nit') || '';
+                
+                let razonSocial = proveedorNombre;
+                if (proveedorNit) {
+                    razonSocial = proveedorNombre + ' - NIT: ' + proveedorNit;
+                }
+                
+                razonSocialInput.value = razonSocial;
+            }
+
             document.querySelector('.FormularioAjax').addEventListener('submit', function(e) {
                 e.preventDefault();
 
@@ -62,15 +78,14 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque">
                 <label for="razon_reg">razon social*</label>
-                <input type="text" name="razon_reg" id="razon_reg" placeholder="Razon social"
-                    pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+&#39;]{3,100}" maxlength="100" required>
+                <input type="text" name="razon_reg" id="razon_reg" placeholder="Se obtiene del proveedor seleccionado" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
             </div>
             <div class="form-bloque">
                 <label for="Proveedor_reg">Proveedor*</label>
-                <select class="select-style" name="Proveedor_reg" id="Proveedor_reg" required>
+                <select class="select-style" name="Proveedor_reg" id="Proveedor_reg" required onchange="actualizarRazonSocial()">
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['proveedores'] as $pro) { ?>
-                        <option value="<?php echo $pro['pr_id']; ?>"><?php echo $pro['pr_nombres']; ?></option>
+                        <option value="<?php echo $pro['pr_id']; ?>" data-nit="<?php echo $pro['pr_nit']; ?>"><?php echo $pro['pr_nombres']; ?></option>
                     <?php } ?>
                 </select>
             </div>

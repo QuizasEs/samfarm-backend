@@ -4,9 +4,9 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
     <div class="container">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="business-outline"></ion-icon> Gestión de Sucursales
-            </h3>
+            </h2>
         </div>
 
         <form class="filtro-dinamico" id="filtroSucursales">
@@ -632,6 +632,25 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 cargarGraficoCostoBeneficio();
                 bindEvents();
                 cargarEcharts();
+                agregarCierreModalesAlBackdrop();
+            }
+
+            function agregarCierreModalesAlBackdrop() {
+                const modales = ['modalNuevaSucursal', 'modalEditarSucursal', 'modalDetalleSucursal', 'modalCajasAbiertas'];
+                
+                modales.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.addEventListener('click', function(event) {
+                            if (event.target === this) {
+                                if (modalId === 'modalNuevaSucursal') cerrarModalNuevo();
+                                else if (modalId === 'modalEditarSucursal') cerrarModalEditar();
+                                else if (modalId === 'modalDetalleSucursal') cerrarModalDetalle();
+                                else if (modalId === 'modalCajasAbiertas') cerrarModalCajas();
+                            }
+                        });
+                    }
+                });
             }
             async function cargarGraficoCostoBeneficio(periodo = 'semestre') {
                 if (typeof echarts === 'undefined') {
@@ -1505,8 +1524,9 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
             function editarDesdeDetalle() {
                 if (sucursalActualDetalle) {
+                    const suId = sucursalActualDetalle.su_id;
                     cerrarModalDetalle();
-                    editarSucursal(sucursalActualDetalle.su_id);
+                    setTimeout(() => editarSucursal(suId), 100);
                 }
             }
 

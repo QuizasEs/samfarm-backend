@@ -7,7 +7,8 @@ class compraModel extends mainModel
     /* registrar compra nueva */
     public static function agregar_compra_model($datos): int
     {
-        $sql = mainModel::conectar()->prepare("
+        $db = mainModel::conectar();
+        $sql = $db->prepare("
             INSERT INTO compras
                 (co_numero, co_fecha, la_id, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
             VALUES
@@ -26,7 +27,7 @@ class compraModel extends mainModel
         $sql->bindParam(":co_razon_social", $datos['co_razon_social']);
 
         $sql->execute();
-        return (int) mainModel::conectar()->lastInsertId();
+        return (int) $db->lastInsertId();
     }
 
     /* registrar detalle de compra */
@@ -52,7 +53,8 @@ class compraModel extends mainModel
     /* insertar lote medicamento */
     public static function agregar_lote_model($datos)
     {
-        $sql = mainModel::conectar()->prepare("
+        $db = mainModel::conectar();
+        $sql = $db->prepare("
             INSERT INTO lote_medicamento
             (pr_id, pr_id_compra, med_id, su_id, lm_numero_lote,
             lm_cant_caja, lm_cant_blister, lm_cant_unidad, lm_total_unidades,
@@ -82,7 +84,7 @@ class compraModel extends mainModel
         $sql->bindParam(":lm_estado", $datos['lm_estado']);
 
         $sql->execute();
-        return (int) mainModel::conectar()->lastInsertId();
+        return (int) $db->lastInsertId();
     }
 
     /* registrar historial de lote */

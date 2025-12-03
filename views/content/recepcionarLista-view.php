@@ -4,9 +4,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <div class="container">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="cloud-download-outline"></ion-icon> Recepcionar Transferencias
-            </h3>
+            </h2>
         </div>
 
         <div class="filtro-dinamico" id="form-filtro-recepcionar">

@@ -417,273 +417,39 @@ class ventasHistorialController extends ventasHistorialModel
             $sucursal_nombre = !empty($filtros['su_id']) ? 'Sucursal_' . $filtros['su_id'] : 'Todas_Sucursales';
             $filename = "Historial_Ventas_{$sucursal_nombre}_{$fecha}.xls";
 
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
+            $headers = array_keys($datos[0]);
 
-            echo '<!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { 
-                    font-family: "Segoe UI", Arial, sans-serif; 
-                    font-size: 11pt; 
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    margin: 0;
-                    padding: 20px;
-                }
-                
-                .container {
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                    overflow: hidden;
-                    margin: 0 auto;
-                    max-width: 1400px;
-                }
-                
-                .header {
-                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                    color: white;
-                    font-size: 20pt;
-                    font-weight: 300;
-                    text-align: center;
-                    padding: 25px;
-                    margin-bottom: 0;
-                    letter-spacing: 1px;
-                    position: relative;
-                }
-                
-                .header::after {
-                    content: "";
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 4px;
-                    background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-                }
-                
-                .info {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    padding: 20px;
-                    border-bottom: 1px solid #dee2e6;
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 15px;
-                    font-size: 10pt;
-                }
-                
-                .info-item {
-                    background: white;
-                    padding: 12px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                    border-left: 4px solid #3498db;
-                }
-                
-                .info-item strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 5px;
-                    font-size: 9pt;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                table {
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    width: 100%;
-                    font-size: 10pt;
-                    background: white;
-                }
-                
-                th {
-                    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                    color: black;
-                    font-weight: 500;
-                    text-align: center;
-                    padding: 14px 10px;
-                    border: none;
-                    position: relative;
-                    font-size: 9pt;
-                    letter-spacing: 0.5px;
-                    text-transform: uppercase;
-                }
-                
-                th::after {
-                    content: "";
-                    position: absolute;
-                    right: 0;
-                    top: 25%;
-                    height: 50%;
-                    width: 1px;
-                    background: rgba(255,255,255,0.3);
-                }
-                
-                th:last-child::after {
-                    display: none;
-                }
-                
-                td {
-                    padding: 12px 10px;
-                    border-bottom: 1px solid #f8f9fa;
-                    text-align: left;
-                }
-                
-                tr:hover td {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-                }
-                
-                .numero {
-                    text-align: right;
-                    font-weight: 600;
-                    font-family: "Courier New", monospace;
-                    color: #2c3e50;
-                }
-                
-                .moneda {
-                    text-align: right;
-                    font-weight: 700;
-                    font-family: "Courier New", monospace;
-                    color: #27ae60;
-                    background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-                    border-left: 3px solid #27ae60;
-                }
-                
-                .total-row {
-                    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                    color: white;
-                    font-weight: 600;
-                    font-size: 11pt;
-                }
-                
-                .total-row td {
-                    border: none;
-                    padding: 16px 10px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                .total-row .numero, .total-row .moneda {
-                    color: white;
-                    background: none;
-                    border-left: none;
-                    font-size: 11pt;
-                }
-                
-                .footer {
-                    margin-top: 0;
-                    padding: 25px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-top: 1px solid #dee2e6;
-                    font-size: 9pt;
-                    color: #6c757d;
-                    text-align: center;
-                }
-                
-                .footer strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 8px;
-                    font-size: 10pt;
-                }
-            </style>
-        </head>
-        <body>';
-
-            echo '<div class="container">';
-            echo '<div class="header"> HISTORIAL DE VENTAS - SAMFARM PHARMA</div>';
-
-            echo '<div class="info">';
-            echo '<div class="info-item">';
-            echo '<strong> Fecha de Generación</strong>';
-            echo date('d/m/Y H:i:s');
-            echo '</div>';
-
-            echo '<div class="info-item">';
-            echo '<strong>👤 Usuario :</strong>';
-            echo htmlspecialchars($_SESSION['nombre_smp'] ?? 'Sistema');
-            echo '</div>';
+            $info_superior = [
+                'Fecha de Generación' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                'Total de Registros' => count($datos)
+            ];
 
             if (!empty($filtros['su_id'])) {
-                echo '<div class="info-item">';
-                echo '<strong> Sucursal</strong>';
-                echo 'Sucursal ID ' . $filtros['su_id'];
-                echo '</div>';
+                $info_superior['Sucursal'] = 'Sucursal ID ' . $filtros['su_id'];
             } else {
-                echo '<div class="info-item">';
-                echo '<strong> Sucursal: </strong>';
-                echo 'Todas las Sucursales';
-                echo '</div>';
+                $info_superior['Sucursal'] = 'Todas las Sucursales';
             }
 
-            if (!empty($filtros['fecha_desde']) || !empty($filtros['fecha_hasta'])) {
-                echo '<div class="info-item">';
-                echo '<strong> Rango de Fechas</strong>';
-                if (!empty($filtros['fecha_desde'])) {
-                    echo date('d/m/Y', strtotime($filtros['fecha_desde']));
-                }
-                if (!empty($filtros['fecha_hasta'])) {
-                    echo ' - ' . date('d/m/Y', strtotime($filtros['fecha_hasta']));
-                }
-                echo '</div>';
+            if (!empty($filtros['fecha_desde']) && !empty($filtros['fecha_hasta'])) {
+                $info_superior['Rango de Fechas'] = date('d/m/Y', strtotime($filtros['fecha_desde'])) . ' - ' . date('d/m/Y', strtotime($filtros['fecha_hasta']));
             }
 
-            echo '<div class="info-item">';
-            echo '<strong>Total de Registros: </strong>';
-            echo count($datos);
-            echo '</div>';
-            echo '</div>';
+            mainModel::generar_excel_reporte([
+                'titulo' => 'HISTORIAL DE VENTAS - SAMFARM PHARMA',
+                'datos' => $datos,
+                'headers' => $headers,
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Subtotal (Bs)' => 'moneda',
+                    'Impuestos (Bs)' => 'moneda',
+                    'Total (Bs)' => 'moneda',
+                    'Items' => 'numero'
+                ],
+                'columnas_totales' => ['Total (Bs)'],
+                'info_superior' => $info_superior
+            ]);
 
-            echo '<table>';
-            echo '<thead><tr>';
-            foreach (array_keys($datos[0]) as $header) {
-                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
-            }
-            echo '</tr></thead>';
-
-            echo '<tbody>';
-
-            $total_general = 0;
-
-            foreach ($datos as $row) {
-                echo '<tr>';
-                foreach ($row as $key => $valor) {
-                    if ($key === 'Total (Bs)') {
-                        echo '<td class="moneda">Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-                        $total_general += $valor;
-                    } elseif ($key === 'Subtotal (Bs)' || $key === 'Impuestos (Bs)') {
-                        echo '<td class="moneda">Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-                    } elseif ($key === 'Items') {
-                        echo '<td class="numero">' . number_format($valor, 0, ',', '.') . '</td>';
-                    } else {
-                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
-                    }
-                }
-                echo '</tr>';
-            }
-
-            echo '<tr class="total-row">';
-            echo '<td colspan="8" style="text-align: right; padding-right: 20px;"> TOTAL GENERAL:</td>';
-            echo '<td class="moneda">Bs ' . number_format($total_general, 2, ',', '.') . '</td>';
-            echo '<td colspan="2"></td>';
-            echo '</tr>';
-
-            echo '</tbody></table>';
-
-            echo '<div class="footer">';
-            echo '<strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>';
-            echo 'Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.';
-            echo '</div>';
-            echo '</div>';
-
-            echo '</body></html>';
-
-            exit();
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
             echo "Error al generar archivo: " . htmlspecialchars($e->getMessage());

@@ -3,6 +3,69 @@ $peticionAjax = true;
 
 require_once "../config/APP.php";
 
+if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar_pdf") {
+    
+    session_start(['name' => 'SMP']);
+    
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+    
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+    
+    require_once "../controllers/cajaHistorialController.php";
+    $ins_historial = new cajaHistorialController();
+    $ins_historial->exportar_historial_caja_pdf_controller();
+    exit();
+}
+
+if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar_excel") {
+    
+    session_start(['name' => 'SMP']);
+    
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+    
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+    
+    require_once "../controllers/cajaHistorialController.php";
+    $ins_historial = new cajaHistorialController();
+    $ins_historial->exportar_historial_caja_excel_controller();
+    exit();
+}
+
+if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar_movimiento_pdf") {
+    
+    session_start(['name' => 'SMP']);
+    
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+    
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+    
+    require_once "../controllers/cajaHistorialController.php";
+    $ins_historial = new cajaHistorialController();
+    $ins_historial->exportar_movimiento_individual_pdf_controller();
+    exit();
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (isset($_POST['cajaHistorialAjax'])) {
@@ -75,18 +138,9 @@ if (isset($_POST['cajaHistorialAjax'])) {
         echo $ins_historial->obtener_datos_grafico_controller();
         exit();
     }
-    if ($valor === "exportar_excel") {
-        echo $ins_historial->exportar_historial_caja_excel_controller();
-        exit();
-    }
-    if ($valor === "exportar_pdf") {
-        echo "hola";
-        echo $ins_historial->exportar_historial_caja_pdf_controller();
-        exit();
-    }
 
-    if ($valor === "exportar_movimiento_pdf") {
-        echo $ins_historial->exportar_movimiento_individual_pdf_controller();
+    if ($valor === "obtener_referencia") {
+        echo $ins_historial->obtener_referencia_movimiento_controller();
         exit();
     }
 } else {

@@ -41,7 +41,7 @@ class mainModel
     }
 
     /* ---------------------------------------funcion de encriptado---------------------------------------------- */
-    public function encryption($string)
+    public static function encryption($string)
     {
         $output = FALSE;
         $key = hash('sha256', SECRET_KEY);
@@ -50,8 +50,8 @@ class mainModel
         $output = base64_encode($output);
         return $output;
     }
-    /* -------------------------------------- funcion de desncritar------------------------------------------------ */
-    protected static function decryption($string)
+    /* -------------------------------------- funcion de desencriptar ------------------------------------------------ */
+    public static function decryption($string)
     {
         $key = hash('sha256', SECRET_KEY);
         $iv = substr(hash('sha256', SECRET_IV), 0, 16);
@@ -69,7 +69,7 @@ class mainModel
     }
 
     /* ----------------------------------------funcion para limpiar cadenas---------------------------------------------- */
-    public function limpiar_cadena($cadena)
+    public static function limpiar_cadena($cadena)
     {
 
 
@@ -363,7 +363,7 @@ class mainModel
 
     /* --------------------------------------generar reportes pdpf------------------------------------------------ */
 
-    protected static function generar_pdf_reporte_fpdf($datos_pdf)
+    protected static function generar_pdf_reporte_fpdf($datos_pdf, $modo_salida = 'I')
     {
         require_once dirname(__DIR__) . './libs/fpdf/fpdf.php';
 
@@ -594,6 +594,325 @@ class mainModel
 
         return $resultado;
     }
+
+    public static function generar_excel_reporte($config)
+    {
+        if (empty($config['nombre_archivo']) || empty($config['datos']) || empty($config['headers'])) {
+            echo "Error: Configuración incompleta para generar Excel";
+            return;
+        }
+
+        $titulo = $config['titulo'] ?? 'REPORTE';
+        $datos = $config['datos'];
+        $headers = $config['headers'];
+        $nombre_archivo = $config['nombre_archivo'];
+        $formato_columnas = $config['formato_columnas'] ?? [];
+        $columnas_totales = $config['columnas_totales'] ?? [];
+        $info_superior = $config['info_superior'] ?? [];
+
+        header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $nombre_archivo . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "\xEF\xBB\xBF" . '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: "Segoe UI", Arial, sans-serif; 
+            font-size: 11pt; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 0 auto;
+            max-width: 1400px;
+        }
+        
+        .header {
+            background: #ffffff;
+            color: #000000;
+            font-size: 20pt;
+            font-weight: 300;
+            text-align: center;
+            padding: 25px;
+            margin-bottom: 0;
+            letter-spacing: 1px;
+            position: relative;
+            border-bottom: 3px solid #34495e;
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
+        }
+        
+        .info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 10pt;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-item strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 10pt;
+            background: white;
+        }
+        
+        th {
+            background: #ecf0f1;
+            color: #000000;
+            font-weight: 500;
+            text-align: center;
+            padding: 14px 10px;
+            border: 1px solid #34495e;
+            position: relative;
+            font-size: 9pt;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        th::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 25%;
+            height: 50%;
+            width: 1px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        th:last-child::after {
+            display: none;
+        }
+        
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f8f9fa;
+            text-align: left;
+        }
+        
+        tr:hover td {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+        }
+        
+        .numero {
+            text-align: right;
+            font-weight: 600;
+            font-family: "Courier New", monospace;
+            color: #2c3e50;
+        }
+        
+        .moneda {
+            text-align: right;
+            font-weight: 700;
+            font-family: "Courier New", monospace;
+            color: #27ae60;
+            background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+            border-left: 3px solid #27ae60;
+        }
+        
+        .moneda-egreso {
+            text-align: right;
+            font-weight: 700;
+            font-family: "Courier New", monospace;
+            color: #c62828;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left: 3px solid #c62828;
+        }
+        
+        .total-row {
+            background: #d5dbdb !important;
+            color: #000000;
+            font-weight: 600;
+            font-size: 11pt;
+        }
+        
+        .total-row td {
+            border: 1px solid #34495e;
+            padding: 16px 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .total-row .numero, .total-row .moneda, .total-row .moneda-egreso {
+            color: #000000;
+            background: none;
+            border-left: 1px solid #34495e;
+        }
+        
+        .resumen-box {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .resumen-item {
+            padding: 10px;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 1px solid #dee2e6;
+            font-size: 9pt;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .footer strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>';
+
+        echo '<div class="container">
+                <div class="header">' . htmlspecialchars($titulo) . '</div>';
+
+        if (!empty($info_superior)) {
+            echo '<div class="info">';
+            foreach ($info_superior as $key => $value) {
+                echo '<div class="info-item">
+                        <strong>' . htmlspecialchars($key) . '</strong>
+                        ' . htmlspecialchars($value) . '
+                      </div>';
+            }
+            echo '</div>';
+        }
+
+        echo '<table>';
+        echo '<thead><tr>';
+        foreach ($headers as $header) {
+            echo '<th>' . htmlspecialchars(strtoupper($header)) . '</th>';
+        }
+        echo '</tr></thead>';
+
+        echo '<tbody>';
+
+        $totales = [];
+        foreach ($columnas_totales as $col) {
+            $totales[$col] = 0;
+        }
+
+        foreach ($datos as $row) {
+            echo '<tr>';
+            foreach ($headers as $header) {
+                $valor = $row[$header] ?? '-';
+                $clase = '';
+
+                if (in_array($header, $columnas_totales)) {
+                    if (isset($formato_columnas[$header]) && $formato_columnas[$header] === 'moneda') {
+                        $clase = 'moneda';
+                        $totales[$header] += (float)$valor;
+                    } elseif (isset($formato_columnas[$header]) && $formato_columnas[$header] === 'numero') {
+                        $clase = 'numero';
+                        $totales[$header] += (float)$valor;
+                    }
+                }
+
+                if (isset($formato_columnas[$header])) {
+                    switch ($formato_columnas[$header]) {
+                        case 'moneda':
+                            $valor = 'Bs ' . number_format($valor, 2, ',', '.');
+                            if (empty($clase)) {
+                                $clase = 'moneda';
+                            }
+                            break;
+                        case 'numero':
+                            $valor = number_format($valor, 2, ',', '.');
+                            if (empty($clase)) {
+                                $clase = 'numero';
+                            }
+                            break;
+                        case 'fecha':
+                            $valor = date('d/m/Y', strtotime($valor));
+                            break;
+                        case 'fecha-hora':
+                            $valor = date('d/m/Y H:i', strtotime($valor));
+                            break;
+                    }
+                }
+
+                echo '<td class="' . $clase . '">' . htmlspecialchars($valor) . '</td>';
+            }
+            echo '</tr>';
+        }
+
+        if (!empty($totales)) {
+            echo '<tr class="total-row">';
+            foreach ($headers as $header) {
+                if (in_array($header, $columnas_totales)) {
+                    $valor_total = $totales[$header];
+                    if (isset($formato_columnas[$header]) && $formato_columnas[$header] === 'moneda') {
+                        $valor_total = 'Bs ' . number_format($valor_total, 2, ',', '.');
+                    } elseif (isset($formato_columnas[$header]) && $formato_columnas[$header] === 'numero') {
+                        $valor_total = number_format($valor_total, 2, ',', '.');
+                    }
+                    echo '<td class="numero">' . htmlspecialchars($valor_total) . '</td>';
+                } else {
+                    echo '<td style="text-align: right; padding-right: 20px;">TOTAL:</td>';
+                }
+            }
+            echo '</tr>';
+        }
+
+        echo '</tbody></table>';
+
+        echo '<div class="footer">
+                <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica</strong>
+                Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
+              </div>';
+
+        echo '</div></body></html>';
+
+        exit();
+    }
+
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

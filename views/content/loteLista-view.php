@@ -13,9 +13,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         data-ajax-param="loteAjax"
         data-ajax-registros="10">
         <div class="title">
-            <h3>
+            <h2>
                 <ion-icon name="bandage-outline"></ion-icon> Lotes de medicamentos
-            </h3>
+            </h2>
         </div>
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">

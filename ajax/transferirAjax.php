@@ -55,6 +55,20 @@ if (isset($_POST['transferirAjax'])) {
         exit();
     }
 
+    if ($valor === "aceptar") {
+        try {
+            echo $ins_transfer->aceptar_transferencia_controller();
+        } catch (Exception $e) {
+            error_log("ERROR AJAX aceptar: " . $e->getMessage());
+            echo json_encode([
+                'error' => 'Error en AJAX: ' . $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => basename($e->getFile())
+            ]);
+        }
+        exit();
+    }
+
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

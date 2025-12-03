@@ -313,15 +313,19 @@ class cajaHistorialController extends cajaHistorialModel
 
         if ($rol_usuario == 2) {
             $filtros['su_id'] = $sucursal_usuario;
-        } elseif ($rol_usuario == 1 && isset($_GET['select4']) && $_GET['select4'] !== '') {
-            $filtros['su_id'] = (int)$_GET['select4'];
+        } elseif ($rol_usuario == 1 && isset($_GET['su_id']) && $_GET['su_id'] !== '') {
+            $filtros['su_id'] = (int)$_GET['su_id'];
         }
 
-        $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : date('Y-m-d');
-        $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : date('Y-m-d');
+        $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : '';
+        $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : '';
 
-        $filtros['fecha_desde'] = $fecha_desde;
-        $filtros['fecha_hasta'] = $fecha_hasta;
+        if (!empty($fecha_desde)) {
+            $filtros['fecha_desde'] = $fecha_desde;
+        }
+        if (!empty($fecha_hasta)) {
+            $filtros['fecha_hasta'] = $fecha_hasta;
+        }
 
         if (isset($_GET['select1']) && $_GET['select1'] !== '') {
             $filtros['caja_id'] = (int)$_GET['select1'];
@@ -344,364 +348,35 @@ class cajaHistorialController extends cajaHistorialModel
                 return;
             }
 
-            $resumen = self::obtener_resumen_periodo_model($filtros);
-
             $fecha = date('Y-m-d_His');
             $sucursal_nombre = isset($filtros['su_id']) ? 'Sucursal_' . $filtros['su_id'] : 'Todas_Sucursales';
             $filename = "Historial_Caja_{$sucursal_nombre}_{$fecha}.xls";
 
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-
-            echo '<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            body { 
-                font-family: "Segoe UI", Arial, sans-serif; 
-                font-size: 11pt; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                margin: 0;
-                padding: 20px;
-            }
-            
-            .container {
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                overflow: hidden;
-                margin: 0 auto;
-                max-width: 1400px;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                color: white;
-                font-size: 20pt;
-                font-weight: 300;
-                text-align: center;
-                padding: 25px;
-                margin-bottom: 0;
-                letter-spacing: 1px;
-                position: relative;
-            }
-            
-            .header::after {
-                content: "";
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-            }
-            
-            .info {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                padding: 20px;
-                border-bottom: 1px solid #dee2e6;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-                font-size: 10pt;
-            }
-            
-            .info-item {
-                background: white;
-                padding: 12px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                border-left: 4px solid #3498db;
-            }
-            
-            .info-item strong {
-                color: #2c3e50;
-                display: block;
-                margin-bottom: 5px;
-                font-size: 9pt;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            
-            table {
-                border-collapse: separate;
-                border-spacing: 0;
-                width: 100%;
-                font-size: 10pt;
-                background: white;
-            }
-            
-            th {
-                background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                color: white;
-                font-weight: 500;
-                text-align: center;
-                padding: 14px 10px;
-                border: none;
-                position: relative;
-                font-size: 9pt;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-            }
-            
-            th::after {
-                content: "";
-                position: absolute;
-                right: 0;
-                top: 25%;
-                height: 50%;
-                width: 1px;
-                background: rgba(255,255,255,0.3);
-            }
-            
-            th:last-child::after {
-                display: none;
-            }
-            
-            td {
-                padding: 12px 10px;
-                border-bottom: 1px solid #f8f9fa;
-                text-align: left;
-            }
-            
-            tr:hover td {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-            }
-            
-            .numero {
-                text-align: right;
-                font-weight: 600;
-                font-family: "Courier New", monospace;
-                color: #2c3e50;
-            }
-            
-            .moneda-ingreso {
-                text-align: right;
-                font-weight: 700;
-                font-family: "Courier New", monospace;
-                color: #27ae60;
-                background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-                border-left: 3px solid #27ae60;
-            }
-            
-            .moneda-egreso {
-                text-align: right;
-                font-weight: 700;
-                font-family: "Courier New", monospace;
-                color: #c62828;
-                background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-                border-left: 3px solid #c62828;
-            }
-            
-            .tipo-ingreso {
-                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
-                color: #2e7d32;
-                font-weight: 600;
-                text-align: center;
-                border-radius: 20px;
-                padding: 6px 12px;
-                border: 1px solid #4caf50;
-            }
-            
-            .tipo-egreso {
-                background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
-                color: #c62828;
-                font-weight: 600;
-                text-align: center;
-                border-radius: 20px;
-                padding: 6px 12px;
-                border: 1px solid #ef5350;
-            }
-            
-            .tipo-venta {
-                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-                color: #1565c0;
-                font-weight: 600;
-                text-align: center;
-                border-radius: 20px;
-                padding: 6px 12px;
-                border: 1px solid #2196f3;
-            }
-            
-            .tipo-compra {
-                background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
-                color: #ef6c00;
-                font-weight: 600;
-                text-align: center;
-                border-radius: 20px;
-                padding: 6px 12px;
-                border: 1px solid #ff9800;
-            }
-            
-            .tipo-ajuste {
-                background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%) !important;
-                color: #757575;
-                font-weight: 600;
-                text-align: center;
-                border-radius: 20px;
-                padding: 6px 12px;
-                border: 1px solid #bdbdbd;
-            }
-            
-            .total-row {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                color: white;
-                font-weight: 600;
-                font-size: 11pt;
-            }
-            
-            .total-row td {
-                border: none;
-                padding: 16px 10px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            
-            .resumen-box {
-                background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
-                padding: 20px;
-                margin: 20px;
-                border-radius: 8px;
-                border-left: 5px solid #3498db;
-            }
-            
-            .resumen-item {
-                padding: 10px;
-                font-size: 12pt;
-                font-weight: bold;
-            }
-            
-            .footer {
-                margin-top: 0;
-                padding: 25px;
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                border-top: 1px solid #dee2e6;
-                font-size: 9pt;
-                color: #6c757d;
-                text-align: center;
-            }
-            
-            .footer strong {
-                color: #2c3e50;
-                display: block;
-                margin-bottom: 8px;
-                font-size: 10pt;
-            }
-        </style>
-    </head>
-    <body>';
-
-            echo '<div class="container">
-                    <div class="header">
-                        💰 HISTORIAL DE MOVIMIENTOS DE CAJA - SAMFARM PHARMA
-                    </div>';
-
-            echo '<div class="info">
-                        <div class="info-item">
-                            <strong>📅 Fecha de Generación</strong>
-                            ' . date('d/m/Y H:i:s') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>👤 Usuario</strong>
-                            ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>📆 Periodo</strong>
-                            ' . date('d/m/Y', strtotime($fecha_desde)) . ' - ' . date('d/m/Y', strtotime($fecha_hasta)) . '
-                        </div>
-                        <div class="info-item">
-                            <strong>📋 Total de Registros</strong>
-                            ' . count($datos) . '
-                        </div>
-                    </div>';
-
-            echo '<table>';
-
-            echo '<thead><tr>';
             $headers = array_keys($datos[0]);
-            foreach ($headers as $header) {
-                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
-            }
-            echo '</tr></thead>';
 
-            echo '<tbody>';
+            $info_superior = [
+                'Fecha de Generación' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                'Total de Registros' => count($datos)
+            ];
 
-            $total_ingresos = 0;
-            $total_egresos = 0;
-
-            foreach ($datos as $row) {
-                echo '<tr>';
-
-                foreach ($headers as $key) {
-                    $valor = $row[$key];
-
-                    if ($key === 'Monto') {
-                        $tipo = $row['Tipo'];
-                        $clase = in_array($tipo, ['INGRESO', 'VENTA']) ? 'moneda-ingreso' : 'moneda-egreso';
-                        $signo = in_array($tipo, ['INGRESO', 'VENTA']) ? '+' : '-';
-                        echo '<td class="' . $clase . '">' . $signo . 'Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-
-                        if (in_array($tipo, ['INGRESO', 'VENTA'])) {
-                            $total_ingresos += $valor;
-                        } else {
-                            $total_egresos += $valor;
-                        }
-                    } elseif ($key === 'Tipo') {
-                        $clase_tipo = 'tipo-' . strtolower($valor);
-                        $iconos = [
-                            'INGRESO' => '⬇️',
-                            'EGRESO' => '⬆️',
-                            'VENTA' => '🛒',
-                            'COMPRA' => '📦',
-                            'AJUSTE' => '📝'
-                        ];
-                        $icono = $iconos[$valor] ?? '📌';
-                        echo '<td class="' . $clase_tipo . '">' . $icono . ' ' . $valor . '</td>';
-                    } elseif ($key === 'Fecha') {
-                        echo '<td>' . date('d/m/Y H:i', strtotime($valor)) . '</td>';
-                    } else {
-                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
-                    }
-                }
-
-                echo '</tr>';
+            if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+                $info_superior['Periodo'] = date('d/m/Y', strtotime($fecha_desde)) . ' - ' . date('d/m/Y', strtotime($fecha_hasta));
             }
 
-            $balance = $total_ingresos - $total_egresos;
-            $color_balance = $balance >= 0 ? '#27ae60' : '#c62828';
+            mainModel::generar_excel_reporte([
+                'titulo' => '💰 HISTORIAL DE MOVIMIENTOS DE CAJA - SAMFARM PHARMA',
+                'datos' => $datos,
+                'headers' => $headers,
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Fecha' => 'fecha-hora',
+                    'Monto' => 'moneda'
+                ],
+                'columnas_totales' => ['Monto'],
+                'info_superior' => $info_superior
+            ]);
 
-            echo '<tr class="total-row">
-                    <td colspan="' . (count($headers) - 1) . '" style="text-align: right; padding-right: 20px;">📊 BALANCE TOTAL:</td>
-                    <td class="numero" style="color: ' . $color_balance . ';">Bs ' . number_format($balance, 2, ',', '.') . '</td>
-                </tr>';
-
-            echo '</tbody></table>';
-
-            echo '<div class="resumen-box">
-                    <h3 style="margin-top: 0; color: #2c3e50;">📈 RESUMEN DEL PERIODO</h3>
-                    <div class="resumen-item" style="color: #27ae60;">
-                        ⬇️ Total Ingresos: <span style="float: right;">+Bs ' . number_format($total_ingresos, 2, ',', '.') . '</span>
-                    </div>
-                    <div class="resumen-item" style="color: #c62828;">
-                        ⬆️ Total Egresos: <span style="float: right;">-Bs ' . number_format($total_egresos, 2, ',', '.') . '</span>
-                    </div>
-                    <div class="resumen-item" style="color: ' . $color_balance . '; font-size: 14pt; border-top: 2px solid #34495e; margin-top: 10px; padding-top: 10px;">
-                        💰 Balance Final: <span style="float: right;">Bs ' . number_format($balance, 2, ',', '.') . '</span>
-                    </div>
-                </div>';
-
-            echo '<div class="footer">
-                        <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>
-                        Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
-                    </div>
-                </div>';
-
-            echo '</body></html>';
-
-            exit();
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
             echo "Error al generar archivo: " . $e->getMessage();
@@ -717,15 +392,19 @@ class cajaHistorialController extends cajaHistorialModel
 
         if ($rol_usuario == 2) {
             $filtros['su_id'] = $sucursal_usuario;
-        } elseif ($rol_usuario == 1 && isset($_GET['select4']) && $_GET['select4'] !== '') {
-            $filtros['su_id'] = (int)$_GET['select4'];
+        } elseif ($rol_usuario == 1 && isset($_GET['su_id']) && $_GET['su_id'] !== '') {
+            $filtros['su_id'] = (int)$_GET['su_id'];
         }
 
-        $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : date('Y-m-d');
-        $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : date('Y-m-d');
+        $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : '';
+        $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : '';
 
-        $filtros['fecha_desde'] = $fecha_desde;
-        $filtros['fecha_hasta'] = $fecha_hasta;
+        if (!empty($fecha_desde)) {
+            $filtros['fecha_desde'] = $fecha_desde;
+        }
+        if (!empty($fecha_hasta)) {
+            $filtros['fecha_hasta'] = $fecha_hasta;
+        }
 
         if (isset($_GET['select1']) && $_GET['select1'] !== '') {
             $filtros['caja_id'] = (int)$_GET['select1'];
@@ -744,13 +423,40 @@ class cajaHistorialController extends cajaHistorialModel
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($datos)) {
-                echo "No hay datos para exportar";
+                echo "No hay datos para exportar en el periodo seleccionado.";
                 return;
             }
 
             $resumen = self::obtener_resumen_periodo_model($filtros);
 
+            $periodo = '';
+            if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+                $periodo = date('d/m/Y', strtotime($fecha_desde)) . ' al ' . date('d/m/Y', strtotime($fecha_hasta));
+            } else {
+                $periodo = 'Todo el historial';
+            }
+
+            $info_superior = [
+                'Periodo' => $periodo,
+                'Total Registros' => count($datos),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [
+                ['text' => 'CAJA', 'width' => 25],
+                ['text' => 'FECHA', 'width' => 22],
+                ['text' => 'TIPO', 'width' => 18],
+                ['text' => 'CONCEPTO', 'width' => 30],
+                ['text' => 'REFERENCIA', 'width' => 30],
+                ['text' => 'USUARIO', 'width' => 20],
+                ['text' => 'MONTO', 'width' => 25]
+            ];
+
             $rows = [];
+            $total_ingresos = $resumen['total_ingresos'] ?? 0;
+            $total_egresos = $resumen['total_egresos'] ?? 0;
+
             foreach ($datos as $row) {
                 $tipo_text = strtoupper($row['mc_tipo']);
                 $signo = in_array($tipo_text, ['INGRESO', 'VENTA']) ? '+' : '-';
@@ -759,72 +465,53 @@ class cajaHistorialController extends cajaHistorialModel
                 $referencia = $row['mc_referencia_tipo'] ? strtoupper($row['mc_referencia_tipo']) . ' #' . $row['mc_referencia_id'] : 'N/A';
                 $usuario = trim(($row['us_nombres'] ?? 'Sistema') . ' ' . ($row['us_apellido_paterno'] ?? ''));
 
-                $rows[] = [
-                    'cells' => [
-                        ['text' => $row['caja_nombre']],
-                        ['text' => date('d/m/Y H:i', strtotime($row['mc_fecha']))],
-                        ['text' => $tipo_text],
-                        ['text' => substr($row['mc_concepto'] ?? '-', 0, 30)],
-                        ['text' => $referencia],
-                        ['text' => substr($usuario, 0, 20)],
-                        ['text' => $signo . 'Bs ' . number_format($row['mc_monto'], 2), 'color' => $color_monto]
-                    ]
+                $cells = [
+                    ['text' => substr($row['caja_nombre'], 0, 20), 'align' => 'L'],
+                    ['text' => date('d/m/Y H:i', strtotime($row['mc_fecha'])), 'align' => 'C'],
+                    ['text' => $tipo_text, 'align' => 'C'],
+                    ['text' => substr($row['mc_concepto'] ?? '-', 0, 25), 'align' => 'L'],
+                    ['text' => substr($referencia, 0, 25), 'align' => 'C'],
+                    ['text' => substr($usuario, 0, 15), 'align' => 'L'],
+                    ['text' => $signo . 'Bs ' . number_format($row['mc_monto'], 2), 'align' => 'R', 'color' => $color_monto]
                 ];
+
+                $rows[] = ['cells' => $cells];
             }
 
-            $balance = $resumen['balance'];
+            $balance = $resumen['balance'] ?? 0;
             $color_balance = $balance >= 0 ? [39, 174, 96] : [231, 76, 60];
 
+            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
+            $cells_total[0] = ['text' => 'TOTAL GENERAL', 'align' => 'R'];
+            $cells_total[count($headers) - 1] = [
+                'text' => 'Bs ' . number_format($balance, 2),
+                'align' => 'R',
+                'color' => [255, 255, 255]
+            ];
+
             $rows[] = [
-                'es_total' => true,
-                'cells' => [
-                    ['text' => 'TOTALES'],
-                    ['text' => ''],
-                    ['text' => ''],
-                    ['text' => ''],
-                    ['text' => ''],
-                    ['text' => ''],
-                    ['text' => 'Bs ' . number_format($balance, 2), 'color' => [255, 255, 255]]
-                ]
+                'cells' => $cells_total,
+                'es_total' => true
+            ];
+
+            $resumen_pdf = [
+                'Total Ingresos' => ['text' => '+Bs ' . number_format($total_ingresos, 2), 'color' => [39, 174, 96]],
+                'Total Egresos' => ['text' => '-Bs ' . number_format($total_egresos, 2), 'color' => [231, 76, 60]],
+                'Balance Final' => ['text' => 'Bs ' . number_format($balance, 2), 'color' => $color_balance]
             ];
 
             $datos_pdf = [
                 'titulo' => 'HISTORIAL DE MOVIMIENTOS DE CAJA',
-                'nombre_archivo' => 'Historial_Caja_' . date('Y-m-d') . '.pdf',
-                'info_superior' => [
-                    'Periodo' => date('d/m/Y', strtotime($fecha_desde)) . ' - ' . date('d/m/Y', strtotime($fecha_hasta)),
-                    'Registros' => count($datos),
-                    'Generado por' => $_SESSION['nombre_smp'] ?? 'Sistema'
-                ],
+                'nombre_archivo' => 'Historial_Caja_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
                 'tabla' => [
-                    'headers' => [
-                        ['text' => 'CAJA', 'width' => 30, 'align' => 'L'],
-                        ['text' => 'FECHA', 'width' => 30, 'align' => 'C'],
-                        ['text' => 'TIPO', 'width' => 20, 'align' => 'C'],
-                        ['text' => 'CONCEPTO', 'width' => 40, 'align' => 'L'],
-                        ['text' => 'REFERENCIA', 'width' => 25, 'align' => 'C'],
-                        ['text' => 'USUARIO', 'width' => 25, 'align' => 'L'],
-                        ['text' => 'MONTO', 'width' => 25, 'align' => 'R']
-                    ],
+                    'headers' => $headers,
                     'rows' => $rows
                 ],
-                'resumen' => [
-                    'Total Ingresos' => [
-                        'text' => '+Bs ' . number_format($resumen['total_ingresos'], 2),
-                        'color' => [39, 174, 96]
-                    ],
-                    'Total Egresos' => [
-                        'text' => '-Bs ' . number_format($resumen['total_egresos'], 2),
-                        'color' => [231, 76, 60]
-                    ],
-                    'Balance Final' => [
-                        'text' => 'Bs ' . number_format($balance, 2),
-                        'color' => $color_balance
-                    ]
-                ]
+                'resumen' => $resumen_pdf
             ];
 
-            mainModel::generar_pdf_reporte_fpdf($datos_pdf);
+            self::generar_pdf_reporte_fpdf($datos_pdf);
         } catch (Exception $e) {
             error_log("Error exportando PDF historial: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
@@ -833,10 +520,10 @@ class cajaHistorialController extends cajaHistorialModel
 
     public function exportar_movimiento_individual_pdf_controller()
     {
-        $mc_id = isset($_GET['mc_id']) ? (int)$_GET['mc_id'] : 0;
+        $mc_id = isset($_GET['mc_id']) ? (int)$_GET['mc_id'] : (isset($_POST['mc_id']) ? (int)$_POST['mc_id'] : 0);
 
         if ($mc_id <= 0) {
-            echo "ID de movimiento invalido";
+            echo "ID de movimiento inválido";
             return;
         }
 
@@ -901,6 +588,98 @@ class cajaHistorialController extends cajaHistorialModel
         } catch (Exception $e) {
             error_log("Error exportando movimiento individual: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function obtener_referencia_movimiento_controller()
+    {
+        $tipo = isset($_POST['tipo']) ? mainModel::limpiar_cadena($_POST['tipo']) : '';
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+        if (empty($tipo) || $id <= 0) {
+            echo json_encode(['error' => 'Datos inválidos']);
+            return;
+        }
+
+        try {
+            $html = '';
+            
+            switch (strtolower($tipo)) {
+                case 'venta':
+                    $stmt = self::obtener_detalle_venta_model($id);
+                    $venta = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($venta) {
+                        $html = $this->generar_html_referencia_venta($venta);
+                    } else {
+                        $html = '<p style="color: #f44336; text-align: center;">No se encontró la venta</p>';
+                    }
+                    break;
+
+                case 'compra':
+                    $html = '<p style="color: #f44336; text-align: center;">Referencia de compra no disponible</p>';
+                    break;
+
+                case 'apertura':
+                    $html = '<p style="color: #2196F3; text-align: center;"><strong>Apertura de Caja</strong></p>';
+                    break;
+
+                case 'cierre':
+                    $html = '<p style="color: #FF9800; text-align: center;"><strong>Cierre de Caja</strong></p>';
+                    break;
+
+                case 'ajuste':
+                    $html = '<p style="color: #9C27B0; text-align: center;"><strong>Ajuste Manual</strong></p>';
+                    break;
+
+                default:
+                    $html = '<p style="color: #999; text-align: center;">Tipo de referencia desconocido</p>';
+            }
+
+            echo json_encode(['html' => $html]);
+        } catch (Exception $e) {
+            error_log("Error obteniendo referencia: " . $e->getMessage());
+            echo json_encode(['error' => 'Error al obtener la referencia']);
+        }
+    }
+
+    private function generar_html_referencia_venta($venta)
+    {
+        $html = '<div class="modal-group">';
+        $html .= '<div class="row"><h3><ion-icon name="receipt-outline"></ion-icon> Información de Venta</h3></div>';
+        
+        $html .= '<div class="row">';
+        $html .= '<div class="col"><label>Número de Venta:</label><p>' . htmlspecialchars($venta['v_numero'] ?? 'N/A') . '</p></div>';
+        $html .= '<div class="col"><label>Fecha:</label><p>' . (isset($venta['v_fecha']) ? date('d/m/Y H:i', strtotime($venta['v_fecha'])) : 'N/A') . '</p></div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col"><label>Cliente:</label><p>' . htmlspecialchars($venta['cliente_nombre'] ?? 'Mostrador') . '</p></div>';
+        $html .= '<div class="col"><label>Total:</label><p><strong style="color: #4CAF50; font-size: 16px;">Bs. ' . number_format($venta['v_total'] ?? 0, 2) . '</strong></p></div>';
+        $html .= '</div>';
+
+        if (isset($venta['v_observacion']) && !empty($venta['v_observacion'])) {
+            $html .= '<div class="row"><label>Observación:</label><p>' . htmlspecialchars($venta['v_observacion']) . '</p></div>';
+        }
+
+        $html .= '</div>';
+        
+        return $html;
+    }
+
+    protected static function obtener_detalle_venta_model($v_id)
+    {
+        try {
+            $conexion = mainModel::conectar();
+            $sql = "SELECT v.*, c.cliente_nombre FROM ventas v 
+                    LEFT JOIN clientes c ON v.cliente_id = c.cliente_id 
+                    WHERE v.v_id = :v_id LIMIT 1";
+            $stmt = $conexion->prepare($sql);
+            $stmt->bindParam(':v_id', $v_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt;
+        } catch (PDOException $e) {
+            error_log("Error en obtener_detalle_venta_model: " . $e->getMessage());
+            return null;
         }
     }
 }

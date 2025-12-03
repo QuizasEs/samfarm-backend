@@ -115,10 +115,10 @@ class recepcionarModel extends mainModel
     protected static function crear_lote_destino_model($datos)
     {
         $sql = "INSERT INTO lote_medicamento 
-                (med_id, su_id, pr_id, pr_id_compra, lm_numero_lote, lm_cant_blister, lm_cant_unidad, 
+                (med_id, su_id, pr_id, pr_id_compra, lm_numero_lote, lm_cant_caja, lm_cant_blister, lm_cant_unidad, 
                  lm_cant_actual_cajas, lm_cant_actual_unidades, lm_precio_compra, 
                  lm_precio_venta, lm_fecha_vencimiento, lm_estado, lm_origen_id)
-                VALUES (:med_id, :su_id, :pr_id, :pr_id_compra, :lm_numero_lote, :lm_cant_blister, :lm_cant_unidad,
+                VALUES (:med_id, :su_id, :pr_id, :pr_id_compra, :lm_numero_lote, :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad,
                         :lm_cant_actual_cajas, :lm_cant_actual_unidades, :lm_precio_compra,
                         :lm_precio_venta, :lm_fecha_vencimiento, :lm_estado, :lm_origen_id)";
 

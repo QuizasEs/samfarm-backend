@@ -216,12 +216,6 @@ class transferirController extends transferirModel
     {
         require_once '../libs/fpdf/fpdf.php';
 
-        // NOTA: Se genera el PDF localmente en el controller en lugar de usar mainModel::generar_pdf_reporte_fpdf()
-        // porque esa función hace exit() después de Output('I'), lo que imposibilita capturar el PDF como string
-        // para retornarlo en base64 en la respuesta AJAX. 
-        // mainModel se usa para PDF que se descargan directamente (muestra en navegador),
-        // pero cuando necesitamos el PDF en JSON, se genera aquí retornando Output('S')
-
         $transferencia = transferirModel::datos_transferencia_completa_model($tr_id)->fetch();
         $detalles = transferirModel::detalle_transferencia_model($tr_id)->fetchAll();
 
@@ -295,6 +289,120 @@ class transferirController extends transferirModel
     }
 
 
+
+    public function aceptar_transferencia_controller()
+    {
+        $tr_id = isset($_POST['tr_id']) ? (int)$_POST['tr_id'] : 0;
+        $us_receptor = $_SESSION['id_smp'] ?? 0;
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        $su_usuario = $_SESSION['sucursal_smp'] ?? 0;
+
+        if (!$tr_id || !$us_receptor) {
+            return json_encode(['error' => 'Datos inválidos']);
+        }
+
+        try {
+            $conexion = mainModel::conectar();
+            $conexion->beginTransaction();
+
+            $stmt_tr = transferirModel::datos_transferencia_completa_model($tr_id);
+            $transferencia = $stmt_tr->fetch(PDO::FETCH_ASSOC);
+
+            if (!$transferencia) {
+                throw new Exception("Transferencia no encontrada");
+            }
+
+            if ($rol != 1 && $transferencia['su_destino_id'] != $su_usuario) {
+                throw new Exception("No tiene permisos para aceptar esta transferencia");
+            }
+
+            if ($transferencia['tr_estado'] != 'pendiente') {
+                throw new Exception("La transferencia no está en estado pendiente");
+            }
+
+            $stmt_dt = transferirModel::detalle_transferencia_model($tr_id);
+            $detalles = $stmt_dt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($detalles as $det) {
+                $lm_origen_id = $det['dt_id'];
+                $med_id = $det['med_id'];
+                $dt_cantidad_cajas = $det['dt_cantidad_cajas'];
+                $dt_cantidad_unidades = $det['dt_cantidad_unidades'];
+                $dt_numero_lote = $det['dt_numero_lote_origen'];
+                $dt_precio_compra = $det['dt_precio_compra'];
+                $dt_precio_venta = $det['dt_precio_venta'];
+                $subtotal = $det['dt_subtotal_valorado'];
+
+                $stmt_lm_origen = transferirModel::datos_lote_transfer_model($det['lm_origen_id']);
+                $lm_origen = $stmt_lm_origen->fetch(PDO::FETCH_ASSOC);
+
+                if (!$lm_origen) {
+                    throw new Exception("Lote origen no encontrado");
+                }
+
+                $datos_lote = [
+                    'med_id' => $med_id,
+                    'su_id' => $transferencia['su_destino_id'],
+                    'lm_numero_lote' => $dt_numero_lote,
+                    'lm_cant_caja' => $dt_cantidad_cajas,
+                    'lm_cant_blister' => $lm_origen['lm_cant_blister'],
+                    'lm_cant_unidad' => $lm_origen['lm_cant_unidad'],
+                    'lm_cant_actual_cajas' => $dt_cantidad_cajas,
+                    'lm_cant_actual_unidades' => $dt_cantidad_unidades,
+                    'lm_precio_compra' => $dt_precio_compra,
+                    'lm_precio_venta' => $dt_precio_venta,
+                    'lm_fecha_vencimiento' => $lm_origen['lm_fecha_vencimiento'],
+                    'lm_origen_id' => $det['lm_origen_id']
+                ];
+
+                $lm_destino_id = transferirModel::crear_lote_en_destino_model($datos_lote);
+
+                transferirModel::actualizar_inventario_destino_model(
+                    $med_id,
+                    $transferencia['su_destino_id'],
+                    $dt_cantidad_cajas,
+                    $dt_cantidad_unidades,
+                    $subtotal
+                );
+
+                $datos_movimiento = [
+                    'lm_id' => $lm_destino_id,
+                    'med_id' => $med_id,
+                    'su_id' => $transferencia['su_destino_id'],
+                    'us_id' => $us_receptor,
+                    'mi_tipo' => 'entrada',
+                    'mi_cantidad' => $dt_cantidad_unidades,
+                    'mi_unidad' => 'unidad',
+                    'mi_referencia_tipo' => 'transferencia_entrada',
+                    'mi_referencia_id' => $tr_id,
+                    'mi_motivo' => "Entrada de {$dt_cantidad_cajas} cajas por transferencia #{$transferencia['tr_numero']}"
+                ];
+
+                transferirModel::registrar_movimiento_entrada_model($datos_movimiento);
+
+                $sql_update_detalle = "UPDATE detalle_transferencia SET lm_destino_id = :lm_destino_id WHERE dt_id = :dt_id";
+                $stmt_update = mainModel::conectar()->prepare($sql_update_detalle);
+                $stmt_update->execute([':lm_destino_id' => $lm_destino_id, ':dt_id' => $det['dt_id']]);
+            }
+
+            transferirModel::actualizar_estado_transferencia_model($tr_id, 'aceptada', $us_receptor);
+
+            $conexion->commit();
+
+            return json_encode([
+                'Tipo' => 'success',
+                'Titulo' => 'Transferencia aceptada',
+                'texto' => "Transferencia #{$transferencia['tr_numero']} aceptada correctamente"
+            ], JSON_UNESCAPED_UNICODE);
+
+        } catch (Exception $e) {
+            if (isset($conexion)) {
+                $conexion->rollBack();
+            }
+            error_log("Error en aceptar_transferencia: " . $e->getMessage());
+            return json_encode(['error' => $e->getMessage()]);
+        }
+    }
 
     private function truncar_texto($texto, $longitud)
     {

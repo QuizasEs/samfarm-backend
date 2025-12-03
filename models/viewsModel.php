@@ -36,8 +36,9 @@
                 "transferirLista",
                 "recepcionarLista",
                 "transferirHistorialLista",
-                "",
-                "",
+                "mermaRegistrar",
+                "mermaLista",
+                "mermaRevision",
             ];
 
             if(in_array($vistas,$listaBlanca)){

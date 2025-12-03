@@ -90,7 +90,7 @@ class inventarioController extends inventarioModel
 
         // Determinar si mostrar columna sucursal
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f3));
-        $colspan_total = $mostrar_columna_sucursal ? 11 : 10;
+        $colspan_total = $mostrar_columna_sucursal ? 13 : 12;
 
         /* ===== CONSTRUIR TABLA ===== */
         $tabla .= '
@@ -104,6 +104,8 @@ class inventarioController extends inventarioModel
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '<th>CAJAS</th>
                                 <th>UNIDADES</th>
+                                <th>MÍNIMO</th>
+                                <th>MÁXIMO</th>
                                 <th>VALORADO</th>
                                 <th>ESTADO</th>
                                 <th>LOTES</th>
@@ -154,6 +156,8 @@ class inventarioController extends inventarioModel
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
                     '<td style="text-align:center;"><strong>' . number_format($row['inv_total_cajas']) . '</strong></td>
                             <td style="text-align:center;font-size:16px;"><strong style="color:#1976D2;">' . number_format($row['inv_total_unidades']) . '</strong></td>
+                            <td style="text-align:center;">' . number_format($row['inv_minimo'] ?? 0) . '</td>
+                            <td style="text-align:center;">' . ($row['inv_maximo'] !== null ? number_format($row['inv_maximo']) : '<span style="color:#999;">Sin límite</span>') . '</td>
                             <td style="text-align:right;">Bs. ' . number_format($row['inv_total_valorado'], 2) . '</td>
                             <td>' . $estado_html . '</td>
                             <td style="text-align:center;">
@@ -168,14 +172,15 @@ class inventarioController extends inventarioModel
                                 onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="eye-outline"></ion-icon> Detalles
                                 </a>
+                                
                                 <a href="javascript:void(0)" 
                                 class="btn danger" 
-                                title="Transferir"
-                                onclick="InventarioModals.abrirTransferencia(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir
+                                title="Configurar minimo y maximo"
+                                onclick="InventarioModals.abrirConfiguracion(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\', ' . ($row['inv_minimo'] ?? 0) . ', ' . ($row['inv_maximo'] ?? 'null') . ')">
+                                    <ion-icon name="settings-outline"></ion-icon> Configurar
                                 </a>
                                 <a href="javascript:void(0)" 
-                                class="btn primary" 
+                                class="btn info" 
                                 title="Ver historial"
                                 onclick="InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="time-outline"></ion-icon> Historial
@@ -752,6 +757,79 @@ class inventarioController extends inventarioModel
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
             echo "Error al generar archivo: " . $e->getMessage();
+        }
+    }
+
+    public function guardar_configuracion_inventario_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario != 1 && $rol_usuario != 2) {
+            return json_encode([
+                'Alerta' => 'simple',
+                'Titulo' => 'Acceso denegado',
+                'texto' => 'No tiene permisos para configurar inventario',
+                'Tipo' => 'error'
+            ]);
+        }
+
+        $inv_id = isset($_POST['inv_id']) ? (int)$_POST['inv_id'] : 0;
+        $inv_minimo = isset($_POST['inv_minimo']) ? (int)$_POST['inv_minimo'] : 0;
+        $inv_maximo = isset($_POST['inv_maximo']) && $_POST['inv_maximo'] !== '' ? (int)$_POST['inv_maximo'] : null;
+
+        if ($inv_id <= 0) {
+            return json_encode([
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'Inventario no válido',
+                'Tipo' => 'error'
+            ]);
+        }
+
+        if ($inv_minimo < 0) {
+            return json_encode([
+                'Alerta' => 'simple',
+                'Titulo' => 'Validación',
+                'texto' => 'La cantidad mínima no puede ser negativa',
+                'Tipo' => 'error'
+            ]);
+        }
+
+        if ($inv_maximo !== null && $inv_maximo < $inv_minimo) {
+            return json_encode([
+                'Alerta' => 'simple',
+                'Titulo' => 'Validación',
+                'texto' => 'La cantidad máxima debe ser mayor o igual a la mínima',
+                'Tipo' => 'error'
+            ]);
+        }
+
+        try {
+            $resultado = self::actualizar_configuracion_inventario_model($inv_id, $inv_minimo, $inv_maximo);
+
+            if ($resultado) {
+                return json_encode([
+                    'Alerta' => 'recargar',
+                    'Titulo' => 'Configuración actualizada',
+                    'texto' => 'Los valores de mínimo y máximo se guardaron correctamente',
+                    'Tipo' => 'success'
+                ]);
+            } else {
+                return json_encode([
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error',
+                    'texto' => 'No se pudo guardar la configuración',
+                    'Tipo' => 'error'
+                ]);
+            }
+        } catch (Exception $e) {
+            error_log("Error en guardar_configuracion_inventario_controller: " . $e->getMessage());
+            return json_encode([
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'Error al guardar configuración',
+                'Tipo' => 'error'
+            ]);
         }
     }
 }
