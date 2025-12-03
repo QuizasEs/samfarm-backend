@@ -338,6 +338,7 @@ class ventaController extends ventaModel
 
                 $remaining = $unidades_requeridas;
                 $lotes = self::obtener_lotes_activos_por_med_sucursal_model($med_id, $sucursal_id);
+                $valorado_total_descuento = 0;
 
                 foreach ($lotes as $lm) {
                     if ($remaining <= 0) break;
@@ -345,6 +346,7 @@ class ventaController extends ventaModel
                     $lm_disp = (int)$lm['lm_cant_actual_unidades'];
                     if ($lm_disp <= 0) continue;
                     $take = min($lm_disp, $remaining);
+                    $lm_precio_compra = (float)$lm['lm_precio_compra'];
 
                     $detalle = [
                         "ve_id" => $ve_id,
@@ -379,12 +381,13 @@ class ventaController extends ventaModel
                     $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
                     if (!$mov_res || $mov_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_inventario");
 
+                    $valorado_total_descuento += $take * $lm_precio_compra;
                     $remaining -= $take;
                 }
 
                 if ($remaining > 0) throw new Exception("Stock inconsistente");
 
-                $inv_ok = self::descontar_inventario_consolidado_model($med_id, $sucursal_id, $unidades_requeridas);
+                $inv_ok = self::descontar_inventario_consolidado_model($med_id, $sucursal_id, $unidades_requeridas, $valorado_total_descuento);
 
                 if (!$inv_ok) {
                     $inv_ok = self::recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id);

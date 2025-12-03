@@ -144,7 +144,7 @@ if ($datos->rowCount() == 1) {
 
 
             <div class='form-buttons'>
-                <button class='btn-primary'>Activar Lote</button>
+                <button class='btn success'>Actualizar Lote</button>
             </div>
         </form>
     </div>

@@ -19,17 +19,17 @@ if ($datos->rowCount() == 1) {
 
 ?>
     <div class="title">
-        <h1>Registro de usuarios</h1>
+        <h1>Registro de medicamentos</h1>
     </div>
     <!-- formulario de registro de usuarios -->
-    <div class="registro-usaurios-container">
-        <form class="form-registro-usuario FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/medicamentoAjax.php" method="POST" data-form="update" autocomplete="off">
+    <div class="container">
+        <form class="form FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/medicamentoAjax.php" method="POST" data-form="update" autocomplete="off">
 
             <input type="hidden" name="MedicamentoAjax" value="update">
             <input type="hidden" name="id" value="<?php echo $pagina[1]?>">
             <!-- DATOS PERSONALES -->
             <div class="form-title">
-                <h3>datos personales</h3>
+                <h3>datos </h3>
             </div>
             <div class="form-group">
                 <div class="form-bloque">
@@ -53,17 +53,6 @@ if ($datos->rowCount() == 1) {
                 <div class="form-bloque">
                     <label for="">PRESENTACION*</label>
                     <input type="text" name="Presentacion_up" value="<?php echo $campos['med_presentacion'] ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Metrica" required>
-                </div>
-
-            </div>
-            <div class="form-group">
-                <div class="form-bloque">
-                    <label for="">PRECIO UNITARIO EN BS*</label>
-                    <input type="text" name="Precio_unitario_up" value="<?php echo $campos['med_precio_unitario'] ?>" pattern="[0-9.]{1,10}" placeholder="Numero" maxlength="10" required>
-                </div>
-                <div class="form-bloque">
-                    <label for="">PRECIO CAJA EN BS*</label>
-                    <input type="text" name="Precio_caja_up" value="<?php echo $campos['med_precio_caja'] ?>" pattern="[0-9.]{1,10}" maxlength="10" placeholder="Numero" required>
                 </div>
 
             </div>
@@ -117,7 +106,7 @@ if ($datos->rowCount() == 1) {
 
             </div>
             <div class="form-buttons">
-                <button class="btn-primary">Agregar</button>
+                <button class="btn success">Actualizar</button>
             </div>
 
 

@@ -363,7 +363,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="row">
                     <div id="graficoComprasMensuales" style="width:100%;height:350px;"></div>
-                </div>F
+                </div>
 
 
 

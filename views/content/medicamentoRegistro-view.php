@@ -9,16 +9,16 @@ $datos_select = $ins_med->datos_extras_controller();
 
 ?>
 <div class="title">
-    <h1>Registro de usuarios</h1>
+    <h2><ion-icon name="layers-outline"></ion-icon> Registro de medicamentos</h2>
 </div>
 <!-- formulario de registro de medicamentos -->
-<div class="registro-usaurios-container">
-    <form class="form-registro-usuario FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/medicamentoAjax.php" method="POST" data-form="save" autocomplete="off">
+<div class="container">
+    <form class="form FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/medicamentoAjax.php" method="POST" data-form="save" autocomplete="off">
 
         <input type="hidden" name="MedicamentoAjax" value="save">
         <!-- DATOS esenciales -->
         <div class="form-title">
-            <h3>datos personales</h3>
+            <h3>datos</h3>
         </div>
         <div class="form-group">
             <div class="form-bloque">
@@ -37,22 +37,11 @@ $datos_select = $ins_med->datos_extras_controller();
         <div class="form-group">
             <div class="form-bloque">
                 <label for="">DESCRIPCION</label>
-                <input type="text" name="Descripcion_reg" placeholder="Si serequire" maxlength="100" required>
+                <input type="text" name="Descripcion_reg" placeholder="Si serequire" maxlength="200">
             </div>
             <div class="form-bloque">
                 <label for="">PRESENTACION*</label>
                 <input type="text" name="Presentacion_reg" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Metrica" required>
-            </div>
-
-        </div>
-        <div class="form-group">
-            <div class="form-bloque">
-                <label for="">PRECIO UNITARIO*</label>
-                <input type="text" name="Precio_unitario_reg" pattern="[0-9.]{1,10}" placeholder="Numero" maxlength="10" required>
-            </div>
-            <div class="form-bloque">
-                <label for="">PRECIO CAJA*</label>
-                <input type="text" name="Precio_caja_reg" pattern="[0-9.]{1,10}" maxlength="10" placeholder="Numero" required>
             </div>
 
         </div>
@@ -111,7 +100,7 @@ $datos_select = $ins_med->datos_extras_controller();
 
         </div>
         <div class="form-buttons">
-            <button class="btn-primary">Agregar</button>
+            <button class="btn success">Agregar</button>
         </div>
 
 

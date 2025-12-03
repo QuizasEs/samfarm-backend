@@ -25,16 +25,16 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             function actualizarRazonSocial() {
                 const proveedorSelect = document.getElementById('Proveedor_reg');
                 const razonSocialInput = document.getElementById('razon_reg');
-                
+
                 const proveedorOption = proveedorSelect.options[proveedorSelect.selectedIndex];
                 const proveedorNombre = proveedorOption.text || '';
                 const proveedorNit = proveedorOption.getAttribute('data-nit') || '';
-                
+
                 let razonSocial = proveedorNombre;
                 if (proveedorNit) {
                     razonSocial = proveedorNombre + ' - NIT: ' + proveedorNit;
                 }
-                
+
                 razonSocialInput.value = razonSocial;
             }
 
@@ -181,9 +181,10 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                         <tr>
                             <th>N°</th>
                             <th>Producto</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Estado</th>
+                            <th>Presentación</th>
+                            <th>Descripción</th>
+                            <th>Código de Barras</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaMedicamentos">
@@ -230,7 +231,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <div class="modal" id="modalLote" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title">📦 Agregar Lote - <span id="modalMedicamentoNombre">Paracetamol</span></div>
+                    <div class="modal-title"><ion-icon name="bag-add-outline"></ion-icon> Agregar Lote - <span id="modalMedicamentoNombre">Paracetamol</span></div>
                     <a class="close" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></a>
                 </div>
 
@@ -238,8 +239,12 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 
                 <div class="modal-group">
                     <div class="row">
-                        <label for="numero_lote" class="required">Número de Lote</label>
-                        <input type="text" id="numero_lote" required readonly>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label for="numero_lote" class="required">Número de Lote</label>
+                                <input type="text" id="numero_lote" required readonly>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -259,13 +264,13 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad" >Blisters por caja </label>
+                                <label for="cantidad">Blisters por caja </label>
                                 <input type="number" name="Cantidad_blister_reg" id="cantidad_blister" min="1" placeholder="si aplica">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="fecha_vencimiento" >Unidades por blister </label>
+                                <label for="fecha_vencimiento">Unidades por blister </label>
                                 <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" placeholder="si aplica">
                             </div>
                         </div>
@@ -296,7 +301,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                         </div>
                     </div>
 
-                    <div class="btn-content">
+                    <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="cerrarModal()">Cancelar</a>
                         <a href="javascript:void(0)" class="btn success" onclick="agregarLote()">Agregar</a>
                     </div>

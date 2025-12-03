@@ -11,7 +11,7 @@ class ventaModel extends mainModel
     {
         $db = mainModel::conectar();
         $stmt = $db->prepare("
-                SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta
+                SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta, lm_precio_compra
                 FROM lote_medicamento
                 WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0
                 ORDER BY lm_fecha_ingreso ASC, lm_fecha_vencimiento ASC
@@ -523,13 +523,14 @@ class ventaModel extends mainModel
     {
         $db = mainModel::conectar();
 
-        // 1) Sumar unidades
-        $stmt = $db->prepare("SELECT COALESCE(SUM(lm_cant_actual_unidades),0) AS tot_unidades FROM lote_medicamento WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo'");
+        // 1) Sumar unidades y calcular valorado
+        $stmt = $db->prepare("SELECT COALESCE(SUM(lm_cant_actual_unidades),0) AS tot_unidades, COALESCE(SUM(lm_cant_actual_unidades * lm_precio_compra),0) AS tot_valorado FROM lote_medicamento WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo'");
         $stmt->bindParam(":med_id", $med_id, PDO::PARAM_INT);
         $stmt->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
         $stmt->execute();
         $r = $stmt->fetch(PDO::FETCH_ASSOC);
         $tot_unidades = (int)$r['tot_unidades'];
+        $tot_valorado = (float)$r['tot_valorado'];
 
         // 2) Determinar factor de caja por primer lote activo (fallback 1)
         $stmt2 = $db->prepare("SELECT lm_cant_blister, lm_cant_unidad FROM lote_medicamento WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0 LIMIT 1");
@@ -556,18 +557,20 @@ class ventaModel extends mainModel
         $row = $stmt3->fetch(PDO::FETCH_ASSOC);
 
         if ($row) {
-            $upd = $db->prepare("UPDATE inventarios SET inv_total_unidades = :tot_unidades, inv_total_cajas = :cajas, inv_actualizado_en = NOW() WHERE inv_id = :inv_id");
+            $upd = $db->prepare("UPDATE inventarios SET inv_total_unidades = :tot_unidades, inv_total_cajas = :cajas, inv_total_valorado = :tot_valorado, inv_actualizado_en = NOW() WHERE inv_id = :inv_id");
             $upd->bindParam(":tot_unidades", $tot_unidades, PDO::PARAM_INT);
             $upd->bindParam(":cajas", $cajas, PDO::PARAM_INT);
+            $upd->bindParam(":tot_valorado", $tot_valorado);
             $upd->bindParam(":inv_id", $row['inv_id'], PDO::PARAM_INT);
             $upd->execute();
             return $upd->rowCount() > 0;
         } else {
-            $ins = $db->prepare("INSERT INTO inventarios (med_id, su_id, inv_total_cajas, inv_total_unidades, inv_total_valorado, inv_creado_en) VALUES (:med_id, :su_id, :cajas, :tot_unidades, 0, NOW())");
+            $ins = $db->prepare("INSERT INTO inventarios (med_id, su_id, inv_total_cajas, inv_total_unidades, inv_total_valorado, inv_creado_en) VALUES (:med_id, :su_id, :cajas, :tot_unidades, :tot_valorado, NOW())");
             $ins->bindParam(":med_id", $med_id, PDO::PARAM_INT);
             $ins->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
             $ins->bindParam(":cajas", $cajas, PDO::PARAM_INT);
             $ins->bindParam(":tot_unidades", $tot_unidades, PDO::PARAM_INT);
+            $ins->bindParam(":tot_valorado", $tot_valorado);
             $ins->execute();
             return $ins->rowCount() > 0;
         }
@@ -603,7 +606,7 @@ class ventaModel extends mainModel
 
 
 
-    public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades)
+    public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades, $valorado_descuento = 0)
     {
         if ($cantidad_unidades <= 0) return false;
         $db = mainModel::conectar();
@@ -611,7 +614,7 @@ class ventaModel extends mainModel
         try {
             // 1) Verificar si existe inventario
             $check_stmt = $db->prepare("
-                SELECT inv_id, inv_total_unidades, inv_total_cajas 
+                SELECT inv_id, inv_total_unidades, inv_total_cajas, inv_total_valorado
                 FROM inventarios 
                 WHERE med_id = :med_id AND su_id = :su_id
             ");
@@ -640,7 +643,7 @@ class ventaModel extends mainModel
 
             // 3) Bloquear fila para actualización
             $lock_stmt = $db->prepare("
-                SELECT inv_id, inv_total_unidades, inv_total_cajas 
+                SELECT inv_id, inv_total_unidades, inv_total_cajas, inv_total_valorado
                 FROM inventarios 
                 WHERE inv_id = :inv_id 
                 FOR UPDATE
@@ -651,6 +654,7 @@ class ventaModel extends mainModel
 
             $inv_id = (int)$inv['inv_id'];
             $unidades_antes = (int)$inv['inv_total_unidades'];
+            $valorado_antes = (float)$inv['inv_total_valorado'];
 
             // 4) Validar stock suficiente
             if ($unidades_antes < $cantidad_unidades) {
@@ -660,6 +664,7 @@ class ventaModel extends mainModel
 
             // 5) Calcular nuevas cantidades
             $unidades_despues = $unidades_antes - $cantidad_unidades;
+            $valorado_despues = max(0, $valorado_antes - $valorado_descuento);
 
             // 6) Obtener factor de conversión para cajas
             $stmt2 = $db->prepare("
@@ -688,18 +693,20 @@ class ventaModel extends mainModel
                 UPDATE inventarios 
                 SET inv_total_unidades = :unidades_despues, 
                     inv_total_cajas = :cajas_despues, 
+                    inv_total_valorado = :valorado_despues,
                     inv_actualizado_en = NOW()
                 WHERE inv_id = :inv_id
             ");
             $upd->bindParam(":unidades_despues", $unidades_despues, PDO::PARAM_INT);
             $upd->bindParam(":cajas_despues", $cajas_despues, PDO::PARAM_INT);
+            $upd->bindParam(":valorado_despues", $valorado_despues);
             $upd->bindParam(":inv_id", $inv_id, PDO::PARAM_INT);
             $upd->execute();
 
             $rows_affected = $upd->rowCount();
 
             if ($rows_affected > 0) {
-                error_log("SUCCESS: Inventario actualizado. med_id={$med_id}, unidades: {$unidades_antes} -> {$unidades_despues}, cajas: -> {$cajas_despues}");
+                error_log("SUCCESS: Inventario actualizado. med_id={$med_id}, unidades: {$unidades_antes} -> {$unidades_despues}, valorado: {$valorado_antes} -> {$valorado_despues}");
                 return true;
             } else {
                 error_log("WARNING: UPDATE no afectó filas. med_id={$med_id}, inv_id={$inv_id}");

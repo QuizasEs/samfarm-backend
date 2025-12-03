@@ -110,7 +110,7 @@ class compraHistorialController extends compraHistorialModel
                             <th>PROVEEDOR</th>
                             <th>LABORATORIO</th>' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>ITEMS</th>
+            '
                             <th>LOTES</th>
                             <th>FACTURA</th>
                             <th>TOTAL</th>
@@ -146,11 +146,11 @@ class compraHistorialController extends compraHistorialModel
                         <td>' . $proveedor_info . '</td>
                         <td>' . htmlspecialchars($row['laboratorio'] ?? 'N/A') . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal']) . '</span></td>' : '') .
-                    '<td style="text-align:center;"><strong>' . $row['total_items'] . '</strong></td>
+                    '
                         <td style="text-align:center;">' . $lotes_badge . '</td>
                         <td>' . htmlspecialchars($row['co_numero_factura'] ?? 'N/A') . '</td>
                         <td style="text-align:right;font-weight:bold;color:#2e7d32;">Bs. ' . number_format($row['co_total'], 2) . '</td>
-                        <td class="accion-buttons">
+                        <td class="">
                             <a href="javascript:void(0)" 
                             class="btn default" 
                             title="Ver detalle"
@@ -305,6 +305,103 @@ class compraHistorialController extends compraHistorialModel
             return json_encode(['error' => 'Error al cargar datos del gráfico']);
         }
     }
+    public function exportar_compra_detalle_pdf_controller()
+    {
+        $co_id = isset($_GET['id']) ? (int)mainModel::limpiar_cadena($_GET['id']) : 0;
+
+        if ($co_id <= 0) {
+            echo "ID de compra no válido.";
+            return;
+        }
+
+        try {
+            $datos_compra = self::exportar_compra_detalle_pdf_model($co_id);
+
+            if (empty($datos_compra)) {
+                echo "No se encontraron datos para la compra seleccionada.";
+                return;
+            }
+
+            $compra = $datos_compra['compra'];
+            $detalles = $datos_compra['detalles'];
+
+            $info_superior = [
+                'N° Compra' => $compra['co_numero'],
+                'Fecha' => date('d/m/Y', strtotime($compra['co_fecha'])),
+                'Proveedor' => $compra['proveedor_nombre'],
+                'Sucursal' => $compra['sucursal'],
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [
+                ['text' => 'N°', 'width' => 8],
+                ['text' => 'MEDICAMENTO', 'width' => 50],
+                ['text' => 'CANTIDAD', 'width' => 15],
+                ['text' => 'P. UNITARIO', 'width' => 20],
+                ['text' => 'DESCUENTO', 'width' => 20],
+                ['text' => 'SUBTOTAL', 'width' => 20],
+                ['text' => 'LOTE', 'width' => 20],
+                ['text' => 'VENCIMIENTO', 'width' => 20]
+            ];
+
+            $rows = [];
+            $contador = 1;
+            foreach ($detalles as $detalle) {
+                $cells = [
+                    ['text' => $contador, 'align' => 'C'],
+                    ['text' => substr($detalle['med_nombre_quimico'], 0, 40), 'align' => 'L'],
+                    ['text' => $detalle['dc_cantidad'], 'align' => 'C'],
+                    ['text' => number_format($detalle['dc_precio_unitario'], 2), 'align' => 'R'],
+                    ['text' => number_format($detalle['dc_descuento'], 2), 'align' => 'R'],
+                    ['text' => number_format($detalle['dc_subtotal'], 2), 'align' => 'R'],
+                    ['text' => $detalle['lm_numero_lote'] ?? 'N/A', 'align' => 'C'],
+                    ['text' => $detalle['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($detalle['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C']
+                ];
+                $rows[] = ['cells' => $cells];
+                $contador++;
+            }
+
+            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
+            $cells_total[0] = ['text' => 'TOTAL', 'align' => 'R'];
+            $cells_total[count($headers) - 1] = [
+                'text' => number_format($compra['co_total'], 2),
+                'align' => 'R',
+                'color' => [255, 255, 255]
+            ];
+
+            $rows[] = [
+                'cells' => $cells_total,
+                'es_total' => true
+            ];
+
+            $resumen = [
+                'Subtotal' => ['text' => 'Bs ' . number_format($compra['co_subtotal'], 2)],
+                'Impuestos' => ['text' => 'Bs ' . number_format($compra['co_impuesto'], 2)],
+                'Total General' => [
+                    'text' => 'Bs ' . number_format($compra['co_total'], 2),
+                    'color' => [46, 125, 50]
+                ]
+            ];
+
+            $datos_pdf = [
+                'titulo' => 'DETALLE DE COMPRA',
+                'nombre_archivo' => 'Compra_' . $compra['co_numero'] . '_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            self::generar_pdf_reporte_fpdf($datos_pdf);
+        } catch (Exception $e) {
+            error_log("Error exportando PDF detalle compra: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
     public function exportar_compras_pdf_controller()
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -369,7 +466,6 @@ class compraHistorialController extends compraHistorialModel
                 ['text' => 'FECHA', 'width' => 20],
                 ['text' => 'PROVEEDOR', 'width' => 35],
                 ['text' => 'LABORATORIO', 'width' => 30],
-                ['text' => 'ITEMS', 'width' => 15],
                 ['text' => 'LOTES', 'width' => 15],
                 ['text' => 'N° FACTURA', 'width' => 25],
                 ['text' => 'TOTAL (Bs)', 'width' => 25]
@@ -390,7 +486,6 @@ class compraHistorialController extends compraHistorialModel
                     ['text' => $row['fecha_compra'], 'align' => 'C'],
                     ['text' => substr($row['proveedor'], 0, 25), 'align' => 'L'],
                     ['text' => substr($row['laboratorio'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                    ['text' => $row['items'], 'align' => 'C'],
                     ['text' => $row['lotes'], 'align' => 'C'],
                     ['text' => $row['co_numero_factura'] ?? 'N/A', 'align' => 'C'],
                     ['text' => number_format($row['co_total'], 2), 'align' => 'R']
@@ -441,6 +536,83 @@ class compraHistorialController extends compraHistorialModel
         } catch (Exception $e) {
             error_log("Error exportando PDF compras: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+    public function generar_pdf_orden_compra_controlador()
+    {
+        $co_id = isset($_GET['id']) ? mainModel::limpiar_cadena($_GET['id']) : 0;
+
+        if ($co_id <= 0) {
+            echo "ID de compra no válido.";
+            return;
+        }
+
+        try {
+            $datos_compra = self::datos_orden_compra_modelo($co_id);
+
+            if (empty($datos_compra)) {
+                echo "No se encontraron datos para la orden de compra seleccionada.";
+                return;
+            }
+
+            $compra = $datos_compra['compra'];
+            $detalles = $datos_compra['detalles'];
+
+            $periodo = date('d/m/Y', strtotime($compra['co_fecha']));
+
+            $info_superior = [
+                'N° Compra' => $compra['co_numero'],
+                'Fecha' => $periodo,
+                'Proveedor' => $compra['proveedor_nombre'],
+                'NIT' => $compra['proveedor_nit'],
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [
+                ['text' => 'Cant.', 'width' => 15],
+                ['text' => 'Producto', 'width' => 85],
+                ['text' => 'P. Unitario', 'width' => 30],
+                ['text' => 'Descuento', 'width' => 30],
+                ['text' => 'Subtotal', 'width' => 30]
+            ];
+
+            $rows = [];
+            foreach ($detalles as $detalle) {
+                $cells = [
+                    ['text' => $detalle['dc_cantidad'], 'align' => 'C'],
+                    ['text' => $detalle['med_nombre_quimico'], 'align' => 'L'],
+                    ['text' => 'Bs. ' . number_format($detalle['dc_precio_unitario'], 2), 'align' => 'R'],
+                    ['text' => 'Bs. ' . number_format($detalle['dc_descuento'], 2), 'align' => 'R'],
+                    ['text' => 'Bs. ' . number_format($detalle['dc_subtotal'], 2), 'align' => 'R']
+                ];
+                $rows[] = ['cells' => $cells];
+            }
+
+            $resumen = [
+                'Subtotal' => ['text' => 'Bs ' . number_format($compra['co_subtotal'], 2)],
+                'Impuestos' => ['text' => 'Bs ' . number_format($compra['co_impuesto'], 2)],
+                'Total' => [
+                    'text' => 'Bs ' . number_format($compra['co_total'], 2),
+                    'color' => [46, 125, 50]
+                ]
+            ];
+
+            $datos_pdf = [
+                'titulo' => 'ORDEN DE COMPRA',
+                'nombre_archivo' => 'Orden_Compra_' . $compra['co_numero'] . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            self::generar_pdf_reporte_fpdf($datos_pdf);
+        } catch (Exception $e) {
+            error_log("Error al generar PDF de orden de compra: " . $e->getMessage());
+            echo "Error al generar el PDF: " . $e->getMessage();
         }
     }
 
@@ -528,7 +700,6 @@ class compraHistorialController extends compraHistorialModel
                 'columnas_totales' => ['Total (Bs)'],
                 'info_superior' => $info_superior
             ]);
-
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
             echo "Error al generar archivo: " . $e->getMessage();

@@ -132,7 +132,7 @@
             bindEvents();
             const resultados = document.getElementById('tablaMedicamentos');
             if (resultados && !hasSearched) {
-                resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Use los filtros o busque por nombre</td></tr>';
+                resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Use los filtros o busque por nombre</td></tr>';
             }
         }
 
@@ -184,13 +184,13 @@
 
             if (!termino && !forma && !via && !laboratorio && !uso) {
                 if (hasSearched) {
-                    resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Ingrese algún criterio de búsqueda</td></tr>';
+                    resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Ingrese algún criterio de búsqueda</td></tr>';
                 }
                 return;
             }
 
             hasSearched = true;
-            resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Buscando...</td></tr>';
+            resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Buscando...</td></tr>';
 
             try {
                 const filtros = {
@@ -228,7 +228,7 @@
             if (!resultados) return;
 
             if (!data || data.length === 0) {
-                resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> No se encontraron resultados</td></tr>';
+                resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> No se encontraron resultados</td></tr>';
                 return;
             }
 
@@ -236,10 +236,11 @@
         <tr>
             <td>${index + 1}</td>
             <td>${escapeHtml(item.nombre || 'N/A')}</td>
-            <td>${formatCurrency(item.precio || 0)}</td>
-            <td>${item.stock || 'N/A'}</td>
+            <td>${escapeHtml(item.med_presentacion || 'N/A')}</td>
+            <td>${escapeHtml(item.med_descripcion || 'N/A')}</td>
+            <td>${escapeHtml(item.med_codigo_barras || 'N/A')}</td>
             <td>
-                <button type="button" class="btn primary" 
+                <button type="button" class="btn success" 
                         data-id="${item.med_id}"
                         data-nombre="${escapeHtml(item.nombre)}"
                         onclick="handleSelectItem(this)">
@@ -2362,11 +2363,25 @@
 
         if (btnExcel) {
             btnExcel.addEventListener('click', function() {
+                const laboratorioSelect = document.querySelector('select[name="select1"]');
+                const estadoSelect = document.querySelector('select[name="select2"]');
                 const sucursalSelect = document.querySelector('select[name="select3"]');
-                const sucursalId = sucursalSelect ? sucursalSelect.value : '';
+                const formaSelect = document.querySelector('select[name="select4"]');
+                const busquedaInput = document.querySelector('input[name="busqueda"]');
 
-                const url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel' +
-                    (sucursalId ? '&su_id=' + sucursalId : '');
+                const laboratorioId = laboratorioSelect ? laboratorioSelect.value : '';
+                const estado = estadoSelect ? estadoSelect.value : '';
+                const sucursalId = sucursalSelect ? sucursalSelect.value : '';
+                const formaId = formaSelect ? formaSelect.value : '';
+                const busqueda = busquedaInput ? busquedaInput.value : '';
+
+                let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel';
+                
+                if (laboratorioId) url += '&select1=' + encodeURIComponent(laboratorioId);
+                if (estado) url += '&select2=' + encodeURIComponent(estado);
+                if (sucursalId) url += '&select3=' + encodeURIComponent(sucursalId);
+                if (formaId) url += '&select4=' + encodeURIComponent(formaId);
+                if (busqueda) url += '&busqueda=' + encodeURIComponent(busqueda);
 
                 console.log('📥 Descargando archivo:', url);
 

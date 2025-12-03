@@ -253,13 +253,16 @@ class compraHistorialModel extends mainModel
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
         $sql = "SELECT 
-                DATE(c.co_fecha) as fecha,
+                CONCAT(COALESCE(p.pr_nombres, ''), ' ', COALESCE(p.pr_apellido_paterno, '')) AS proveedor,
                 COUNT(*) as cantidad_compras,
+                ROUND(AVG(c.co_total), 2) as ticket_promedio,
                 SUM(c.co_total) as total_monto
             FROM compras c
+            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             $whereSQL
-            GROUP BY DATE(c.co_fecha)
-            ORDER BY DATE(c.co_fecha) ASC";
+            GROUP BY c.pr_id
+            ORDER BY cantidad_compras DESC
+            LIMIT 10";
 
         $conexion = mainModel::conectar();
         return $conexion->query($sql);
@@ -314,33 +317,33 @@ class compraHistorialModel extends mainModel
     protected static function exportar_compras_excel_model($filtros)
     {
         $whereParts = [];
-        
+
         if (isset($filtros['su_id'])) {
             $whereParts[] = "c.su_id = '" . $filtros['su_id'] . "'";
         }
-        
+
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
             $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
         }
-        
+
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
             $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
         }
-        
+
         if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
             $whereParts[] = "c.pr_id = '" . $filtros['proveedor'] . "'";
         }
-        
+
         if (isset($filtros['laboratorio']) && $filtros['laboratorio'] != '') {
             $whereParts[] = "c.la_id = '" . $filtros['laboratorio'] . "'";
         }
-        
+
         if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
             $whereParts[] = "c.us_id = '" . $filtros['usuario'] . "'";
         }
-        
+
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
-        
+
         $sql = "SELECT 
                 c.co_numero AS 'N° Compra',
                 DATE_FORMAT(c.co_fecha, '%d/%m/%Y') AS 'Fecha Compra',
@@ -366,8 +369,113 @@ class compraHistorialModel extends mainModel
             INNER JOIN usuarios u ON c.us_id = u.us_id
             $whereSQL
             ORDER BY c.co_fecha DESC";
-        
+
         $conexion = mainModel::conectar();
         return $conexion->query($sql);
+    }
+    protected static function exportar_compra_detalle_pdf_model($co_id)
+    {
+        $conexion = mainModel::conectar();
+
+        $sql = "SELECT 
+                c.*,
+                CONCAT(COALESCE(p.pr_nombres, ''), ' ', COALESCE(p.pr_apellido_paterno, '')) AS proveedor_nombre,
+                p.pr_nit AS proveedor_nit,
+                l.la_nombre_comercial AS laboratorio,
+                s.su_nombre AS sucursal,
+                CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
+            FROM compras c
+            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
+            LEFT JOIN laboratorios l ON c.la_id = l.la_id
+            INNER JOIN sucursales s ON c.su_id = s.su_id
+            INNER JOIN usuarios u ON c.us_id = u.us_id
+            WHERE c.co_id = :co_id";
+
+        $stmt = $conexion->prepare($sql);
+        $stmt->bindParam(':co_id', $co_id);
+        $stmt->execute();
+        $compra = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$compra) {
+            return null;
+        }
+
+        $sql_detalles = "SELECT 
+                dc.*,
+                m.med_nombre_quimico,
+                m.med_principio_activo,
+                lm.lm_numero_lote,
+                lm.lm_estado,
+                lm.lm_fecha_vencimiento
+            FROM detalle_compra dc
+            INNER JOIN medicamento m ON dc.med_id = m.med_id
+            LEFT JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+            WHERE dc.co_id = :co_id
+            ORDER BY dc.dc_id";
+
+        $stmt_detalles = $conexion->prepare($sql_detalles);
+        $stmt_detalles->bindParam(':co_id', $co_id);
+        $stmt_detalles->execute();
+        $detalles = $stmt_detalles->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'compra' => $compra,
+            'detalles' => $detalles
+        ];
+    }
+
+    protected static function datos_orden_compra_modelo($co_id)
+    {
+        $conexion = mainModel::conectar();
+
+        // Datos principales de la compra
+        $sql_compra = "SELECT 
+            c.*,
+            CONCAT(COALESCE(p.pr_nombres, ''), ' ', COALESCE(p.pr_apellido_paterno, '')) AS proveedor_nombre,
+            p.pr_nit AS proveedor_nit,
+            p.pr_direccion AS proveedor_direccion,
+            p.pr_telefono AS proveedor_telefono,
+            l.la_nombre_comercial AS laboratorio,
+            s.su_nombre AS sucursal,
+            CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
+        FROM compras c
+        LEFT JOIN proveedores p ON c.pr_id = p.pr_id
+        LEFT JOIN laboratorios l ON c.la_id = l.la_id
+        INNER JOIN sucursales s ON c.su_id = s.su_id
+        INNER JOIN usuarios u ON c.us_id = u.us_id
+        WHERE c.co_id = :co_id";
+
+        $stmt_compra = $conexion->prepare($sql_compra);
+        $stmt_compra->bindParam(':co_id', $co_id);
+        $stmt_compra->execute();
+        $compra = $stmt_compra->fetch(PDO::FETCH_ASSOC);
+
+        if (!$compra) {
+            return [];
+        }
+
+        // Detalles de medicamentos de la compra
+        $sql_detalles = "SELECT 
+            dc.*,
+            m.med_nombre_quimico,
+            m.med_principio_activo,
+            lm.lm_numero_lote,
+            lm.lm_estado,
+            lm.lm_fecha_vencimiento
+        FROM detalle_compra dc
+        INNER JOIN medicamento m ON dc.med_id = m.med_id
+        LEFT JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+        WHERE dc.co_id = :co_id
+        ORDER BY dc.dc_id";
+
+        $stmt_detalles = $conexion->prepare($sql_detalles);
+        $stmt_detalles->bindParam(':co_id', $co_id);
+        $stmt_detalles->execute();
+        $detalles = $stmt_detalles->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'compra' => $compra,
+            'detalles' => $detalles
+        ];
     }
 }

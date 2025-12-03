@@ -20,9 +20,7 @@ class medicamentoModel extends mainModel
                 vd_id,
                 la_id,
                 su_id,
-                med_descripcion,
-                med_precio_unitario,
-                med_precio_caja
+                med_descripcion
             ) VALUES (
                 :Nombre,
                 :Principio,
@@ -33,9 +31,7 @@ class medicamentoModel extends mainModel
                 :Via,
                 :Laboratorio,
                 :Sucursal,
-                :Descripcion,
-                :PrecioUnitario,
-                :PrecioCaja
+                :Descripcion
             )
         ");
         $sql->bindParam(":Nombre", $datos['Nombre']);
@@ -48,8 +44,6 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
         $sql->bindParam(":Sucursal", $datos['Sucursal']);
         $sql->bindParam(":Descripcion", $datos['Descripcion']);
-        $sql->bindParam(":PrecioUnitario", $datos['PrecioUnitario']);
-        $sql->bindParam(":PrecioCaja", $datos['PrecioCaja']);
 
         $sql->execute();
         return $sql;
@@ -64,8 +58,6 @@ class medicamentoModel extends mainModel
                 med_accion_farmacologica = :Accion,
                 med_descripcion = :Descripcion,
                 med_presentacion = :Presentacion,
-                med_precio_unitario = :PrecioUnitario,
-                med_precio_caja = :PrecioCaja,
                 uf_id = :Uso,
                 ff_id = :Forma,
                 vd_id = :Via,
@@ -79,8 +71,6 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Accion", $datos['Accion']);
         $sql->bindParam(":Descripcion", $datos['Descripcion']);
         $sql->bindParam(":Presentacion", $datos['Presentacion']);
-        $sql->bindParam(":PrecioUnitario", $datos['PrecioUnitario']);
-        $sql->bindParam(":PrecioCaja", $datos['PrecioCaja']);
         $sql->bindParam(":Uso", $datos['Uso']);
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
@@ -101,8 +91,6 @@ class medicamentoModel extends mainModel
                     m.med_accion_farmacologica,
                     m.med_presentacion,
                     m.med_codigo_barras,
-                    m.med_precio_unitario,
-                    m.med_precio_caja,
                     m.med_creado_en,
                     m.med_actualizado_en,
                     COALESCE(la.la_nombre_comercial, 'Sin laboratorio') AS laboratorio,

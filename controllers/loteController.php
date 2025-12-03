@@ -73,11 +73,13 @@ class loteController extends loteModel
             error_log(" Gerente viendo solo sucursal: $sucursal_usuario");
         }
 
-        // 🔍 Búsqueda limitada a nombre químico y principio activo
+        // 🔍 Búsqueda por nombre químico, principio activo, proveedor y número de lote
         if (!empty($busqueda)) {
             $whereParts[] = "(
                 m.med_nombre_quimico LIKE '%$busqueda%' OR
-                m.med_principio_activo LIKE '%$busqueda%'
+                m.med_principio_activo LIKE '%$busqueda%' OR
+                p.pr_nombres LIKE '%$busqueda%' OR
+                lm.lm_numero_lote LIKE '%$busqueda%'
             )";
         }
 
@@ -193,9 +195,9 @@ class loteController extends loteModel
                             <th>N° LOTE</th>
                             <th>MEDICAMENTO</th>
                             <th>PROVEEDOR</th>' .
-            ($mostrar_columna_sucursal ? '<th>🏢 SUCURSAL</th>' : '') .
-            '<th>CANT. INICIAL</th>
-                            <th>CANT. ACTUAL</th>
+            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
+            '<th>CANT. cajas</th>
+                            <th>CANT. unidades</th>
                             <th>PRECIO COMPRA</th>
                             <th>PRECIO VENTA</th>
                             <th>FECHA INGRESO</th>

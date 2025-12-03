@@ -20,7 +20,9 @@ class compraController extends compraModel
             SELECT 
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
-                m.med_precio_unitario AS precio,
+                m.med_presentacion,
+                m.med_descripcion,
+                m.med_codigo_barras,
                 la.la_nombre_comercial AS laboratorio,
                 ff.ff_nombre AS forma,
                 vd.vd_nombre AS via,
@@ -49,16 +51,15 @@ class compraController extends compraModel
             $sql .= " AND m.uf_id = " . intval($filtros['uso']);
         }
         /* filtramos por termino de busqueda */
-        /* filtramos por termino de busqueda */
         if (!empty($filtros['termino'])) {
             $busqueda = "%" . $filtros['termino'] . "%";
             $sql .= "
                 AND (
                     m.med_nombre_quimico LIKE '$busqueda' OR
-                    m.med_principio_activo LIKE '$busqueda' OR
-                    m.med_accion_farmacologica LIKE '$busqueda' OR
+                    la.la_nombre_comercial LIKE '$busqueda' OR
                     m.med_presentacion LIKE '$busqueda' OR
-                    m.med_descripcion LIKE '$busqueda'
+                    m.med_descripcion LIKE '$busqueda' OR
+                    m.med_codigo_barras LIKE '$busqueda'
                 )
             ";
         }

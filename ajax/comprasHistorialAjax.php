@@ -4,41 +4,76 @@ $peticionAjax = true;
 require_once "../config/APP.php";
 
 if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_pdf") {
-    
+
     session_start(['name' => 'SMP']);
-    
+
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }
-    
+
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo "No tiene permisos para exportar.";
         exit();
     }
-    
+
     require_once "../controllers/compraHistorialController.php";
     $ins_compra = new compraHistorialController();
     $ins_compra->exportar_compras_pdf_controller();
     exit();
 }
 
-if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_excel") {
-    
+if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_pdf_detalle") {
     session_start(['name' => 'SMP']);
-    
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }
-    
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo "No tiene permisos para exportar.";
         exit();
     }
-    
+    require_once "../controllers/compraHistorialController.php";
+    $ins_compra = new compraHistorialController();
+    $ins_compra->exportar_compra_detalle_pdf_controller();
+    exit();
+}
+
+if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_pdf_orden") {
+    session_start(['name' => 'SMP']);
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+    require_once "../controllers/compraHistorialController.php";
+    $ins_compra = new compraHistorialController();
+    $ins_compra->generar_pdf_orden_compra_controlador();
+    exit();
+}
+
+
+if (isset($_GET['comprasHistorialAjax']) && $_GET['comprasHistorialAjax'] == "exportar_excel") {
+
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar.";
+        exit();
+    }
+
     require_once "../controllers/compraHistorialController.php";
     $ins_compra = new compraHistorialController();
     $ins_compra->exportar_compras_excel_controller();
@@ -63,7 +98,7 @@ if (isset($_POST['comprasHistorialAjax'])) {
         ]);
         exit();
     }
-    
+
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo json_encode([
@@ -82,7 +117,7 @@ if (isset($_POST['comprasHistorialAjax'])) {
 
     if ($valor === "listar") {
         header('Content-Type: text/html; charset=utf-8');
-        
+
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
         $busqueda = isset($_POST['busqueda']) ? $_POST['busqueda'] : '';
@@ -124,7 +159,6 @@ if (isset($_POST['comprasHistorialAjax'])) {
         "Tipo" => "error"
     ]);
     exit();
-
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

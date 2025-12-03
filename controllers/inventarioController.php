@@ -60,7 +60,7 @@ class inventarioController extends inventarioModel
         }
 
         if ($f2 !== '') {
-            $estados_validos = ['agotado', 'bajo', 'normal', 'exceso'];
+            $estados_validos = ['agotado', 'bajo', 'normal', 'exceso', 'sin_definir'];
             if (in_array($f2, $estados_validos)) {
                 $filtros['estado'] = $f2;
             }
@@ -210,21 +210,20 @@ class inventarioController extends inventarioModel
 
     private static function generar_badge_estado($estado, $unidades, $minimo)
     {
-        // Calcular estado real
         if ($unidades == 0) {
             return '<span class="estado-badge agotado"><ion-icon name="close-circle-outline"></ion-icon> AGOTADO</span>';
         }
 
-        if ($minimo > 0 && $unidades < $minimo) {
+        if ($minimo == 0 || $minimo === null) {
+            return '<span class="estado-badge desconocido"><ion-icon name="help-circle-outline"></ion-icon> SIN DEFINIR</span>';
+        }
+
+        if ($unidades < $minimo) {
             return '<span class="estado-badge caducado"><ion-icon name="alert-circle-outline"></ion-icon> CRÍTICO</span>';
         }
 
-        if ($minimo > 0 && $unidades < ($minimo * 1.5)) {
+        if ($unidades < ($minimo * 1.5)) {
             return '<span class="estado-badge espera"><ion-icon name="warning-outline"></ion-icon> BAJO</span>';
-        }
-
-        if ($minimo == 0 || $minimo === null) {
-            return '<span class="estado-badge desconocido"><ion-icon name="help-circle-outline"></ion-icon> SIN DEFINIR</span>';
         }
 
         return '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> NORMAL</span>';
@@ -362,12 +361,48 @@ class inventarioController extends inventarioModel
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
         $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 
-        // Gerentes solo su sucursal
-        $su_id = ($rol_usuario == 2) ? $sucursal_usuario : (isset($_GET['su_id']) ? (int)$_GET['su_id'] : null);
+        $filtros = [];
+
+        // 🔒 Filtro por sucursal según rol
+        if ($rol_usuario == 1) {
+            // Admin: puede ver todas o filtrar
+            $f3 = isset($_GET['select3']) ? $_GET['select3'] : '';
+            if ($f3 !== '') {
+                $filtros['su_id'] = (int)$f3;
+            }
+        } elseif ($rol_usuario == 2) {
+            // Gerente: solo su sucursal
+            $filtros['su_id'] = $sucursal_usuario;
+        }
+
+        // Demás filtros
+        $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
+        $f1 = isset($_GET['select1']) ? $_GET['select1'] : '';
+        $f2 = isset($_GET['select2']) ? $_GET['select2'] : '';
+        $f4 = isset($_GET['select4']) ? $_GET['select4'] : '';
+
+        if (!empty($busqueda)) {
+            $filtros['busqueda'] = $busqueda;
+        }
+
+        if ($f1 !== '' && is_numeric($f1)) {
+            $filtros['laboratorio'] = (int)$f1;
+        }
+
+        if ($f2 !== '') {
+            $estados_validos = ['agotado', 'bajo', 'normal', 'exceso', 'sin_definir', 'critico'];
+            if (in_array($f2, $estados_validos)) {
+                $filtros['estado'] = $f2;
+            }
+        }
+
+        if ($f4 !== '' && is_numeric($f4)) {
+            $filtros['forma'] = (int)$f4;
+        }
 
         try {
-            // Obtener datos
-            $stmt = self::exportar_inventario_excel_model($su_id);
+            // Obtener datos con filtros
+            $stmt = self::exportar_inventario_excel_model($filtros);
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($datos)) {

@@ -1,9 +1,9 @@
 
-=== SOLICITUD 2025-12-03 00:58:31 ===
+=== SOLICITUD 2025-12-03 07:09:32 ===
 Array
 (
     [compraAjax] => buscar_medicamentos
-    [termino] => ra
+    [termino] => ome
     [forma] => 
     [via] => 
     [laboratorio] => 
@@ -11,102 +11,11 @@ Array
 )
 
 
-=== SOLICITUD 2025-12-03 00:58:42 ===
-Array
-(
-    [compraAjax] => save
-    [Numero_compra_reg] => COMP-2025-0010
-    [razon_reg] => Droguería Inti - NIT: 123456790
-    [Proveedor_reg] => 3
-    [Laboratorio_factura_reg] => 4
-    [Fecha_factura_reg] => 2025-12-27
-    [Numero_factura_reg] => 4232342342
-    [impuestos_reg] => 5
-    [Form_reg] => 
-    [Via_reg] => 
-    [Laboratorio_reg] => 
-    [Uso_reg] => 
-    [termino] => ra
-    [Cantidad_reg] => 14
-    [Vencimiento_reg] => 2025-12-19
-    [Cantidad_blister_reg] => 
-    [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 15
-    [precio_venta_reg] => 16
-    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
-    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
-)
-
-EXCEPTION: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '0' for key 'PRIMARY'
-#0 C:\xampp\htdocs\samfarm-backend\models\compraModel.php(28): PDOStatement->execute()
-#1 C:\xampp\htdocs\samfarm-backend\controllers\compraController.php(168): compraModel::agregar_compra_model(Array)
-#2 C:\xampp\htdocs\samfarm-backend\ajax\compraAjax.php(60): compraController->agregar_compra_controller()
-#3 {main}
-
-=== SOLICITUD 2025-12-03 01:04:15 ===
-Array
-(
-    [compraAjax] => save
-    [Numero_compra_reg] => COMP-2025-0010
-    [razon_reg] => Droguería Inti - NIT: 123456790
-    [Proveedor_reg] => 3
-    [Laboratorio_factura_reg] => 4
-    [Fecha_factura_reg] => 2025-12-27
-    [Numero_factura_reg] => 4232342342
-    [impuestos_reg] => 5
-    [Form_reg] => 
-    [Via_reg] => 
-    [Laboratorio_reg] => 
-    [Uso_reg] => 
-    [termino] => ra
-    [Cantidad_reg] => 14
-    [Vencimiento_reg] => 2025-12-19
-    [Cantidad_blister_reg] => 
-    [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 15
-    [precio_venta_reg] => 16
-    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
-    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
-)
-
-EXCEPTION: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '0' for key 'PRIMARY'
-#0 C:\xampp\htdocs\samfarm-backend\models\compraModel.php(29): PDOStatement->execute()
-#1 C:\xampp\htdocs\samfarm-backend\controllers\compraController.php(168): compraModel::agregar_compra_model(Array)
-#2 C:\xampp\htdocs\samfarm-backend\ajax\compraAjax.php(60): compraController->agregar_compra_controller()
-#3 {main}
-
-=== SOLICITUD 2025-12-03 01:17:53 ===
-Array
-(
-    [compraAjax] => save
-    [Numero_compra_reg] => COMP-2025-0010
-    [razon_reg] => Droguería Inti - NIT: 123456790
-    [Proveedor_reg] => 3
-    [Laboratorio_factura_reg] => 4
-    [Fecha_factura_reg] => 2025-12-27
-    [Numero_factura_reg] => 4232342342
-    [impuestos_reg] => 5
-    [Form_reg] => 
-    [Via_reg] => 
-    [Laboratorio_reg] => 
-    [Uso_reg] => 
-    [termino] => ra
-    [Cantidad_reg] => 14
-    [Vencimiento_reg] => 2025-12-19
-    [Cantidad_blister_reg] => 
-    [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 15
-    [precio_venta_reg] => 16
-    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0011","cantidad":14,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-19","precioCompra":15,"precioVenta":16,"activar_lote":1}]
-    [totales_json] => {"subtotal":"210.00","impuestos":"27.30","total":"237.30","cantidadLotes":1}
-)
-
-
-=== SOLICITUD 2025-12-03 02:04:05 ===
+=== SOLICITUD 2025-12-03 07:10:05 ===
 Array
 (
     [compraAjax] => buscar_medicamentos
-    [termino] => ap
+    [termino] => o
     [forma] => 
     [via] => 
     [laboratorio] => 
@@ -114,41 +23,308 @@ Array
 )
 
 
-=== SOLICITUD 2025-12-03 02:04:06 ===
-Array
-(
-    [compraAjax] => buscar_medicamentos
-    [termino] => para
-    [forma] => 
-    [via] => 
-    [laboratorio] => 
-    [uso] => 
-)
-
-
-=== SOLICITUD 2025-12-03 02:05:01 ===
+=== SOLICITUD 2025-12-03 07:10:58 ===
 Array
 (
     [compraAjax] => save
     [Numero_compra_reg] => COMP-2025-0001
-    [razon_reg] => jonas - NIT: 31348612316542310
-    [Proveedor_reg] => 7
+    [razon_reg] => Droguería Inti - NIT: 123456790
+    [Proveedor_reg] => 3
     [Laboratorio_factura_reg] => 8
-    [Fecha_factura_reg] => 2025-12-02
-    [Numero_factura_reg] => 1231414124
+    [Fecha_factura_reg] => 2025-12-03
+    [Numero_factura_reg] => 31254234232
+    [impuestos_reg] => 5
+    [Form_reg] => 
+    [Via_reg] => 
+    [Laboratorio_reg] => 
+    [Uso_reg] => 
+    [termino] => o
+    [Cantidad_reg] => 60
+    [Vencimiento_reg] => 2026-01-11
+    [Cantidad_blister_reg] => 6
+    [Cantidad_unidades_reg] => 4
+    [Precio_compra_reg] => 60
+    [precio_venta_reg] => 3
+    [lotes_json] => [{"id_medicamento":"1","nombre":"Paracetamol","numero":"MED-0001","cantidad":600,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2026-01-01","precioCompra":50,"precioVenta":60,"activar_lote":1},{"id_medicamento":"5","nombre":"Omeprazol","numero":"MED-0002","cantidad":50,"cantidad_blister":4,"cantidad_unidades":10,"vencimiento":"2026-01-11","precioCompra":80,"precioVenta":2,"activar_lote":1},{"id_medicamento":"2","nombre":"Ibuprofeno","numero":"MED-0003","cantidad":60,"cantidad_blister":6,"cantidad_unidades":4,"vencimiento":"2026-01-11","precioCompra":60,"precioVenta":3,"activar_lote":1}]
+    [totales_json] => {"subtotal":"37600.00","impuestos":"4888.00","total":"42488.00","cantidadLotes":3}
+)
+
+
+=== SOLICITUD 2025-12-03 07:11:02 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => u
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:12:03 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => o
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:12:33 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => o
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:13:04 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => d
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:13:35 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => d
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:14:43 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => a
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:14:57 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => d
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:15:49 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => d
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:16:35 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => d
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:16:46 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => de
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 07:17:15 ===
+Array
+(
+    [compraAjax] => save
+    [Numero_compra_reg] => COMP-2025-0002
+    [razon_reg] => MediBol - NIT: 123456793
+    [Proveedor_reg] => 6
+    [Laboratorio_factura_reg] => 4
+    [Fecha_factura_reg] => 2025-12-21
+    [Numero_factura_reg] => 131245243345
     [impuestos_reg] => 
     [Form_reg] => 
     [Via_reg] => 
     [Laboratorio_reg] => 
     [Uso_reg] => 
-    [termino] => para
-    [Cantidad_reg] => 40
-    [Vencimiento_reg] => 2025-12-03
+    [termino] => de
+    [Cantidad_reg] => 10
+    [Vencimiento_reg] => 2025-12-04
     [Cantidad_blister_reg] => 
     [Cantidad_unidades_reg] => 
-    [Precio_compra_reg] => 44
-    [precio_venta_reg] => 50
-    [lotes_json] => [{"id_medicamento":"1","nombre":"Paracetamol","numero":"MED-0001","cantidad":80,"cantidad_blister":4,"cantidad_unidades":6,"vencimiento":"2025-12-31","precioCompra":50,"precioVenta":2,"activar_lote":1},{"id_medicamento":"5","nombre":"Omeprazol","numero":"MED-0002","cantidad":40,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-03","precioCompra":44,"precioVenta":50,"activar_lote":1}]
-    [totales_json] => {"subtotal":"5760.00","impuestos":"748.80","total":"6508.80","cantidadLotes":2}
+    [Precio_compra_reg] => 10
+    [precio_venta_reg] => 12
+    [lotes_json] => [{"id_medicamento":"3","nombre":"Amoxicilina","numero":"MED-0004","cantidad":10,"cantidad_blister":0,"cantidad_unidades":0,"vencimiento":"2025-12-04","precioCompra":10,"precioVenta":12,"activar_lote":1}]
+    [totales_json] => {"subtotal":"100.00","impuestos":"13.00","total":"113.00","cantidadLotes":1}
+)
+
+
+=== SOLICITUD 2025-12-03 19:44:43 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => para
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:46:34 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => a
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:34 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => tableta
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:40 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => para
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:42 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => parace
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:44 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => paraceta
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:46 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => a
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:46 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => anal
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:47 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => analge
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:47 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => analgeci
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
+)
+
+
+=== SOLICITUD 2025-12-03 19:51:49 ===
+Array
+(
+    [compraAjax] => buscar_medicamentos
+    [termino] => analgesico
+    [forma] => 
+    [via] => 
+    [laboratorio] => 
+    [uso] => 
 )
 

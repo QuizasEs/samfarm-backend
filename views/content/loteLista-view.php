@@ -20,6 +20,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
 
+                
+                <!-- Fechas -->
+                <div class="form-fechas">
+                    <small>
+                        Desde
+                    </small>
+                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
+                </div>
+                <div class="form-fechas">
+                    <small>
+                        Hasta
+                    </small>
+                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
+                </div>
                 <div class="form-fechas">
 
                     <small>Estados</small>
@@ -29,11 +43,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <option value="activo">Activo</option>
                         <option value="terminado">Terminado</option>
                         <option value="caducado">Caducado</option>
-                        <option value="devuelto">Devuelto</option>
-                        <option value="bloqueado">Bloqueado</option>
+  <!--                       <option value="devuelto">Devuelto</option>
+                        <option value="bloqueado">Bloqueado</option> -->
                     </select>
                 </div>
-                <div class="form-fechas">
+                <!-- <div class="form-fechas">
                     <small>Meses</small>
                     <select class="select-filtro" name="select2" id="">
                         <option value="">Mes</option>
@@ -50,7 +64,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <option value="11">Noviembre</option>
                         <option value="12">Diciembre</option>
                     </select>
-                </div>
+                </div> -->
                 <!-- select de sucursales solo para administrador -->
                 <div class="form-fechas">
 
@@ -63,19 +77,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             <?php } ?>
                         </select>
                     <?php } ?>
-                </div>
-                <!-- Fechas -->
-                <div class="form-fechas">
-                    <small>
-                        Desde
-                    </small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-                <div class="form-fechas">
-                    <small>
-                        Hasta
-                    </small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
                 </div>
 
                 <div class="search">

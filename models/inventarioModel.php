@@ -70,7 +70,8 @@ class inventarioModel extends mainModel
             $sql .= " AND (
                         m.med_nombre_quimico LIKE :busqueda OR
                         m.med_principio_activo LIKE :busqueda OR
-                        m.med_codigo_barras LIKE :busqueda
+                        m.med_codigo_barras LIKE :busqueda OR
+                        la.la_nombre_comercial LIKE :busqueda
                     )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -103,11 +104,8 @@ class inventarioModel extends mainModel
 
                 case 'normal':
                     $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND (
-                        (i.inv_minimo > 0 AND i.inv_total_unidades >= (i.inv_minimo * 1.5))
-                        OR
-                        (i.inv_minimo IS NULL OR i.inv_minimo = 0)
-                    )";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
                     $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
                     break;
 
@@ -119,6 +117,12 @@ class inventarioModel extends mainModel
                 case 'sin_definir':
                     $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
                     $sql .= " AND i.inv_total_unidades > 0";
+                    break;
+
+                case 'critico':
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
                     break;
             }
         }
@@ -179,7 +183,8 @@ class inventarioModel extends mainModel
             $sql .= " AND (
                             m.med_nombre_quimico LIKE :busqueda OR
                             m.med_principio_activo LIKE :busqueda OR
-                            m.med_codigo_barras LIKE :busqueda
+                            m.med_codigo_barras LIKE :busqueda OR
+                            la.la_nombre_comercial LIKE :busqueda
                         )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -194,16 +199,35 @@ class inventarioModel extends mainModel
                 case 'agotado':
                     $sql .= " AND i.inv_total_unidades = 0";
                     break;
+
+                case 'critico':
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
+                    break;
+
                 case 'bajo':
-                    $sql .= " AND i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo";
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
+                    $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
                     break;
-                case 'exceso':
-                    $sql .= " AND i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo";
-                    break;
+
                 case 'normal':
                     $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND (i.inv_minimo = 0 OR i.inv_total_unidades >= i.inv_minimo)";
-                    $sql .= " AND (i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
+                    $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
+                    break;
+
+                case 'exceso':
+                    $sql .= " AND i.inv_maximo > 0";
+                    $sql .= " AND i.inv_total_unidades > i.inv_maximo";
+                    break;
+
+                case 'sin_definir':
+                    $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
+                    $sql .= " AND i.inv_total_unidades > 0";
                     break;
             }
         }
@@ -335,7 +359,7 @@ class inventarioModel extends mainModel
     /**
      * Exportar inventario a Excel
      */
-    protected static function exportar_inventario_excel_model($su_id = null)
+    protected static function exportar_inventario_excel_model($filtros = [])
     {
         $sql = "
             SELECT 
@@ -351,6 +375,7 @@ class inventarioModel extends mainModel
                 i.inv_maximo AS 'Stock Máximo',
                 CASE 
                     WHEN i.inv_total_unidades = 0 THEN 'AGOTADO'
+                    WHEN (i.inv_minimo IS NULL OR i.inv_minimo = 0) AND i.inv_total_unidades > 0 THEN 'SIN DEFINIR'
                     WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 'CRÍTICO'
                     WHEN i.inv_minimo > 0 AND i.inv_total_unidades < (i.inv_minimo * 1.5) THEN 'BAJO'
                     WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN 'EXCESO'
@@ -362,18 +387,86 @@ class inventarioModel extends mainModel
             INNER JOIN sucursales s ON s.su_id = i.su_id
             LEFT JOIN laboratorios la ON la.la_id = m.la_id
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+            WHERE 1=1
         ";
 
-        if ($su_id !== null) {
-            $sql .= " WHERE i.su_id = :su_id";
+        $params = [];
+
+        // Filtro por sucursal
+        if (!empty($filtros['su_id'])) {
+            $sql .= " AND i.su_id = :su_id";
+            $params[':su_id'] = (int)$filtros['su_id'];
+        }
+
+        // Filtro por búsqueda
+        if (!empty($filtros['busqueda'])) {
+            $sql .= " AND (
+                        m.med_nombre_quimico LIKE :busqueda OR
+                        m.med_principio_activo LIKE :busqueda OR
+                        m.med_codigo_barras LIKE :busqueda OR
+                        la.la_nombre_comercial LIKE :busqueda
+                    )";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
+        }
+
+        // Filtro por laboratorio
+        if (!empty($filtros['laboratorio'])) {
+            $sql .= " AND m.la_id = :laboratorio";
+            $params[':laboratorio'] = (int)$filtros['laboratorio'];
+        }
+
+        // Filtro por estado de stock
+        if (!empty($filtros['estado'])) {
+            switch ($filtros['estado']) {
+                case 'agotado':
+                    $sql .= " AND i.inv_total_unidades = 0";
+                    break;
+
+                case 'critico':
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
+                    break;
+
+                case 'bajo':
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
+                    $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
+                    break;
+
+                case 'normal':
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    $sql .= " AND i.inv_minimo > 0";
+                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
+                    $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
+                    break;
+
+                case 'exceso':
+                    $sql .= " AND i.inv_maximo > 0";
+                    $sql .= " AND i.inv_total_unidades > i.inv_maximo";
+                    break;
+
+                case 'sin_definir':
+                    $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
+                    $sql .= " AND i.inv_total_unidades > 0";
+                    break;
+            }
+        }
+
+        // Filtro por forma farmacéutica
+        if (!empty($filtros['forma'])) {
+            $sql .= " AND m.ff_id = :forma";
+            $params[':forma'] = (int)$filtros['forma'];
         }
 
         $sql .= " ORDER BY s.su_nombre, m.med_nombre_quimico";
 
-        $stmt = mainModel::conectar()->prepare($sql);
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
 
-        if ($su_id !== null) {
-            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
 
         $stmt->execute();
@@ -403,5 +496,115 @@ class inventarioModel extends mainModel
             error_log("Error en actualizar_configuracion_inventario_model: " . $e->getMessage());
             return false;
         }
+    }
+
+    public static function margen_bruto_por_medicamento_model($su_id = null)
+    {
+        $sql = "
+            SELECT 
+                m.med_nombre_quimico,
+                la.la_nombre_comercial,
+                SUM(dv.dv_cantidad) AS unidades_vendidas,
+                ROUND(SUM(dv.dv_subtotal), 2) AS ingresos_totales,
+                ROUND(SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS costo_ventas,
+                ROUND(SUM(dv.dv_subtotal) - SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS margen_bruto_bs,
+                ROUND(((SUM(dv.dv_subtotal) - SUM(dv.dv_cantidad * lm.lm_precio_compra)) / SUM(dv.dv_subtotal)) * 100, 2) AS margen_bruto_pct
+            FROM detalle_venta dv
+            INNER JOIN ventas v ON v.ve_id = dv.ve_id
+            INNER JOIN medicamento m ON m.med_id = dv.med_id
+            INNER JOIN lote_medicamento lm ON lm.lm_id = dv.lm_id
+            LEFT JOIN laboratorios la ON la.la_id = m.la_id
+            WHERE v.ve_estado = 1
+              AND v.ve_fecha_emision >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        ";
+
+        if ($su_id !== null) {
+            $sql .= " AND v.su_id = :su_id";
+        }
+
+        $sql .= " GROUP BY m.med_nombre_quimico, la.la_nombre_comercial
+                 ORDER BY margen_bruto_bs DESC
+                 LIMIT 10";
+
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+
+        if ($su_id !== null) {
+            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function margen_bruto_diario_model($su_id = null)
+    {
+        $sql = "
+            SELECT 
+                DATE(v.ve_fecha_emision) AS fecha,
+                COUNT(DISTINCT v.ve_id) AS num_ventas,
+                ROUND(SUM(v.ve_total), 2) AS ingresos,
+                ROUND(SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS costos,
+                ROUND(SUM(v.ve_total) - SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS margen_bruto,
+                ROUND(((SUM(v.ve_total) - SUM(dv.dv_cantidad * lm.lm_precio_compra)) / SUM(v.ve_total)) * 100, 2) AS margen_pct
+            FROM ventas v
+            INNER JOIN detalle_venta dv ON dv.ve_id = v.ve_id
+            INNER JOIN lote_medicamento lm ON lm.lm_id = dv.lm_id
+            WHERE v.ve_estado = 1
+              AND v.ve_fecha_emision >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        ";
+
+        if ($su_id !== null) {
+            $sql .= " AND v.su_id = :su_id";
+        }
+
+        $sql .= " GROUP BY DATE(v.ve_fecha_emision)
+                 ORDER BY fecha DESC";
+
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+
+        if ($su_id !== null) {
+            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function margen_bruto_por_sucursal_model($su_id = null)
+    {
+        $sql = "
+            SELECT 
+                s.su_nombre,
+                DATE_FORMAT(v.ve_fecha_emision, '%Y-%m') AS mes,
+                ROUND(SUM(v.ve_total), 2) AS ingresos_totales,
+                ROUND(SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS costo_ventas,
+                ROUND(SUM(v.ve_total) - SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS margen_bruto_bs,
+                ROUND(((SUM(v.ve_total) - SUM(dv.dv_cantidad * lm.lm_precio_compra)) / SUM(v.ve_total)) * 100, 2) AS margen_bruto_pct
+            FROM ventas v
+            INNER JOIN detalle_venta dv ON dv.ve_id = v.ve_id
+            INNER JOIN lote_medicamento lm ON lm.lm_id = dv.lm_id
+            INNER JOIN sucursales s ON s.su_id = v.su_id
+            WHERE v.ve_estado = 1
+              AND v.ve_fecha_emision >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+        ";
+
+        if ($su_id !== null) {
+            $sql .= " AND v.su_id = :su_id";
+        }
+
+        $sql .= " GROUP BY s.su_nombre, DATE_FORMAT(v.ve_fecha_emision, '%Y-%m')
+                 ORDER BY mes DESC, s.su_nombre";
+
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+
+        if ($su_id !== null) {
+            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

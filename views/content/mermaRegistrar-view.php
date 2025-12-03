@@ -71,26 +71,44 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </a>
             </div>
 
-            <form id="formMermaRegistro" class="form">
+            <form id="formMermaRegistro" class="">
                 <div class="modal-group">
-                    <label>Medicamento:</label>
-                    <input type="text" id="medicamentoNombre" readonly style="background-color: #f5f5f5;">
-                    <input type="hidden" id="lm_id" name="lm_id">
+                    <div class="row">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Medicamento:</label>
+                                <input type="text" id="medicamentoNombre" readonly style="background-color: #f5f5f5;">
+                                <input type="hidden" id="lm_id" name="lm_id">
+                            </div>
+                        </div>
+                    </div>
 
-                    <label style="margin-top: 15px;">Total de Unidades Caducadas:</label>
-                    <input type="text" id="cantidadDisponible" readonly style="background-color: #f5f5f5;">
-                    <small style="color: #666;">Se registrarán TODAS las unidades del lote como merma</small>
+                    <div class="row">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label style="margin-top: 15px;">Total de Unidades Caducadas:</label>
+                                <input type="text" id="cantidadDisponible" readonly style="background-color: #f5f5f5;">
+                                <small style="color: #666; font-size: 0.8rem;">Se registrarán TODAS las unidades del lote como merma</small>
+                            </div>
+                        </div>
+                    </div>
 
-                    <label style="margin-top: 15px;">Motivo de la Merma:</label>
-                    <textarea id="me_motivo" name="me_motivo" required placeholder="Ej: Producto caducado, Vencimiento próximo, Daño físico, etc." style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif;"></textarea>
+                    <div class="orw">
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label style="margin-top: 15px;">Motivo de la Merma:</label>
+                                <textarea id="me_motivo" name="me_motivo" required placeholder="Ej: Producto caducado, Vencimiento próximo, Daño físico, etc." ></textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="cerrarModalMermaRegistro()">
+                    <a href="javascript:void(0)" class="btn warning" onclick="cerrarModalMermaRegistro()">
                         Cancelar
                     </a>
                     <button type="button" class="btn success" onclick="guardarMermaRegistro()">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Registrar Todas las Unidades
+                        <ion-icon name="checkmark-circle-outline"></ion-icon> Merma
                     </button>
                 </div>
             </form>
@@ -134,30 +152,30 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             formData.append('mermaRegistrarAjax', 'crear');
 
             fetch('<?php echo SERVER_URL; ?>ajax/mermaRegistrarAjax.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.Alerta === 'redireccionar') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Merma Registrada',
-                        text: 'Se registraron ' + cantidadMaxActual + ' unidades como merma',
-                        confirmButtonText: 'Aceptar'
-                    }).then(() => {
-                        window.location.href = data.URL;
-                    });
-                } else if (data.Alerta === 'simple') {
-                    Swal.fire(data.Titulo, data.Texto, data.Tipo);
-                }
-                cerrarModalMermaRegistro();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'Ocurrió un error al procesar la merma', 'error');
-                cerrarModalMermaRegistro();
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Alerta === 'redireccionar') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Merma Registrada',
+                            text: 'Se registraron ' + cantidadMaxActual + ' unidades como merma',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            window.location.href = data.URL;
+                        });
+                    } else if (data.Alerta === 'simple') {
+                        Swal.fire(data.Titulo, data.Texto, data.Tipo);
+                    }
+                    cerrarModalMermaRegistro();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Ocurrió un error al procesar la merma', 'error');
+                    cerrarModalMermaRegistro();
+                });
         }
 
         document.addEventListener('DOMContentLoaded', function() {

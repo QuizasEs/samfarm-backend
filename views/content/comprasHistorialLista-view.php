@@ -1,5 +1,11 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
+    require_once "./controllers/medicamentoController.php";
+    $ins_med = new medicamentoController();
+    $datos_select = $ins_med->datos_extras_controller();
+
+    $rol_usuario = $_SESSION['rol_smp'];
+    $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
     <div class="container tabla-dinamica"
@@ -26,38 +32,34 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="date" name="fecha_hasta" placeholder="Hasta">
                 </div>
 
-
                 <div class="form-fechas">
-                    <small>Proveedor</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todos los proveedores</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Laboratorio</small>
+                    <small>Usuario</small>
                     <select class="select-filtro" name="select2">
-                        <option value="">Todos los laboratorios</option>
+                        <option value="">Todos los usuarios</option>
+                        <?php
+                        foreach ($datos_select['caja'] as $usuario) {
+                            $nombre_completo = trim(($usuario['us_nombres'] ?? '') . ' ' . ($usuario['us_apellido_paterno'] ?? ''));
+                            echo '<option value="' . $usuario['us_id'] . '">' . $nombre_completo . '</option>';
+                        }
+                        ?>
                     </select>
                 </div>
 
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
+
+                <?php if ($rol_usuario == 1) { ?>
                     <div class="form-fechas">
                         <small>Sucursal</small>
                         <select class="select-filtro" name="select3">
                             <option value="">Todas las sucursales</option>
+                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                            <?php } ?>
                         </select>
                     </div>
                 <?php } ?>
 
-                <div class="form-fechas">
-                    <small>Usuario</small>
-                    <select class="select-filtro" name="select4">
-                        <option value="">Todos los usuarios</option>
-                    </select>
-                </div>
 
-                <div class="form-fechas">
+                <!-- <div class="form-fechas">
                     <small>Estado de Lotes</small>
                     <select class="select-filtro" name="select5">
                         <option value="">Todos</option>
@@ -65,7 +67,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <option value="activos">Con lotes activos</option>
                         <option value="completado">Completamente procesado</option>
                     </select>
-                </div>
+                </div> -->
 
                 <div class="search">
                     <input type="text" name="busqueda" placeholder="Buscar por N° compra, factura, NIT o proveedor...">
@@ -91,7 +93,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     <div class="container" id="grafico-compras-container">
         <div class="title">
             <h2>
-                <ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras
+                <ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras por Proveedor
             </h2>
         </div>
         <div id="grafico-compras-periodo" style="width: 100%; height: 400px;"></div>
@@ -230,7 +232,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <a href="javascript:void(0)" class="btn default" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
                         Cerrar
                     </a>
-                    <a href="javascript:void(0)" class="btn primary" onclick="ComprasHistorialModals.imprimirPDF()">
+                    <a href="javascript:void(0)" class="btn primary" onclick="ComprasHistorialModals.imprimirPDF()" id="btnImprimirPDF">
                         <ion-icon name="print-outline"></ion-icon> Imprimir PDF
                     </a>
                 </div>
@@ -368,18 +370,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             function imprimirPDF() {
                 const coId = document.getElementById('modalCompraId').value;
-                if (!coId) {
-                    Swal.fire('Error', 'No se pudo obtener el ID de la compra', 'error');
-                    return;
+                if (coId) {
+                    const url = `<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?comprasHistorialAjax=exportar_pdf_detalle&id=${coId}`;
+                    window.open(url, '_blank');
+                    Swal.fire({
+                        title: 'Generando PDF',
+                        text: 'La descarga del PDF comenzará en breve.',
+                        icon: 'info',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Error', 'No se ha podido obtener el ID de la compra.', 'error');
                 }
-
-                Swal.fire({
-                    title: 'Generando PDF',
-                    text: 'El documento se está generando...',
-                    icon: 'info',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
             }
 
             async function cargarGrafico() {
@@ -426,18 +429,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         return;
                     }
 
-                    const fechas = datos.map(d => {
-                        const [y, m, dia] = d.fecha.split('-');
-                        return `${dia}/${m}`;
-                    });
+                    const proveedores = datos.map(d => d.proveedor.length > 25 ? d.proveedor.substring(0, 25) + '...' : d.proveedor);
                     const cantidades = datos.map(d => parseInt(d.cantidad_compras));
-                    const montos = datos.map(d => parseFloat(d.total_monto));
+                    const ticketsPromedios = datos.map(d => parseFloat(d.ticket_promedio));
 
                     const myChart = echarts.init(graficoContainer);
 
                     const option = {
                         title: {
-                            text: 'Compras por Fecha',
+                            text: 'Distribución de Compras por Proveedor - Ticket Promedio',
                             left: 'center'
                         },
                         tooltip: {
@@ -448,7 +448,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             formatter: function(params) {
                                 let result = params[0].name + '<br>';
                                 params.forEach(param => {
-                                    const value = param.seriesName === 'Cantidad' ?
+                                    const value = param.seriesName === 'Cantidad de Compras' ?
                                         param.value :
                                         'Bs ' + parseFloat(param.value).toFixed(2);
                                     result += param.marker + ' ' + param.seriesName + ': ' + value + '<br>';
@@ -457,7 +457,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             }
                         },
                         legend: {
-                            data: ['Cantidad', 'Monto Total'],
+                            data: ['Cantidad de Compras', 'Ticket Promedio'],
                             bottom: 0
                         },
                         grid: {
@@ -468,7 +468,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         },
                         xAxis: {
                             type: 'category',
-                            data: fechas
+                            data: proveedores,
+                            axisLabel: {
+                                rotate: 45,
+                                interval: 0
+                            }
                         },
                         yAxis: [{
                             type: 'value',
@@ -476,24 +480,29 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             position: 'left'
                         }, {
                             type: 'value',
-                            name: 'Monto (Bs)',
+                            name: 'Ticket Promedio (Bs)',
                             position: 'right'
                         }],
                         series: [{
-                            name: 'Cantidad',
+                            name: 'Cantidad de Compras',
                             type: 'bar',
                             data: cantidades,
                             itemStyle: {
-                                color: '#3498db'
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: '#3498db' },
+                                    { offset: 1, color: '#2980b9' }
+                                ])
                             }
                         }, {
-                            name: 'Monto Total',
+                            name: 'Ticket Promedio',
                             type: 'line',
                             yAxisIndex: 1,
-                            data: montos,
+                            data: ticketsPromedios,
                             itemStyle: {
-                                color: '#2ecc71'
-                            }
+                                color: '#e74c3c'
+                            },
+                            smooth: true,
+                            symbolSize: 8
                         }]
                     };
 

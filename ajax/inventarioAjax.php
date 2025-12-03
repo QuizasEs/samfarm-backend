@@ -112,6 +112,41 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
+    require_once "../models/inventarioModel.php";
+
+    /* ===== OBTENER MARGEN BRUTO POR MEDICAMENTO ===== */
+    if ($valor == "margen_medicamentos") {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+        $su_id = ($rol_usuario == 2) ? $sucursal_usuario : null;
+        
+        $datos = inventarioModel::margen_bruto_por_medicamento_model($su_id);
+        echo json_encode($datos);
+        exit();
+    }
+
+    /* ===== OBTENER MARGEN BRUTO DIARIO ===== */
+    if ($valor == "margen_diario") {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+        $su_id = ($rol_usuario == 2) ? $sucursal_usuario : null;
+        
+        $datos = inventarioModel::margen_bruto_diario_model($su_id);
+        echo json_encode($datos);
+        exit();
+    }
+
+    /* ===== OBTENER MARGEN BRUTO POR SUCURSAL ===== */
+    if ($valor == "margen_sucursal") {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+        $su_id = ($rol_usuario == 2) ? $sucursal_usuario : null;
+        
+        $datos = inventarioModel::margen_bruto_por_sucursal_model($su_id);
+        echo json_encode($datos);
+        exit();
+    }
+
     // Si llegamos aquí, la acción no existe
     echo json_encode([
         "Alerta" => "simple",

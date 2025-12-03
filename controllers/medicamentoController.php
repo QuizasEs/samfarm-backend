@@ -238,8 +238,6 @@ class medicamentoController extends medicamentoModel
                     m.med_principio_activo,
                     m.med_accion_farmacologica,
                     m.med_presentacion,
-                    m.med_precio_unitario,
-                    m.med_precio_caja,
                     m.med_creado_en,
                     m.med_actualizado_en,
                     la.la_nombre_comercial AS laboratorio_nombre,
@@ -297,7 +295,6 @@ class medicamentoController extends medicamentoModel
                                 <th>VÍA</th>
                                 <th>USO</th>
                                 <th>PRESENTACIÓN</th>
-                                <th>PRECIO UNITARIO</th>
                                 <th>ACCIONES</th>
                             </tr>
                         </thead>
@@ -319,7 +316,6 @@ class medicamentoController extends medicamentoModel
                             <td>' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . '</td>
                             <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
                             <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
-                            <td>Bs. ' . number_format($rows['med_precio_unitario'], 2) . '</td>
                             <td class="accion-buttons">
                                 <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
                                     <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
@@ -336,9 +332,9 @@ class medicamentoController extends medicamentoModel
             $reg_final = $contador - 1;
         } else {
             if ($total >= 1) {
-                $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
+                $tabla .= '<tr><td colspan="9"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
             } else {
-                $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
+                $tabla .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;">
                                 <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
                             </td></tr>';
             }

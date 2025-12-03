@@ -114,9 +114,10 @@
                         <tr>
                             <th>N°</th>
                             <th>Producto</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Estado</th>
+                            <th>Presentación</th>
+                            <th>Descripción</th>
+                            <th>Código de Barras</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaMedicamentos">

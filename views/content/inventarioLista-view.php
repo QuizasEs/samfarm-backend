@@ -86,8 +86,189 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </form>
 
         <div class="tabla-contenedor"></div>
+
+        <div style="margin-top: 50px; padding: 30px; background: #f9fafb; border-radius: 12px;">
+            <h3 style="margin: 0 0 30px 0; color: #333;">
+                <ion-icon name="trending-up-outline" style="margin-right: 8px;"></ion-icon>
+                Análisis de Margen Bruto (Últimas Ventas)
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: 600;">Ingresos Totales (3 meses)</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333;" id="totalIngresos">-</div>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #f093fb; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: 600;">Costo Total</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #333;" id="totalCostos">-</div>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #43e97b; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: 600;">Margen Bruto (Bs)</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #43e97b;" id="margenBrutoBs">-</div>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #4facfe; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: 600;">Margen Bruto (%)</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #4facfe;" id="margenBrutoPct">-</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <h4 style="margin: 0 0 20px 0; color: #333; font-size: 14px; font-weight: 600;">Top 10 Medicamentos por Margen Bruto (3 meses)</h4>
+                    <canvas id="chartMedicamentos" style="max-height: 350px;"></canvas>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <h4 style="margin: 0 0 20px 0; color: #333; font-size: 14px; font-weight: 600;">Margen Bruto Diario (Últimos 30 días)</h4>
+                    <canvas id="chartDiario" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <h4 style="margin: 0 0 20px 0; color: #333; font-size: 14px; font-weight: 600;">Margen Bruto por Sucursal (Últimos 6 meses)</h4>
+                <canvas id="chartSucursales" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        let chartMedicamentos, chartDiario, chartSucursales;
+
+        function cargarGraficosMargen() {
+            const formData1 = new FormData();
+            formData1.append('inventarioAjax', 'margen_medicamentos');
+            
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                method: 'POST',
+                body: formData1
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const labels = data.map(d => d.med_nombre_quimico.substring(0, 25));
+                    const margenes = data.map(d => parseFloat(d.margen_bruto_pct) || 0);
+                    const ingresos = data.map(d => parseFloat(d.ingresos_totales) || 0);
+                    const costos = data.map(d => parseFloat(d.costo_ventas) || 0);
+                    
+                    const totalIngresos = ingresos.reduce((a,b) => a+b, 0);
+                    const totalCostos = costos.reduce((a,b) => a+b, 0);
+                    const totalMargen = totalIngresos - totalCostos;
+                    const pctMargen = totalIngresos > 0 ? ((totalMargen / totalIngresos) * 100).toFixed(2) : 0;
+                    
+                    document.getElementById('totalIngresos').textContent = totalIngresos.toFixed(2) + ' Bs';
+                    document.getElementById('totalCostos').textContent = totalCostos.toFixed(2) + ' Bs';
+                    document.getElementById('margenBrutoBs').textContent = totalMargen.toFixed(2) + ' Bs';
+                    document.getElementById('margenBrutoPct').textContent = pctMargen + '%';
+                    
+                    const ctx1 = document.getElementById('chartMedicamentos');
+                    if (chartMedicamentos) chartMedicamentos.destroy();
+                    chartMedicamentos = new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Margen (%)',
+                                data: margenes,
+                                backgroundColor: '#667eea',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { display: true, position: 'bottom' } },
+                            scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
+                        }
+                    });
+                }
+            });
+
+            const formData2 = new FormData();
+            formData2.append('inventarioAjax', 'margen_diario');
+            
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                method: 'POST',
+                body: formData2
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const labels = data.map(d => d.fecha);
+                    const margenes = data.map(d => parseFloat(d.margen_pct) || 0);
+                    
+                    const ctx2 = document.getElementById('chartDiario');
+                    if (chartDiario) chartDiario.destroy();
+                    chartDiario = new Chart(ctx2, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Margen % Diario',
+                                data: margenes,
+                                borderColor: '#43e97b',
+                                backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#43e97b'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { display: true, position: 'bottom' } },
+                            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
+                        }
+                    });
+                }
+            });
+
+            const formData3 = new FormData();
+            formData3.append('inventarioAjax', 'margen_sucursal');
+            
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                method: 'POST',
+                body: formData3
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const labels = data.map(d => d.su_nombre + ' (' + d.mes + ')');
+                    const margenes = data.map(d => parseFloat(d.margen_bruto_pct) || 0);
+                    
+                    const ctx3 = document.getElementById('chartSucursales');
+                    if (chartSucursales) chartSucursales.destroy();
+                    chartSucursales = new Chart(ctx3, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Margen Bruto %',
+                                data: margenes,
+                                backgroundColor: '#f093fb',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { display: true, position: 'bottom' } },
+                            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
+                        }
+                    });
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(cargarGraficosMargen, 500);
+        });
+    </script>
 
     <div class="modal" id="modalDetalleInventario" style="display: none;">
         <div class="modal-content">
