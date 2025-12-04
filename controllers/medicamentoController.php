@@ -31,23 +31,19 @@ class medicamentoController extends medicamentoModel
         $accion = mainModel::limpiar_cadena($_POST['Accion_reg']);
         $descripcion = mainModel::limpiar_cadena($_POST['Descripcion_reg']);
         $presentacion = mainModel::limpiar_cadena($_POST['Presentacion_reg']);
-        $unitario = mainModel::limpiar_cadena($_POST['Precio_unitario_reg']);
-        $caja = mainModel::limpiar_cadena($_POST['Precio_caja_reg']);
 
         $uso = mainModel::limpiar_cadena($_POST['Uso_reg']);
         $forma = mainModel::limpiar_cadena($_POST['Forma_reg']);
         $via = mainModel::limpiar_cadena($_POST['Via_reg']);
         $laboratorio = mainModel::limpiar_cadena($_POST['Laboratorio_reg']);
-        $sucursal = mainModel::limpiar_cadena($_POST['Sucursal_reg']);
 
         $uso = (int)$uso;
         $forma = (int)$forma;
         $via = (int)$via;
         $laboratorio = (int)$laboratorio;
-        $sucursal = (int)$sucursal;
 
         /* verificamos que los campos requeridos no esten vacios */
-        if ($nombre == "" || $principio == "" || $accion == "" || $presentacion == "" || $uso == "" || $forma == "" || $via == "" || $laboratorio == "" || $unitario == "" || $caja == "") {
+        if ($nombre == "" || $principio == "" || $accion == "" || $presentacion == "" || $uso == "" || $forma == "" || $via == "" || $laboratorio == "") {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
@@ -98,29 +94,9 @@ class medicamentoController extends medicamentoModel
             echo json_encode($alerta);
             exit();
         }
-        if (mainModel::verificar_datos("[0-9.]{1,10}", $unitario)) {
-            $alerta = [
-                "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "El PRECIO POR UNIDAD no cumple con el formato requerido",
-                "Tipo" => "error"
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
-        if (mainModel::verificar_datos("[0-9.]{1,10}", $caja)) {
-            $alerta = [
-                "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "El PRECIO POR CAJA no cumple con el formato requerido",
-                "Tipo" => "error"
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
 
         /* verificar valor de selects no negativo */
-        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0 || $sucursal == "") {
+        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0) {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
@@ -139,10 +115,7 @@ class medicamentoController extends medicamentoModel
             "Forma" => $forma,
             "Via" => $via,
             "Laboratorio" => $laboratorio,
-            "Sucursal" => $sucursal,
-            "Descripcion" => $descripcion,
-            "PrecioUnitario" => $unitario,
-            "PrecioCaja" => $caja
+            "Descripcion" => $descripcion
         ];
         $agregar_datos = medicamentoModel::agregar_medicamento_model($datos_med);
 
@@ -150,7 +123,7 @@ class medicamentoController extends medicamentoModel
 
         if ($agregar_datos->rowCount() == 1) {
             $alerta = [
-                "Alerta" => "simple",
+                "Alerta" => "recargar",
                 "Titulo" => "Medicamento Registrado correctamente",
                 "texto" => "Medicamento se ha registrado con exito",
                 "Tipo" => "success"
@@ -197,7 +170,6 @@ class medicamentoController extends medicamentoModel
         $whereParts[] = "(ff.ff_estado = 1 OR ff.ff_estado IS NULL)";
         $whereParts[] = "(vd.vd_estado = 1 OR vd.vd_estado IS NULL)";
         $whereParts[] = "(uf.uf_estado = 1 OR uf.uf_estado IS NULL)";
-        $whereParts[] = "(s.su_estado = 1 OR s.su_estado IS NULL)";
 
         // Búsqueda por texto
         if (!empty($busqueda)) {
@@ -243,14 +215,12 @@ class medicamentoController extends medicamentoModel
                     la.la_nombre_comercial AS laboratorio_nombre,
                     ff.ff_nombre AS forma_farmaceutica,
                     vd.vd_nombre AS via_administracion,
-                    uf.uf_nombre AS uso_farmacologico,
-                    s.su_nombre AS sucursal_nombre
+                    uf.uf_nombre AS uso_farmacologico
                 FROM medicamento AS m
                 LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
                 LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
                 LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
                 LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
-                LEFT JOIN sucursales AS s ON m.su_id = s.su_id
                 $whereSQL
                 ORDER BY m.med_nombre_quimico ASC 
                 LIMIT $inicio, $registros
@@ -317,11 +287,7 @@ class medicamentoController extends medicamentoModel
                             <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
                             <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
                             <td class="accion-buttons">
-                                <form action="' . SERVER_URL . 'ajax/medicamentoAjax.php" class="FormularioAjax" method="POST" data-form="delete" autocomplete="off">
-                                    <input type="hidden" name="medicamento_del" value="' . mainModel::encryption($rows['med_id']) . '">
-                                    <button type="submit" class="btn warning"><ion-icon name="trash-outline"></ion-icon> Eliminar</button>
-                                </form>
-                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn default">
+                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn danger">
                                     <ion-icon name="create-outline"></ion-icon> Editar
                                 </a>
                             </td>
@@ -392,18 +358,14 @@ class medicamentoController extends medicamentoModel
         $accion        = mainModel::limpiar_cadena($_POST['Accion_up']);
         $descripcion   = mainModel::limpiar_cadena($_POST['Descripcion_up']);
         $presentacion  = mainModel::limpiar_cadena($_POST['Presentacion_up']);
-        $unitario      = mainModel::limpiar_cadena($_POST['Precio_unitario_up']);
-        $caja          = mainModel::limpiar_cadena($_POST['Precio_caja_up']);
         $uso           = mainModel::limpiar_cadena($_POST['Uso_up']);
         $forma         = mainModel::limpiar_cadena($_POST['Forma_up']);
         $via           = mainModel::limpiar_cadena($_POST['Via_up']);
         $laboratorio   = mainModel::limpiar_cadena($_POST['Laboratorio_up']);
-        $sucursal      = mainModel::limpiar_cadena($_POST['Sucursal_up']);
         /* verificamos que los campos obligatorios sean llenados correctamente */
         if (
             $nombre == "" || $principio == "" || $accion == "" || $presentacion == "" ||
-            $unitario == "" || $caja == "" || $uso == "" || $forma == "" ||
-            $via == "" || $laboratorio == "" || $sucursal == ""
+            $uso == "" || $forma == "" || $via == "" || $laboratorio == ""
         ) {
             echo json_encode([
                 "Alerta" => "simple",
@@ -415,15 +377,12 @@ class medicamentoController extends medicamentoModel
         }
         /* verificamos que el formulario tenga el formato solicitado */
         $pattern_texto = "[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}";
-        $pattern_precio = "[0-9.]{1,10}";
 
         $validaciones = [
             ["campo" => $nombre, "patron" => $pattern_texto, "msg" => "El nombre comercial no cumple con el formato requerido."],
             ["campo" => $principio, "patron" => $pattern_texto, "msg" => "El principio activo no cumple con el formato requerido."],
             ["campo" => $accion, "patron" => $pattern_texto, "msg" => "La acción farmacológica no cumple con el formato requerido."],
-            ["campo" => $presentacion, "patron" => $pattern_texto, "msg" => "La presentación no cumple con el formato requerido."],
-            ["campo" => $unitario, "patron" => $pattern_precio, "msg" => "El precio unitario no cumple con el formato requerido."],
-            ["campo" => $caja, "patron" => $pattern_precio, "msg" => "El precio por caja no cumple con el formato requerido."]
+            ["campo" => $presentacion, "patron" => $pattern_texto, "msg" => "La presentación no cumple con el formato requerido."]
         ];
 
         foreach ($validaciones as $v) {
@@ -442,10 +401,9 @@ class medicamentoController extends medicamentoModel
         $forma = (int)$forma;
         $via = (int)$via;
         $laboratorio = (int)$laboratorio;
-        $sucursal = (int)$sucursal;
 
         /* preguntamos si estan vacios */
-        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0 || $sucursal <= 0) {
+        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0) {
             echo json_encode([
                 "Alerta" => "simple",
                 "Titulo" => "Error de validación",
@@ -474,13 +432,10 @@ class medicamentoController extends medicamentoModel
             "Accion"         => $accion,
             "Descripcion"    => $descripcion,
             "Presentacion"   => $presentacion,
-            "PrecioUnitario" => $unitario,
-            "PrecioCaja"     => $caja,
             "Uso"            => $uso,
             "Forma"          => $forma,
             "Via"            => $via,
             "Laboratorio"    => $laboratorio,
-            "Sucursal"       => $sucursal,
             "Id"             => $id
         ];
         /* preguntamos si se actualizo correctamente los datos */

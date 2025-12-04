@@ -69,6 +69,11 @@ if (isset($_POST['sucursalAjax']) || isset($_GET['sucursalAjax'])) {
         echo $ins_sucursal->costo_beneficio_controller();
         exit();
     }
+
+    if ($valor === "actualizar_config") {
+        echo $ins_sucursal->actualizar_config_empresa_controller();
+        exit();
+    }
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

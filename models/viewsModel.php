@@ -39,6 +39,8 @@
                 "mermaRegistrar",
                 "mermaLista",
                 "mermaRevision",
+                "perfilEditar",
+                "empresaEditar",
             ];
 
             if(in_array($vistas,$listaBlanca)){

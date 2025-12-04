@@ -448,32 +448,37 @@
             }
 
             contenedorLista.innerHTML = listaLotes.map((lote, i) => `
-    <div class="item-lote" style="padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="flex: 1;">
-                <strong style="font-size: 16px; color: #333;">${i + 1}. ${lote.nombre}</strong>
-                <span style="margin-left: 10px; font-size: 13px; font-weight: bold; color:${lote.activar_lote ? '#28a745' : '#dc3545'};">
-                    [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
-                </span>
-                <br>
-                <div style="margin-top: 8px; font-size: 14px; color: #666;">
-                    <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
-                    <span style="margin-left: 15px;"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
-                    <span style="margin-left: 15px;"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
+        <div class="lote-card">
+            <div class="lote-card-header">
+                <div class="lote-card-info">
+                    <strong class="lote-titulo">${i + 1}. ${lote.nombre}</strong>
+                    <span class="lote-estado ${lote.activar_lote ? 'activo' : 'inactivo'}">
+                        [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
+                    </span>
+
+                    <br>
+
+                    <div class="lote-detalles fila-1">
+                        <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
+                        <span class="espacio"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
+                        <span class="espacio"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
+                    </div>
+
+                    <div class="lote-detalles fila-2">
+                        <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
+                        <span class="espacio"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
+                        <span class="espacio"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+                    </div>
                 </div>
-                <div style="margin-top: 5px; font-size: 14px; color: #666;">
-                    <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
-                    <span style="margin-left: 15px;"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                    <span style="margin-left: 15px;"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+
+                <div>
+                    <a href="javascript:void(0)" class="btn warning btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
+                        <ion-icon name="trash-outline"></ion-icon> Eliminar
+                    </a>
                 </div>
-            </div>
-            <div>
-                <a href="javascript:void(0)" class="btn warning btn-sm" onclick="ModalManager.eliminarLote(${i})">
-                    <ion-icon name="trash-outline"></ion-icon> Eliminar
-                </a>
             </div>
         </div>
-    </div>
+
 `).join("");
         }
 
@@ -1832,7 +1837,7 @@
         console.log("✅ Script de búsqueda de clientes inicializado");
     })();
 </script>
-    <!-- script para cerrar caja -->
+<!-- script para cerrar caja -->
 <script>
     // 🔐 Script para cerrar caja con doble confirmación
     document.addEventListener('DOMContentLoaded', function() {
@@ -2331,7 +2336,7 @@
                     if (data.Tipo === 'success') {
                         Swal.fire('Éxito', data.texto, 'success');
                         utils.cerrar('modalConfiguracionInventario');
-                        
+
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
@@ -2376,7 +2381,7 @@
                 const busqueda = busquedaInput ? busquedaInput.value : '';
 
                 let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel';
-                
+
                 if (laboratorioId) url += '&select1=' + encodeURIComponent(laboratorioId);
                 if (estado) url += '&select2=' + encodeURIComponent(estado);
                 if (sucursalId) url += '&select3=' + encodeURIComponent(sucursalId);
@@ -2737,7 +2742,7 @@
         const chartVencimientos = document.getElementById('chartVencimientos');
         if (chartVencimientos) {
             const myChart = echarts.init(chartVencimientos);
-            
+
             fetch(API_URL + '?dashboardAjax=obtener_vencimientos_ajax')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -2747,16 +2752,38 @@
                     console.log('Vencimientos data:', data);
                     if (data.success) {
                         const opcion = {
-                            tooltip: { trigger: 'item' },
-                            legend: { orient: 'vertical', left: 'left' },
+                            tooltip: {
+                                trigger: 'item'
+                            },
+                            legend: {
+                                orient: 'vertical',
+                                left: 'left'
+                            },
                             series: [{
                                 name: 'Vencimientos',
                                 type: 'pie',
                                 radius: '50%',
-                                data: [
-                                    { value: data.data.expirados || 0, name: 'Expirados', itemStyle: { color: '#d32f2f' } },
-                                    { value: data.data.proximos || 0, name: 'Próximos 30 días', itemStyle: { color: '#ffa500' } },
-                                    { value: data.data.disponibles || 0, name: 'Disponibles', itemStyle: { color: '#4caf50' } }
+                                data: [{
+                                        value: data.data.expirados || 0,
+                                        name: 'Expirados',
+                                        itemStyle: {
+                                            color: '#d32f2f'
+                                        }
+                                    },
+                                    {
+                                        value: data.data.proximos || 0,
+                                        name: 'Próximos 30 días',
+                                        itemStyle: {
+                                            color: '#ffa500'
+                                        }
+                                    },
+                                    {
+                                        value: data.data.disponibles || 0,
+                                        name: 'Disponibles',
+                                        itemStyle: {
+                                            color: '#4caf50'
+                                        }
+                                    }
                                 ]
                             }]
                         };
@@ -2771,7 +2798,7 @@
         const chartStockMinimo = document.getElementById('chartStockMinimo');
         if (chartStockMinimo) {
             const myChart = echarts.init(chartStockMinimo);
-            
+
             fetch(API_URL + '?dashboardAjax=obtener_stock_minimo_ajax')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -2782,17 +2809,32 @@
                     if (data.success && data.data.length > 0) {
                         const productos = data.data.map(item => item.med_nombre_quimico);
                         const stock = data.data.map(item => parseInt(item.inv_total_unidades));
-                        
+
                         const opcion = {
-                            tooltip: { trigger: 'axis' },
-                            xAxis: { type: 'category', data: productos, axisLabel: { interval: 0, rotate: 45 } },
-                            yAxis: { type: 'value' },
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: productos,
+                                axisLabel: {
+                                    interval: 0,
+                                    rotate: 45
+                                }
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
                             series: [{
                                 data: stock,
                                 type: 'bar',
-                                itemStyle: { color: '#ffa500' }
+                                itemStyle: {
+                                    color: '#ffa500'
+                                }
                             }],
-                            grid: { bottom: 100 }
+                            grid: {
+                                bottom: 100
+                            }
                         };
                         myChart.setOption(opcion);
                     } else {
@@ -2805,7 +2847,7 @@
         const chartProductosVendidos = document.getElementById('chartProductosVendidos');
         if (chartProductosVendidos) {
             const myChart = echarts.init(chartProductosVendidos);
-            
+
             fetch(API_URL + '?dashboardAjax=obtener_productos_vendidos_ajax')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -2816,17 +2858,32 @@
                     if (data.success && data.data.length > 0) {
                         const productos = data.data.map(item => item.med_nombre_quimico);
                         const cantidades = data.data.map(item => parseInt(item.cantidad_vendida));
-                        
+
                         const opcion = {
-                            tooltip: { trigger: 'axis' },
-                            xAxis: { type: 'category', data: productos, axisLabel: { interval: 0, rotate: 45 } },
-                            yAxis: { type: 'value' },
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: productos,
+                                axisLabel: {
+                                    interval: 0,
+                                    rotate: 45
+                                }
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
                             series: [{
                                 data: cantidades,
                                 type: 'bar',
-                                itemStyle: { color: '#2196f3' }
+                                itemStyle: {
+                                    color: '#2196f3'
+                                }
                             }],
-                            grid: { bottom: 100 }
+                            grid: {
+                                bottom: 100
+                            }
                         };
                         myChart.setOption(opcion);
                     } else {
@@ -2839,7 +2896,7 @@
         const chartVentasMensuales = document.getElementById('chartVentasMensuales');
         if (chartVentasMensuales) {
             const myChart = echarts.init(chartVentasMensuales);
-            
+
             fetch(API_URL + '?dashboardAjax=obtener_ventas_mensuales_ajax')
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -2850,17 +2907,28 @@
                     if (data.success && data.data.length > 0) {
                         const meses = data.data.map(item => item.mes);
                         const totales = data.data.map(item => parseFloat(item.total_mes));
-                        
+
                         const opcion = {
-                            tooltip: { trigger: 'axis' },
-                            xAxis: { type: 'category', data: meses },
-                            yAxis: { type: 'value' },
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: meses
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
                             series: [{
                                 data: totales,
                                 type: 'bar',
-                                itemStyle: { color: '#4caf50' }
+                                itemStyle: {
+                                    color: '#4caf50'
+                                }
                             }],
-                            grid: { bottom: 50 }
+                            grid: {
+                                bottom: 50
+                            }
                         };
                         myChart.setOption(opcion);
                     } else {

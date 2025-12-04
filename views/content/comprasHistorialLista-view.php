@@ -628,18 +628,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         })();
     </script>
 
-    <style>
-        #grafico-compras-periodo {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
 
-        #grafico-compras-container {
-            margin-top: 20px;
-        }
-    </style>
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">

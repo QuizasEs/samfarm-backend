@@ -73,7 +73,7 @@ formularios_ajax.forEach((formulario) => {
 // Función para abrir PDF desde base64
 function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
     try {
-        console.log('📄 Intentando abrir PDF...');
+        console.log('Intentando abrir PDF...');
         
         // Decodificar base64
         const byteCharacters = atob(base64Data);
@@ -94,7 +94,7 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
         
         // Si fue bloqueado por el navegador
         if (!ventanaPDF || ventanaPDF.closed || typeof ventanaPDF.closed === 'undefined') {
-            console.warn('⚠️ Pop-up bloqueado por el navegador');
+            console.warn('Pop-up bloqueado por el navegador');
             
             // Crear enlace de descarga como alternativa
             const link = document.createElement('a');
@@ -106,7 +106,7 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
                 title: 'Pop-up bloqueado',
                 html: `Tu navegador bloqueó la ventana del PDF.<br><br>
                        <a href="${url}" target="_blank" style="display:inline-block; padding:10px 20px; background:#3085d6; color:white; text-decoration:none; border-radius:5px; margin:10px;">
-                           📄 Abrir PDF en nueva pestaña
+                           Abrir PDF en nueva pestaña
                        </a>`,
                 icon: 'warning',
                 confirmButtonText: 'Entendido',
@@ -120,17 +120,17 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
                 if (ventanaPDF.closed) {
                     clearInterval(checkClosed);
                     URL.revokeObjectURL(url);
-                    console.log('✅ PDF cerrado, memoria liberada');
+                    console.log('PDF cerrado, memoria liberada');
                 }
             }, 1000);
             
-            console.log('✅ PDF abierto exitosamente');
+            console.log('PDF abierto exitosamente');
         }
         
         return true;
         
     } catch (error) {
-        console.error('❌ Error abriendo PDF:', error);
+        console.error('Error abriendo PDF:', error);
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -144,7 +144,7 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
 function alertas_ajax(alerta) {
     console.log('📨 Respuesta recibida:', alerta);
     
-    // ✅ CASO ESPECIAL: Venta exitosa con PDF
+    // CASO ESPECIAL: Venta exitosa con PDF
     if (alerta.Alerta === "venta_exitosa") {
         Swal.fire({
             title: alerta.Titulo,

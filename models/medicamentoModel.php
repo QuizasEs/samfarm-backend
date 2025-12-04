@@ -19,7 +19,6 @@ class medicamentoModel extends mainModel
                 ff_id,
                 vd_id,
                 la_id,
-                su_id,
                 med_descripcion
             ) VALUES (
                 :Nombre,
@@ -30,7 +29,6 @@ class medicamentoModel extends mainModel
                 :Forma,
                 :Via,
                 :Laboratorio,
-                :Sucursal,
                 :Descripcion
             )
         ");
@@ -42,7 +40,6 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
         $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
-        $sql->bindParam(":Sucursal", $datos['Sucursal']);
         $sql->bindParam(":Descripcion", $datos['Descripcion']);
 
         $sql->execute();
@@ -61,8 +58,7 @@ class medicamentoModel extends mainModel
                 uf_id = :Uso,
                 ff_id = :Forma,
                 vd_id = :Via,
-                la_id = :Laboratorio,
-                su_id = :Sucursal
+                la_id = :Laboratorio
             WHERE med_id = :Id
         ");
 
@@ -75,7 +71,6 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
         $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
-        $sql->bindParam(":Sucursal", $datos['Sucursal']);
         $sql->bindParam(":Id", $datos['Id']);
 
         return $sql->execute();

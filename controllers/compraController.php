@@ -126,6 +126,18 @@ class compraController extends compraModel
             exit();
         }
 
+        /* validamos el formato del número de factura */
+        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $numero_factura)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Formato inválido',
+                'texto' => 'El NÚMERO DE FACTURA no cumple con el formato requerido (3-100 caracteres alfanuméricos).',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
         /* verificamos que los lotes existan en la lista */
         if (empty($lotes) || !is_array($lotes) || count($lotes) === 0) {
             $alerta = [

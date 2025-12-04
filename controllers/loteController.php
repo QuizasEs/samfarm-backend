@@ -374,6 +374,63 @@ class loteController extends loteModel
             exit();
         }
 
+        /* Validaciones de formato para campos numéricos cuando se proporcionan */
+        if (!empty($_POST['Cantidad_blister_up'])) {
+            $cant_blister_input = mainModel::limpiar_cadena($_POST['Cantidad_blister_up']);
+            if (mainModel::verificar_datos("[0-9]{1,10}", $cant_blister_input)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Formato inválido',
+                    'texto' => 'La CANTIDAD DE BLISTER debe ser un número válido.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if (!empty($_POST['Cantidad_unidades_up'])) {
+            $cant_unidad_input = mainModel::limpiar_cadena($_POST['Cantidad_unidades_up']);
+            if (mainModel::verificar_datos("[0-9]{1,10}", $cant_unidad_input)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Formato inválido',
+                    'texto' => 'La CANTIDAD DE UNIDADES debe ser un número válido.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if (!empty($_POST['Precio_compra_up'])) {
+            $precio_compra_input = mainModel::limpiar_cadena($_POST['Precio_compra_up']);
+            if (mainModel::verificar_datos("[0-9.]{1,10}", $precio_compra_input)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Formato inválido',
+                    'texto' => 'El PRECIO DE COMPRA no cumple con el formato requerido.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if (!empty($_POST['Precio_venta_up'])) {
+            $precio_venta_input = mainModel::limpiar_cadena($_POST['Precio_venta_up']);
+            if (mainModel::verificar_datos("[0-9.]{1,10}", $precio_venta_input)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Formato inválido',
+                    'texto' => 'El PRECIO DE VENTA no cumple con el formato requerido.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
         /* Estructura para actualizar */
         $datos_up = [
             'lm_cant_blister' => $cant_blister,

@@ -106,7 +106,10 @@ if (isset($_POST['usuariosAjax'])) {
         exit();
     }
 
-
+    if ($valor === "editar_perfil") {
+        echo $ins_usuario->editar_perfil_controller();
+        exit();
+    }
 
     echo json_encode([
         "Alerta" => "simple",

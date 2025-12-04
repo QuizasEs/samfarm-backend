@@ -1,7 +1,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmacia</title>
+    <?php
+        $peticionAjax = false;
+        require_once __DIR__ . '/../../controllers/sucursalController.php';
+        $ins_sucursal = new sucursalController();
+        $config_json = $ins_sucursal->datos_config_empresa_controller();
+        $config = json_decode($config_json, true);
+        $nombre_empresa = $config['ce_nombre'] ?? 'Farmacia';
+        $logo_empresa = $config['ce_logo'] ?? SERVER_URL . 'views/assets/img/predeterminado.png';
+    ?>
+    <title><?php echo htmlspecialchars($nombre_empresa); ?></title>
+    <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($logo_empresa); ?>">
     <link rel="stylesheet" href="<?php echo SERVER_URL; ?>views/css/style.css">
     <!-- script ion-icons -->
 <!--     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script> -->

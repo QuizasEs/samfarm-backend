@@ -136,6 +136,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>usuarioLista/">Usuarios</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL; ?>sucursalLista/">sucursales</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL; ?>empresaEditar/">Empresa</a></li>
                 </ul>
             </li>
 
@@ -166,7 +167,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <div class="menu-item">
                     <div class="item-link">
                         <ion-icon name="person-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL . "usuarioActualizar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
+                        <span><a href="<?php echo SERVER_URL . "perfilEditar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
                     </div>
                 </div>
             </li>

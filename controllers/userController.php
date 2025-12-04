@@ -599,9 +599,14 @@ class userController extends userModel
         exit();
     }
 
-    public function datos_usuario_controller()
+    public function datos_usuario_controller($id = null)
     {
-        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+        if ($id === null) {
+            $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+        } else {
+            $id = mainModel::decryption($id);
+            $us_id = (int)mainModel::limpiar_cadena($id);
+        }
 
         if ($us_id <= 0) {
             return json_encode(['error' => 'ID inválido']);
@@ -682,7 +687,179 @@ class userController extends userModel
         }
     }
 
+    public function editar_perfil_controller()
+    {
+        $rol_actual = $_SESSION['rol_smp'] ?? 0;
+        $usuario_sesion = $_SESSION['id_smp'] ?? 0;
 
+        if ($rol_actual != 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acceso denegado",
+                "texto" => "Solo los administradores pueden editar el perfil",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $us_id_perfil = mainModel::decryption($_POST['us_id_perfil'] ?? '');
+        $us_id_perfil = (int)mainModel::limpiar_cadena($us_id_perfil);
+
+        if ($us_id_perfil != $usuario_sesion) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acción no permitida",
+                "texto" => "Solo puedes editar tu propio perfil",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $nombres = mainModel::limpiar_cadena($_POST['Nombres_perfil'] ?? '');
+        $apellido_paterno = mainModel::limpiar_cadena($_POST['ApellidoPaterno_perfil'] ?? '');
+        $apellido_materno = mainModel::limpiar_cadena($_POST['ApellidoMaterno_perfil'] ?? '');
+        $carnet = mainModel::limpiar_cadena($_POST['Carnet_perfil'] ?? '');
+        $telefono = mainModel::limpiar_cadena($_POST['Telefono_perfil'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_perfil'] ?? '');
+        $direccion = mainModel::limpiar_cadena($_POST['Direccion_perfil'] ?? '');
+        $usuarioName = mainModel::limpiar_cadena($_POST['UsuarioName_perfil'] ?? '');
+        $password = mainModel::limpiar_cadena($_POST['Password_perfil'] ?? '');
+        $password_confirm = mainModel::limpiar_cadena($_POST['PasswordConfirm_perfil'] ?? '');
+
+        if (empty($nombres) || empty($apellido_paterno) || empty($apellido_materno) || empty($carnet) || empty($usuarioName)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Campos obligatorios",
+                "texto" => "Debe completar todos los campos obligatorios",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT * FROM usuarios WHERE us_id = '$us_id_perfil'");
+        if ($check_usuario->rowCount() <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Usuario no existe",
+                "texto" => "El usuario no fue encontrado en el sistema",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $usuario_actual = $check_usuario->fetch();
+
+        if ($carnet != $usuario_actual['us_numero_carnet']) {
+            $check_carnet = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_numero_carnet = '$carnet'");
+            if ($check_carnet->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Carnet duplicado",
+                    "texto" => "Ya existe otro usuario con este número de carnet",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if ($usuarioName != $usuario_actual['us_username']) {
+            $check_username = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_username = '$usuarioName'");
+            if ($check_username->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Usuario duplicado",
+                    "texto" => "Ya existe otro usuario con este nombre de usuario",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        if (!empty($correo) && $correo != $usuario_actual['us_correo']) {
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo inválido",
+                    "texto" => "El formato del correo electrónico no es válido",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
+            $check_correo = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_correo = '$correo'");
+            if ($check_correo->rowCount() > 0) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Correo duplicado",
+                    "texto" => "Ya existe otro usuario con este correo electrónico",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
+        $password_hash = $usuario_actual['us_password_hash'];
+
+        if (!empty($password) && !empty($password_confirm)) {
+            if ($password != $password_confirm) {
+                $alerta = [
+                    "Alerta" => "simple",
+                    "Titulo" => "Contraseñas no coinciden",
+                    "texto" => "Las nuevas contraseñas no coinciden",
+                    "Tipo" => "error"
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+            $password_hash = mainModel::encryption($password);
+        }
+
+        $datos_usuario = [
+            'us_id' => $us_id_perfil,
+            'Nombres' => $nombres,
+            'ApellidoPaterno' => $apellido_paterno,
+            'ApellidoMaterno' => $apellido_materno,
+            'Carnet' => $carnet,
+            'Telefono' => $telefono,
+            'Correo' => $correo,
+            'Direccion' => $direccion,
+            'UsuarioName' => $usuarioName,
+            'Password' => $password_hash,
+            'Sucursal' => $usuario_actual['su_id'],
+            'Rol' => $usuario_actual['ro_id']
+        ];
+
+        $actualizar = userModel::editar_usuario_model($datos_usuario);
+
+        if ($actualizar->rowCount() >= 0) {
+            $_SESSION['nombre_smp'] = $nombres . ' ' . $apellido_paterno;
+
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Perfil actualizado",
+                "texto" => "Los datos de tu perfil fueron actualizados correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo actualizar el perfil",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
 
 
 

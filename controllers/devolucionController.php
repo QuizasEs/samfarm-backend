@@ -222,6 +222,16 @@ class devolucionController extends devolucionModel
                     throw new Exception("No se pudo registrar movimiento de baja");
                 }
 
+                $descuento_lote_ok = self::descontar_lote_devolucion_model($lm_id, $cantidad);
+                if (!$descuento_lote_ok) {
+                    throw new Exception("No se pudo descontar del lote medicamento");
+                }
+
+                $inv_ok = self::descontar_inventario_consolidado_devolucion_model($med_id, $su_id, $cantidad, $precio_unitario);
+                if (!$inv_ok) {
+                    throw new Exception("No se pudo actualizar inventario consolidado en devolución");
+                }
+
                 if ($tipo === 'cambio') {
                     $stmt_lotes = self::obtener_lotes_disponibles_model($med_id, $su_id);
                     $lotes_disponibles = $stmt_lotes->fetchAll(PDO::FETCH_ASSOC);
@@ -258,11 +268,6 @@ class devolucionController extends devolucionModel
                         $cambio_result = self::registrar_movimiento_cambio_model($datos_cambio);
                         if (!$cambio_result || $cambio_result->rowCount() <= 0) {
                             throw new Exception("No se pudo registrar movimiento de cambio");
-                        }
-
-                        $inv_ok = self::descontar_inventario_consolidado_devolucion_model($med_id, $su_id, $cantidad_usar);
-                        if (!$inv_ok) {
-                            error_log("WARNING: No se pudo actualizar inventario consolidado para cambio. med_id={$med_id}");
                         }
 
                         $cantidad_pendiente -= $cantidad_usar;

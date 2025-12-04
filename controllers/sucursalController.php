@@ -479,4 +479,167 @@ class sucursalController extends sucursalModel
             ], JSON_UNESCAPED_UNICODE);
         }
     }
+
+    private function guardar_imagen_logo()
+    {
+        if (!isset($_FILES['LogoEmpresa_edit'])) {
+            return '';
+        }
+
+        $archivo = $_FILES['LogoEmpresa_edit'];
+
+        if ($archivo['error'] !== UPLOAD_ERR_OK || empty($archivo['name'])) {
+            return '';
+        }
+
+        $img_dir = dirname(__FILE__) . '/../views/assets/img/';
+
+        if (!is_dir($img_dir)) {
+            mkdir($img_dir, 0755, true);
+        }
+
+        $resultado = mainModel::procesar_imagen($archivo, 'logo_empresa', $img_dir);
+        
+        if ($resultado['error']) {
+            error_log("ERROR guardando logo: " . json_encode($resultado));
+            return '';
+        }
+
+        $nombre_archivo = $resultado['nombre'];
+        $ruta_final = SERVER_URL . 'views/assets/img/' . $nombre_archivo;
+        return $ruta_final;
+    }
+
+    private function eliminar_imagen_logo($ruta_imagen)
+    {
+        if (empty($ruta_imagen) || strpos($ruta_imagen, 'predeterminado.png') !== false) {
+            return;
+        }
+
+        $ruta_relativa = str_replace(SERVER_URL, '', $ruta_imagen);
+        $ruta_absoluta = dirname(__FILE__) . '/../' . $ruta_relativa;
+
+        if (file_exists($ruta_absoluta)) {
+            chmod($ruta_absoluta, 0777);
+            unlink($ruta_absoluta);
+        }
+    }
+
+    public function datos_config_empresa_controller()
+    {
+        try {
+            $config = self::obtener_config_empresa_model();
+            return json_encode($config, JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en datos_config_empresa_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar configuración'], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    public function actualizar_config_empresa_controller()
+    {
+        $rol_actual = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_actual != 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acceso denegado",
+                "texto" => "Solo los administradores pueden editar la configuración de la empresa",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $nombre = mainModel::limpiar_cadena($_POST['NombreEmpresa_edit'] ?? '');
+        $nit = mainModel::limpiar_cadena($_POST['NITEmpresa_edit'] ?? '');
+        $direccion = mainModel::limpiar_cadena($_POST['DireccionEmpresa_edit'] ?? '');
+        $telefono = mainModel::limpiar_cadena($_POST['TelefonoEmpresa_edit'] ?? '');
+
+        if (empty($nombre) || empty($nit)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Campos obligatorios",
+                "texto" => "Debe completar el nombre y NIT de la empresa",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $nombre)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Formato inválido",
+                "texto" => "El nombre de la empresa no cumple con el formato requerido",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (mainModel::verificar_datos("[a-zA-Z0-9\-]{3,50}", $nit)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Formato inválido",
+                "texto" => "El NIT/RUC no cumple con el formato requerido",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (!empty($telefono) && mainModel::verificar_datos("[0-9\-\+\s]{6,20}", $telefono)) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Formato inválido",
+                "texto" => "El teléfono no cumple con el formato requerido",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $datos_config = [
+            'nombre' => $nombre,
+            'nit' => $nit,
+            'direccion' => $direccion,
+            'telefono' => $telefono
+        ];
+
+        if (isset($_FILES['LogoEmpresa_edit']) && $_FILES['LogoEmpresa_edit']['error'] === UPLOAD_ERR_OK) {
+            $config_actual = self::obtener_config_empresa_model();
+            if (!empty($config_actual['ce_logo']) && strpos($config_actual['ce_logo'], 'predeterminado.png') === false) {
+                $this->eliminar_imagen_logo($config_actual['ce_logo']);
+            }
+            
+            $logo = $this->guardar_imagen_logo();
+            if (empty($logo)) {
+                $logo = SERVER_URL . 'views/assets/img/predeterminado.png';
+            }
+            
+            $datos_config['logo'] = $logo;
+        }
+
+        $actualizar = self::actualizar_config_empresa_model($datos_config);
+
+        if ($actualizar->rowCount() >= 0) {
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Configuración actualizada",
+                "texto" => "La información de la empresa fue actualizada correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo actualizar la configuración",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
 }

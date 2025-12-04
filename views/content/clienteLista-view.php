@@ -108,7 +108,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Paterno</label>
-                                <input type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                                <input type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
                         <div class="col">

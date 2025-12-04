@@ -262,11 +262,80 @@ class sucursalModel extends mainModel
                 'ce_nombre' => 'SAMFARM PHARMA',
                 'ce_nit' => 'S/N',
                 'ce_direccion' => '',
-                'ce_telefono' => ''
+                'ce_telefono' => '',
+                'ce_logo' => SERVER_URL . 'views/assets/img/predeterminado.png'
             ];
         }
 
+        if (empty($config['ce_logo'])) {
+            $config['ce_logo'] = SERVER_URL . 'views/assets/img/predeterminado.png';
+        }
+
         return $config;
+    }
+
+    protected static function actualizar_config_empresa_model($datos)
+    {
+        $sql = "SELECT ce_id FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+        $stmt->execute();
+        $config_existente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($config_existente) {
+            $sql_update = "
+                UPDATE configuracion_empresa
+                SET ce_nombre = :nombre,
+                    ce_nit = :nit,
+                    ce_direccion = :direccion,
+                    ce_telefono = :telefono";
+            
+            if (!empty($datos['logo'])) {
+                $sql_update .= ", ce_logo = :logo";
+            }
+            
+            $sql_update .= ",
+                    ce_actualizado_en = NOW()
+                WHERE ce_id = :ce_id
+            ";
+            $stmt = $conexion->prepare($sql_update);
+            $stmt->bindParam(':ce_id', $config_existente['ce_id']);
+            $stmt->bindParam(':nombre', $datos['nombre']);
+            $stmt->bindParam(':nit', $datos['nit']);
+            $stmt->bindParam(':direccion', $datos['direccion']);
+            $stmt->bindParam(':telefono', $datos['telefono']);
+            if (!empty($datos['logo'])) {
+                $stmt->bindParam(':logo', $datos['logo']);
+            }
+        } else {
+            $sql_insert = "
+                INSERT INTO configuracion_empresa (ce_nombre, ce_nit, ce_direccion, ce_telefono";
+            
+            if (!empty($datos['logo'])) {
+                $sql_insert .= ", ce_logo";
+            }
+            
+            $sql_insert .= ", ce_creado_en, ce_actualizado_en)
+                VALUES (:nombre, :nit, :direccion, :telefono";
+            
+            if (!empty($datos['logo'])) {
+                $sql_insert .= ", :logo";
+            }
+            
+            $sql_insert .= ", NOW(), NOW())
+            ";
+            $stmt = $conexion->prepare($sql_insert);
+            $stmt->bindParam(':nombre', $datos['nombre']);
+            $stmt->bindParam(':nit', $datos['nit']);
+            $stmt->bindParam(':direccion', $datos['direccion']);
+            $stmt->bindParam(':telefono', $datos['telefono']);
+            if (!empty($datos['logo'])) {
+                $stmt->bindParam(':logo', $datos['logo']);
+            }
+        }
+
+        $stmt->execute();
+        return $stmt;
     }
     protected static function ventas_por_usuario_sucursal_model($su_id)
     {

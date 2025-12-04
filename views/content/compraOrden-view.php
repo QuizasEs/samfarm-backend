@@ -78,7 +78,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque">
                 <label for="razon_reg">razon social*</label>
-                <input type="text" name="razon_reg" id="razon_reg" placeholder="Se obtiene del proveedor seleccionado" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                <input type="text" name="razon_reg" id="razon_reg" placeholder="Se obtiene del proveedor seleccionado" readonly style="cursor: not-allowed;">
             </div>
             <div class="form-bloque">
                 <label for="Proveedor_reg">Proveedor*</label>
@@ -129,7 +129,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <div class="form-search">
             <div class="form-bloque-search">
                 <label for="Form_reg">forma farmaceutica</label>
-                <select name="Form_reg" id="Form_reg">
+                <select name="Form_reg" id="Form_reg" class="select-filtro">
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
                         <option value="<?php echo $forma['ff_id']; ?>"><?php echo $forma['ff_nombre']; ?></option>
@@ -138,7 +138,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque-search">
                 <label for="Via_reg">via de administracion</label>
-                <select name="Via_reg" id="Via_reg">
+                <select name="Via_reg" id="Via_reg" class="select-filtro">
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['via_administracion'] as $via) { ?>
                         <option value="<?php echo $via['vd_id']; ?>"><?php echo $via['vd_nombre']; ?></option>
@@ -147,7 +147,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque-search">
                 <label for="Laboratorio_reg">laboratorio</label>
-                <select name="Laboratorio_reg" id="Laboratorio_reg">
+                <select name="Laboratorio_reg" id="Laboratorio_reg" class="select-filtro">
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
                         <option value="<?php echo $lab['la_id']; ?>"><?php echo $lab['la_nombre_comercial']; ?></option>
@@ -156,7 +156,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="form-bloque-search">
                 <label for="Uso_reg">uso farmacologico</label>
-                <select name="Uso_reg" id="Uso_reg">
+                <select name="Uso_reg" id="Uso_reg" class="select-filtro">
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?>
                         <option value="<?php echo $uso['uf_id']; ?>"><?php echo $uso['uf_nombre']; ?></option>
@@ -174,7 +174,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <div class="form-title">
             <h3>resultado filtrado</h3>
         </div>
-        <div class="content">
+        <div class="container">
             <div class="table-container">
                 <table class="table">
                     <thead>

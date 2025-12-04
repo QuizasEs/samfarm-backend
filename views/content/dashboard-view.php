@@ -80,7 +80,7 @@
                     </a>
                 </div>
                 <div class="direct-link-item blue">
-                    <a href="<?php echo SERVER_URL; ?>categorialista/">
+                    <a href="<?php echo SERVER_URL; ?>categoriaLista/">
                         <div class="direct-link-text">
                             <h3>
                                 <?php echo $total_categorias; ?>

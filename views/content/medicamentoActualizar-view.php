@@ -74,8 +74,7 @@ if ($datos->rowCount() == 1) {
                         <?php } ?>
                     </select>
                 </div>
-            </div>
-            <div class="form-group">
+
                 <div class="form-bloque">
                     <label for="">VIA DE ADMINISTRACION*</label>
                     <select class="select-style" name="Via_up">
@@ -90,17 +89,6 @@ if ($datos->rowCount() == 1) {
                         <?php foreach ($datos_select['laboratorios'] as $laboratorios) { ?>
                             <option value="<?php echo $laboratorios['la_id'] ?>" <?php if ($campos['la_id'] == $laboratorios['la_id']) { ?> selected="" <?php } ?>><?php echo $laboratorios['la_nombre_comercial'] ?></option>
                         <?php } ?>
-                    </select>
-                </div>
-                <div class="form-bloque">
-                    <label for="">SUCURSAL*</label>
-                    <select class="select-style" name="Sucursal_up">
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>" <?php if ($campos['su_id'] == $sucursal['su_id']) { ?> selected="" <?php } ?>><?php echo $sucursal['su_nombre'] ?></option>
-                        <?php } ?>
-                        <?php ?>
-                        <?php ?>
-
                     </select>
                 </div>
 

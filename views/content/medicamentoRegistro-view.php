@@ -65,8 +65,7 @@ $datos_select = $ins_med->datos_extras_controller();
                     <?php }?>
                 </select>
             </div>
-        </div>
-        <div class="form-group">
+        
             <div class="form-bloque">
                 <label for="">VIA DE ADMINISTRACION*</label>
                 <select class="select-style" name="Via_reg">
@@ -85,28 +84,11 @@ $datos_select = $ins_med->datos_extras_controller();
                     <?php }?>
                 </select>
             </div>
-            <div class="form-bloque">
-                <label for="">SUCURSAL*</label>
-                <select class="select-style" name="Sucursal_reg">
-                    <option value="">SELECCIONAR</option>
-                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                    <option value="<?php echo $sucursal['su_id']?>"><?php echo $sucursal['su_nombre']?></option>
-                    <?php }?>
-                    <?php ?>
-                    <?php ?>
-
-                </select>
-            </div>
 
         </div>
         <div class="form-buttons">
             <button class="btn success">Agregar</button>
         </div>
-
-
-
-
-
 
     </form>
 </div>

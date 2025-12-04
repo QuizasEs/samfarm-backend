@@ -67,8 +67,8 @@ if (isset($_SESSION['id_smp'])) {
 
                 </div>
 
-                <div class="">
-                    <a class="btn default" href="<?php echo SERVER_URL; ?>medicamentoRegistro/"><ion-icon name="add-outline"></ion-icon> NUEVO</a>
+                <div class="filtro-dinamico-butttons">
+                    <a class="btn success" href="<?php echo SERVER_URL; ?>medicamentoRegistro/"><ion-icon name="add-outline"></ion-icon> NUEVO</a>
                 </div>
             </form>
 
