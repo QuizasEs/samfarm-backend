@@ -41,6 +41,8 @@
                 "mermaRevision",
                 "perfilEditar",
                 "empresaEditar",
+                "preciosLista",
+                "preciosBalance",
             ];
 
             if(in_array($vistas,$listaBlanca)){

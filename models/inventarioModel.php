@@ -607,4 +607,81 @@ class inventarioModel extends mainModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * RECALCULAR VALORADO DE INVENTARIO
+     * Fórmula: inv_total_valorado = SUM(lm_cant_actual_unidades * lm_precio_venta)
+     * Solo de lotes activos
+     * Ejecutado por cronjob cada 1-2 horas
+     */
+    public static function recalcular_valorado_inventario_model()
+    {
+        try {
+            $conexion = mainModel::conectar();
+            $conexion->beginTransaction();
+
+            $sql = "
+                UPDATE inventarios i
+                SET i.inv_total_valorado = COALESCE((
+                    SELECT SUM(lm.lm_cant_actual_unidades * lm.lm_precio_venta)
+                    FROM lote_medicamento lm
+                    WHERE lm.med_id = i.med_id 
+                    AND lm.su_id = i.su_id 
+                    AND lm.lm_estado = 'activo'
+                    AND lm.lm_cant_actual_unidades > 0
+                ), 0),
+                i.inv_actualizado_en = NOW()
+                WHERE i.inv_total_unidades >= 0
+            ";
+
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute();
+            $actualizados = $stmt->rowCount();
+
+            $contar_sql = "SELECT COUNT(*) as total FROM inventarios";
+            $stmt_count = $conexion->prepare($contar_sql);
+            $stmt_count->execute();
+            $resultado_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
+            $total = $resultado_count['total'];
+
+            $conexion->commit();
+
+            error_log("Valorado recalculado: {$actualizados} registros de {$total} total");
+
+            return [
+                'actualizados' => $actualizados,
+                'total' => $total,
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
+
+        } catch (PDOException $e) {
+            if (isset($conexion)) {
+                $conexion->rollBack();
+            }
+            error_log("Error recalculando valorado: " . $e->getMessage());
+            throw new Exception("No se pudo recalcular el valorado: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * OBTENER TIMESTAMP DEL ÚLTIMO RECÁLCULO
+     */
+    public static function obtener_timestamp_ultimo_recalculo_model()
+    {
+        $sql = "
+            SELECT MAX(inv_actualizado_en) as ultimo_recalculo
+            FROM inventarios
+        ";
+
+        try {
+            $conexion = mainModel::conectar();
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $resultado['ultimo_recalculo'] ?? null;
+        } catch (PDOException $e) {
+            error_log("Error obteniendo timestamp de recálculo: " . $e->getMessage());
+            return null;
+        }
+    }
 }

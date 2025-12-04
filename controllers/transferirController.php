@@ -94,7 +94,7 @@ class transferirController extends transferirModel
                     throw new Exception("Stock insuficiente en lote " . ($lote['lm_numero_lote'] ?? 'desconocido'));
                 }
 
-                $subtotal = $cantidad_cajas * $lote['lm_precio_compra'];
+                $subtotal = $cantidad_unidades * $lote['lm_precio_venta'];
 
                 $datos_detalle = [
                     'tr_id' => $tr_id,

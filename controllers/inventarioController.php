@@ -70,6 +70,14 @@ class inventarioController extends inventarioModel
             $filtros['forma'] = (int)$f4;
         }
 
+        /* ===== RECALCULAR VALORADO ANTES DE MOSTRAR ===== */
+        try {
+            inventarioModel::recalcular_valorado_inventario_model();
+            error_log("✅ Valorado de inventario recalculado");
+        } catch (Exception $e) {
+            error_log("⚠️ Error en recalcular_valorado_inventario_model: " . $e->getMessage());
+        }
+
         /* ===== CONSULTAR DATOS ===== */
         try {
             $conexion = mainModel::conectar();
@@ -399,6 +407,9 @@ class inventarioController extends inventarioModel
         if ($f4 !== '' && is_numeric($f4)) {
             $filtros['forma'] = (int)$f4;
         }
+
+        // Extraer su_id de filtros para usar en el reporte
+        $su_id = $filtros['su_id'] ?? null;
 
         try {
             // Obtener datos con filtros

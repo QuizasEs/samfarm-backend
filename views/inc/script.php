@@ -23,6 +23,20 @@
         localStorage.setItem('dark', value);
     }
 </script>
+
+<!-- PREVENIR CIERRE DE MODALES AL HACER CLICK FUERA -->
+<script>
+    document.addEventListener('click', (e) => {
+        const modal = e.target;
+        if (modal && modal.classList && modal.classList.contains('modal')) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }, true);
+</script>
+
 <script>
     //funcionamiento del despligue de los sub links
     document.querySelectorAll(".sidebar .menu-item").forEach(item => {
@@ -567,12 +581,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         ModalManager.cerrarModal();
-        const modal = document.getElementById("modalLote");
-        if (modal) {
-            modal.addEventListener("click", e => {
-                if (e.target === modal) ModalManager.cerrarModal();
-            });
-        }
     });
 </script>
 
@@ -878,17 +886,7 @@
         }
     }
 
-    // CERRAR MODAL AL HACER CLICK EN EL FONDO
-    document.addEventListener("click", (e) => {
-        const modal = document.getElementById("modalActivarLote");
 
-        if (modal.style.display !== "flex") return;
-
-        // Si se hace clic fuera del contenido → cerrar
-        if (e.target === modal) {
-            modal.style.display = "none";
-        }
-    });
 </script>
 
 
@@ -918,12 +916,6 @@
 
         function setupModal() {
             if (!modal) return; // nada que hacer si no existe
-            // cerrar al click fuera
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    api.cerrarModal();
-                }
-            });
 
             // Si tienes un botón con clase .close dentro, lo conectamos si existe
             const closeBtns = modal.querySelectorAll('.close, [data-close="modalCliente"]');
@@ -1096,9 +1088,12 @@
             });
         }
 
-        // ✅ FUNCIÓN MEJORADA: Buscar índice considerando solo med_id
-        function findItemIndex(med_id) {
-            return cart.findIndex(item => String(item.med_id) === String(med_id));
+        // ✅ FUNCIÓN MEJORADA: Buscar índice considerando med_id + lm_id (lote específico)
+        function findItemIndex(med_id, lote_id) {
+            return cart.findIndex(item => 
+                String(item.med_id) === String(med_id) && 
+                String(item.lote_id || null) === String(lote_id || null)
+            );
         }
 
         function renderCart() {
@@ -1272,12 +1267,12 @@
             if (dineroHidden) dineroHidden.value = dinero;
         }
 
-        // ✅ FUNCIÓN CORREGIDA: Agregar item considerando solo med_id
+        // ✅ FUNCIÓN CORREGIDA: Agregar item considerando med_id + lote_id (lote específico)
         function addItem(m) {
-            const idx = findItemIndex(m.med_id);
+            const idx = findItemIndex(m.med_id, m.lote_id);
 
             if (idx !== -1) {
-                // ✅ Ya existe, aumentar cantidad
+                // ✅ Ya existe este lote específico, aumentar cantidad
                 const ex = cart[idx];
                 const nuevaCantidad = ex.cantidad + 1;
 
@@ -1285,6 +1280,7 @@
                     Swal.fire({
                         title: 'Sin stock suficiente',
                         html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
+                       ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
                        <p>Stock disponible: <strong>${m.stock}</strong> unidades</p>
                        <p>Ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
                         icon: 'warning',
@@ -1294,19 +1290,14 @@
                 }
 
                 ex.cantidad = nuevaCantidad;
-
-                // ✅ Actualizar info de lote si viene de búsqueda
-                if (m.lote_id && !ex.lote_id) {
-                    ex.lote_id = m.lote_id;
-                    ex.lote = m.lote;
-                }
             } else {
-                // ✅ No existe, crear nuevo
+                // ✅ No existe este lote, crear nuevo item (aunque sea el mismo medicamento de otro lote)
                 if (m.stock != null && m.stock <= 0) {
                     Swal.fire({
                         title: 'Sin stock',
                         html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
-                       <p>Este medicamento no tiene stock disponible</p>`,
+                       ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
+                       <p>Este lote no tiene stock disponible</p>`,
                         icon: 'error',
                         confirmButtonText: 'Entendido'
                     });
@@ -2230,6 +2221,7 @@
                             const colorTipo = mov.tipo === 'entrada' ? '#e8f5e9' : '#ffebee';
                             const iconTipo = mov.tipo === 'entrada' ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline';
 
+                            const motivoLimpio = (mov.motivo || '-').replace(/\s*\(lm_id\s+\d+\)/g, '');
                             return `
                             <tr>
                                 <td>${mov.fecha}</td>
@@ -2242,7 +2234,7 @@
                                 <td>${utils.formatearNumero(mov.cantidad)} ${mov.unidad}</td>
                                 <td>${mov.lote || 'N/A'}</td>
                                 <td>${mov.usuario || 'Sistema'}</td>
-                                <td>${mov.motivo || '-'}</td>
+                                <td>${motivoLimpio}</td>
                             </tr>
                         `;
                         }).join('');
@@ -2405,18 +2397,7 @@
     });
 
 
-    (function() {
-        const modalIds = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario'];
 
-        document.addEventListener('click', function(e) {
-            modalIds.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal && modal.style && modal.style.display === 'flex' && e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        });
-    })();
 </script>
 
 <!-- vista tavla historial caja -->

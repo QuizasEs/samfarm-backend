@@ -51,9 +51,7 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Buscar medicamentos
-     */
+
     public function buscar_medicamento_controller($termino, $filtros = [])
     {
         if (!isset($_SESSION['sucursal_smp'])) {
@@ -89,9 +87,7 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Más vendidos
-     */
+
     public function mas_vendidos_controller($limit = 5)
     {
         if (!isset($_SESSION['sucursal_smp'])) {
@@ -109,9 +105,6 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Consultar caja activa
-     */
     public function consulta_caja_controller()
     {
         if (isset($_SESSION['id_smp']) && in_array($_SESSION['rol_smp'], [1, 2, 3])) {
@@ -129,12 +122,10 @@ class ventaController extends ventaModel
         }
     }
 
-    /**
-     * 🆕 Abrir caja con validación de usuario activo
-     */
+
     public function abrir_caja_controller()
     {
-        // ✅ Validar usuario activo
+
         if (!$this->validar_usuario_activo()) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -219,12 +210,10 @@ class ventaController extends ventaModel
         exit();
     }
 
-    /**
-     * 🆕 Registrar venta con validación de usuario activo
-     */
+
     public function registrar_venta_controller()
     {
-        // ✅ Validar usuario activo
+
         if (!$this->validar_usuario_activo()) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -321,6 +310,7 @@ class ventaController extends ventaModel
 
             foreach ($venta_items as $item) {
                 $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
+                $lm_id_solicitado = isset($item['lote_id']) ? (int)$item['lote_id'] : 0;
                 $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 0;
                 $precio_unitario = isset($item['precio']) ? (float)$item['precio'] : 0.0;
                 $descuento_item = isset($item['descuento']) ? (float)$item['descuento'] : 0.00;
@@ -336,32 +326,47 @@ class ventaController extends ventaModel
                     throw new Exception("Stock insuficiente para med_id {$med_id}");
                 }
 
-                $remaining = $unidades_requeridas;
-                $lotes = self::obtener_lotes_activos_por_med_sucursal_model($med_id, $sucursal_id);
                 $valorado_total_descuento = 0;
 
-                foreach ($lotes as $lm) {
-                    if ($remaining <= 0) break;
+                if ($lm_id_solicitado > 0) {
+                    $db_check = mainModel::conectar();
+                    $stmt_check = $db_check->prepare("
+                        SELECT lm_id, lm_cant_actual_unidades, lm_precio_compra, lm_precio_venta
+                        FROM lote_medicamento
+                        WHERE lm_id = :lm_id AND med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo'
+                    ");
+                    $stmt_check->bindParam(":lm_id", $lm_id_solicitado, PDO::PARAM_INT);
+                    $stmt_check->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+                    $stmt_check->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
+                    $stmt_check->execute();
+
+                    if ($stmt_check->rowCount() <= 0) {
+                        throw new Exception("Lote solicitado no existe o está inactivo: lm_id {$lm_id_solicitado}");
+                    }
+
+                    $lm = $stmt_check->fetch(PDO::FETCH_ASSOC);
                     $lm_id = (int)$lm['lm_id'];
                     $lm_disp = (int)$lm['lm_cant_actual_unidades'];
-                    if ($lm_disp <= 0) continue;
-                    $take = min($lm_disp, $remaining);
                     $lm_precio_compra = (float)$lm['lm_precio_compra'];
+
+                    if ($lm_disp < $unidades_requeridas) {
+                        throw new Exception("Stock insuficiente en el lote seleccionado: {$lm_id}");
+                    }
 
                     $detalle = [
                         "ve_id" => $ve_id,
                         "med_id" => $med_id,
                         "lm_id" => $lm_id,
-                        "dv_cantidad" => $take,
+                        "dv_cantidad" => $unidades_requeridas,
                         "dv_unidad" => 'unidad',
                         "dv_precio_unitario" => $precio_unitario,
                         "dv_descuento" => $descuento_item,
-                        "dv_subtotal" => $take * $precio_unitario - $descuento_item
+                        "dv_subtotal" => $unidades_requeridas * $precio_unitario - $descuento_item
                     ];
                     $det_res = self::agregar_detalle_venta_model($detalle);
                     if (!$det_res || $det_res->rowCount() <= 0) throw new Exception("No se pudo registrar detalle de venta");
 
-                    $ok = self::descontar_unidades_lote_model($lm_id, $take);
+                    $ok = self::descontar_unidades_lote_model($lm_id, $unidades_requeridas);
                     if (!$ok) throw new Exception("No se pudo actualizar lote {$lm_id}");
 
                     self::verificar_estado_lote_terminado_model($lm_id);
@@ -372,7 +377,7 @@ class ventaController extends ventaModel
                         "su_id" => $sucursal_id,
                         "us_id" => $usuario_id,
                         "mi_tipo" => "salida",
-                        "mi_cantidad" => $take,
+                        "mi_cantidad" => $unidades_requeridas,
                         "mi_unidad" => "unidad",
                         "mi_referencia_tipo" => "venta",
                         "mi_referencia_id" => $ve_id,
@@ -381,11 +386,61 @@ class ventaController extends ventaModel
                     $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
                     if (!$mov_res || $mov_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_inventario");
 
-                    $valorado_total_descuento += $take * $lm_precio_compra;
-                    $remaining -= $take;
-                }
+                    $valorado_total_descuento = $unidades_requeridas * $lm_precio_compra;
 
-                if ($remaining > 0) throw new Exception("Stock inconsistente");
+                } else {
+                    $remaining = $unidades_requeridas;
+                    $lotes = self::obtener_lotes_activos_por_med_sucursal_model($med_id, $sucursal_id);
+
+                    foreach ($lotes as $lm) {
+                        if ($remaining <= 0) break;
+                        $lm_id = (int)$lm['lm_id'];
+                        $lm_disp = (int)$lm['lm_cant_actual_unidades'];
+                        if ($lm_disp <= 0) continue;
+                        $take = min($lm_disp, $remaining);
+                        $lm_precio_compra = (float)$lm['lm_precio_compra'];
+
+                        $descuento_proporcional = ($take / $unidades_requeridas) * $descuento_item;
+
+                        $detalle = [
+                            "ve_id" => $ve_id,
+                            "med_id" => $med_id,
+                            "lm_id" => $lm_id,
+                            "dv_cantidad" => $take,
+                            "dv_unidad" => 'unidad',
+                            "dv_precio_unitario" => $precio_unitario,
+                            "dv_descuento" => $descuento_proporcional,
+                            "dv_subtotal" => $take * $precio_unitario - $descuento_proporcional
+                        ];
+                        $det_res = self::agregar_detalle_venta_model($detalle);
+                        if (!$det_res || $det_res->rowCount() <= 0) throw new Exception("No se pudo registrar detalle de venta");
+
+                        $ok = self::descontar_unidades_lote_model($lm_id, $take);
+                        if (!$ok) throw new Exception("No se pudo actualizar lote {$lm_id}");
+
+                        self::verificar_estado_lote_terminado_model($lm_id);
+
+                        $mov_inv = [
+                            "lm_id" => $lm_id,
+                            "med_id" => $med_id,
+                            "su_id" => $sucursal_id,
+                            "us_id" => $usuario_id,
+                            "mi_tipo" => "salida",
+                            "mi_cantidad" => $take,
+                            "mi_unidad" => "unidad",
+                            "mi_referencia_tipo" => "venta",
+                            "mi_referencia_id" => $ve_id,
+                            "mi_motivo" => "Venta {$ve_numero_documento} (lm_id {$lm_id})"
+                        ];
+                        $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
+                        if (!$mov_res || $mov_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_inventario");
+
+                        $valorado_total_descuento += $take * $lm_precio_compra;
+                        $remaining -= $take;
+                    }
+
+                    if ($remaining > 0) throw new Exception("Stock inconsistente");
+                }
 
                 $inv_ok = self::descontar_inventario_consolidado_model($med_id, $sucursal_id, $unidades_requeridas, $valorado_total_descuento);
 
@@ -465,12 +520,10 @@ class ventaController extends ventaModel
         }
     }
 
-    /**
-     * 🆕 Cerrar caja con balance interno
-     */
+ 
     public function cerrar_caja_controller()
     {
-        // ✅ Validar usuario activo
+
         if (!$this->validar_usuario_activo()) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -503,15 +556,14 @@ class ventaController extends ventaModel
         $caja_id = (int)$caja['caja_id'];
         $saldo_inicial = (float)$caja['caja_saldo_inicial'];
 
-        // Obtener total de ventas en efectivo
+
         $ventas_efectivo = self::sumar_ventas_por_caja_model($caja_id, 'efectivo');
         $teorico = $saldo_inicial + (float)$ventas_efectivo;
 
-        // ✅ Balance interno: El cajero NO ve cuánto vendió
-        // Se registra automáticamente el saldo teórico
+
         $datos_cierre = [
             "caja_id" => $caja_id,
-            "caja_saldo_final" => $teorico, // Balance automático
+            "caja_saldo_final" => $teorico, 
             "caja_cerrado_en" => date('Y-m-d H:i:s'),
             "caja_observacion" => "Cierre automático con balance interno"
         ];

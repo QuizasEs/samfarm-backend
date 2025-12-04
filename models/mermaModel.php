@@ -56,7 +56,7 @@ class mermaModel extends mainModel
                         WHERE lm_id = :lm_id
                     ), 1))),
                     inv_total_valorado = GREATEST(0, inv_total_valorado - (:me_cantidad * COALESCE((
-                        SELECT lm_precio_compra 
+                        SELECT lm_precio_venta 
                         FROM lote_medicamento 
                         WHERE lm_id = :lm_id
                     ), 0))),

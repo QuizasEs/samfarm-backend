@@ -88,7 +88,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div id="modalDetalleTransferencia" class="modal" style="display:none;">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content" >
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="swap-horizontal-outline"></ion-icon>
@@ -150,14 +150,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="row" style="margin-top: 20px; gap: 10px;">
-                    <button type="button" id="btnAceptarTransferencia" class="btn success" onclick="TransferirHistorialModals.aceptarTransferencia(document.getElementById('modalDetalleTrId').value)" style="flex: 1; display:none;">
-                        <ion-icon name="checkmark-outline"></ion-icon> Aceptar Transferencia
-                    </button>
-                    <button type="button" class="btn success" onclick="TransferirHistorialModals.descargarPDF(document.getElementById('modalDetalleTrId').value)" style="flex: 1;">
-                        <ion-icon name="download-outline"></ion-icon> Descargar PDF
-                    </button>
-                </div>
+
             </div>
         </div>
     </div>
@@ -209,7 +202,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
-                    console.log(`✅ Modal abierto: ${modalId}`);
+                    console.log(` Modal abierto: ${modalId}`);
                 }
             },
 
@@ -217,7 +210,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'none';
-                    console.log(`✅ Modal cerrado: ${modalId}`);
+                    console.log(` Modal cerrado: ${modalId}`);
                 }
             },
 
@@ -232,7 +225,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         const detalle = {
             async abrir(trId, numeroTransferencia) {
-                console.log('📋 Abriendo detalle de transferencia:', {
+                console.log(' Abriendo detalle de transferencia:', {
                     trId,
                     numeroTransferencia
                 });
@@ -269,13 +262,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleTotalCajas').textContent = tr.tr_total_cajas;
                     document.getElementById('detalleTotalUnidades').textContent = utils.formatearNumero(tr.tr_total_unidades);
                     document.getElementById('detalleTotal').textContent = utils.formatearMoneda(tr.tr_total_valorado);
-                    
-                    const btnAceptar = document.getElementById('btnAceptarTransferencia');
-                    if (tr.tr_estado === 'pendiente') {
-                        btnAceptar.style.display = 'flex';
-                    } else {
-                        btnAceptar.style.display = 'none';
-                    }
 
                     const tbody = document.getElementById('tablaItemsTransferencia');
                     if (data.detalles && data.detalles.length > 0) {
@@ -408,7 +394,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     timer: 2000,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    document.getElementById('btnAceptarTransferencia').style.display = 'none';
                                     detalle.abrir(trId, '');
                                 });
                             } else {

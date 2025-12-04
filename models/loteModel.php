@@ -32,8 +32,6 @@ class loteModel extends mainModel
                 m.med_principio_activo,
                 m.med_presentacion,
                 m.med_accion_farmacologica,
-                m.med_precio_unitario,
-                m.med_precio_caja,
                 m.med_codigo_barras,
                 m.med_version_comercial,
                 ff.ff_nombre AS forma_farmaceutica,
@@ -114,8 +112,8 @@ class loteModel extends mainModel
             $su_id = (int)$lote['su_id'];
             $lm_cant_actual_cajas = (int)$lote['lm_cant_actual_cajas'];
             $lm_cant_actual_unidades = (int)$lote['lm_cant_actual_unidades'];
-            $lm_precio_compra = (float)$lote['lm_precio_compra'];
-            $subtotal_lote = $lm_cant_actual_cajas * $lm_precio_compra;
+            $lm_precio_venta = (float)$lote['lm_precio_venta'];
+            $subtotal_lote = $lm_cant_actual_unidades * $lm_precio_venta;
             $numero_lote = $lote['lm_numero_lote'];
 
             // 2) Actualizar estado del lote a 'activo'
