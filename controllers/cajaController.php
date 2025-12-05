@@ -210,6 +210,7 @@ class cajaController extends cajaModel
         $busqueda = isset($_POST['busqueda']) ? mainModel::limpiar_cadena($_POST['busqueda']) : '';
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
+        $inicio = ($pagina - 1) * $registros;
 
         try {
             $stmt = self::listar_cajas_model($estado, $busqueda, $pagina, $registros);
@@ -220,14 +221,15 @@ class cajaController extends cajaModel
             $total_registros = $total_row['total'] ?? 0;
             $total_paginas = ceil($total_registros / $registros);
 
-            // Generar HTML
             $html = '<div class="table-container"><table class="table"><thead><tr>';
             $html .= '<th>N°</th><th>Nombre de Caja</th><th>Usuario</th><th>Sucursal</th>';
             $html .= '<th>Saldo Inicial (Bs)</th><th>Total Ingresos (Bs)</th><th>Total Egresos (Bs)</th>';
             $html .= '<th>Estado</th><th>Fecha Apertura</th><th>Acciones</th></tr></thead><tbody>';
 
-            if (!empty($cajas)) {
-                $contador = ($pagina - 1) * $registros + 1;
+            if (!empty($cajas) && $pagina <= $total_paginas) {
+                $contador = $inicio + 1;
+                $reg_inicio = $inicio + 1;
+                
                 foreach ($cajas as $caja) {
                     $nombreUsuario = trim(($caja['us_nombres'] ?? '') . ' ' . ($caja['us_apellido_paterno'] ?? ''));
                     $estado_caja = ($caja['caja_activa'] == 1 && $caja['caja_cerrado_en'] === null) ? 'Abierta' : 'Cerrada';
@@ -258,37 +260,16 @@ class cajaController extends cajaModel
                     $html .= '</tr>';
                     $contador++;
                 }
+                $reg_final = $contador - 1;
             } else {
                 $html .= '<tr><td colspan="10" style="text-align:center;">No hay cajas registradas</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
 
-            // Generar paginación
-            if ($total_paginas > 1) {
-                $html .= '<nav><ul class="custom-pagination">';
-
-                if ($pagina > 1) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina - 1) . '">Anterior</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Anterior</a></li>';
-                }
-
-                for ($i = $pagina; $i <= min($pagina + 4, $total_paginas); $i++) {
-                    if ($pagina === $i) {
-                        $html .= '<li class="page-item active"><a class="page-link">' . $i . '</a></li>';
-                    } else {
-                        $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . $i . '">' . $i . '</a></li>';
-                    }
-                }
-
-                if ($pagina < $total_paginas) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina + 1) . '">Siguiente</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Siguiente</a></li>';
-                }
-
-                $html .= '</ul></nav>';
+            if (!empty($cajas) && $pagina <= $total_paginas) {
+                $html .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total_registros . '</p>';
+                $html .= mainModel::paginador_tablas_main($pagina, $total_paginas, SERVER_URL . 'cajaLista/', 5);
             }
 
             return $html;
@@ -306,6 +287,7 @@ class cajaController extends cajaModel
         $busqueda = isset($_POST['busqueda']) ? mainModel::limpiar_cadena($_POST['busqueda']) : '';
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
+        $inicio = ($pagina - 1) * $registros;
 
         if ($rol_usuario == 2) {
             $su_id = $_SESSION['sucursal_smp'] ?? null;
@@ -325,7 +307,6 @@ class cajaController extends cajaModel
             $resumen_stmt = self::obtener_resumen_cajas_cerradas_model($su_id);
             $resumen = $resumen_stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Actualizar contenedor de resumen
             $resumen_html = '';
             if ($resumen && $resumen['total_cajas_cerradas'] > 0) {
                 $resumen_html = '<script>';
@@ -338,14 +319,15 @@ class cajaController extends cajaModel
                 $resumen_html .= '</script>';
             }
 
-            // Generar HTML tabla
             $html = '<div class="table-container"><table class="table"><thead><tr>';
             $html .= '<th>N°</th><th>Nombre de Caja</th><th>Usuario</th><th>Sucursal</th>';
             $html .= '<th>Saldo Inicial (Bs)</th><th>Saldo Final (Bs)</th><th>Arqueo (Bs)</th>';
             $html .= '<th>Total Ventas (Bs)</th><th>Fecha Cierre</th><th>Acciones</th></tr></thead><tbody>';
 
-            if (!empty($cajas)) {
-                $contador = ($pagina - 1) * $registros + 1;
+            if (!empty($cajas) && $pagina <= $total_paginas) {
+                $contador = $inicio + 1;
+                $reg_inicio = $inicio + 1;
+                
                 foreach ($cajas as $caja) {
                     $nombreUsuario = trim(($caja['us_nombres'] ?? '') . ' ' . ($caja['us_apellido_paterno'] ?? ''));
                     $arqueo = floatval($caja['caja_saldo_final'] ?? 0) - floatval($caja['caja_saldo_inicial'] ?? 0);
@@ -375,37 +357,16 @@ class cajaController extends cajaModel
                     $html .= '</tr>';
                     $contador++;
                 }
+                $reg_final = $contador - 1;
             } else {
                 $html .= '<tr><td colspan="10" style="text-align:center;">No hay cajas cerradas registradas</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
 
-            // Generar paginación
-            if ($total_paginas > 1) {
-                $html .= '<nav><ul class="custom-pagination">';
-
-                if ($pagina > 1) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina - 1) . '">Anterior</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Anterior</a></li>';
-                }
-
-                for ($i = $pagina; $i <= min($pagina + 4, $total_paginas); $i++) {
-                    if ($pagina === $i) {
-                        $html .= '<li class="page-item active"><a class="page-link">' . $i . '</a></li>';
-                    } else {
-                        $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . $i . '">' . $i . '</a></li>';
-                    }
-                }
-
-                if ($pagina < $total_paginas) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina + 1) . '">Siguiente</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Siguiente</a></li>';
-                }
-
-                $html .= '</ul></nav>';
+            if (!empty($cajas) && $pagina <= $total_paginas) {
+                $html .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total_registros . '</p>';
+                $html .= mainModel::paginador_tablas_main($pagina, $total_paginas, SERVER_URL . 'cajaHistorialTotales/', 5);
             }
 
             return $resumen_html . $html;

@@ -5,6 +5,44 @@ require_once "mainModel.php";
 class preciosModel extends mainModel
 {
     /**
+     * OBTENER SUCURSAL DE UN LOTE
+     */
+    public static function obtener_sucursal_del_lote_model($lm_id)
+    {
+        $conexion = self::conectar();
+        $stmt = $conexion->prepare("SELECT su_id FROM lote_medicamento WHERE lm_id = :lm_id");
+        $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $resultado['su_id'] ?? null;
+    }
+
+    /**
+     * DIAGNÓSTICO: VERIFICAR TABLA INFORMES
+     */
+    public static function diagnostico_informes_model()
+    {
+        $conexion = self::conectar();
+        
+        $diagnostico = [];
+        
+        $stmt = $conexion->query("SELECT COUNT(*) as total FROM informes");
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $diagnostico['total_informes'] = $resultado['total'] ?? 0;
+        
+        $stmt = $conexion->query("SELECT COUNT(*) as total FROM informes WHERE JSON_EXTRACT(inf_config, '$.tipo_cambio') IN ('lote_individual', 'todos_lotes')");
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        $diagnostico['informes_cambios_precio'] = $resultado['total'] ?? 0;
+        
+        $stmt = $conexion->query("SELECT inf_id, inf_usuario, inf_config, inf_creado_en FROM informes ORDER BY inf_creado_en DESC LIMIT 5");
+        $diagnostico['ultimos_5_registros'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log("DEBUG DIAGNÓSTICO: " . json_encode($diagnostico, JSON_PRETTY_PRINT));
+        
+        return $diagnostico;
+    }
+
+    /**
      * OBTENER MEDICAMENTOS CON SUS LOTES
      */
     public static function obtener_medicamentos_con_lotes_model($su_id = null, $busqueda = "")
@@ -292,7 +330,15 @@ class preciosModel extends mainModel
         $contenido_json = json_encode($contenido);
         $stmt->bindParam(':inf_config', $contenido_json, PDO::PARAM_STR);
         
-        return $stmt->execute();
+        $resultado = $stmt->execute();
+        
+        if ($resultado) {
+            error_log("✓ Informe registrado: tipo=$tipo, med_id=$med_id, su_id=$su_id, usuario=$usuario_id, config=" . substr($contenido_json, 0, 100));
+        } else {
+            error_log("✗ Error registrando informe: " . json_encode($stmt->errorInfo()));
+        }
+        
+        return $resultado;
     }
 
     /**
@@ -405,6 +451,10 @@ class preciosModel extends mainModel
 
         $stmt->execute();
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $resultado['total'] ?? 0;
+        $total = $resultado['total'] ?? 0;
+        
+        error_log("DEBUG: contar_informes_cambios_precios_model - total=$total, filtros=" . json_encode($filtros));
+        
+        return $total;
     }
 }

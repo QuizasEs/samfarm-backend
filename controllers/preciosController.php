@@ -104,7 +104,17 @@ class preciosController extends preciosModel
             ]);
         }
 
-        $resultado = preciosModel::actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, 1, $med_id);
+        $su_id = preciosModel::obtener_sucursal_del_lote_model($lm_id);
+        if (!$su_id) {
+            return json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo obtener la sucursal del lote",
+                "Tipo" => "error"
+            ]);
+        }
+
+        $resultado = preciosModel::actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, $su_id, $med_id);
 
         return json_encode($resultado);
     }
@@ -148,7 +158,9 @@ class preciosController extends preciosModel
             ]);
         }
 
-        $resultado = preciosModel::actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, 1);
+        $su_id = isset($_POST['su_id']) && !empty($_POST['su_id']) ? (int)$_POST['su_id'] : 1;
+
+        $resultado = preciosModel::actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, $su_id);
 
         return json_encode($resultado);
     }
@@ -170,7 +182,7 @@ class preciosController extends preciosModel
         $busqueda = isset($_POST['busqueda']) ? mainModel::limpiar_cadena($_POST['busqueda']) : '';
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
-        $offset = ($pagina - 1) * $registros;
+        $inicio = ($pagina - 1) * $registros;
 
         $filtros = [];
         if (!empty($busqueda)) {
@@ -181,16 +193,17 @@ class preciosController extends preciosModel
             $total_registros = preciosModel::contar_informes_cambios_precios_model($filtros);
             $total_paginas = ceil($total_registros / $registros);
 
-            $informes = preciosModel::obtener_informes_cambios_precios_model($offset, $registros, $filtros);
+            $informes = preciosModel::obtener_informes_cambios_precios_model($inicio, $registros, $filtros);
 
-            // Generar HTML
             $html = '<div class="table-container"><table class="table"><thead><tr>';
             $html .= '<th>N°</th><th>Tipo Cambio</th><th>Medicamento</th><th>Sucursal</th>';
             $html .= '<th>Precio Anterior (Bs)</th><th>Precio Nuevo (Bs)</th>';
             $html .= '<th>Lotes Afectados</th><th>Usuario</th><th>Fecha/Hora</th></tr></thead><tbody>';
 
-            if (!empty($informes)) {
-                $contador = ($pagina - 1) * $registros + 1;
+            if (!empty($informes) && $pagina <= $total_paginas) {
+                $contador = $inicio + 1;
+                $reg_inicio = $inicio + 1;
+                
                 foreach ($informes as $informe) {
                     $contenido = json_decode($informe['inf_config'], true) ?? [];
                     
@@ -220,37 +233,16 @@ class preciosController extends preciosModel
                     $html .= '</tr>';
                     $contador++;
                 }
+                $reg_final = $contador - 1;
             } else {
                 $html .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
 
-            // Generar paginación
-            if ($total_paginas > 1) {
-                $html .= '<nav><ul class="custom-pagination">';
-
-                if ($pagina > 1) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina - 1) . '">Anterior</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Anterior</a></li>';
-                }
-
-                for ($i = $pagina; $i <= min($pagina + 4, $total_paginas); $i++) {
-                    if ($pagina === $i) {
-                        $html .= '<li class="page-item active"><a class="page-link">' . $i . '</a></li>';
-                    } else {
-                        $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . $i . '">' . $i . '</a></li>';
-                    }
-                }
-
-                if ($pagina < $total_paginas) {
-                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina + 1) . '">Siguiente</a></li>';
-                } else {
-                    $html .= '<li class="page-item disabled"><a class="page-link">Siguiente</a></li>';
-                }
-
-                $html .= '</ul></nav>';
+            if (!empty($informes) && $pagina <= $total_paginas) {
+                $html .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total_registros . '</p>';
+                $html .= mainModel::paginador_tablas_main($pagina, $total_paginas, SERVER_URL . 'preciosBalance/', 5);
             }
 
             return $html;

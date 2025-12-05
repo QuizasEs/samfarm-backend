@@ -131,8 +131,7 @@
                 imgPic.style.display = 'block';
             }
         }
-    } else {
-    }
+    } else {}
 </script>
 
 <!-- para busqueda en el formulario de registro de compras  -->
@@ -591,13 +590,19 @@
         const totalEl = document.getElementById("total");
         const impuestosInput = document.getElementById("impuestos_reg");
 
+        if (!subtotalEl || !impuestosEl || !totalEl || !impuestosInput) {
+            return {
+                actualizarTotales: () => {}
+            };
+        }
+
         function calcularSubtotal() {
             const lotes = ModalManager.obtenerLotes();
             return lotes.reduce((acc, lote) => acc + (lote.cantidad * lote.precioCompra), 0);
         }
 
         function calcularImpuestos(subtotal) {
-            const valor = parseFloat(impuestosInput.value) || 0;
+            const valor = impuestosInput ? parseFloat(impuestosInput.value) || 0 : 0;
             return subtotal * (valor / 100);
         }
 
@@ -612,9 +617,13 @@
             if (totalEl) totalEl.textContent = `Bs. ${total.toFixed(2)}`;
 
             // Actualizar campos ocultos para envío
-            document.getElementById('subtotal_total').value = subtotal.toFixed(2);
-            document.getElementById('impuestos_total').value = impuestos.toFixed(2);
-            document.getElementById('total_general').value = total.toFixed(2);
+            const subtotalField = document.getElementById('subtotal_total');
+            const impuestosField = document.getElementById('impuestos_total');
+            const totalField = document.getElementById('total_general');
+
+            if (subtotalField) subtotalField.value = subtotal.toFixed(2);
+            if (impuestosField) impuestosField.value = impuestos.toFixed(2);
+            if (totalField) totalField.value = total.toFixed(2);
         }
 
         // Escuchar cambios en impuestos
@@ -624,6 +633,8 @@
 
         // Conectar con ModalManager
         function conectarConModal() {
+            if (!ModalManager) return;
+
             // Guardar referencia a los métodos originales
             const originalAgregar = ModalManager.agregarLote;
             const originalEliminar = ModalManager.eliminarLote;
@@ -735,8 +746,7 @@
             }
         } else {
             // Si el valor está vacío, es 0 o no cumple el patrón
-            if (!ultimaCompraValor || ultimaCompraValor === '0') {
-            } else {
+            if (!ultimaCompraValor || ultimaCompraValor === '0') {} else {
                 // Si el valor es inválido y no está vacío, avisamos al usuario
                 Swal.fire({
                     icon: 'warning',
@@ -877,8 +887,6 @@
             Swal.fire("Error", "No se pudo procesar la solicitud: " + err.message, "error");
         }
     }
-
-
 </script>
 
 
@@ -956,16 +964,14 @@
             window.abrirModal = () => {
                 try {
                     window.ModalCliente.abrirModal();
-                } catch (e) {
-                }
+                } catch (e) {}
             };
         }
         if (typeof window.cerrarModal !== 'function') {
             window.cerrarModal = () => {
                 try {
                     window.ModalCliente.cerrarModal();
-                } catch (e) {
-                }
+                } catch (e) {}
             };
         }
 
@@ -1077,8 +1083,8 @@
 
         // ✅ FUNCIÓN MEJORADA: Buscar índice considerando med_id + lm_id (lote específico)
         function findItemIndex(med_id, lote_id) {
-            return cart.findIndex(item => 
-                String(item.med_id) === String(med_id) && 
+            return cart.findIndex(item =>
+                String(item.med_id) === String(med_id) &&
                 String(item.lote_id || null) === String(lote_id || null)
             );
         }
@@ -1495,25 +1501,26 @@
                     </td>
                 </tr>`;
                 }).join('');
+            });
 
-                tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => {
-                    b.addEventListener('click', e => {
-                        e.preventDefault();
-                        const el = e.currentTarget;
-                        const stock = Number(el.dataset.stock || 0);
+            tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => {
+                b.addEventListener('click', e => {
+                    e.preventDefault();
+                    const el = e.currentTarget;
+                    const stock = Number(el.dataset.stock || 0);
 
-                        addItem({
-                            med_id: el.dataset.id,
-                            lote_id: null,
-                            lote: null,
-                            nombre: el.dataset.nombre,
-                            presentacion: '',
-                            linea: '',
-                            precio: parseFloat(el.dataset.precio || 0),
-                            stock: stock
-                        });
+                    addItem({
+                        med_id: el.dataset.id,
+                        lote_id: null,
+                        lote: null,
+                        nombre: el.dataset.nombre,
+                        presentacion: '',
+                        linea: '',
+                        precio: parseFloat(el.dataset.precio || 0),
+                        stock: stock
                     });
                 });
+            });
         }
 
         if (inputDinero) inputDinero.addEventListener('input', updateTotals);
@@ -1723,10 +1730,6 @@
         function seleccionarCliente(item) {
             const id = item.dataset.id;
             const nombre = item.dataset.nombre;
-
-                id,
-                nombre
-            });
 
             // Guardar cliente seleccionado
             clienteSeleccionado = {
@@ -1981,7 +1984,6 @@
         const utils = {
             async ajax(params) {
                 try {
-
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: {
@@ -2006,7 +2008,6 @@
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
-                } else {
                 }
             },
 
@@ -2038,6 +2039,7 @@
         // ==================== MODAL DETALLE ====================
         const detalle = {
             async abrir(invId, medId, suId, medicamento) {
+                console.log({
                     invId,
                     medId,
                     suId,
@@ -2051,7 +2053,6 @@
 
                 utils.abrir('modalDetalleInventario');
 
-                // Mostrar loading
                 document.getElementById('tablaLotesDetalle').innerHTML =
                     '<tr><td colspan="5" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
 
@@ -2098,12 +2099,6 @@
         // ==================== MODAL TRANSFERIR ====================
         const transferir = {
             async abrir(invId, medId, suId, medicamento) {
-                    invId,
-                    medId,
-                    suId,
-                    medicamento
-                });
-
                 document.getElementById('modalTransferirMedicamento').textContent = medicamento;
                 document.getElementById('modalTransferirInvId').value = invId;
                 document.getElementById('modalTransferirMedId').value = medId;
@@ -2151,6 +2146,7 @@
         // ==================== MODAL HISTORIAL ====================
         const historial = {
             async abrir(medId, suId, medicamento) {
+                console.log({
                     medId,
                     suId,
                     medicamento
@@ -2206,28 +2202,10 @@
             }
         };
 
-        // ==================== LISTENER PARA ACTUALIZAR STOCK ==================== 
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectLote = document.getElementById('transferirLote');
-            if (selectLote) {
-                selectLote.addEventListener('change', function() {
-                    const option = this.options[this.selectedIndex];
-                    const stock = option.getAttribute('data-stock');
-                    const infoElement = document.getElementById('transferirStockDisponible');
-
-                    if (stock && stock > 0) {
-                        infoElement.textContent = `Stock disponible: ${utils.formatearNumero(stock)} unidades`;
-                        infoElement.style.color = '#4caf50';
-                    } else {
-                        infoElement.textContent = '';
-                    }
-                });
-            }
-        });
-
         // ==================== MODAL CONFIGURACION ====================
         const configuracion = {
             async abrir(invId, medId, suId, medicamento, minimoActual = 0, maximoActual = null) {
+                console.log({
                     invId,
                     medId,
                     suId,
@@ -2252,6 +2230,7 @@
                 const invMaximoInput = document.getElementById('configuracionMaximo').value;
                 const invMaximo = invMaximoInput !== '' ? parseInt(invMaximoInput) : null;
 
+                console.log({
                     invId,
                     invMinimo,
                     invMaximo
@@ -2296,6 +2275,25 @@
             }
         };
 
+        // ==================== LISTENER PARA ACTUALIZAR STOCK ==================== 
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectLote = document.getElementById('transferirLote');
+            if (selectLote) {
+                selectLote.addEventListener('change', function() {
+                    const option = this.options[this.selectedIndex];
+                    const stock = option.getAttribute('data-stock');
+                    const infoElement = document.getElementById('transferirStockDisponible');
+
+                    if (stock && stock > 0) {
+                        infoElement.textContent = `Stock disponible: ${utils.formatearNumero(stock)} unidades`;
+                        infoElement.style.color = '#4caf50';
+                    } else {
+                        infoElement.textContent = '';
+                    }
+                });
+            }
+        });
+
         // ==================== API PÚBLICA ====================
         return {
             cerrar: utils.cerrar,
@@ -2306,9 +2304,9 @@
             abrirConfiguracion: configuracion.abrir,
             guardarConfiguracion: configuracion.guardar
         };
-    })();
+    })(); // ✅ Cierre correcto del IIFE
 
-    /* exportar excel */
+    // ==================== EXPORTAR EXCEL ====================
     document.addEventListener('DOMContentLoaded', function() {
         const btnExcel = document.getElementById('btnExportarExcel');
 
@@ -2334,8 +2332,8 @@
                 if (formaId) url += '&select4=' + encodeURIComponent(formaId);
                 if (busqueda) url += '&busqueda=' + encodeURIComponent(busqueda);
 
+                console.log('📥 Descargando archivo:', url);
 
-                // Abrir en nueva ventana para forzar descarga
                 window.open(url, '_blank');
 
                 Swal.fire({
@@ -2349,8 +2347,19 @@
         }
     });
 
+    // ==================== CERRAR MODALES AL HACER CLIC FUERA ====================
+    (function() {
+        const modalIds = ['modalDetalleInventario', 'modalTransferirInventario', 'modalHistorialInventario', 'modalConfiguracionInventario'];
 
-
+        document.addEventListener('click', function(e) {
+            modalIds.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && modal.style && modal.style.display === 'flex' && e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    })();
 </script>
 
 <!-- vista tavla historial caja -->
@@ -2446,8 +2455,7 @@
                     resumenContainer.innerHTML = resumenHTML;
                 }
 
-            } catch (error) {
-            }
+            } catch (error) {}
         }
 
         async function cargarGrafico() {
@@ -2536,8 +2544,7 @@
 
                 myChart.setOption(option);
 
-            } catch (error) {
-            }
+            } catch (error) {}
         }
 
         function obtenerFiltros() {
@@ -2702,9 +2709,9 @@
                             }]
                         };
                         myChart.setOption(opcion);
-                    } else {
                     }
                 })
+                .catch(error => console.error('Error al cargar vencimientos:', error));
         }
 
         const chartStockMinimo = document.getElementById('chartStockMinimo');
@@ -2748,9 +2755,9 @@
                             }
                         };
                         myChart.setOption(opcion);
-                    } else {
                     }
                 })
+                .catch(error => console.error('Error al cargar stock mínimo:', error));
         }
 
         const chartProductosVendidos = document.getElementById('chartProductosVendidos');
@@ -2794,9 +2801,9 @@
                             }
                         };
                         myChart.setOption(opcion);
-                    } else {
                     }
                 })
+                .catch(error => console.error('Error al cargar productos vendidos:', error));
         }
 
         const chartVentasMensuales = document.getElementById('chartVentasMensuales');
@@ -2836,9 +2843,10 @@
                             }
                         };
                         myChart.setOption(opcion);
-                    } else {
                     }
                 })
+                .catch(error => console.error('Error al cargar ventas mensuales:', error));
         }
     });
 </script>
+<script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>

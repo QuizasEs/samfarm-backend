@@ -34,10 +34,6 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
     </div>
 
-    <style>
-        /* Estilos específicos de la vista de balance */
-    </style>
-
 <?php } else { ?>
     <div class="error" style="padding:30px;text-align:center;">
         <h3>Acceso Denegado</h3>

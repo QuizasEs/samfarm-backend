@@ -97,6 +97,18 @@ if (isset($_POST['preciosAjax'])) {
     }
 
     /**
+     * DIAGNÓSTICO
+     */
+    if ($valor === "diagnostico") {
+        $diagnostico = preciosModel::diagnostico_informes_model();
+        echo json_encode([
+            "success" => true,
+            "diagnostico" => $diagnostico
+        ]);
+        exit();
+    }
+
+    /**
      * LISTAR INFORMES
      */
     if ($valor === "listar_informes") {
