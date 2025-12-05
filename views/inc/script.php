@@ -132,7 +132,6 @@
             }
         }
     } else {
-        console.warn('Elementos de carga de imagen no encontrados en esta página');
     }
 </script>
 
@@ -216,7 +215,6 @@
                     uso: uso
                 };
 
-                console.log('Enviando filtros:', filtros);
 
                 const response = await fetch('<?php echo SERVER_URL; ?>ajax/compraAjax.php', {
                     method: 'POST',
@@ -232,7 +230,6 @@
                 renderResultados(data);
 
             } catch (error) {
-                console.error('Error:', error);
                 resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Error en la búsqueda</td></tr>';
             }
         }
@@ -288,7 +285,7 @@
     function handleSelectItem(button) {
         const id = button.getAttribute('data-id');
         const nombre = button.getAttribute('data-nombre');
-        console.log('Seleccionado:', {
+        console.log({
             id,
             nombre
         });
@@ -316,7 +313,6 @@
             const valor = ultimoLoteInput ? ultimoLoteInput.value.trim() : "";
 
             if (!valor || valor === "0") {
-                console.warn("⚠️ No se encontró número de lote anterior. Se inicia desde MED-0000.");
                 contadorLote = 0;
                 return;
             }
@@ -698,7 +694,7 @@
                 }
                 inputTotales.value = JSON.stringify(totales);
 
-                console.log('📤 Enviando formulario con:', {
+                console.log({
                     lotes: lotes,
                     totales: totales
                 });
@@ -716,7 +712,6 @@
 
         // 🧩 Validar existencia de los elementos
         if (!inputNumeroCompra) {
-            console.error('❌ No se encontró el campo #numero_compra en el DOM.');
             return;
         }
 
@@ -741,7 +736,6 @@
         } else {
             // Si el valor está vacío, es 0 o no cumple el patrón
             if (!ultimaCompraValor || ultimaCompraValor === '0') {
-                console.warn('⚠️ No se detectó número de compra anterior. Se inicia desde COMP-' + añoActual + '-0001.');
             } else {
                 // Si el valor es inválido y no está vacío, avisamos al usuario
                 Swal.fire({
@@ -761,7 +755,6 @@
         // Asignar solo si el campo está vacío
         if (inputNumeroCompra.value.trim() === '') {
             inputNumeroCompra.value = nuevoCodigo;
-            console.log('✅ Número de compra generado:', nuevoCodigo);
         }
     });
 </script>
@@ -881,7 +874,6 @@
             }
 
         } catch (err) {
-            console.error(err);
             Swal.fire("Error", "No se pudo procesar la solicitud: " + err.message, "error");
         }
     }
@@ -931,7 +923,6 @@
         function abrirModal() {
             initIfNeeded();
             if (!modal) {
-                console.warn('ModalCliente: #modalCliente no encontrado al intentar abrir.');
                 return;
             }
             modal.style.display = 'flex';
@@ -966,7 +957,6 @@
                 try {
                     window.ModalCliente.abrirModal();
                 } catch (e) {
-                    console.error(e);
                 }
             };
         }
@@ -975,7 +965,6 @@
                 try {
                     window.ModalCliente.cerrarModal();
                 } catch (e) {
-                    console.error(e);
                 }
             };
         }
@@ -998,11 +987,9 @@
     (function() {
         const formVenta = document.getElementById('form-venta-caja');
         if (!formVenta) {
-            console.log('⚠️ Formulario de venta no encontrado');
             return;
         }
 
-        console.log('✅ Script de ventas inicializado');
 
         const URL_MED = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
         let cart = [];
@@ -1344,10 +1331,8 @@
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
-                console.log('Resultados:', json);
                 renderResults(json || []);
             }).catch(err => {
-                console.error('Error búsqueda:', err);
                 if (resultsContainer) {
                     resultsContainer.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
                     resultsContainer.style.display = 'block';
@@ -1529,7 +1514,6 @@
                         });
                     });
                 });
-            }).catch(err => console.error(err));
         }
 
         if (inputDinero) inputDinero.addEventListener('input', updateTotals);
@@ -1619,7 +1603,6 @@
         margin-top: 0;
     `;
 
-        console.log("📍 Contenedor de resultados posicionado en:", ventasClienteContainer || inputCliente.parentElement);
 
         // Obtener contenedor de cliente seleccionado
         const clienteSeleccionadoContainer = document.getElementById('cliente_seleccionado_container');
@@ -1633,7 +1616,6 @@
                 const termino = this.value.trim();
                 clearTimeout(debounceCliente);
 
-                console.log("⌨️ Escribiendo:", termino);
 
                 if (termino.length < 1) {
                     resultadoClientes.innerHTML = "";
@@ -1643,7 +1625,6 @@
 
                 // Buscar después de 250ms (búsqueda en tiempo real)
                 debounceCliente = setTimeout(() => {
-                    console.log("🚀 Iniciando búsqueda automática");
                     buscarClientes(termino);
                 }, 250);
             });
@@ -1668,7 +1649,6 @@
         }
 
         async function buscarClientes(termino) {
-            console.log("🔍 Buscando clientes:", termino);
 
             const formData = new FormData();
             formData.append("ventaAjax", "buscar_cliente");
@@ -1685,28 +1665,23 @@
                 }
 
                 const text = await response.text();
-                console.log("📥 Respuesta:", text);
 
                 let data;
                 try {
                     data = JSON.parse(text);
                 } catch (e) {
-                    console.error("❌ Error parseando JSON:", e);
                     data = [];
                 }
 
-                console.log("✅ Datos parseados:", data);
                 mostrarResultadosClientes(data);
 
             } catch (error) {
-                console.error("❌ Error buscando clientes:", error);
                 resultadoClientes.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
                 resultadoClientes.style.display = "block";
             }
         }
 
         function mostrarResultadosClientes(clientes) {
-            console.log("📋 Mostrando resultados:", clientes);
 
             if (!clientes || clientes.length === 0) {
                 resultadoClientes.innerHTML = '<div class="search-results-item no-results">No se encontraron clientes</div>';
@@ -1735,7 +1710,6 @@
             resultadoClientes.innerHTML = html;
             resultadoClientes.style.display = "block";
 
-            console.log("✅ HTML insertado, display:", resultadoClientes.style.display);
 
             // Agregar event listeners a los items
             resultadoClientes.querySelectorAll('.cliente-item').forEach(item => {
@@ -1750,7 +1724,6 @@
             const id = item.dataset.id;
             const nombre = item.dataset.nombre;
 
-            console.log("👤 Cliente seleccionado:", {
                 id,
                 nombre
             });
@@ -1825,7 +1798,6 @@
             clienteSeleccionado: () => clienteSeleccionado
         };
 
-        console.log("✅ Script de búsqueda de clientes inicializado");
     })();
 </script>
 <!-- script para cerrar caja -->
@@ -1941,7 +1913,6 @@
             }
 
         } catch (error) {
-            console.error('❌ Error:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error de conexión',
@@ -1983,11 +1954,9 @@
                 };
             }
 
-            console.log('PDF abierto exitosamente');
             return true;
 
         } catch (error) {
-            console.error('Error abriendo PDF:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -2012,7 +1981,6 @@
         const utils = {
             async ajax(params) {
                 try {
-                    console.log('📡 Enviando petición:', params);
 
                     const response = await fetch(API_URL, {
                         method: 'POST',
@@ -2027,11 +1995,9 @@
                     }
 
                     const data = await response.json();
-                    console.log('✅ Respuesta recibida:', data);
                     return data;
 
                 } catch (error) {
-                    console.error('❌ Error AJAX:', error);
                     throw error;
                 }
             },
@@ -2040,9 +2006,7 @@
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
-                    console.log(`✅ Modal abierto: ${modalId}`);
                 } else {
-                    console.error(`❌ Modal no encontrado: ${modalId}`);
                 }
             },
 
@@ -2050,7 +2014,6 @@
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'none';
-                    console.log(`✅ Modal cerrado: ${modalId}`);
                 }
             },
 
@@ -2075,7 +2038,6 @@
         // ==================== MODAL DETALLE ====================
         const detalle = {
             async abrir(invId, medId, suId, medicamento) {
-                console.log('📋 Abriendo detalle:', {
                     invId,
                     medId,
                     suId,
@@ -2128,7 +2090,6 @@
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
                 }
             }
@@ -2137,7 +2098,6 @@
         // ==================== MODAL TRANSFERIR ====================
         const transferir = {
             async abrir(invId, medId, suId, medicamento) {
-                console.log('🔄 Abriendo transferencia:', {
                     invId,
                     medId,
                     suId,
@@ -2175,7 +2135,6 @@
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
                     Swal.fire('Error', 'No se pudieron cargar los lotes', 'error');
                 }
             },
@@ -2192,7 +2151,6 @@
         // ==================== MODAL HISTORIAL ====================
         const historial = {
             async abrir(medId, suId, medicamento) {
-                console.log('📜 Abriendo historial:', {
                     medId,
                     suId,
                     medicamento
@@ -2243,7 +2201,6 @@
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el historial', 'error');
                 }
             }
@@ -2271,7 +2228,6 @@
         // ==================== MODAL CONFIGURACION ====================
         const configuracion = {
             async abrir(invId, medId, suId, medicamento, minimoActual = 0, maximoActual = null) {
-                console.log('⚙️ Abriendo configuración:', {
                     invId,
                     medId,
                     suId,
@@ -2296,7 +2252,6 @@
                 const invMaximoInput = document.getElementById('configuracionMaximo').value;
                 const invMaximo = invMaximoInput !== '' ? parseInt(invMaximoInput) : null;
 
-                console.log('💾 Guardando configuración:', {
                     invId,
                     invMinimo,
                     invMaximo
@@ -2336,7 +2291,6 @@
                         Swal.fire('Error', data.texto, 'error');
                     }
                 } catch (error) {
-                    console.error('❌ Error:', error);
                     Swal.fire('Error', 'No se pudo guardar la configuración', 'error');
                 }
             }
@@ -2380,7 +2334,6 @@
                 if (formaId) url += '&select4=' + encodeURIComponent(formaId);
                 if (busqueda) url += '&busqueda=' + encodeURIComponent(busqueda);
 
-                console.log('📥 Descargando archivo:', url);
 
                 // Abrir en nueva ventana para forzar descarga
                 window.open(url, '_blank');
@@ -2408,8 +2361,6 @@
         const API_URL = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php';
 
         function init() {
-            console.log('CajaHistorial inicializado');
-            console.log('API_URL:', API_URL);
             cargarResumen();
             cargarGrafico();
             configurarEventos();
@@ -2419,8 +2370,6 @@
             const btnExcel = document.getElementById('btnExportarExcelCajaHistorial');
             const btnPDF = document.getElementById('btnExportarPDFCajaHistorial');
 
-            console.log('Botón Excel encontrado:', !!btnExcel);
-            console.log('Botón PDF encontrado:', !!btnPDF);
 
             if (btnExcel) {
                 btnExcel.addEventListener('click', exportarExcel);
@@ -2433,7 +2382,6 @@
             const filtros = document.querySelectorAll('.filtro-dinamico select, .filtro-dinamico input[type="date"]');
             filtros.forEach(filtro => {
                 filtro.addEventListener('change', function() {
-                    console.log('Filtro cambiado:', this.name, this.value);
                     cargarResumen();
                     cargarGrafico();
                 });
@@ -2444,7 +2392,6 @@
             const formData = obtenerFiltros();
             formData.append('cajaHistorialAjax', 'resumen');
 
-            console.log('Cargando resumen con filtros:', Object.fromEntries(formData));
 
             try {
                 const response = await fetch(API_URL, {
@@ -2455,12 +2402,9 @@
                     body: new URLSearchParams(formData)
                 });
 
-                console.log('Respuesta resumen status:', response.status);
                 const data = await response.json();
-                console.log('Datos resumen:', data);
 
                 if (data.error) {
-                    console.error('Error en resumen:', data.error);
                     return;
                 }
 
@@ -2503,7 +2447,6 @@
                 }
 
             } catch (error) {
-                console.error('Error cargando resumen:', error);
             }
         }
 
@@ -2511,7 +2454,6 @@
             const formData = obtenerFiltros();
             formData.append('cajaHistorialAjax', 'grafico');
 
-            console.log('Cargando gráfico con filtros:', Object.fromEntries(formData));
 
             try {
                 const response = await fetch(API_URL, {
@@ -2522,12 +2464,9 @@
                     body: new URLSearchParams(formData)
                 });
 
-                console.log('Respuesta gráfico status:', response.status);
                 const datos = await response.json();
-                console.log('Datos gráfico:', datos);
 
                 if (datos.error) {
-                    console.error('Error en gráfico:', datos.error);
                     return;
                 }
 
@@ -2598,7 +2537,6 @@
                 myChart.setOption(option);
 
             } catch (error) {
-                console.error('Error cargando gráfico:', error);
             }
         }
 
@@ -2654,7 +2592,6 @@
             }
 
             const url = API_URL + '?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' + mc_id;
-            console.log('Exportando movimiento:', url);
 
             window.open(url, '_blank');
 
@@ -2672,7 +2609,6 @@
             const params = new URLSearchParams(filtros);
             const url = API_URL + '?cajaHistorialAjax=exportar_excel&' + params.toString();
 
-            console.log('Exportando Excel:', url);
 
             window.open(url, '_blank');
 
@@ -2690,7 +2626,6 @@
             const params = new URLSearchParams(filtros);
             const url = API_URL + '?cajaHistorialAjax=exportar_pdf_historial&' + params.toString();
 
-            console.log('Exportando PDF:', url);
 
             window.open(url, '_blank');
 
@@ -2718,7 +2653,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const API_URL = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php';
-        console.log('Dashboard API URL:', API_URL);
 
         const chartVencimientos = document.getElementById('chartVencimientos');
         if (chartVencimientos) {
@@ -2730,7 +2664,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Vencimientos data:', data);
                     if (data.success) {
                         const opcion = {
                             tooltip: {
@@ -2770,10 +2703,8 @@
                         };
                         myChart.setOption(opcion);
                     } else {
-                        console.error('API response failed:', data);
                     }
                 })
-                .catch(error => console.error('Fetch error:', error));
         }
 
         const chartStockMinimo = document.getElementById('chartStockMinimo');
@@ -2786,7 +2717,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Stock minimo data:', data);
                     if (data.success && data.data.length > 0) {
                         const productos = data.data.map(item => item.med_nombre_quimico);
                         const stock = data.data.map(item => parseInt(item.inv_total_unidades));
@@ -2819,10 +2749,8 @@
                         };
                         myChart.setOption(opcion);
                     } else {
-                        console.error('No data or API response failed:', data);
                     }
                 })
-                .catch(error => console.error('Fetch error:', error));
         }
 
         const chartProductosVendidos = document.getElementById('chartProductosVendidos');
@@ -2835,7 +2763,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Productos vendidos data:', data);
                     if (data.success && data.data.length > 0) {
                         const productos = data.data.map(item => item.med_nombre_quimico);
                         const cantidades = data.data.map(item => parseInt(item.cantidad_vendida));
@@ -2868,10 +2795,8 @@
                         };
                         myChart.setOption(opcion);
                     } else {
-                        console.error('No data or API response failed:', data);
                     }
                 })
-                .catch(error => console.error('Fetch error:', error));
         }
 
         const chartVentasMensuales = document.getElementById('chartVentasMensuales');
@@ -2884,7 +2809,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Ventas mensuales data:', data);
                     if (data.success && data.data.length > 0) {
                         const meses = data.data.map(item => item.mes);
                         const totales = data.data.map(item => parseFloat(item.total_mes));
@@ -2913,10 +2837,8 @@
                         };
                         myChart.setOption(opcion);
                     } else {
-                        console.error('No data or API response failed:', data);
                     }
                 })
-                .catch(error => console.error('Fetch error:', error));
         }
     });
 </script>

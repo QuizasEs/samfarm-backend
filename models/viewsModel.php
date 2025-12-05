@@ -43,6 +43,8 @@
                 "empresaEditar",
                 "preciosLista",
                 "preciosBalance",
+                "cajaLista",
+                "cajaHistorialTotales",
             ];
 
             if(in_array($vistas,$listaBlanca)){

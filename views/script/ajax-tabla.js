@@ -16,11 +16,9 @@ function obtenerAjaxConfig(container) {
 
     const tablas = document.querySelectorAll('.tabla-dinamica[data-ajax-table="true"]');
     if (!tablas || tablas.length === 0) {
-        console.warn('⚠️ No se encontraron tablas dinámicas');
         return;
     }
 
-    console.log('✅ Inicializando', tablas.length, 'tabla(s) dinámica(s)');
     tablas.forEach(initTabla);
 
     function initTabla(container) {
@@ -31,7 +29,7 @@ function obtenerAjaxConfig(container) {
         const ajaxAction = ajaxCfg.action;
 
 
-        console.log('🔧 Configurando tabla:', { ajaxUrl, paramName, registrosDefault, ajaxAction });
+
 
         // Área donde se renderiza la tabla
         let destino = container.querySelector(".tabla-contenedor");
@@ -52,14 +50,11 @@ function obtenerAjaxConfig(container) {
 
         // Eventos de formulario (filtros)
         if (form) {
-            console.log('✅ Formulario encontrado, configurando eventos');
 
             // 📅 Eventos para filtros de fecha
             // 📅 Eventos para filtros de fecha CON VALIDACIÓN
             const fechaInputs = form.querySelectorAll('input[name="fecha_desde"], input[name="fecha_hasta"]');
             if (fechaInputs.length > 0) {
-                console.log('📅 Inputs de fecha encontrados:', fechaInputs.length);
-
                 const fechaDesde = form.querySelector('input[name="fecha_desde"]');
                 const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
 
@@ -94,7 +89,6 @@ function obtenerAjaxConfig(container) {
 
                     if (tsDesde > tsHasta) {
                         // ❌ Rango inválido
-                        console.warn('⚠️ Fecha desde es mayor que fecha hasta');
                         fechaDesde.style.borderColor = '#ff9800';
                         fechaHasta.style.borderColor = '#ff9800';
                         fechaDesde.setCustomValidity('La fecha inicial debe ser menor o igual a la final');
@@ -104,7 +98,6 @@ function obtenerAjaxConfig(container) {
                         return false;
                     } else {
                         // ✅ Rango válido
-                        console.log('✅ Rango de fechas válido:', desde, 'a', hasta);
                         fechaDesde.setCustomValidity('');
                         fechaHasta.setCustomValidity('');
                         fechaDesde.style.borderColor = '#4CAF50';
@@ -156,8 +149,6 @@ function obtenerAjaxConfig(container) {
                 // Eventos de cambio
                 fechaInputs.forEach(input => {
                     input.addEventListener('change', () => {
-                        console.log('📅 Cambio en fecha:', input.name, input.value);
-
                         if (validarFechas()) {
                             // Solo buscar si las fechas son válidas
                             cargarPagina(1);
@@ -193,25 +184,19 @@ function obtenerAjaxConfig(container) {
             // Búsqueda por Enter
             const busqInput = form.querySelector('input[name="busqueda"]');
             if (busqInput) {
-                console.log('🔍 Input de búsqueda encontrado');
                 busqInput.addEventListener("keydown", (e) => {
                     if (e.key === "Enter") {
                         e.preventDefault();
-                        console.log('🔍 Enter presionado, buscando...');
                         cargarPagina(1);
                     }
                 });
-            } else {
-                console.warn('⚠️ No se encontró input[name="busqueda"]');
             }
 
             // Cambio de selects
             const selects = form.querySelectorAll("select");
             if (selects.length > 0) {
-                console.log('🎛️ Selects encontrados:', selects.length);
                 selects.forEach((sel, idx) => {
                     sel.addEventListener("change", () => {
-                        console.log('🎛️ Cambio en select', idx + 1, ':', sel.value);
                         cargarPagina(1);
                     });
                 });
@@ -220,17 +205,11 @@ function obtenerAjaxConfig(container) {
             // Click en botón buscar
             const btnBuscar = form.querySelector('.btn-search');
             if (btnBuscar) {
-                console.log('🔘 Botón buscar encontrado');
                 btnBuscar.addEventListener("click", (e) => {
                     e.preventDefault();
-                    console.log('🔘 Click en buscar');
                     cargarPagina(1);
                 });
-            } else {
-                console.warn('⚠️ No se encontró .btn-search');
             }
-        } else {
-            console.warn('⚠️ No se encontró .filtro-dinamico');
         }
 
         // Delegar clicks de paginación
@@ -240,16 +219,13 @@ function obtenerAjaxConfig(container) {
             const page = a.dataset.page || parsePageFromHref(a.getAttribute("href"));
             if (!page) return;
             e.preventDefault();
-            console.log('📄 Navegando a página:', page);
             cargarPagina(page);
         });
 
         // Cargar tabla inicial
-        console.log('🚀 Cargando página inicial');
         cargarPagina(1);
 
         async function cargarPagina(pagina) {
-            console.log('📡 Cargando página:', pagina);
             loader.style.display = "block";
             destino.style.opacity = "0.6";
 
@@ -267,7 +243,6 @@ function obtenerAjaxConfig(container) {
                 if (busq) {
                     const valor = busq.value ? busq.value.trim() : '';
                     if (valor) {
-                        console.log('🔍 Búsqueda:', valor);
                         formData.append("busqueda", valor);
                     }
                 }
@@ -277,11 +252,9 @@ function obtenerAjaxConfig(container) {
                 const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
 
                 if (fechaDesde && fechaDesde.value) {
-                    console.log('📅 Fecha desde:', fechaDesde.value);
                     formData.append("fecha_desde", fechaDesde.value);
                 }
                 if (fechaHasta && fechaHasta.value) {
-                    console.log('📅 Fecha hasta:', fechaHasta.value);
                     formData.append("fecha_hasta", fechaHasta.value);
                 }
 
@@ -289,15 +262,10 @@ function obtenerAjaxConfig(container) {
                 for (let i = 1; i <= 5; i++) {
                     const sel = form.querySelector(`select[name="select${i}"]`);
                     if (sel && sel.value) {
-                        console.log(`🎛️ Select${i}:`, sel.value);
                         formData.append(`select${i}`, sel.value);
                     }
                 }
             }
-
-            const formDataObj = Object.fromEntries(formData);
-            console.log('📤 Enviando datos:', formDataObj);
-            console.log('📤 Valor de parámetro [' + paramName + ']:', formDataObj[paramName]);
 
             try {
                 const res = await fetch(fullUrl, {
@@ -305,8 +273,6 @@ function obtenerAjaxConfig(container) {
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: formData,
                 });
-
-                console.log('📥 Respuesta recibida:', res.status, res.statusText);
 
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -317,19 +283,15 @@ function obtenerAjaxConfig(container) {
 
                 if (contentType.includes("application/json")) {
                     const json = await res.json();
-                    console.log('📋 JSON recibido:', json);
                     html = json.html || "";
                 } else {
                     html = await res.text();
-                    console.log('📄 HTML recibido (primeros 200 chars):', html.substring(0, 200));
                 }
 
                 if (!html || html.trim().length === 0) {
-                    console.error('❌ Respuesta vacía del servidor');
                     destino.innerHTML = '<div class="error">No se recibieron datos del servidor</div>';
                 } else {
                     destino.innerHTML = html;
-                    console.log('✅ Tabla actualizada correctamente');
 
                     // Actualizar data-page en links
                     const links = destino.querySelectorAll(".custom-pagination a.page-link");
@@ -339,7 +301,6 @@ function obtenerAjaxConfig(container) {
                     });
                 }
             } catch (err) {
-                console.error("❌ Error AJAX:", err);
                 destino.innerHTML = `<div class="error">Error al cargar datos: ${err.message}</div>`;
             } finally {
                 loader.style.display = "none";

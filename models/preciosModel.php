@@ -64,6 +64,7 @@ class preciosModel extends mainModel
             SELECT 
                 lm.lm_id,
                 lm.lm_numero_lote,
+                COALESCE(la.la_nombre_comercial, 'N/A') AS med_nombre_comercial,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_cant_actual_unidades,
@@ -72,6 +73,8 @@ class preciosModel extends mainModel
                 lm.lm_fecha_vencimiento,
                 lm.lm_estado
             FROM lote_medicamento lm
+            LEFT JOIN medicamento m ON m.med_id = lm.med_id
+            LEFT JOIN laboratorios la ON m.la_id = la.la_id
             WHERE lm.med_id = :med_id
         ";
 
@@ -314,16 +317,26 @@ class preciosModel extends mainModel
             WHERE JSON_EXTRACT(inf.inf_config, '$.tipo_cambio') IN ('lote_individual', 'todos_lotes')
         ";
 
+        $params = [];
+
         if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
             $sql .= " AND JSON_EXTRACT(inf.inf_config, '$.su_id') = :su_id";
+            $params[':su_id'] = (int)$filtros['su_id'];
+        }
+
+        if (!empty($filtros['busqueda'])) {
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda)";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
         if (!empty($filtros['fecha_inicio'])) {
             $sql .= " AND DATE(inf.inf_creado_en) >= :fecha_inicio";
+            $params[':fecha_inicio'] = $filtros['fecha_inicio'];
         }
 
         if (!empty($filtros['fecha_fin'])) {
             $sql .= " AND DATE(inf.inf_creado_en) <= :fecha_fin";
+            $params[':fecha_fin'] = $filtros['fecha_fin'];
         }
 
         $sql .= "
@@ -334,22 +347,14 @@ class preciosModel extends mainModel
         $conexion = self::conectar();
         $stmt = $conexion->prepare($sql);
 
-        if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
-            $stmt->bindParam(':su_id', $filtros['su_id'], PDO::PARAM_INT);
-        }
-
-        if (!empty($filtros['fecha_inicio'])) {
-            $stmt->bindParam(':fecha_inicio', $filtros['fecha_inicio'], PDO::PARAM_STR);
-        }
-
-        if (!empty($filtros['fecha_fin'])) {
-            $stmt->bindParam(':fecha_fin', $filtros['fecha_fin'], PDO::PARAM_STR);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
 
         $inicio = (int)$inicio;
         $registros = (int)$registros;
-        $stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
-        $stmt->bindParam(':registros', $registros, PDO::PARAM_INT);
+        $stmt->bindValue(':inicio', $inicio, PDO::PARAM_INT);
+        $stmt->bindValue(':registros', $registros, PDO::PARAM_INT);
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -363,34 +368,39 @@ class preciosModel extends mainModel
         $sql = "
             SELECT COUNT(*) as total
             FROM informes inf
+            LEFT JOIN usuarios u ON u.us_id = inf.inf_usuario
+            LEFT JOIN medicamento m ON JSON_EXTRACT(inf.inf_config, '$.med_id') = m.med_id
+            LEFT JOIN sucursales s ON s.su_id = JSON_EXTRACT(inf.inf_config, '$.su_id')
             WHERE JSON_EXTRACT(inf.inf_config, '$.tipo_cambio') IN ('lote_individual', 'todos_lotes')
         ";
 
+        $params = [];
+
         if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
             $sql .= " AND JSON_EXTRACT(inf.inf_config, '$.su_id') = :su_id";
+            $params[':su_id'] = (int)$filtros['su_id'];
+        }
+
+        if (!empty($filtros['busqueda'])) {
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda)";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
         if (!empty($filtros['fecha_inicio'])) {
             $sql .= " AND DATE(inf.inf_creado_en) >= :fecha_inicio";
+            $params[':fecha_inicio'] = $filtros['fecha_inicio'];
         }
 
         if (!empty($filtros['fecha_fin'])) {
             $sql .= " AND DATE(inf.inf_creado_en) <= :fecha_fin";
+            $params[':fecha_fin'] = $filtros['fecha_fin'];
         }
 
         $conexion = self::conectar();
         $stmt = $conexion->prepare($sql);
 
-        if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
-            $stmt->bindParam(':su_id', $filtros['su_id'], PDO::PARAM_INT);
-        }
-
-        if (!empty($filtros['fecha_inicio'])) {
-            $stmt->bindParam(':fecha_inicio', $filtros['fecha_inicio'], PDO::PARAM_STR);
-        }
-
-        if (!empty($filtros['fecha_fin'])) {
-            $stmt->bindParam(':fecha_fin', $filtros['fecha_fin'], PDO::PARAM_STR);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
 
         $stmt->execute();

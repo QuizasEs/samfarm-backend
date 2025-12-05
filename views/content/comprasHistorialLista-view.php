@@ -81,7 +81,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <button type="button" class="btn success" id="btnExportarExcelComprasHistorial">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn danger" id="btnExportarPDFComprasHistorial">
+                <button type="button" class="btn primary" id="btnExportarPDFComprasHistorial">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
@@ -229,7 +229,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
+                    <a href="javascript:void(0)" class="btn warning" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
                         Cerrar
                     </a>
                     <a href="javascript:void(0)" class="btn primary" onclick="ComprasHistorialModals.imprimirPDF()" id="btnImprimirPDF">

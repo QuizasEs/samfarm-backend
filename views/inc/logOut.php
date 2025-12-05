@@ -41,7 +41,6 @@
                         .then(res => res.json())
                         .then(respuesta => alertas_ajax(respuesta))
                         .catch(error => {
-                            console.error("Error al cerrar sesión:", error);
                             Swal.fire("Error", "Ocurrió un problema al cerrar sesión.", "error");
                         });
                 }

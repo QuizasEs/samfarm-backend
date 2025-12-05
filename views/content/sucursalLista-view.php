@@ -123,7 +123,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 </div>
 
                 <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="SucursalesModals.cerrarModalCajas()">
+                    <a href="javascript:void(0)" class="btn warning" onclick="SucursalesModals.cerrarModalCajas()">
                         Cerrar
                     </a>
                 </div>
@@ -230,7 +230,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
                     <div class="modal-btn-content">
                         <a href="javascript:void(0)" class="btn warning" onclick="SucursalesModals.cerrarModalEditar()">Cancelar</a>
-                        <button type="submit" class="btn success">Guardar Cambios</button>
+                        <button type="submit" style="width: fit-content;" class="btn success">Guardar Cambios</button>
                     </div>
                 </div>
             </form>
@@ -1070,7 +1070,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     <td><span style="color:#ff9800;font-weight:600;">${tiempoAbierta}</span></td>
                     <td>${escapeHtml(caja.caja_observacion || '-')}</td>
                     <td>
-                        <a href="<?php echo SERVER_URL; ?>movimientosCaja/${caja.caja_id}/" 
+                        <a href="<?php echo SERVER_URL; ?>cajaHistorialLista/?select2=${caja.us_id}" 
                            class="btn default btn-sm">
                             <ion-icon name="list-outline"></ion-icon> Ver Movimientos
                         </a>

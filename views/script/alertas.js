@@ -73,8 +73,6 @@ formularios_ajax.forEach((formulario) => {
 // Función para abrir PDF desde base64
 function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
     try {
-        console.log('Intentando abrir PDF...');
-        
         // Decodificar base64
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -94,8 +92,6 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
         
         // Si fue bloqueado por el navegador
         if (!ventanaPDF || ventanaPDF.closed || typeof ventanaPDF.closed === 'undefined') {
-            console.warn('Pop-up bloqueado por el navegador');
-            
             // Crear enlace de descarga como alternativa
             const link = document.createElement('a');
             link.href = url;
@@ -120,17 +116,13 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
                 if (ventanaPDF.closed) {
                     clearInterval(checkClosed);
                     URL.revokeObjectURL(url);
-                    console.log('PDF cerrado, memoria liberada');
                 }
             }, 1000);
-            
-            console.log('PDF abierto exitosamente');
         }
         
         return true;
         
     } catch (error) {
-        console.error('Error abriendo PDF:', error);
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -142,8 +134,6 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
 
 // Función para manejar los mensajes de las alertas
 function alertas_ajax(alerta) {
-    console.log('📨 Respuesta recibida:', alerta);
-    
     // CASO ESPECIAL: Venta exitosa con PDF
     if (alerta.Alerta === "venta_exitosa") {
         Swal.fire({
@@ -170,7 +160,6 @@ function alertas_ajax(alerta) {
     
     // ✅ COMPATIBILIDAD: PDF por URL (sistema antiguo)
     if (alerta.pdf_url) {
-        console.log('🔗 Abriendo PDF por URL:', alerta.pdf_url);
         let ventana = window.open(alerta.pdf_url, "_blank");
 
         // Verificar si fue bloqueado

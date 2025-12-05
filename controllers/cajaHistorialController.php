@@ -157,13 +157,13 @@ class cajaHistorialController extends cajaHistorialModel
                             class="btn default" 
                             title="Ver referencia"
                             onclick="CajaHistorial.verReferencia(\'' . $row['mc_referencia_tipo'] . '\', ' . $row['mc_referencia_id'] . ')">
-                                <ion-icon name="open-outline"></ion-icon>
+                                <ion-icon name="open-outline"></ion-icon> Detalles
                             </a>
                             <a href="javascript:void(0)" 
                             class="btn success" 
                             title="Exportar PDF"
                             onclick="CajaHistorial.exportarMovimiento(' . $row['mc_id'] . ')">
-                                <ion-icon name="document-text-outline"></ion-icon>
+                                <ion-icon name="document-text-outline"></ion-icon> Generar PDF
                             </a>
                         </td>
                     </tr>

@@ -114,9 +114,5 @@
         };
 
         myChart.setOption(option);
-    } else if (!graphyc) {
-        console.warn("⚠️ No se encontró el elemento #graphyc, se omite la carga del gráfico.");
-    } else {
-        console.warn("⚠️ ECharts no está definido. Asegúrate de cargar la librería antes de este script.");
     }
 })();

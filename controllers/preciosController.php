@@ -156,6 +156,111 @@ class preciosController extends preciosModel
     /**
      * LISTAR INFORMES CON PAGINACIÓN
      */
+    public function listar_informes_html_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario != 1) {
+            return '<div class="error" style="padding:30px;text-align:center;">
+                        <h3>Acceso Denegado</h3>
+                        <p>Solo administradores pueden ver esta sección</p>
+                    </div>';
+        }
+
+        $busqueda = isset($_POST['busqueda']) ? mainModel::limpiar_cadena($_POST['busqueda']) : '';
+        $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
+        $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
+        $offset = ($pagina - 1) * $registros;
+
+        $filtros = [];
+        if (!empty($busqueda)) {
+            $filtros['busqueda'] = $busqueda;
+        }
+
+        try {
+            $total_registros = preciosModel::contar_informes_cambios_precios_model($filtros);
+            $total_paginas = ceil($total_registros / $registros);
+
+            $informes = preciosModel::obtener_informes_cambios_precios_model($offset, $registros, $filtros);
+
+            // Generar HTML
+            $html = '<div class="table-container"><table class="table"><thead><tr>';
+            $html .= '<th>N°</th><th>Tipo Cambio</th><th>Medicamento</th><th>Sucursal</th>';
+            $html .= '<th>Precio Anterior (Bs)</th><th>Precio Nuevo (Bs)</th>';
+            $html .= '<th>Lotes Afectados</th><th>Usuario</th><th>Fecha/Hora</th></tr></thead><tbody>';
+
+            if (!empty($informes)) {
+                $contador = ($pagina - 1) * $registros + 1;
+                foreach ($informes as $informe) {
+                    $contenido = json_decode($informe['inf_config'], true) ?? [];
+                    
+                    $tipo_cambio = ($contenido['tipo_cambio'] ?? '') == 'lote_individual' 
+                        ? '<span style="background:#E3F2FD;padding:4px 10px;border-radius:12px;font-weight:600;color:#1565C0;">Individual</span>'
+                        : '<span style="background:#C8E6C9;padding:4px 10px;border-radius:12px;font-weight:600;color:#2e7d32;">Todos</span>';
+                    
+                    $usuario = htmlspecialchars(trim(($informe['us_nombres'] ?? '') . ' ' . ($informe['us_apellido_paterno'] ?? '')));
+                    $medicamento = htmlspecialchars($informe['med_nombre_quimico'] ?? 'N/A');
+                    $sucursal = htmlspecialchars($informe['su_nombre'] ?? 'N/A');
+                    $fecha = date('d/m/Y H:i:s', strtotime($informe['inf_creado_en'] ?? date('Y-m-d H:i:s')));
+                    
+                    $precio_anterior = number_format($contenido['precio_anterior'] ?? 0, 2, ',', '.');
+                    $precio_nuevo = number_format($contenido['precio_nuevo'] ?? 0, 2, ',', '.');
+                    $cantidad = $contenido['cantidad_lotes_afectados'] ?? 0;
+
+                    $html .= '<tr>';
+                    $html .= '<td>' . $contador . '</td>';
+                    $html .= '<td>' . $tipo_cambio . '</td>';
+                    $html .= '<td><strong>' . $medicamento . '</strong></td>';
+                    $html .= '<td>' . $sucursal . '</td>';
+                    $html .= '<td style="text-align:right;color:#e74c3c;font-weight:600;">Bs ' . $precio_anterior . '</td>';
+                    $html .= '<td style="text-align:right;color:#27ae60;font-weight:600;">Bs ' . $precio_nuevo . '</td>';
+                    $html .= '<td style="text-align:center;">' . $cantidad . '</td>';
+                    $html .= '<td>' . $usuario . '</td>';
+                    $html .= '<td>' . $fecha . '</td>';
+                    $html .= '</tr>';
+                    $contador++;
+                }
+            } else {
+                $html .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros</td></tr>';
+            }
+
+            $html .= '</tbody></table></div>';
+
+            // Generar paginación
+            if ($total_paginas > 1) {
+                $html .= '<nav><ul class="custom-pagination">';
+
+                if ($pagina > 1) {
+                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina - 1) . '">Anterior</a></li>';
+                } else {
+                    $html .= '<li class="page-item disabled"><a class="page-link">Anterior</a></li>';
+                }
+
+                for ($i = $pagina; $i <= min($pagina + 4, $total_paginas); $i++) {
+                    if ($pagina === $i) {
+                        $html .= '<li class="page-item active"><a class="page-link">' . $i . '</a></li>';
+                    } else {
+                        $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . $i . '">' . $i . '</a></li>';
+                    }
+                }
+
+                if ($pagina < $total_paginas) {
+                    $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . ($pagina + 1) . '">Siguiente</a></li>';
+                } else {
+                    $html .= '<li class="page-item disabled"><a class="page-link">Siguiente</a></li>';
+                }
+
+                $html .= '</ul></nav>';
+            }
+
+            return $html;
+
+        } catch (Exception $e) {
+            error_log("Error en listar_informes_html_controller: " . $e->getMessage());
+            return '<div class="error" style="padding:20px;color:red;"><strong>Error:</strong> ' . htmlspecialchars($e->getMessage()) . '</div>';
+        }
+    }
+
     public function paginado_informes_precios_controller($pagina, $registros, $url)
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -181,23 +286,40 @@ class preciosController extends preciosModel
         $total = preciosModel::contar_informes_cambios_precios_model($filtros);
         $informes = preciosModel::obtener_informes_cambios_precios_model($inicio, $registros, $filtros);
 
-        if (!$informes) {
-            $tabla = '<tr><td colspan="10">
-                        <div class="alert alert-info" style="padding: 20px; text-align: center;">
-                            📋 No hay registros de cambios de precios
-                        </div>
-                    </td></tr>';
-        } else {
+        $Npaginas = ceil($total / $registros);
+
+        $tabla .= '
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>TIPO CAMBIO</th>
+                            <th>MEDICAMENTO</th>
+                            <th>SUCURSAL</th>
+                            <th>PRECIO ANTERIOR</th>
+                            <th>PRECIO NUEVO</th>
+                            <th>LOTES AFECTADOS</th>
+                            <th>USUARIO</th>
+                            <th>FECHA/HORA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        ';
+
+        if ($pagina <= $Npaginas && $total >= 1) {
+            $contador = $inicio + 1;
+
             foreach ($informes as $informe) {
                 $contenido = json_decode($informe['inf_config'], true);
                 
                 $tipo_cambio = $contenido['tipo_cambio'] == 'lote_individual' 
-                    ? '<span class="badge" style="background: #3498db;">Individual</span>'
-                    : '<span class="badge" style="background: #27ae60;">Todos los lotes</span>';
+                    ? '<span style="background:#E3F2FD;padding:4px 10px;border-radius:12px;font-weight:600;color:#1565C0;">Individual</span>'
+                    : '<span style="background:#C8E6C9;padding:4px 10px;border-radius:12px;font-weight:600;color:#2e7d32;">Todos</span>';
                 
-                $usuario = $informe['us_nombres'] . ' ' . ($informe['us_apellido_paterno'] ?? '');
-                $medicamento = $informe['med_nombre_quimico'] ?? 'N/A';
-                $sucursal = $informe['su_nombre'] ?? 'N/A';
+                $usuario = htmlspecialchars($informe['us_nombres'] . ' ' . ($informe['us_apellido_paterno'] ?? ''));
+                $medicamento = htmlspecialchars($informe['med_nombre_quimico'] ?? 'N/A');
+                $sucursal = htmlspecialchars($informe['su_nombre'] ?? 'N/A');
                 $fecha = date('d/m/Y H:i:s', strtotime($informe['inf_creado_en']));
                 
                 $precio_anterior = number_format($contenido['precio_anterior'], 2, ',', '.');
@@ -206,67 +328,34 @@ class preciosController extends preciosModel
 
                 $tabla .= "
                     <tr>
-                        <td>$tipo_cambio</td>
-                        <td><strong>$medicamento</strong></td>
-                        <td>$sucursal</td>
-                        <td><span style=\"color: #e74c3c;\">Bs $precio_anterior</span></td>
-                        <td><span style=\"color: #27ae60;\">Bs $precio_nuevo</span></td>
-                        <td>$cantidad</td>
-                        <td>$usuario</td>
-                        <td>$fecha</td>
+                        <td>" . $contador . "</td>
+                        <td>" . $tipo_cambio . "</td>
+                        <td><strong>" . $medicamento . "</strong></td>
+                        <td>" . $sucursal . "</td>
+                        <td style='text-align:right;color:#e74c3c;font-weight:600;'>Bs " . $precio_anterior . "</td>
+                        <td style='text-align:right;color:#27ae60;font-weight:600;'>Bs " . $precio_nuevo . "</td>
+                        <td style='text-align:center;'>" . $cantidad . "</td>
+                        <td>" . $usuario . "</td>
+                        <td>" . $fecha . "</td>
                     </tr>
                 ";
+                $contador++;
             }
+            $reg_final = $contador - 1;
+        } else {
+            $tabla .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;">
+                        <ion-icon name="document-outline"></ion-icon> No hay registros
+                    </td></tr>';
         }
 
-        // Calcular páginas
-        $paginas = ceil($total / $registros);
-        
-        $html = "
-            <div style='overflow-x: auto;'>
-                <table class='tabla-dinamica-lista'>
-                    <thead>
-                        <tr>
-                            <th>Tipo de Cambio</th>
-                            <th>Medicamento</th>
-                            <th>Sucursal</th>
-                            <th>Precio Anterior</th>
-                            <th>Precio Nuevo</th>
-                            <th>Lotes Afectados</th>
-                            <th>Usuario</th>
-                            <th>Fecha/Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        $tabla
-                    </tbody>
-                </table>
-            </div>
-            <div class='paginador'>
-                <button type='button' class='btn-paginador' onclick=\"goToPage(1)\">Primera</button>
-        ";
+        $tabla .= '</tbody></table></div>';
 
-        if ($pagina > 1) {
-            $anterior = $pagina - 1;
-            $html .= "<button type='button' class='btn-paginador' onclick=\"goToPage($anterior)\">← Anterior</button>";
+        if ($pagina <= $Npaginas && $total >= 1) {
+            $reg_inicio = $inicio + 1;
+            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 
-        for ($i = 1; $i <= $paginas; $i++) {
-            $activa = ($i == $pagina) ? 'class="btn-paginador active"' : 'class="btn-paginador"';
-            $html .= "<button type='button' $activa onclick=\"goToPage($i)\">$i</button>";
-        }
-
-        if ($pagina < $paginas) {
-            $siguiente = $pagina + 1;
-            $html .= "<button type='button' class='btn-paginador' onclick=\"goToPage($siguiente)\">Siguiente →</button>";
-        }
-
-        $html .= "
-                <button type='button' class='btn-paginador' onclick=\"goToPage($paginas)\">Última</button>
-                <span style='margin-left: 20px;'><strong>Mostrando:</strong> $inicio a " . ($inicio + count($informes)) . " de $total</span>
-            </div>
-        ";
-
-        return $html;
+        return $tabla;
     }
 }

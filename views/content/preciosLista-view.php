@@ -1,5 +1,8 @@
 <?php
 if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
+    require_once "./controllers/MedicamentoController.php";
+    $ins_med = new medicamentoController();
+    $datos_select = $ins_med->datos_extras_controller();
 ?>
 
     <div class="container">
@@ -11,28 +14,41 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
         <form class="filtro-dinamico" id="formularioBusqueda">
             <div class="filtro-dinamico-search">
+                <div class="form-fechas">
+                    <small>Sucursales</small>
+                    <select class="select-filtro" id="filtroSucursal">
+                        <option value="">Todas las sucursales</option>
+                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+
                 <div class="search">
                     <input type="text" id="busquedaMedicamento" placeholder="Buscar medicamento por nombre, principio activo...">
-                    <button type="button" class="btn" onclick="buscarMedicamentos()">
+                    <button type="button" class="btn-search" onclick="buscarMedicamentos(1)">
                         <ion-icon name="search"></ion-icon>
                     </button>
                 </div>
-                <a href="<?php echo SERVER_URL; ?>precio-balance" class="btn info">
+
+                <a href="<?php echo SERVER_URL; ?>preciosBalance/" class="btn default">
                     <ion-icon name="document-text-outline"></ion-icon> Ver Informes
                 </a>
             </div>
         </form>
 
-        <div id="medicamentosContainer" style="margin-top: 20px;">
-            <div class="alert alert-info" style="padding: 20px; text-align: center;">
-                📦 Cargando medicamentos...
+        <div id="medicamentosContainer" class="medicamentos-container">
+            <div class="alert alert-info alert-center">
+                Cargando medicamentos...
             </div>
         </div>
+
+        <div id="paginacionContainer" class="pagination-container"></div>
     </div>
 
     <!-- MODAL EDICIÓN DE PRECIOS -->
-    <div class="modal" id="modalEditarPrecios" style="display: none;">
-        <div class="modal-content" style="max-width: 700px;">
+    <div class="modal" id="modalEditarPrecios">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="create-outline"></ion-icon>
@@ -48,24 +64,31 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     <h4>Lotes del Medicamento</h4>
                 </div>
 
-                <div id="lotesContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-                    <p style="text-align: center; color: #999;">Cargando lotes...</p>
+                <div class="table-container">
+                    <div id="lotesContainer" class="lotes-container">
+                        <p class="text-center text-muted">Cargando lotes...</p>
+                    </div>
                 </div>
 
-                <div class="row" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
-                    <h4 style="margin-bottom: 15px;">Aplicar Nuevo Precio a TODOS los Lotes</h4>
+                <div class="row row-separator">
+                    <h4 class="section-title">Aplicar Nuevo Precio a TODOS los Lotes</h4>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <label>Nuevo Precio (Bs):</label>
-                        <input type="number" id="precioNuevoTodos" step="0.01" min="0" placeholder="0.00">
+                        <div class="modal-bloque">
+                            <label>Nuevo Precio (Bs):</label>
+                            <input type="number" id="precioNuevoTodos" step="0.01" min="0" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
 
-                <div class="row" style="margin-top: 15px;">
-                    <button type="button" class="btn success" onclick="aplicarPrecioTodos()" style="width: 100%;">
+                <div class="modal-btn-content">
+                    <button type="button" style=" width: fit-content;" class="btn danger btn-full" onclick="aplicarPrecioTodos()">
                         <ion-icon name="checkmark-circle-outline"></ion-icon> Aplicar a Todos los Lotes
+                    </button>
+                    <button type="button" class="btn warning btn-full" onclick="cerrarModalPrecios()">
+                        <ion-icon name="close-outline"></ion-icon> Cancelar
                     </button>
                 </div>
             </div>
@@ -73,8 +96,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
     </div>
 
     <!-- MODAL EDICIÓN INDIVIDUAL -->
-    <div class="modal" id="modalEditarLote" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+    <div class="modal" id="modalEditarLote">
+        <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="create-outline"></ion-icon>
@@ -88,28 +111,37 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             <div class="modal-group">
                 <div class="row">
                     <div class="col">
-                        <label>Número de Lote:</label>
-                        <p id="detalleNumeroLote" style="font-weight: bold;">-</p>
+                        <div class="modal-bloque">
+                            <label>Número de Lote:</label>
+                            <p id="detalleNumeroLote" class="text-bold">-</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <label>Precio Actual (Bs):</label>
-                        <p id="detallePrecioActual" style="color: #e74c3c; font-weight: bold;">-</p>
+                        <div class="modal-bloque">
+                            <label>Precio Actual (Bs):</label>
+                            <p id="detallePrecioActual" class="text-error text-bold">-</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <label>Nuevo Precio (Bs):</label>
-                        <input type="number" id="precioNuevoLote" step="0.01" min="0" placeholder="0.00">
+                        <div class="modal-bloque">
+                            <label>Nuevo Precio (Bs):</label>
+                            <input type="number" id="precioNuevoLote" step="0.01" min="0" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
 
-                <div class="row" style="margin-top: 15px;">
-                    <button type="button" class="btn success" onclick="guardarPrecioLote()" style="width: 100%;">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Guardar Cambio
+                <div class="modal-btn-content">
+                    <button type="button" class="btn danger btn-full" onclick="guardarPrecioLote()">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon> Guardar
+                    </button>
+                    <button type="button" class="btn warning btn-full" onclick="cerrarModalLote()">
+                        <ion-icon name="close-outline"></ion-icon> Cancelar
                     </button>
                 </div>
             </div>
@@ -119,68 +151,92 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
     <script>
         let medicamentoActual = null;
         let loteActual = null;
+        let paginaActual = 1;
+        const registrosPorPagina = 10;
+        let totalRegistros = 0;
+        let totalPaginas = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
-            buscarMedicamentos();
-            
+            buscarMedicamentos(1);
+
             const inputBusqueda = document.getElementById('busquedaMedicamento');
             inputBusqueda.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    buscarMedicamentos();
+                    buscarMedicamentos(1);
                 }
+            });
+
+            const filtroSucursal = document.getElementById('filtroSucursal');
+            filtroSucursal.addEventListener('change', function() {
+                buscarMedicamentos(1);
             });
         });
 
-        function buscarMedicamentos() {
+        function buscarMedicamentos(pagina = 1) {
             const busqueda = document.getElementById('busquedaMedicamento').value;
+            const sucursal = document.getElementById('filtroSucursal').value;
             const container = document.getElementById('medicamentosContainer');
 
             const formData = new FormData();
-            formData.append('preciosAjax', 'obtener_medicamentos');
+            formData.append('preciosAjax', 'obtener_medicamentos_paginado');
             formData.append('busqueda', busqueda);
+            formData.append('su_id', sucursal);
+            formData.append('pagina', pagina);
+            formData.append('registros', registrosPorPagina);
 
-            container.innerHTML = '<div class="alert alert-info" style="padding: 20px; text-align: center;">⏳ Cargando medicamentos...</div>';
+            container.innerHTML = '<div class="alert alert-info alert-center">Cargando medicamentos...</div>';
 
             fetch('<?php echo SERVER_URL; ?>ajax/preciosAjax.php', {
-                method: 'POST',
-                body: formData
-            })
+                    method: 'POST',
+                    body: formData
+                })
                 .then(r => r.json())
                 .then(data => {
-                    if (!data || data.length === 0) {
-                        container.innerHTML = '<div class="alert alert-warning" style="padding: 20px; text-align: center;">❌ No se encontraron medicamentos</div>';
+                    if (!data || data.medicamentos.length === 0) {
+                        container.innerHTML = '<div class="title">No se encontraron medicamentos</div>';
+                        document.getElementById('paginacionContainer').innerHTML = '';
                         return;
                     }
 
-                    let html = '<div style="display: grid; gap: 15px;">';
+                    totalRegistros = data.total;
+                    totalPaginas = data.total_paginas;
+                    paginaActual = pagina;
 
-                    data.forEach(med => {
+                    let html = '<div class="medicamentos-grid">';
+
+                    data.medicamentos.forEach(med => {
                         const margenPromedio = med.total_lotes > 0 ? (((med.total_valorado || 0) / (med.total_lotes * med.precio_compra_promedio)) - 1) * 100 : 0;
                         const colorMargen = margenPromedio < 0 ? '#e74c3c' : '#27ae60';
 
                         html += `
-                            <div class="card" style="padding: 15px; border-left: 4px solid #3498db;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 10px;">
-                                    <div>
-                                        <strong>${med.med_nombre_quimico}</strong><br>
-                                        <small style="color: #999;">${med.la_nombre_comercial || 'N/A'}</small>
-                                    </div>
-                                    <div>
-                                        <small style="color: #999;">Precio Compra Promedio</small><br>
-                                        <strong>Bs ${parseFloat(med.precio_compra_promedio).toFixed(2)}</strong>
-                                    </div>
-                                    <div>
-                                        <small style="color: #999;">Stock Activo</small><br>
-                                        <strong>${parseInt(med.total_unidades_activas)} unidades</strong>
-                                    </div>
-                                    <div>
-                                        <small style="color: #999;">Valorado</small><br>
-                                        <strong style="color: ${colorMargen};">Bs ${parseFloat(med.total_valorado || 0).toFixed(2)}</strong>
+                            <div class="price-card">
+                                <div class="price-card-header">
+                                    <div class="price-card-title">
+                                        <strong>${med.med_nombre_quimico}</strong>
+                                        <small class="price-card-subtitle">${med.la_nombre_comercial || 'N/A'}</small>
                                     </div>
                                 </div>
-                                <div style="border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;">
-                                    <small style="color: #999;">📊 Lotes activos: ${med.lotes_activos} de ${med.total_lotes}</small>
-                                    <button type="button" class="btn primary" style="float: right; padding: 5px 10px; font-size: 12px;" onclick="abrirModalPrecios(${med.med_id}, '${med.med_nombre_quimico}')">
+                                
+                                <div class="price-card-body">
+                                    <div class="price-card-row">
+                                        <span class="price-card-label">Precio Compra Promedio</span>
+                                        <span class="price-card-value">Bs ${parseFloat(med.precio_compra_promedio).toFixed(2)}</span>
+                                    </div>
+                                    
+                                    <div class="price-card-row">
+                                        <span class="price-card-label">Stock Activo</span>
+                                        <span class="price-card-value">${parseInt(med.total_unidades_activas)} unidades</span>
+                                    </div>
+                                    
+                                    <div class="price-card-row">
+                                        <span class="price-card-label">Valorado</span>
+                                        <span class="price-card-value price-card-highlight" style="color: ${colorMargen};">Bs ${parseFloat(med.total_valorado || 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="price-card-footer">
+                                    <small class="price-card-info">Lotes activos: ${med.lotes_activos} de ${med.total_lotes}</small>
+                                    <button type="button" class="btn danger" onclick="abrirModalPrecios(${med.med_id}, '${med.med_nombre_quimico.replace(/'/g, "\\'")}')">
                                         Editar Precios
                                     </button>
                                 </div>
@@ -190,11 +246,51 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
                     html += '</div>';
                     container.innerHTML = html;
+                    generarPaginacion();
                 })
                 .catch(err => {
-                    console.error(err);
-                    container.innerHTML = '<div class="alert alert-error" style="padding: 20px; text-align: center;">⚠️ Error al cargar medicamentos</div>';
+                    container.innerHTML = '<div class="alert alert-error alert-center">Error al cargar medicamentos</div>';
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudieron cargar los medicamentos',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
+        }
+
+        function generarPaginacion() {
+            const paginacionContainer = document.getElementById('paginacionContainer');
+            
+            if (totalPaginas <= 1) {
+                paginacionContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '<nav><ul class="custom-pagination">';
+
+            if (paginaActual > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="buscarMedicamentos(${paginaActual - 1}); return false;">Previous</a></li>`;
+            } else {
+                html += '<li class="page-item disabled"><a class="page-link">Previous</a></li>';
+            }
+
+            for (let i = paginaActual; i <= Math.min(paginaActual + 4, totalPaginas); i++) {
+                if (paginaActual === i) {
+                    html += `<li class="page-item active"><a class="page-link">${i}</a></li>`;
+                } else {
+                    html += `<li class="page-item"><a class="page-link" href="#" onclick="buscarMedicamentos(${i}); return false;">${i}</a></li>`;
+                }
+            }
+
+            if (paginaActual < totalPaginas) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="buscarMedicamentos(${paginaActual + 1}); return false;">Next</a></li>`;
+            } else {
+                html += '<li class="page-item disabled"><a class="page-link">Next</a></li>';
+            }
+
+            html += '</ul></nav>';
+            paginacionContainer.innerHTML = html;
         }
 
         function abrirModalPrecios(med_id, med_nombre) {
@@ -212,32 +308,31 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             formData.append('preciosAjax', 'obtener_lotes');
             formData.append('med_id', med_id);
 
-            container.innerHTML = '<p style="text-align: center; color: #999;">⏳ Cargando lotes...</p>';
+            container.innerHTML = '<p class="text-center text-muted">Cargando lotes...</p>';
 
             fetch('<?php echo SERVER_URL; ?>ajax/preciosAjax.php', {
-                method: 'POST',
-                body: formData
-            })
+                    method: 'POST',
+                    body: formData
+                })
                 .then(r => r.json())
                 .then(data => {
                     if (!data || data.length === 0) {
-                        container.innerHTML = '<p style="text-align: center; color: #999;">❌ No hay lotes disponibles</p>';
+                        container.innerHTML = '<p class="text-center text-muted">No hay lotes disponibles</p>';
                         return;
                     }
 
-                    let html = '<table class="tabla-dinamica-lista" style="width: 100%; font-size: 12px;">';
-                    html += '<thead><tr><th>Lote</th><th>Stock</th><th>Precio Actual</th><th>Margen %</th><th>Acción</th></tr></thead><tbody>';
+                    let html = '<table class="table">';
+                    html += '<thead><tr><th>Lote</th><th>Nombre Comercial</th><th>Stock</th><th>Precio Actual</th><th>Acción</th></tr></thead><tbody>';
 
                     data.forEach(lote => {
-                        const colorMargen = lote.margen_pct < 0 ? '#e74c3c' : '#27ae60';
                         html += `
                             <tr>
                                 <td>${lote.lm_numero_lote}</td>
+                                <td>${lote.med_nombre_comercial || 'N/A'}</td>
                                 <td>${lote.lm_cant_actual_unidades} ud</td>
                                 <td><strong>Bs ${parseFloat(lote.lm_precio_venta).toFixed(2)}</strong></td>
-                                <td><span style="color: ${colorMargen};">${parseFloat(lote.margen_pct).toFixed(2)}%</span></td>
                                 <td>
-                                    <button type="button" class="btn sm primary" onclick="abrirModalLote(${lote.lm_id}, '${lote.lm_numero_lote}', ${lote.lm_precio_venta})">
+                                    <button type="button" class="btn sm danger" onclick="abrirModalLote(${lote.lm_id}, '${lote.lm_numero_lote}', ${lote.lm_precio_venta})">
                                         Editar
                                     </button>
                                 </td>
@@ -250,7 +345,13 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 })
                 .catch(err => {
                     console.error(err);
-                    container.innerHTML = '<p style="text-align: center; color: #e74c3c;">⚠️ Error al cargar lotes</p>';
+                    container.innerHTML = '<p class="text-center text-error">Error al cargar lotes</p>';
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudieron cargar los lotes',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
         }
 
@@ -271,7 +372,12 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             const precioNuevo = parseFloat(document.getElementById('precioNuevoLote').value);
 
             if (!precioNuevo || precioNuevo <= 0) {
-                alert('❌ Por favor ingresa un precio válido mayor a 0');
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'Por favor ingresa un precio válido mayor a 0',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
@@ -282,14 +388,14 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             formData.append('precio_nuevo', precioNuevo);
 
             fetch('<?php echo SERVER_URL; ?>ajax/preciosAjax.php', {
-                method: 'POST',
-                body: formData
-            })
+                    method: 'POST',
+                    body: formData
+                })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
-                            title: '✅ Éxito',
+                            title: 'Éxito',
                             text: data.mensaje,
                             icon: 'success',
                             confirmButtonText: 'OK'
@@ -299,7 +405,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                         });
                     } else {
                         Swal.fire({
-                            title: '❌ Error',
+                            title: 'Error',
                             text: data.mensaje,
                             icon: 'error',
                             confirmButtonText: 'OK'
@@ -307,9 +413,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     }
                 })
                 .catch(err => {
-                    console.error(err);
                     Swal.fire({
-                        title: '⚠️ Error',
+                        title: 'Error',
                         text: 'Error al actualizar el precio',
                         icon: 'error',
                         confirmButtonText: 'OK'
@@ -321,12 +426,17 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             const precioNuevo = parseFloat(document.getElementById('precioNuevoTodos').value);
 
             if (!precioNuevo || precioNuevo <= 0) {
-                alert('❌ Por favor ingresa un precio válido mayor a 0');
+                Swal.fire({
+                    title: 'Validación',
+                    text: 'Por favor ingresa un precio válido mayor a 0',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
             Swal.fire({
-                title: '⚠️ Confirmar',
+                title: 'Confirmar',
                 text: `¿Deseas aplicar el precio de Bs ${precioNuevo.toFixed(2)} a TODOS los lotes de este medicamento?`,
                 icon: 'warning',
                 showCancelButton: true,
@@ -340,24 +450,24 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     formData.append('precio_nuevo', precioNuevo);
 
                     fetch('<?php echo SERVER_URL; ?>ajax/preciosAjax.php', {
-                        method: 'POST',
-                        body: formData
-                    })
+                            method: 'POST',
+                            body: formData
+                        })
                         .then(r => r.json())
                         .then(data => {
                             if (data.success) {
                                 Swal.fire({
-                                    title: '✅ Éxito',
+                                    title: 'Éxito',
                                     text: data.mensaje,
                                     icon: 'success',
                                     confirmButtonText: 'OK'
                                 }).then(() => {
                                     cerrarModalPrecios();
-                                    buscarMedicamentos();
+                                    buscarMedicamentos(paginaActual);
                                 });
                             } else {
                                 Swal.fire({
-                                    title: '❌ Error',
+                                    title: 'Error',
                                     text: data.mensaje,
                                     icon: 'error',
                                     confirmButtonText: 'OK'
@@ -365,9 +475,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                             }
                         })
                         .catch(err => {
-                            console.error(err);
                             Swal.fire({
-                                title: '⚠️ Error',
+                                title: 'Error',
                                 text: 'Error al actualizar los precios',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
@@ -388,7 +497,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
 <?php } else { ?>
     <div class="error" style="padding:30px;text-align:center;">
-        <h3>⛔ Acceso Denegado</h3>
+        <h3>Acceso Denegado</h3>
         <p>No tiene permisos para ver esta sección</p>
     </div>
 <?php } ?>

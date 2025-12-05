@@ -73,7 +73,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <button type="button" class="btn primary" id="btnExportarExcelClientes">
                     <ion-icon name="download-outline"></ion-icon> Exportar Excel
                 </button>
-                <button type="button" class="btn danger" id="btnExportarPDFClientes">
+                <button type="button" class="btn primary" id="btnExportarPDFClientes">
                     <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
                 </button>
             </div>
