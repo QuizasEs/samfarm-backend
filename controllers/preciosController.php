@@ -104,17 +104,7 @@ class preciosController extends preciosModel
             ]);
         }
 
-        $su_id = preciosModel::obtener_sucursal_del_lote_model($lm_id);
-        if (!$su_id) {
-            return json_encode([
-                "Alerta" => "simple",
-                "Titulo" => "Error",
-                "texto" => "No se pudo obtener la sucursal del lote",
-                "Tipo" => "error"
-            ]);
-        }
-
-        $resultado = preciosModel::actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, $su_id, $med_id);
+        $resultado = preciosModel::actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, $med_id);
 
         return json_encode($resultado);
     }
@@ -148,6 +138,7 @@ class preciosController extends preciosModel
 
         $med_id = (int)$_POST['med_id'];
         $precio_nuevo = (float)$_POST['precio_nuevo'];
+        $su_id = isset($_POST['su_id']) && !empty($_POST['su_id']) ? (int)$_POST['su_id'] : null;
 
         if ($precio_nuevo <= 0) {
             return json_encode([
@@ -157,8 +148,6 @@ class preciosController extends preciosModel
                 "Tipo" => "error"
             ]);
         }
-
-        $su_id = isset($_POST['su_id']) && !empty($_POST['su_id']) ? (int)$_POST['su_id'] : 1;
 
         $resultado = preciosModel::actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, $su_id);
 
@@ -195,39 +184,42 @@ class preciosController extends preciosModel
 
             $informes = preciosModel::obtener_informes_cambios_precios_model($inicio, $registros, $filtros);
 
-            $html = '<div class="table-container"><table class="table"><thead><tr>';
-            $html .= '<th>N°</th><th>Tipo Cambio</th><th>Medicamento</th><th>Sucursal</th>';
-            $html .= '<th>Precio Anterior (Bs)</th><th>Precio Nuevo (Bs)</th>';
-            $html .= '<th>Lotes Afectados</th><th>Usuario</th><th>Fecha/Hora</th></tr></thead><tbody>';
+            $html = '<div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Lote</th>
+                                    <th>Medicamento</th>
+                                    <th>Sucursal</th>
+                                    <th>Precio Anterior (Bs)</th>
+                                    <th>Precio Nuevo (Bs)</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha/Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody>';
 
             if (!empty($informes) && $pagina <= $total_paginas) {
                 $contador = $inicio + 1;
                 $reg_inicio = $inicio + 1;
-                
                 foreach ($informes as $informe) {
-                    $contenido = json_decode($informe['inf_config'], true) ?? [];
-                    
-                    $tipo_cambio = ($contenido['tipo_cambio'] ?? '') == 'lote_individual' 
-                        ? '<span style="background:#E3F2FD;padding:4px 10px;border-radius:12px;font-weight:600;color:#1565C0;">Individual</span>'
-                        : '<span style="background:#C8E6C9;padding:4px 10px;border-radius:12px;font-weight:600;color:#2e7d32;">Todos</span>';
-                    
                     $usuario = htmlspecialchars(trim(($informe['us_nombres'] ?? '') . ' ' . ($informe['us_apellido_paterno'] ?? '')));
                     $medicamento = htmlspecialchars($informe['med_nombre_quimico'] ?? 'N/A');
                     $sucursal = htmlspecialchars($informe['su_nombre'] ?? 'N/A');
-                    $fecha = date('d/m/Y H:i:s', strtotime($informe['inf_creado_en'] ?? date('Y-m-d H:i:s')));
+                    $lote = htmlspecialchars($informe['lm_numero_lote'] ?? 'N/A');
+                    $fecha = date('d/m/Y H:i:s', strtotime($informe['bp_creado_en'] ?? date('Y-m-d H:i:s')));
                     
-                    $precio_anterior = number_format($contenido['precio_anterior'] ?? 0, 2, ',', '.');
-                    $precio_nuevo = number_format($contenido['precio_nuevo'] ?? 0, 2, ',', '.');
-                    $cantidad = $contenido['cantidad_lotes_afectados'] ?? 0;
+                    $precio_anterior = number_format($informe['bp_precio_anterior'] ?? 0, 2, ',', '.');
+                    $precio_nuevo = number_format($informe['bp_precio_nuevo'] ?? 0, 2, ',', '.');
 
                     $html .= '<tr>';
                     $html .= '<td>' . $contador . '</td>';
-                    $html .= '<td>' . $tipo_cambio . '</td>';
+                    $html .= '<td><strong>' . $lote . '</strong></td>';
                     $html .= '<td><strong>' . $medicamento . '</strong></td>';
                     $html .= '<td>' . $sucursal . '</td>';
                     $html .= '<td style="text-align:right;color:#e74c3c;font-weight:600;">Bs ' . $precio_anterior . '</td>';
                     $html .= '<td style="text-align:right;color:#27ae60;font-weight:600;">Bs ' . $precio_nuevo . '</td>';
-                    $html .= '<td style="text-align:center;">' . $cantidad . '</td>';
                     $html .= '<td>' . $usuario . '</td>';
                     $html .= '<td>' . $fecha . '</td>';
                     $html .= '</tr>';
@@ -235,7 +227,8 @@ class preciosController extends preciosModel
                 }
                 $reg_final = $contador - 1;
             } else {
-                $html .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros</td></tr>';
+                error_log("No hay informes o no es un array. Total: " . $total_registros);
+                $html .= '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros de cambios de precios</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
@@ -286,12 +279,11 @@ class preciosController extends preciosModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>TIPO CAMBIO</th>
+                            <th>LOTE</th>
                             <th>MEDICAMENTO</th>
                             <th>SUCURSAL</th>
                             <th>PRECIO ANTERIOR</th>
                             <th>PRECIO NUEVO</th>
-                            <th>LOTES AFECTADOS</th>
                             <th>USUARIO</th>
                             <th>FECHA/HORA</th>
                         </tr>
@@ -303,30 +295,23 @@ class preciosController extends preciosModel
             $contador = $inicio + 1;
 
             foreach ($informes as $informe) {
-                $contenido = json_decode($informe['inf_config'], true);
-                
-                $tipo_cambio = $contenido['tipo_cambio'] == 'lote_individual' 
-                    ? '<span style="background:#E3F2FD;padding:4px 10px;border-radius:12px;font-weight:600;color:#1565C0;">Individual</span>'
-                    : '<span style="background:#C8E6C9;padding:4px 10px;border-radius:12px;font-weight:600;color:#2e7d32;">Todos</span>';
-                
-                $usuario = htmlspecialchars($informe['us_nombres'] . ' ' . ($informe['us_apellido_paterno'] ?? ''));
+                $usuario = htmlspecialchars(trim(($informe['us_nombres'] ?? '') . ' ' . ($informe['us_apellido_paterno'] ?? '')));
                 $medicamento = htmlspecialchars($informe['med_nombre_quimico'] ?? 'N/A');
                 $sucursal = htmlspecialchars($informe['su_nombre'] ?? 'N/A');
-                $fecha = date('d/m/Y H:i:s', strtotime($informe['inf_creado_en']));
+                $lote = htmlspecialchars($informe['lm_numero_lote'] ?? 'N/A');
+                $fecha = date('d/m/Y H:i:s', strtotime($informe['bp_creado_en'] ?? date('Y-m-d H:i:s')));
                 
-                $precio_anterior = number_format($contenido['precio_anterior'], 2, ',', '.');
-                $precio_nuevo = number_format($contenido['precio_nuevo'], 2, ',', '.');
-                $cantidad = $contenido['cantidad_lotes_afectados'];
+                $precio_anterior = number_format($informe['bp_precio_anterior'] ?? 0, 2, ',', '.');
+                $precio_nuevo = number_format($informe['bp_precio_nuevo'] ?? 0, 2, ',', '.');
 
                 $tabla .= "
                     <tr>
                         <td>" . $contador . "</td>
-                        <td>" . $tipo_cambio . "</td>
+                        <td><strong>" . $lote . "</strong></td>
                         <td><strong>" . $medicamento . "</strong></td>
                         <td>" . $sucursal . "</td>
                         <td style='text-align:right;color:#e74c3c;font-weight:600;'>Bs " . $precio_anterior . "</td>
                         <td style='text-align:right;color:#27ae60;font-weight:600;'>Bs " . $precio_nuevo . "</td>
-                        <td style='text-align:center;'>" . $cantidad . "</td>
                         <td>" . $usuario . "</td>
                         <td>" . $fecha . "</td>
                     </tr>
@@ -335,7 +320,7 @@ class preciosController extends preciosModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="document-outline"></ion-icon> No hay registros
                     </td></tr>';
         }

@@ -311,7 +311,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </script>
 
     <div class="modal" id="modalDetalleInventario" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="eye-outline"></ion-icon>
@@ -397,7 +397,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 
     <div class="modal" id="modalHistorialInventario" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content detalle">
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="time-outline"></ion-icon>

@@ -71,7 +71,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 </div>
 
 <div class="modal" id="modalDetalleCajaCerrada" style="display: none;">
-    <div class="modal-content detalle">
+    <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title">
                 <ion-icon name="cash-outline"></ion-icon> Detalle de Caja Cerrada
@@ -135,7 +135,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="modal-btn-content">
-                <a href="javascript:void(0)" class="btn default" onclick="CajaHistorialTotales.cerrarModal()">Cerrar</a>
+                <a href="javascript:void(0)" class="btn warning" onclick="CajaHistorialTotales.cerrarModal()">Cerrar</a>
             </div>
         </div>
     </div>

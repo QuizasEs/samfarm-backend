@@ -183,4 +183,34 @@ class compraModel extends mainModel
         $sql->execute();
         return $sql;
     }
+
+    /* registrar informe de compra en la tabla informes_compra (nueva tabla estructurada) */
+    public static function agregar_informe_compra_estructurado_model($datos)
+    {
+        $db = mainModel::conectar();
+        $sql = $db->prepare("
+            INSERT INTO informes_compra
+                (co_id, pr_id, us_id, su_id, ic_numero_compra, ic_numero_factura, ic_fecha_compra, 
+                 ic_subtotal, ic_impuestos, ic_total, ic_cantidad_lotes, ic_config_json)
+            VALUES
+                (:co_id, :pr_id, :us_id, :su_id, :ic_numero_compra, :ic_numero_factura, :ic_fecha_compra,
+                 :ic_subtotal, :ic_impuestos, :ic_total, :ic_cantidad_lotes, :ic_config_json)
+        ");
+        
+        $sql->bindParam(":co_id", $datos['co_id']);
+        $sql->bindParam(":pr_id", $datos['pr_id']);
+        $sql->bindParam(":us_id", $datos['us_id']);
+        $sql->bindParam(":su_id", $datos['su_id']);
+        $sql->bindParam(":ic_numero_compra", $datos['ic_numero_compra']);
+        $sql->bindParam(":ic_numero_factura", $datos['ic_numero_factura']);
+        $sql->bindParam(":ic_fecha_compra", $datos['ic_fecha_compra']);
+        $sql->bindParam(":ic_subtotal", $datos['ic_subtotal']);
+        $sql->bindParam(":ic_impuestos", $datos['ic_impuestos']);
+        $sql->bindParam(":ic_total", $datos['ic_total']);
+        $sql->bindParam(":ic_cantidad_lotes", $datos['ic_cantidad_lotes']);
+        $sql->bindParam(":ic_config_json", $datos['ic_config_json']);
+
+        $sql->execute();
+        return $sql;
+    }
 }

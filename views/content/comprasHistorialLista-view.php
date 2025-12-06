@@ -458,8 +458,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         },
                         legend: {
                             data: ['Cantidad de Compras', 'Ticket Promedio'],
-                            bottom: 0
+                            bottom: 0,
+                            textStyle: {
+                                fontSize: 13,
+                                color: '#009DC4'
+                            }
                         },
+
+
                         grid: {
                             left: '3%',
                             right: '4%',
@@ -488,9 +494,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             type: 'bar',
                             data: cantidades,
                             itemStyle: {
-                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                    { offset: 0, color: '#3498db' },
-                                    { offset: 1, color: '#2980b9' }
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: '#3498db'
+                                    },
+                                    {
+                                        offset: 1,
+                                        color: '#2980b9'
+                                    }
                                 ])
                             }
                         }, {

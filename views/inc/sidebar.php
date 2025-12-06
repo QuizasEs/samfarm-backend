@@ -6,73 +6,83 @@ if ($_SESSION['rol_smp'] == 1) {
     <div class="sidebar">
         <ul class="sidebar-content">
 
-            <!-- DASHBOARD -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="rocket-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>dashboard/">Dashboard</a></span>
+                        <a href="<?php echo SERVER_URL ?>dashboard/">
+                            <ion-icon name="rocket-outline"></ion-icon>
+                            <span>Dashboard</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
-
-            <!-- caja -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="storefront-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>caja/">Caja</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- devoluciones -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="repeat-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>devolucionLista/">Devolucion</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- merma registro -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="alert-circle-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>mermaRegistrar/">Registrar Merma</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- CLIENTES -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="people-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- compra -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="cart-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>compraOrden/">Registrar Compra</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- balance general -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="stats-chart-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>preciosLista//">Balance general</a></span>
+                        <a href="<?php echo SERVER_URL ?>caja/">
+                            <ion-icon name="storefront-outline"></ion-icon>
+                            <span>Caja</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
-            <!-- productos -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>devolucionLista/">
+                            <ion-icon name="repeat-outline"></ion-icon>
+                            <span>Devolucion</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>mermaRegistrar/">
+                            <ion-icon name="alert-circle-outline"></ion-icon>
+                            <span>Registrar Merma</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>clienteLista/">
+                            <ion-icon name="people-outline"></ion-icon>
+                            <span>Clientes</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>compraOrden/">
+                            <ion-icon name="cart-outline"></ion-icon>
+                            <span>Registrar Compra</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>preciosLista/">
+                            <ion-icon name="stats-chart-outline"></ion-icon>
+                            <span>Balance general</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
@@ -87,13 +97,10 @@ if ($_SESSION['rol_smp'] == 1) {
                 </ul>
             </li>
 
-
-
-            <!-- almacen -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="clipboard-outline"></ion-icon>
+                        <ion-icon name="server-outline"></ion-icon>
                         <span>Almacen</span>
                     </div>
                     <ion-icon name="chevron-down-outline"></ion-icon>
@@ -107,7 +114,6 @@ if ($_SESSION['rol_smp'] == 1) {
                 </ul>
             </li>
 
-            <!-- Reportes / facturas -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
@@ -126,23 +132,6 @@ if ($_SESSION['rol_smp'] == 1) {
                 </ul>
             </li>
 
-            <!-- ALERTAS -->
-            <!-- <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="alert-circle-outline"></ion-icon>
-                        <span>Alertas</span>
-                    </div>
-                    <ion-icon name="chevron-down-outline"></ion-icon>
-                </div>
-                <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Vencimientos</a></li>
-                    <li class="sub-link"><a href="#">Stock mínimo</a></li>
-                    <li class="sub-link"><a href="#">Pendientes</a></li>
-                    <li class="sub-link"><a href="#">Errores del sistema</a></li>
-                </ul>
-            </li> -->
-            <!-- configuracion -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
@@ -159,34 +148,13 @@ if ($_SESSION['rol_smp'] == 1) {
                 </ul>
             </li>
 
-
-
-
-
-
-            <!-- CONFIGURACIÓN -->
-            <!--             <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="settings"></ion-icon>
-                        <span>Configuración</span>
-                    </div>
-                    <ion-icon name="chevron-down-outline"></ion-icon>
-                </div>
-                <ul class="sub-links">
-                    <li class="sub-link"><a href="#">Datos de empresa</a></li>
-                    <li class="sub-link"><a href="#">Impuestos y moneda</a></li>
-                    <li class="sub-link"><a href="#">Opciones de impresión</a></li>
-                    <li class="sub-link"><a href="#">Backup</a></li>
-                    <li class="sub-link"><a href="#">Seguridad</a></li>
-                </ul>
-            </li> -->
-            <!-- perfil -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="person-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL . "perfilEditar/" . $lc->encryption($_SESSION['id_smp']); ?>">Perfil</a></span>
+                        <a href="<?php echo SERVER_URL . "perfilEditar/" . $lc->encryption($_SESSION['id_smp']); ?>">
+                            <ion-icon name="person-outline"></ion-icon>
+                            <span>Perfil</span>
+                        </a>
                     </div>
                 </div>
             </li>
@@ -194,74 +162,77 @@ if ($_SESSION['rol_smp'] == 1) {
         </ul>
     </div>
 
-
-
-    <!-- gerente vista -->
 <?php } elseif ($_SESSION['rol_smp'] == 2) { ?>
 
     <div class="sidebar">
         <ul class="sidebar-content">
 
-            <!-- DASHBOARD -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="rocket-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>dashboard/">Dashboard</a></span>
+                        <a href="<?php echo SERVER_URL ?>dashboard/">
+                            <ion-icon name="rocket-outline"></ion-icon>
+                            <span>Dashboard</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
-
-            <!-- caja -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="storefront-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>caja/">Caja</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- devoluciones -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="repeat-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>devolucionLista/">Devolucion</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- merma registro -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="alert-circle-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>mermaRegistrar/">Registrar Merma</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- CLIENTES -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="people-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
+                        <a href="<?php echo SERVER_URL ?>caja/">
+                            <ion-icon name="storefront-outline"></ion-icon>
+                            <span>Caja</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
-            <!-- compra -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="storefront-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>compraOrden/">Compra</a></span>
+                        <a href="<?php echo SERVER_URL ?>devolucionLista/">
+                            <ion-icon name="repeat-outline"></ion-icon>
+                            <span>Devolucion</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>mermaRegistrar/">
+                            <ion-icon name="alert-circle-outline"></ion-icon>
+                            <span>Registrar Merma</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
 
-            <!-- productos -->
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>clienteLista/">
+                            <ion-icon name="people-outline"></ion-icon>
+                            <span>Clientes</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>compraOrden/">
+                            <ion-icon name="storefront-outline"></ion-icon>
+                            <span>Compra</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
@@ -276,13 +247,10 @@ if ($_SESSION['rol_smp'] == 1) {
                 </ul>
             </li>
 
-
-
-            <!-- Almacen -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="clipboard-outline"></ion-icon>
+                        <ion-icon name="server-outline"></ion-icon>
                         <span>Almacen</span>
                     </div>
                     <ion-icon name="chevron-down-outline"></ion-icon>
@@ -299,59 +267,57 @@ if ($_SESSION['rol_smp'] == 1) {
         </ul>
     </div>
 
-
-    <!-- usuario caja vista -->
 <?php } elseif ($_SESSION['rol_smp'] == 3) { ?>
 
     <div class="sidebar">
         <ul class="sidebar-content">
 
-
-
-            <!-- caja -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="storefront-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>caja/">Caja</a></span>
-                    </div>
-                </div>
-            </li>
-            <!-- devoluciones -->
-            <li class="link">
-                <div class="menu-item">
-                    <div class="item-link">
-                        <ion-icon name="repeat-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>devolucionLista/">Devolucion</a></span>
+                        <a href="<?php echo SERVER_URL ?>caja/">
+                            <ion-icon name="storefront-outline"></ion-icon>
+                            <span>Caja</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
-            <!-- CLIENTES -->
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="people-outline"></ion-icon>
-                        <span><a href="<?php echo SERVER_URL ?>clienteLista/">Clientes</a></span>
+                        <a href="<?php echo SERVER_URL ?>devolucionLista/">
+                            <ion-icon name="repeat-outline"></ion-icon>
+                            <span>Devolucion</span>
+                        </a>
                     </div>
                 </div>
             </li>
 
+            <li class="link">
+                <div class="menu-item">
+                    <div class="item-link">
+                        <a href="<?php echo SERVER_URL ?>clienteLista/">
+                            <ion-icon name="people-outline"></ion-icon>
+                            <span>Clientes</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
 
         </ul>
     </div>
 
-
-
-    <!-- nada -->
 <?php } else { ?>
     <div class="sidebar">
         <ul class="sidebar-content">
             <li class="link">
                 <div class="menu-item">
                     <div class="item-link">
-                        <ion-icon name="home"></ion-icon>
-                        <a href="#">salir</a>
+                        <a href="#">
+                            <ion-icon name="home"></ion-icon>
+                            <span>salir</span>
+                        </a>
                     </div>
                 </div>
             </li>

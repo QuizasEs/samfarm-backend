@@ -141,19 +141,21 @@ class preciosModel extends mainModel
     /**
      * ACTUALIZAR PRECIO DE UN LOTE INDIVIDUAL
      */
-    public static function actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, $su_id, $med_id)
+    public static function actualizar_precio_lote_individual_model($lm_id, $precio_nuevo, $usuario_id, $med_id)
     {
         $conexion = self::conectar();
         
         try {
             $conexion->beginTransaction();
 
-            // 1) Obtener precio anterior
-            $sql_get = $conexion->prepare("SELECT lm_precio_venta FROM lote_medicamento WHERE lm_id = :lm_id");
+            // 1) Obtener precio anterior, med_id y su_id del lote
+            $sql_get = $conexion->prepare("SELECT lm_precio_venta, med_id, su_id FROM lote_medicamento WHERE lm_id = :lm_id");
             $sql_get->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
             $sql_get->execute();
             $resultado = $sql_get->fetch(PDO::FETCH_ASSOC);
             $precio_anterior = $resultado['lm_precio_venta'] ?? 0;
+            $med_id = $resultado['med_id'] ?? $med_id;
+            $su_id = $resultado['su_id'] ?? null;
 
             // 2) Actualizar precio del lote
             $sql_update = $conexion->prepare("
@@ -182,16 +184,12 @@ class preciosModel extends mainModel
             $sql_inv->bindParam(':su_id', $su_id, PDO::PARAM_INT);
             $sql_inv->execute();
 
-            // 4) Registrar informe
-            self::registrar_informe_cambio_precio_model(
-                $usuario_id,
-                $med_id,
-                $su_id,
-                'lote_individual',
+            // 4) Registrar en balance_precios
+            self::registrar_balance_precio_model(
                 $lm_id,
+                $usuario_id,
                 $precio_anterior,
-                $precio_nuevo,
-                1
+                $precio_nuevo
             );
 
             $conexion->commit();
@@ -214,14 +212,33 @@ class preciosModel extends mainModel
     /**
      * ACTUALIZAR PRECIO DE TODOS LOS LOTES DE UN MEDICAMENTO
      */
-    public static function actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, $su_id)
+    public static function actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, $su_id = null)
     {
         $conexion = self::conectar();
         
         try {
             $conexion->beginTransaction();
 
-            // 1) Obtener lotes actuales para el histórico
+            // 1) Si no se proporciona su_id, obtenerlo del primer lote del medicamento
+            if ($su_id === null) {
+                $sql_su = $conexion->prepare("
+                    SELECT su_id 
+                    FROM lote_medicamento 
+                    WHERE med_id = :med_id 
+                    AND lm_estado IN ('activo', 'en_espera')
+                    LIMIT 1
+                ");
+                $sql_su->bindParam(':med_id', $med_id, PDO::PARAM_INT);
+                $sql_su->execute();
+                $resultado_su = $sql_su->fetch(PDO::FETCH_ASSOC);
+                $su_id = $resultado_su['su_id'] ?? null;
+                
+                if ($su_id === null) {
+                    throw new Exception("No se encontraron lotes activos para el medicamento");
+                }
+            }
+
+            // 2) Obtener lotes actuales para el histórico
             $sql_get = $conexion->prepare("
                 SELECT lm_id, lm_precio_venta 
                 FROM lote_medicamento 
@@ -265,23 +282,15 @@ class preciosModel extends mainModel
             $sql_inv->bindParam(':su_id', $su_id, PDO::PARAM_INT);
             $sql_inv->execute();
 
-            // 4) Registrar informe (consolidado)
-            $precio_anterior_promedio = 0;
+            // 4) Registrar en balance_precios (un registro por cada lote)
             foreach ($lotes as $lote) {
-                $precio_anterior_promedio += $lote['lm_precio_venta'];
+                self::registrar_balance_precio_model(
+                    $lote['lm_id'],
+                    $usuario_id,
+                    $lote['lm_precio_venta'],
+                    $precio_nuevo
+                );
             }
-            $precio_anterior_promedio = $cantidad_lotes > 0 ? $precio_anterior_promedio / $cantidad_lotes : 0;
-
-            self::registrar_informe_cambio_precio_model(
-                $usuario_id,
-                $med_id,
-                $su_id,
-                'todos_lotes',
-                null,
-                $precio_anterior_promedio,
-                $precio_nuevo,
-                $cantidad_lotes
-            );
 
             $conexion->commit();
 
@@ -300,93 +309,72 @@ class preciosModel extends mainModel
         }
     }
 
-    /**
-     * REGISTRAR INFORME DE CAMBIO DE PRECIO
-     */
-    private static function registrar_informe_cambio_precio_model($usuario_id, $med_id, $su_id, $tipo, $lm_id, $precio_anterior, $precio_nuevo, $cantidad_lotes)
+    private static function registrar_balance_precio_model($lm_id, $usuario_id, $precio_anterior, $precio_nuevo)
     {
         $sql = "
-            INSERT INTO informes 
-            (inf_usuario, inf_config, inf_creado_en)
+            INSERT INTO balance_precios 
+            (lm_id, us_id, bp_precio_anterior, bp_precio_nuevo, bp_creado_en)
             VALUES 
-            (:inf_usuario, :inf_config, NOW())
+            (:lm_id, :us_id, :bp_precio_anterior, :bp_precio_nuevo, NOW())
         ";
-
-        $contenido = [
-            'tipo_cambio' => $tipo,
-            'med_id' => $med_id,
-            'su_id' => $su_id,
-            'lm_id' => $lm_id,
-            'precio_anterior' => (float)$precio_anterior,
-            'precio_nuevo' => (float)$precio_nuevo,
-            'cantidad_lotes_afectados' => (int)$cantidad_lotes,
-            'usuario_id' => (int)$usuario_id,
-            'fecha_cambio' => date('Y-m-d H:i:s')
-        ];
 
         $conexion = self::conectar();
         $stmt = $conexion->prepare($sql);
-        $stmt->bindParam(':inf_usuario', $usuario_id, PDO::PARAM_INT);
-        $contenido_json = json_encode($contenido);
-        $stmt->bindParam(':inf_config', $contenido_json, PDO::PARAM_STR);
+        $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
+        $stmt->bindParam(':us_id', $usuario_id, PDO::PARAM_INT);
+        $stmt->bindParam(':bp_precio_anterior', $precio_anterior, PDO::PARAM_STR);
+        $stmt->bindParam(':bp_precio_nuevo', $precio_nuevo, PDO::PARAM_STR);
         
-        $resultado = $stmt->execute();
-        
-        if ($resultado) {
-            error_log("✓ Informe registrado: tipo=$tipo, med_id=$med_id, su_id=$su_id, usuario=$usuario_id, config=" . substr($contenido_json, 0, 100));
-        } else {
-            error_log("✗ Error registrando informe: " . json_encode($stmt->errorInfo()));
-        }
-        
-        return $resultado;
+        return $stmt->execute();
     }
 
-    /**
-     * OBTENER INFORMES DE CAMBIOS DE PRECIOS
-     */
     public static function obtener_informes_cambios_precios_model($inicio = 0, $registros = 10, $filtros = [])
     {
         $sql = "
             SELECT 
-                inf.inf_id,
-                inf.inf_config,
-                inf.inf_creado_en,
+                bp.bp_id,
+                bp.lm_id,
+                bp.bp_precio_anterior,
+                bp.bp_precio_nuevo,
+                bp.bp_creado_en,
                 u.us_nombres,
                 u.us_apellido_paterno,
                 u.us_apellido_materno,
                 m.med_nombre_quimico,
-                s.su_nombre
-            FROM informes inf
-            LEFT JOIN usuarios u ON u.us_id = inf.inf_usuario
-            LEFT JOIN medicamento m ON JSON_EXTRACT(inf.inf_config, '$.med_id') = m.med_id
-            LEFT JOIN sucursales s ON s.su_id = JSON_EXTRACT(inf.inf_config, '$.su_id')
-            WHERE JSON_EXTRACT(inf.inf_config, '$.tipo_cambio') IN ('lote_individual', 'todos_lotes')
+                s.su_nombre,
+                lm.lm_numero_lote
+            FROM balance_precios bp
+            INNER JOIN lote_medicamento lm ON lm.lm_id = bp.lm_id
+            INNER JOIN medicamento m ON m.med_id = lm.med_id
+            INNER JOIN sucursales s ON s.su_id = lm.su_id
+            LEFT JOIN usuarios u ON u.us_id = bp.us_id
+            WHERE 1=1
         ";
 
         $params = [];
 
         if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
-            $sql .= " AND JSON_EXTRACT(inf.inf_config, '$.su_id') = :su_id";
+            $sql .= " AND lm.su_id = :su_id";
             $params[':su_id'] = (int)$filtros['su_id'];
         }
 
         if (!empty($filtros['busqueda'])) {
-            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda)";
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda OR lm.lm_numero_lote LIKE :busqueda)";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
         if (!empty($filtros['fecha_inicio'])) {
-            $sql .= " AND DATE(inf.inf_creado_en) >= :fecha_inicio";
+            $sql .= " AND DATE(bp.bp_creado_en) >= :fecha_inicio";
             $params[':fecha_inicio'] = $filtros['fecha_inicio'];
         }
 
         if (!empty($filtros['fecha_fin'])) {
-            $sql .= " AND DATE(inf.inf_creado_en) <= :fecha_fin";
+            $sql .= " AND DATE(bp.bp_creado_en) <= :fecha_fin";
             $params[':fecha_fin'] = $filtros['fecha_fin'];
         }
 
         $sql .= "
-            ORDER BY inf.inf_creado_en DESC
+            ORDER BY bp.bp_creado_en DESC
             LIMIT :inicio, :registros
         ";
 
@@ -406,39 +394,37 @@ class preciosModel extends mainModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * CONTAR TOTAL DE INFORMES
-     */
     public static function contar_informes_cambios_precios_model($filtros = [])
     {
         $sql = "
             SELECT COUNT(*) as total
-            FROM informes inf
-            LEFT JOIN usuarios u ON u.us_id = inf.inf_usuario
-            LEFT JOIN medicamento m ON JSON_EXTRACT(inf.inf_config, '$.med_id') = m.med_id
-            LEFT JOIN sucursales s ON s.su_id = JSON_EXTRACT(inf.inf_config, '$.su_id')
-            WHERE JSON_EXTRACT(inf.inf_config, '$.tipo_cambio') IN ('lote_individual', 'todos_lotes')
+            FROM balance_precios bp
+            INNER JOIN lote_medicamento lm ON lm.lm_id = bp.lm_id
+            INNER JOIN medicamento m ON m.med_id = lm.med_id
+            INNER JOIN sucursales s ON s.su_id = lm.su_id
+            LEFT JOIN usuarios u ON u.us_id = bp.us_id
+            WHERE 1=1
         ";
 
         $params = [];
 
         if (!empty($filtros['su_id']) && $filtros['su_id'] > 0) {
-            $sql .= " AND JSON_EXTRACT(inf.inf_config, '$.su_id') = :su_id";
+            $sql .= " AND lm.su_id = :su_id";
             $params[':su_id'] = (int)$filtros['su_id'];
         }
 
         if (!empty($filtros['busqueda'])) {
-            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda)";
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR u.us_nombres LIKE :busqueda OR s.su_nombre LIKE :busqueda OR lm.lm_numero_lote LIKE :busqueda)";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
         if (!empty($filtros['fecha_inicio'])) {
-            $sql .= " AND DATE(inf.inf_creado_en) >= :fecha_inicio";
+            $sql .= " AND DATE(bp.bp_creado_en) >= :fecha_inicio";
             $params[':fecha_inicio'] = $filtros['fecha_inicio'];
         }
 
         if (!empty($filtros['fecha_fin'])) {
-            $sql .= " AND DATE(inf.inf_creado_en) <= :fecha_fin";
+            $sql .= " AND DATE(bp.bp_creado_en) <= :fecha_fin";
             $params[':fecha_fin'] = $filtros['fecha_fin'];
         }
 
@@ -451,10 +437,6 @@ class preciosModel extends mainModel
 
         $stmt->execute();
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        $total = $resultado['total'] ?? 0;
-        
-        error_log("DEBUG: contar_informes_cambios_precios_model - total=$total, filtros=" . json_encode($filtros));
-        
-        return $total;
+        return $resultado['total'] ?? 0;
     }
 }

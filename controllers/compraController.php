@@ -424,6 +424,30 @@ class compraController extends compraModel
             exit();
         }
 
+        // Preparamos los datos para la nueva tabla 'informes_compra'
+        $datos_informe_estructurado = [
+            "co_id" => $compra_id,
+            "pr_id" => $proveedor_id,
+            "us_id" => $usuario_id,
+            "su_id" => $sucursal_id,
+            "ic_numero_compra" => $numero_compra,
+            "ic_numero_factura" => $numero_factura,
+            "ic_fecha_compra" => date('Y-m-d H:i:s'),
+            "ic_subtotal" => $totales['subtotal'],
+            "ic_impuestos" => $totales['impuestos'],
+            "ic_total" => $totales['total'],
+            "ic_cantidad_lotes" => count($lotes),
+            "ic_config_json" => json_encode($config_informe, JSON_UNESCAPED_UNICODE) // Guardamos el JSON completo por si acaso
+        ];
+
+        // Llamamos a un nuevo método en el modelo para insertar en la nueva tabla
+        $informe_estructurado_result = compraModel::agregar_informe_compra_estructurado_model($datos_informe_estructurado);
+        if (!$informe_estructurado_result || $informe_estructurado_result->rowCount() <= 0) {
+            // Si falla, solo registramos un log pero no detenemos el proceso
+            error_log("ADVERTENCIA: No se pudo registrar el informe de compra estructurado para la compra ID: " . $compra_id);
+        }
+
+
         /* respuesta exitosa */
         $alerta = [
             'Alerta' => 'recargar',

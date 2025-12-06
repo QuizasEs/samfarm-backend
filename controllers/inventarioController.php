@@ -188,7 +188,7 @@ class inventarioController extends inventarioModel
                                     <ion-icon name="settings-outline"></ion-icon> Configurar
                                 </a>
                                 <a href="javascript:void(0)" 
-                                class="btn info" 
+                                class="btn primary" 
                                 title="Ver historial"
                                 onclick="InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="time-outline"></ion-icon> Historial

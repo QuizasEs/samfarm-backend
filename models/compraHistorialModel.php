@@ -478,4 +478,132 @@ class compraHistorialModel extends mainModel
             'detalles' => $detalles
         ];
     }
+
+    protected static function obtener_informe_compra_model($ic_id)
+    {
+        $sql = "SELECT 
+                ic.*,
+                CONCAT(COALESCE(p.pr_nombres, ''), ' ', COALESCE(p.pr_apellido_paterno, '')) AS proveedor_nombre,
+                p.pr_nit AS proveedor_nit,
+                l.la_nombre_comercial AS laboratorio,
+                s.su_nombre AS sucursal,
+                CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
+            FROM informes_compra ic
+            LEFT JOIN proveedores p ON ic.pr_id = p.pr_id
+            LEFT JOIN laboratorios l ON (SELECT la_id FROM compras WHERE co_id = ic.co_id) = l.la_id
+            INNER JOIN sucursales s ON ic.su_id = s.su_id
+            INNER JOIN usuarios u ON ic.us_id = u.us_id
+            WHERE ic.ic_id = :ic_id";
+
+        $conexion = mainModel::conectar();
+        $stmt = $conexion->prepare($sql);
+        $stmt->bindParam(':ic_id', $ic_id);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    protected static function listar_informes_compra_model($inicio, $registros, $filtros)
+    {
+        $whereParts = [];
+
+        if (isset($filtros['su_id'])) {
+            $whereParts[] = "ic.su_id = '" . $filtros['su_id'] . "'";
+        }
+
+        if (isset($filtros['busqueda']) && !empty($filtros['busqueda'])) {
+            $busqueda = $filtros['busqueda'];
+            $whereParts[] = "(
+                ic.ic_numero_compra LIKE '%$busqueda%' OR
+                ic.ic_numero_factura LIKE '%$busqueda%' OR
+                p.pr_nombres LIKE '%$busqueda%'
+            )";
+        }
+
+        if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
+            $whereParts[] = "DATE(ic.ic_fecha_compra) >= '" . $filtros['fecha_desde'] . "'";
+        }
+
+        if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
+            $whereParts[] = "DATE(ic.ic_fecha_compra) <= '" . $filtros['fecha_hasta'] . "'";
+        }
+
+        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
+            $whereParts[] = "ic.pr_id = '" . $filtros['proveedor'] . "'";
+        }
+
+        if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
+            $whereParts[] = "ic.us_id = '" . $filtros['usuario'] . "'";
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+
+        $sql = "SELECT SQL_CALC_FOUND_ROWS
+                ic.ic_id,
+                ic.co_id,
+                ic.ic_numero_compra,
+                ic.ic_fecha_compra,
+                ic.ic_numero_factura,
+                ic.ic_total,
+                CONCAT(COALESCE(p.pr_nombres, ''), ' ', COALESCE(p.pr_apellido_paterno, '')) AS proveedor_nombre,
+                p.pr_nit AS proveedor_nit,
+                s.su_nombre AS sucursal,
+                CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre,
+                ic.ic_cantidad_lotes
+            FROM informes_compra ic
+            LEFT JOIN proveedores p ON ic.pr_id = p.pr_id
+            INNER JOIN sucursales s ON ic.su_id = s.su_id
+            INNER JOIN usuarios u ON ic.us_id = u.us_id
+            $whereSQL
+            ORDER BY ic.ic_fecha_compra DESC
+            LIMIT $inicio, $registros";
+
+        $conexion = mainModel::conectar();
+        return $conexion->query($sql);
+    }
+
+    protected static function contar_informes_compra_model($filtros)
+    {
+        $whereParts = [];
+
+        if (isset($filtros['su_id'])) {
+            $whereParts[] = "ic.su_id = '" . $filtros['su_id'] . "'";
+        }
+
+        if (isset($filtros['busqueda']) && !empty($filtros['busqueda'])) {
+            $busqueda = $filtros['busqueda'];
+            $whereParts[] = "(
+                ic.ic_numero_compra LIKE '%$busqueda%' OR
+                ic.ic_numero_factura LIKE '%$busqueda%' OR
+                p.pr_nombres LIKE '%$busqueda%'
+            )";
+        }
+
+        if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
+            $whereParts[] = "DATE(ic.ic_fecha_compra) >= '" . $filtros['fecha_desde'] . "'";
+        }
+
+        if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
+            $whereParts[] = "DATE(ic.ic_fecha_compra) <= '" . $filtros['fecha_hasta'] . "'";
+        }
+
+        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
+            $whereParts[] = "ic.pr_id = '" . $filtros['proveedor'] . "'";
+        }
+
+        if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
+            $whereParts[] = "ic.us_id = '" . $filtros['usuario'] . "'";
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+
+        $sql = "SELECT COUNT(*) as total
+            FROM informes_compra ic
+            LEFT JOIN proveedores p ON ic.pr_id = p.pr_id
+            $whereSQL";
+
+        $conexion = mainModel::conectar();
+        $result = $conexion->query($sql);
+        $row = $result->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
 }

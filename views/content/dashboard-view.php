@@ -342,15 +342,15 @@
                 const url = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php?dashboardAjax=obtener_vencimientos_ajax';
                 console.log('Fetching:', url);
                 const response = await fetch(url);
-                
+
                 if (!response.ok) {
                     console.error('HTTP error:', response.status, response.statusText);
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('Vencimientos response:', result);
-                
+
                 if (result.success) {
                     const data = result.data;
                     const chart = echarts.init(document.getElementById('chartVencimientos'));
@@ -367,25 +367,40 @@
                             orient: 'vertical',
                             left: 'left'
                         },
-                        series: [
-                            {
-                                name: 'Vencimientos',
-                                type: 'pie',
-                                radius: '50%',
-                                data: [
-                                    { value: data.expirados, name: 'Expirados', itemStyle: { color: '#d32f2f' } },
-                                    { value: data.proximos, name: 'Próximos', itemStyle: { color: '#ffa500' } },
-                                    { value: data.disponibles, name: 'Disponibles', itemStyle: { color: '#4caf50' } }
-                                ],
-                                emphasis: {
+                        series: [{
+                            name: 'Vencimientos',
+                            type: 'pie',
+                            radius: '50%',
+                            data: [{
+                                    value: data.expirados,
+                                    name: 'Expirados',
                                     itemStyle: {
-                                        shadowBlur: 10,
-                                        shadowOffsetX: 0,
-                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                        color: '#d32f2f'
+                                    }
+                                },
+                                {
+                                    value: data.proximos,
+                                    name: 'Próximos',
+                                    itemStyle: {
+                                        color: '#ffa500'
+                                    }
+                                },
+                                {
+                                    value: data.disponibles,
+                                    name: 'Disponibles',
+                                    itemStyle: {
+                                        color: '#4caf50'
                                     }
                                 }
+                            ],
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
                             }
-                        ]
+                        }]
                     };
                     chart.setOption(option);
                     window.addEventListener('resize', () => chart.resize());
@@ -400,102 +415,143 @@
         async function loadChartStockMinimo() {
             try {
                 const url = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php?dashboardAjax=obtener_stock_minimo_ajax';
-                console.log('Fetching:', url);
                 const response = await fetch(url);
-                
-                if (!response.ok) {
-                    console.error('HTTP error:', response.status, response.statusText);
+
+                if (!response.ok) return console.error('HTTP error:', response.status);
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    console.error('Failed to load stock minimo data:', result.message);
                     return;
                 }
-                
-                const result = await response.json();
-                console.log('Stock minimo response:', result);
-                
-                if (result.success) {
-                    const data = result.data;
-                    const chart = echarts.init(document.getElementById('chartStockMinimo'));
-                    
-                    const productos = data.map(item => item.med_nombre_quimico);
-                    const stocks = data.map(item => parseInt(item.inv_total_unidades));
-                    const minimos = data.map(item => parseInt(item.inv_minimo));
-                    
-                    const option = {
-                        title: {
-                            text: 'Stock Actual vs Stock Mínimo',
-                            left: 'center'
+
+                const data = result.data;
+                const chartContainer = document.getElementById('chartStockMinimo');
+                const chart = echarts.init(chartContainer);
+
+                const productos = data.map(item => item.med_nombre_quimico);
+                const stocks = data.map(item => parseInt(item.inv_total_unidades));
+                const minimos = data.map(item => parseInt(item.inv_minimo));
+
+                // 🔥 Detectar contenedor pequeño
+                const isSmall = chartContainer.offsetWidth < 450;
+
+                const option = {
+                    title: {
+                        text: 'Stock Actual vs Stock Mínimo',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: isSmall ? 14 : 18,
+                            fontWeight: 'bold'
+                        }
+                    },
+
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+
+                    legend: {
+                        top: 25,
+                        textStyle: {
+                            fontSize: isSmall ? 11 : 14,
+                            color: '#EB3434'
+                        }
+                    },
+
+                    grid: {
+                        left: isSmall ? '6%' : '3%',
+                        right: '4%',
+                        bottom: isSmall ? '12%' : '5%',
+                        containLabel: true
+                    },
+
+                    xAxis: {
+                        type: 'category',
+                        data: productos,
+                        axisLabel: {
+                            rotate: isSmall ? 65 : 45,
+                            fontSize: isSmall ? 10 : 12,
+                            interval: 0,
+                            color: '#333'
+                        }
+                    },
+
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            fontSize: isSmall ? 10 : 12
                         },
-                        tooltip: {
-                            trigger: 'axis',
-                            axisPointer: {
-                                type: 'shadow'
+                        splitLine: {
+                            lineStyle: {
+                                color: '#e0e0e0',
+                                type: 'dashed'
                             }
-                        },
-                        legend: {
-                            data: ['Stock Actual', 'Stock Mínimo']
-                        },
-                        grid: {
-                            left: '3%',
-                            right: '4%',
-                            bottom: '3%',
-                            containLabel: true
-                        },
-                        xAxis: {
-                            type: 'category',
-                            data: productos,
-                            axisLabel: {
-                                rotate: 45,
-                                interval: 0
-                            }
-                        },
-                        yAxis: {
-                            type: 'value'
-                        },
-                        series: [
-                            {
-                                name: 'Stock Actual',
-                                type: 'bar',
-                                data: stocks,
-                                itemStyle: { color: '#ffa500' }
+                        }
+                    },
+
+                    series: [{
+                            name: 'Stock Actual',
+                            type: 'bar',
+                            data: stocks,
+                            itemStyle: {
+                                color: '#ffa500'
                             },
-                            {
-                                name: 'Stock Mínimo',
-                                type: 'bar',
-                                data: minimos,
-                                itemStyle: { color: '#d32f2f' }
-                            }
-                        ]
-                    };
-                    chart.setOption(option);
-                    window.addEventListener('resize', () => chart.resize());
-                } else {
-                    console.error('Failed to load stock minimo data:', result.message);
+                            barMaxWidth: 40
+                        },
+                        {
+                            name: 'Stock Mínimo',
+                            type: 'bar',
+                            data: minimos,
+                            itemStyle: {
+                                color: '#d32f2f'
+                            },
+                            barMaxWidth: 40
+                        }
+                    ]
+                };
+
+                chart.setOption(option);
+
+                // 🔥 Responsividad real con ResizeObserver
+                if (!window.__chartStockMinimoObserverAdded) {
+                    const ro = new ResizeObserver(() => chart.resize());
+                    ro.observe(chartContainer);
+                    window.__chartStockMinimoObserverAdded = true;
                 }
+
+                window.addEventListener('resize', () => chart.resize());
+
             } catch (error) {
                 console.error('Error loading stock minimo chart:', error);
             }
         }
+
 
         async function loadChartProductosVendidos() {
             try {
                 const url = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php?dashboardAjax=obtener_productos_vendidos_ajax';
                 console.log('Fetching:', url);
                 const response = await fetch(url);
-                
+
                 if (!response.ok) {
                     console.error('HTTP error:', response.status, response.statusText);
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('Productos vendidos response:', result);
-                
+
                 if (result.success) {
                     const data = result.data;
                     const chart = echarts.init(document.getElementById('chartProductosVendidos'));
-                    
+
                     const productos = data.map(item => item.med_nombre_quimico);
                     const cantidades = data.map(item => parseInt(item.cantidad_vendida));
-                    
+
                     const option = {
                         title: {
                             text: 'Productos Más Vendidos',
@@ -524,14 +580,14 @@
                         yAxis: {
                             type: 'value'
                         },
-                        series: [
-                            {
-                                name: 'Cantidad Vendida',
-                                type: 'bar',
-                                data: cantidades,
-                                itemStyle: { color: '#2196f3' }
+                        series: [{
+                            name: 'Cantidad Vendida',
+                            type: 'bar',
+                            data: cantidades,
+                            itemStyle: {
+                                color: '#2196f3'
                             }
-                        ]
+                        }]
                     };
                     chart.setOption(option);
                     window.addEventListener('resize', () => chart.resize());
@@ -548,25 +604,28 @@
                 const url = '<?php echo SERVER_URL; ?>ajax/dashboardAjax.php?dashboardAjax=obtener_ventas_mensuales_ajax';
                 console.log('Fetching:', url);
                 const response = await fetch(url);
-                
+
                 if (!response.ok) {
                     console.error('HTTP error:', response.status, response.statusText);
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('Ventas mensuales response:', result);
-                
+
                 if (result.success) {
                     const data = result.data;
                     const chart = echarts.init(document.getElementById('chartVentasMensuales'));
-                    
+
                     const meses = data.map(item => {
                         const date = new Date(item.mes + '-01');
-                        return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+                        return date.toLocaleDateString('es-ES', {
+                            month: 'short',
+                            year: 'numeric'
+                        });
                     });
                     const totales = data.map(item => parseFloat(item.total_mes));
-                    
+
                     const option = {
                         title: {
                             text: 'Ventas Mensuales',
@@ -591,18 +650,18 @@
                         yAxis: {
                             type: 'value'
                         },
-                        series: [
-                            {
-                                name: 'Total Ventas (Bs)',
-                                type: 'line',
-                                data: totales,
-                                smooth: true,
-                                itemStyle: { color: '#4caf50' },
-                                areaStyle: {
-                                    color: 'rgba(76, 175, 80, 0.3)'
-                                }
+                        series: [{
+                            name: 'Total Ventas (Bs)',
+                            type: 'line',
+                            data: totales,
+                            smooth: true,
+                            itemStyle: {
+                                color: '#4caf50'
+                            },
+                            areaStyle: {
+                                color: 'rgba(76, 175, 80, 0.3)'
                             }
-                        ]
+                        }]
                     };
                     chart.setOption(option);
                     window.addEventListener('resize', () => chart.resize());

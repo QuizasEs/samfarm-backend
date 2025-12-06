@@ -22,10 +22,10 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
                 <div class="search">
 
-                        <input type="text" name="busqueda" id="busqueda_sucursal" placeholder="Buscar por nombre o dirección...">
-                        <button type="button" class="btn-search">
-                            <ion-icon name="search-outline"></ion-icon>
-                        </button>
+                    <input type="text" name="busqueda" id="busqueda_sucursal" placeholder="Buscar por nombre o dirección...">
+                    <button type="button" class="btn-search">
+                        <ion-icon name="search-outline"></ion-icon>
+                    </button>
 
                 </div>
             </div>
@@ -66,7 +66,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             <div id="graficoCostoBeneficio"></div>
         </div>
     </div>
-
+    <!-- cajas abiertas -->
     <div class="modal" id="modalCajasAbiertas" style="display: none;">
         <div class="modal-content detalle">
             <div class="modal-header">
@@ -85,13 +85,13 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 <div class="filtro-dinamico-search" style="margin-bottom: 20px;">
                     <div class="form-fechas">
                         <small>Usuario</small>
-                        <select class="select-filtro" id="filtroUsuarioCaja">
+                        <select class="select-filtro" style="background-color: #fff !important; color: black !important;" id="filtroUsuarioCaja">
                             <option value="">Todos</option>
                         </select>
                     </div>
 
                     <div class="search">
-                        <input type="text" id="busquedaCaja" placeholder="Buscar por nombre de caja...">
+                        <input type="text" id="busquedaCaja" style="background-color: #fff !important; color: black !important;" placeholder="Buscar por nombre de caja...">
                         <button type="button" onclick="SucursalesModals.buscarCajas()">
                             <ion-icon name="search-outline"></ion-icon>
                         </button>
@@ -333,22 +333,23 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 </div>
 
                 <div class="modal-btn-content">
+                    <a href="javascript:void(0)" class="btn warning" onclick="SucursalesModals.cerrarModalDetalle()">
+                        Cerrar
+                    </a>
                     <a href="javascript:void(0)" class="btn primary" onclick="SucursalesModals.editarDesdeDetalle()">
                         <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
                     <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalleSucursal">
                         <ion-icon name="power-outline"></ion-icon> Cambiar Estado
                     </a>
-                    <a href="javascript:void(0)" class="btn warning" onclick="SucursalesModals.cerrarModalDetalle()">
-                        Cerrar
-                    </a>
+
                 </div>
             </div>
         </div>
     </div>
 
     <style>
-      
+
     </style>
     <!-- modal sucursales editar y registrar -->
     <script>
@@ -372,7 +373,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
             function agregarCierreModalesAlBackdrop() {
                 const modales = ['modalNuevaSucursal', 'modalEditarSucursal', 'modalDetalleSucursal', 'modalCajasAbiertas'];
-                
+
                 modales.forEach(modalId => {
                     const modal = document.getElementById(modalId);
                     if (modal) {
@@ -401,7 +402,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 chart.showLoading({
                     text: 'Cargando datos...',
                     color: '#1976D2',
-                    textColor: '#000',
+                    textColor: '#0044DE',
                     maskColor: 'rgba(255, 255, 255, 0.8)'
                 });
 
@@ -462,7 +463,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                             left: 'center',
                             top: 'middle',
                             textStyle: {
-                                color: '#999',
+                                color: '#0044DE',
                                 fontSize: 16
                             }
                         }
@@ -495,7 +496,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                         data: ['Costos', 'Ingresos', 'Beneficio Neto'],
                         top: 10,
                         textStyle: {
-                            fontSize: 12
+                            fontSize: 12,
+                            color: '0044DE'
                         }
                     },
                     grid: {
@@ -550,7 +552,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                                     return params.value > 0 ? 'Bs. ' + params.value.toFixed(0) : '';
                                 },
                                 fontSize: 10,
-                                color: '#333'
+                                color: '#009DC4'
                             },
                             barMaxWidth: 60
                         },
@@ -577,7 +579,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                                     return params.value > 0 ? 'Bs. ' + params.value.toFixed(0) : '';
                                 },
                                 fontSize: 10,
-                                color: '#333'
+                                color: '#009DC4'
                             },
                             barMaxWidth: 60
                         },
