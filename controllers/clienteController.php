@@ -372,7 +372,7 @@ class clienteController extends clienteModel
 
         if ($agregar->rowCount() == 1) {
             $alerta = [
-                'Alerta' => 'recargar',
+                'Alerta' => 'simple',
                 'Titulo' => 'Cliente registrado',
                 'texto' => 'El cliente fue registrado correctamente',
                 'Tipo' => 'success'

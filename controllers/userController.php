@@ -137,10 +137,10 @@ class userController extends userModel
                             <td>' . htmlspecialchars($row['us_numero_carnet'] ?: '-') . '</td>
                             <td>' . htmlspecialchars($row['us_telefono'] ?: '-') . '</td>
                             <td>' . htmlspecialchars($row['us_correo'] ?: '-') . '</td>
-                            <td style="font-size:11px;">' . htmlspecialchars($row['us_direccion'] ?: '-') . '</td>
+                            <td style="font-size:11px; white-space:normal; word-wrap:break-word; max-width:200px; overflow:hidden; text-overflow:ellipsis;" style="max-height:100px; overflow:auto;">' . htmlspecialchars($row['us_direccion'] ?: '-') . '</td>
                             <td>' . date('d/m/Y', strtotime($row['us_creado_en'])) . '</td>
-                            <td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:' . $rol_color . ';">' . $rol_nombre . '</span></td>' .
-                    ($mostrar_columna_sucursal ? '<td><span style="background:#FFF3E0;padding:4px 8px;border-radius:4px;font-weight:600;color:#E65100;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
+                            <td><span style="text-transform:uppercase; font-weight:600;color:' . $rol_color . ';">' . $rol_nombre . '</span></td>' .
+                    ($mostrar_columna_sucursal ? '<td><span style="font-weight:600;color:#E65100; text-transform:uppercase;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
                     '<td>' . $estado_html . '</td>
                             <td class="accion-buttons">
                                 <a href="javascript:void(0)" 

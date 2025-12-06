@@ -88,7 +88,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div id="modalDetalleTransferencia" class="modal" style="display:none;">
-        <div class="modal-content" >
+        <div class="modal-content detalle" >
             <div class="modal-header">
                 <div class="modal-title">
                     <ion-icon name="swap-horizontal-outline"></ion-icon>

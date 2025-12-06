@@ -87,8 +87,10 @@ $datos_select = $ins_med->datos_extras_controller();
 
         </div>
         <div class="form-buttons">
+            <a href="<?php echo SERVER_URL;?>medicamentoLista?>" class="btn warning">cancelar</a>
             <button class="btn success">Agregar</button>
         </div>
+
 
     </form>
 </div>

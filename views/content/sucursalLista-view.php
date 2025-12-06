@@ -22,8 +22,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
                 <div class="search">
 
-                    <input type="text" name="busqueda" id="busqueda_sucursal" placeholder="Buscar por nombre o dirección...">
-                    <button type="button" class="btn-search">
+                    <input type="text" style="width: 100%;"name="busqueda" id="busqueda_sucursal" placeholder="Buscar por nombre o dirección...">
+                    <button type="button" style="display: none;" class="btn-search">
                         <ion-icon name="search-outline"></ion-icon>
                     </button>
 
@@ -31,11 +31,11 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             </div>
 
             <div class="filtro-dinamico-buttons">
-                <button type="button" class="btn success" onclick="SucursalesModals.abrirModalNuevo()">
-                    <ion-icon name="add-circle-outline"></ion-icon> Nueva Sucursal
+                <button type="button"  class="btn success" onclick="SucursalesModals.abrirModalNuevo()">
+                    <ion-icon name="add-circle-outline"></ion-icon> Nuevo
                 </button>
                 <button type="button" class="btn primary" id="btnExportarPDF">
-                    <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                    <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
         </form>

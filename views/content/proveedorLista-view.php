@@ -69,7 +69,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="filtro-dinamico-buttons">
 
-                <button type="button" class="btn primary" onclick="ProveedoresModals.abrirRegistro()">
+                <button type="button" class="btn success" onclick="ProveedoresModals.abrirRegistro()">
                     <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
                 </button>
 
@@ -216,7 +216,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">
+                    <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">
                         Cerrar
                     </a>
                 </div>

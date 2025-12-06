@@ -115,8 +115,8 @@ class ventasHistorialController extends ventasHistorialModel
                             <th>FECHA</th>
                             <th>CLIENTE</th>
                             <th>VENDEDOR</th>' .
-            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>ITEMS</th>
+                            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
+                            '
                             <th>TOTAL</th>
                             <th>TIPO DOC.</th>
                             <th>ACCIONES</th>
@@ -152,8 +152,7 @@ class ventasHistorialController extends ventasHistorialModel
                         <td>' . date('d/m/Y H:i', strtotime($row['ve_fecha_emision'])) . '</td>
                         <td>' . $cliente_display . '</td>
                         <td>' . htmlspecialchars($row['vendedor_nombre']) . '</td>' .
-                    ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
-                    '<td style="text-align:center;"><span style="background:#FFF3E0;padding:4px 10px;border-radius:12px;font-weight:600;color:#E65100;">' . $row['cantidad_items'] . '</span></td>
+                    ($mostrar_columna_sucursal ? '<td><span style=";padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .'
                         <td style="text-align:right;font-size:14px;"><strong style="color:#2e7d32;">Bs. ' . number_format($row['ve_total'], 2) . '</strong></td>
                         <td style="text-align:center;">' . $tipo_doc_html . '</td>
                         <td class="accion-buttons">

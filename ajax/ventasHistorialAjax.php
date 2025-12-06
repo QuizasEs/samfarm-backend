@@ -2,7 +2,6 @@
 $peticionAjax = true;
 require_once "../config/APP.php";
 
-// ✅ MANEJO ESPECIAL PARA EXCEL (viene por GET)
 if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exportar_excel') {
     session_start(['name' => 'SMP']);
 
@@ -27,7 +26,6 @@ if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exp
     exit();
 }
 
-// ✅ PETICIONES POST
 if (isset($_POST['ventasHistorialAjax'])) {
     session_start(['name' => 'SMP']);
 
@@ -62,7 +60,6 @@ if (isset($_POST['ventasHistorialAjax'])) {
     require_once "../controllers/ventasHistorialController.php";
     $ins_ventas = new ventasHistorialController();
 
-    // ✅ LISTAR
     if ($valor === "listar") {
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
@@ -90,20 +87,17 @@ if (isset($_POST['ventasHistorialAjax'])) {
         exit();
     }
 
-    // ✅ DETALLE
     if ($valor === "detalle") {
         echo $ins_ventas->detalle_venta_controller();
         exit();
     }
 
-    // ✅ GENERAR PDF
     if ($valor === "generar_pdf") {
         echo $ins_ventas->generar_pdf_nota_controller();
         exit();
     }
 
 } else {
-    // ❌ Petición no autorizada
     session_start(['name' => 'SMP']);
     session_unset();
     session_destroy();

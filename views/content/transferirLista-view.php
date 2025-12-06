@@ -135,23 +135,31 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="row">
                     <div class="col">
-                        <label class="required">Cantidad (cajas)</label>
-                        <input type="number" id="modal-cantidad-cajas-transfer" min="1" required>
+                        <div class="modal-bloque">
+                            <label class="required">Cantidad (cajas)</label>
+                            <input type="number" id="modal-cantidad-cajas-transfer" min="1" required>
+                        </div>
                     </div>
                     <div class="col">
-                        <label>Equivale a (unidades)</label>
-                        <input type="number" id="modal-cantidad-unidades-transfer" readonly style="background: #f5f5f5;">
+                        <div class="modal-bloque">
+                            <label>Equivale a (unidades)</label>
+                            <input type="number" id="modal-cantidad-unidades-transfer" readonly style="background: #f5f5f5;">
+                        </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <label class="required">Sucursal Destino</label>
-                    <select id="modal-sucursal-destino-transfer" required>
-                        <option value="">Seleccione...</option>
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                        <?php } ?>
-                    </select>
+                    <div class="col">
+                        <div class="modal-bloque">
+                            <label class="required">Sucursal Destino</label>
+                            <select class="select-filtro" style="background: white; color: black;" id="modal-sucursal-destino-transfer" required>
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                    <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -161,12 +169,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </p>
                 </div>
 
-                <div class="btn-content">
+                <div class="modal-btn-content">
                     <a href="javascript:void(0)" class="btn warning" onclick="TransferManager.cerrarModalAgregar()">
                         Cancelar
                     </a>
                     <a href="javascript:void(0)" class="btn success" onclick="TransferManager.agregarItem()">
-                        <ion-icon name="add-outline"></ion-icon> Agregar a Lista
+                        <ion-icon name="add-outline"></ion-icon> Agregar
                     </a>
                 </div>
             </div>

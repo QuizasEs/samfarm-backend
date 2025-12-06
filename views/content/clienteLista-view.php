@@ -67,14 +67,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="filtro-dinamico-buttons">
                 <button type="button" class="btn success" onclick="ClientesModals.abrirModalNuevo()">
-                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Cliente
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo
                 </button>
 
-                <button type="button" class="btn primary" id="btnExportarExcelClientes">
-                    <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                <button type="button" class="btn success" id="btnExportarExcelClientes">
+                    <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
                 <button type="button" class="btn primary" id="btnExportarPDFClientes">
-                    <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                    <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
 
@@ -407,7 +407,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <tr>
                                     <th>N°</th>
                                     <th>Medicamento</th>
-                                    <th>Nombre Comercial</th>
+                                    
                                     <th>Laboratorio</th>
                                     <th>Forma</th>
                                     <th>Veces</th>
@@ -427,20 +427,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="modal-btn-content">
+                    <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalDetalle()">
+                        Cerrar
+                    </a>
+                    <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalle">
+                        <ion-icon name="power-outline"></ion-icon>Estado
+                    </a>
                     <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.editarDesdeDetalle()">
                         <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
-                    <a href="javascript:void(0)" class="btn success" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
+                    <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
                         <ion-icon name="document-text-outline"></ion-icon> PDF
                     </a>
                     <a href="javascript:void(0)" class="btn default" onclick="ClientesModals.verHistorialCompleto()">
                         <ion-icon name="time-outline"></ion-icon> Historial
-                    </a>
-                    <a href="javascript:void(0)" class="btn default" id="btnToggleEstadoDetalle">
-                        <ion-icon name="power-outline"></ion-icon>Estado
-                    </a>
-                    <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalDetalle()">
-                        Cerrar
                     </a>
                 </div>
             </div>
@@ -661,11 +661,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <tr>
                             <td><strong>${compra.ve_numero_documento}</strong></td>
                             <td>${formatearFecha(compra.ve_fecha_emision)}</td>
-                            <td style="font-size:11px;" title="${compra.medicamentos_detalle || ''}">${medicamentos}</td>
+                            <td  title="${compra.medicamentos_detalle || ''}">${medicamentos}</td>
                             <td style="text-align:center;"><strong>${compra.total_unidades || 0}</strong></td>
-                            <td style="text-align:right;">Bs. ${formatearNumero(compra.ve_subtotal || compra.ve_total)}</td>
-                            <td style="text-align:right;"><strong style="color:#1976D2;">Bs. ${formatearNumero(compra.ve_total)}</strong></td>
-                            <td style="font-size:11px;">${vendedor}</td>
+                            <td >Bs. ${formatearNumero(compra.ve_subtotal || compra.ve_total)}</td>
+                            <td ><strong style="color:#1976D2;">Bs. ${formatearNumero(compra.ve_total)}</strong></td>
+                            <td >${vendedor}</td>
                             
                         </tr>
                     `
@@ -700,9 +700,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <tr>
                             <td>${index + 1}</td>
                             <td><strong>${med.med_nombre_quimico}</strong></td>
-                            <td style="font-size:11px;color:#666;">${med.med_version_comercial || '-'}</td>
-                            <td style="font-size:11px;">${med.laboratorio || '-'}</td>
-                            <td style="font-size:11px;">${med.forma_farmaceutica || '-'}</td>
+                            
+                            <td>${med.laboratorio || '-'}</td>
+                            <td>${med.forma_farmaceutica || '-'}</td>
                             <td style="text-align:center;"><strong style="color:#1976D2;">${med.veces_comprado}</strong></td>
                             <td style="text-align:center;"><strong>${med.total_unidades}</strong></td>
                             <td>${formatearFecha(med.ultima_compra)}</td>

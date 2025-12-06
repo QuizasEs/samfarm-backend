@@ -163,7 +163,7 @@ class cajaHistorialController extends cajaHistorialModel
                             class="btn success" 
                             title="Exportar PDF"
                             onclick="CajaHistorial.exportarMovimiento(' . $row['mc_id'] . ')">
-                                <ion-icon name="document-text-outline"></ion-icon> Generar PDF
+                                <ion-icon name="document-text-outline"></ion-icon> PDF
                             </a>
                         </td>
                     </tr>

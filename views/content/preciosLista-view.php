@@ -84,11 +84,11 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 </div>
 
                 <div class="modal-btn-content">
-                    <button type="button" style=" width: fit-content;" class="btn danger btn-full" onclick="aplicarPrecioTodos()">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Aplicar a Todos los Lotes
-                    </button>
                     <button type="button" class="btn warning btn-full" onclick="cerrarModalPrecios()">
                         <ion-icon name="close-outline"></ion-icon> Cancelar
+                    </button>
+                    <button type="button" style=" width: fit-content;" class="btn danger btn-full" onclick="aplicarPrecioTodos()">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon> Aplicar a Todos los Lotes
                     </button>
                 </div>
             </div>
@@ -137,11 +137,11 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 </div>
 
                 <div class="modal-btn-content">
-                    <button type="button" class="btn danger btn-full" onclick="guardarPrecioLote()">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Guardar
-                    </button>
                     <button type="button" class="btn warning btn-full" onclick="cerrarModalLote()">
                         <ion-icon name="close-outline"></ion-icon> Cancelar
+                    </button>
+                    <button type="button" class="btn danger btn-full" onclick="guardarPrecioLote()">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon> Guardar
                     </button>
                 </div>
             </div>

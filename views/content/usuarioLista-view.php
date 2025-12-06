@@ -60,7 +60,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="filtro-dinamico-buttons">
                 <button type="button" class="btn success" onclick="UsuariosModals.abrirModalNuevo()">
-                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Usuario
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo
                 </button>
 
             </div>
@@ -464,14 +464,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="UsuariosModals.editarDesdeDetalle()">
-                        <ion-icon name="create-outline"></ion-icon> Editar
+                    <a href="javascript:void(0)" class="btn warning" onclick="UsuariosModals.cerrarModalDetalle()">
+                        Cerrar
                     </a>
                     <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalleUsuario">
                         <ion-icon name="power-outline"></ion-icon> Estado
                     </a>
-                    <a href="javascript:void(0)" class="btn warning" onclick="UsuariosModals.cerrarModalDetalle()">
-                        Cerrar
+                    <a href="javascript:void(0)" class="btn default" onclick="UsuariosModals.editarDesdeDetalle()">
+                        <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
                 </div>
             </div>

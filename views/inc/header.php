@@ -23,7 +23,7 @@
                         <ion-icon name="notifications-outline"></ion-icon>
                     </div>
                     <div class="user">
-                        <button class="btn-exit-system" type="submit">
+                        <button class="btn-exit-system" type="submit" title="Salir">
                             <ion-icon name="walk"></ion-icon>
                         </button>
                     </div>

@@ -85,11 +85,11 @@ class transferirHistorialController extends transferirModel
                                 <td>' . $estado_badge . '</td>
                                 <td style="text-align:right;"><strong>Bs. ' . $monto . '</strong></td>
                                 <td class="buttons">
-                                    <a href="#" class="btn default" onclick="event.preventDefault(); TransferirHistorialModals.verDetalle(' . (int)$tr['tr_id'] . ', \'' . htmlspecialchars($tr['tr_numero']) . '\')" title="Ver detalles">
-                                        <ion-icon name="eye-outline"></ion-icon>
+                                    <a href="#" class="btn primary" onclick="event.preventDefault(); TransferirHistorialModals.verDetalle(' . (int)$tr['tr_id'] . ', \'' . htmlspecialchars($tr['tr_numero']) . '\')" title="Ver detalles">
+                                        <ion-icon name="eye-outline"></ion-icon> Detalles
                                     </a>
-                                    <a href="#" class="btn default" onclick="event.preventDefault(); TransferirHistorialModals.descargarPDF(' . (int)$tr['tr_id'] . ')" title="Descargar PDF">
-                                        <ion-icon name="download-outline"></ion-icon>
+                                    <a href="#" class="btn success" onclick="event.preventDefault(); TransferirHistorialModals.descargarPDF(' . (int)$tr['tr_id'] . ')" title="Descargar PDF">
+                                        <ion-icon name="download-outline"></ion-icon> EXCEL
                                     </a>
                                 </td>
                             </tr>';

@@ -251,7 +251,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                 </div>
                             </div>
 
-                            <div class="btn-content">
+                            <div class="modal-btn-content">
                                 <a href="javascript:void(0)" class="btn warning" onclick="ModalCliente.cerrarModalCliente()">Cancelar</a>
                                 <button type="submit" class="btn success">Registrar</button>
                             </div>

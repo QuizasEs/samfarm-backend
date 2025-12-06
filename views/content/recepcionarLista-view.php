@@ -110,7 +110,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <textarea id="modal-motivo-rechazo" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
                 </div>
 
-                <div class="btn-content">
+                <div class="modal-btn-content">
                     <a href="javascript:void(0)" class="btn warning" onclick="RecepcionManager.cerrarModalDetalles()">
                         Cancelar
                     </a>

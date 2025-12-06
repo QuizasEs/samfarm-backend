@@ -80,7 +80,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <?php if ($_SESSION['rol_smp'] == 1) { ?>
                 <div class="filtro-acciones" style="display:flex; gap:10px; margin-top:10px;">
                     <button type="button" id="btnExportarExcel" class="btn success">
-                        <ion-icon name="download-outline"></ion-icon> Exportar a Excel
+                        <ion-icon name="download-outline"></ion-icon> Excel
                     </button>
                 </div>
             <?php } ?>
