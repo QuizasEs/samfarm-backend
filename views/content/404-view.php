@@ -1,3 +1,14 @@
+<?php
+if (!isset($_SESSION['id_smp'])) {
+?>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
+    </div>
+<?php
+    exit();
+}
+?>
 <div class="404-main" style="background: linear-gradient(135deg, #13386c 0%, #1b4681 50%, #293241 100%);">
         <div class="error-404-page error-404-design active">
             <div class="error-404-heart-monitor">

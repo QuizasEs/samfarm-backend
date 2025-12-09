@@ -70,7 +70,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <div class="filtro-dinamico-buttons">
 
                 <button type="button" class="btn success" onclick="ProveedoresModals.abrirRegistro()">
-                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo
                 </button>
 
                 <button type="button" class="btn success" id="btnExportarExcelProveedor">
@@ -392,6 +392,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     const busqueda = form.querySelector('input[name="busqueda"]');
                     const select1 = form.querySelector('select[name="select1"]');
+                    const select2 = form.querySelector('select[name="select2"]');
+                    const select3 = form.querySelector('select[name="select3"]');
                     const fechaDesde = form.querySelector('input[name="fecha_desde"]');
                     const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
 
@@ -403,6 +405,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     if (select1 && select1.value) {
                         url += '&select1=' + encodeURIComponent(select1.value);
+                    }
+
+                    if (select2 && select2.value) {
+                        url += '&select2=' + encodeURIComponent(select2.value);
+                    }
+
+                    if (select3 && select3.value) {
+                        url += '&select3=' + encodeURIComponent(select3.value);
                     }
 
                     if (fechaDesde && fechaDesde.value) {
@@ -593,7 +603,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">
-        <h2>⛔ Acceso Denegado</h2>
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
         <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>

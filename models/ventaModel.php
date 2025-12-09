@@ -139,20 +139,24 @@ class ventaModel extends mainModel
             SELECT
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
-                COALESCE(lm_ag.min_precio, 0) AS precio_venta,
+                lm.lm_id AS lote_id,
+                lm.lm_numero_lote AS lote,
+                COALESCE(ff.ff_nombre, '') AS presentacion,
+                COALESCE(la.la_nombre_comercial, '') AS linea,
+                lm.lm_precio_venta AS precio_venta,
                 COALESCE(SUM(dv.dv_cantidad), 0) AS vendidos,
-                COALESCE(inv.inv_total_unidades, 0) AS stock
+                lm.lm_cant_actual_unidades AS stock
             FROM medicamento m
             INNER JOIN detalle_venta dv ON dv.med_id = m.med_id
             INNER JOIN ventas v ON v.ve_id = dv.ve_id AND v.su_id = :sucursal_id
-            LEFT JOIN (
-                SELECT med_id, MIN(lm_precio_venta) AS min_precio
-                FROM lote_medicamento
-                WHERE lm_estado = 'activo' AND su_id = :sucursal_id2
-                GROUP BY med_id
-            ) lm_ag ON lm_ag.med_id = m.med_id
-            LEFT JOIN inventarios inv ON inv.med_id = m.med_id AND inv.su_id = :sucursal_id3
-            WHERE lm_ag.min_precio IS NOT NULL AND lm_ag.min_precio > 0
+            INNER JOIN lote_medicamento lm ON lm.med_id = m.med_id AND lm.su_id = :sucursal_id2 AND lm.lm_estado = 'activo' AND lm.lm_precio_venta = (
+                SELECT MIN(lm2.lm_precio_venta)
+                FROM lote_medicamento lm2
+                WHERE lm2.med_id = m.med_id AND lm2.su_id = :sucursal_id2 AND lm2.lm_estado = 'activo'
+            )
+            LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+            LEFT JOIN laboratorios la ON la.la_id = m.la_id
+            WHERE lm.lm_precio_venta IS NOT NULL AND lm.lm_precio_venta > 0
             GROUP BY m.med_id
             ORDER BY vendidos DESC
             LIMIT :limit
@@ -161,7 +165,6 @@ class ventaModel extends mainModel
         $sql->bindValue(":limit", (int)$limit, PDO::PARAM_INT);
         $sql->bindValue(":sucursal_id", (int)$sucursal_id, PDO::PARAM_INT);
         $sql->bindValue(":sucursal_id2", (int)$sucursal_id, PDO::PARAM_INT);
-        $sql->bindValue(":sucursal_id3", (int)$sucursal_id, PDO::PARAM_INT);
 
         $sql->execute();
         return $sql->fetchAll(PDO::FETCH_ASSOC);

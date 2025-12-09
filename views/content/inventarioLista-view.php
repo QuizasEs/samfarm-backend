@@ -478,7 +478,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="btn-content">
+                <div class="modal-btn-content">
                     <a href="javascript:void(0)" class="btn warning" onclick="InventarioModals.cerrar('modalConfiguracionInventario')">
                         Cancelar
                     </a>
@@ -494,7 +494,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">
-        <h2>⛔ Acceso Denegado</h2>
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
         <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>

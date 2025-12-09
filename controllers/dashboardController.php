@@ -54,75 +54,90 @@ class dashboardController extends mainModel
         return (int)$resultado['total'];
     }
 
-    public static function obtener_proximos_vencimientos_controller($su_id = null)
+    public static function obtener_proximos_vencimientos_controller($param_su_id = null)
     {
-        $sql = "SELECT 
-                    m.med_id,
-                    m.med_nombre_quimico,
-                    lm.lm_numero_lote,
-                    lm.lm_fecha_vencimiento,
-                    lm.lm_cant_actual_unidades,
-                    s.su_nombre,
-                    CASE 
-                        WHEN lm.lm_fecha_vencimiento < CURDATE() THEN 'expirado'
-                        WHEN lm.lm_fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'proximo'
-                        ELSE 'disponible'
-                    END as estado_vencimiento
-                FROM lote_medicamento lm
-                JOIN medicamento m ON lm.med_id = m.med_id
-                JOIN sucursales s ON lm.su_id = s.su_id
-                WHERE lm.lm_estado IN ('activo', 'terminado')
-                AND lm.lm_fecha_vencimiento IS NOT NULL
-                AND lm.lm_fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-                AND lm.lm_fecha_vencimiento >= CURDATE()";
-        
+        // Always determine su_id from session for security
+        $su_id = null;
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (in_array($rol, [2, 3])) {
+            $su_id = $_SESSION['sucursal_smp'] ?? null;
+        }
+
+        $sql = "SELECT
+                     m.med_id,
+                     m.med_nombre_quimico,
+                     lm.lm_numero_lote,
+                     lm.lm_fecha_vencimiento,
+                     lm.lm_cant_actual_unidades,
+                     s.su_nombre,
+                     CASE
+                         WHEN lm.lm_fecha_vencimiento < CURDATE() THEN 'expirado'
+                         WHEN lm.lm_fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'proximo'
+                         ELSE 'disponible'
+                     END as estado_vencimiento
+                 FROM lote_medicamento lm
+                 JOIN medicamento m ON lm.med_id = m.med_id
+                 JOIN sucursales s ON lm.su_id = s.su_id
+                 WHERE lm.lm_estado IN ('activo', 'terminado')
+                 AND lm.lm_fecha_vencimiento IS NOT NULL
+                 AND lm.lm_fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+                 AND lm.lm_fecha_vencimiento >= CURDATE()";
+
         if ($su_id) {
             $sql .= " AND lm.su_id = :su_id";
         }
-        
+
         $sql .= " ORDER BY lm.lm_fecha_vencimiento ASC LIMIT 6";
-        
+
         $stmt = mainModel::conectar()->prepare($sql);
-        
+
         if ($su_id) {
             $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
         }
-        
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function obtener_stock_minimo_controller($su_id = null)
+    public static function obtener_stock_minimo_controller($param_su_id = null)
     {
-        $sql = "SELECT 
-                    i.inv_id,
-                    m.med_nombre_quimico,
-                    i.inv_total_unidades,
-                    i.inv_minimo,
-                    s.su_nombre,
-                    CASE 
-                        WHEN i.inv_total_unidades <= 0 THEN 'sin_stock'
-                        WHEN i.inv_total_unidades < i.inv_minimo THEN 'bajo_stock'
-                        ELSE 'adecuado'
-                    END as estado_stock
-                FROM inventarios i
-                JOIN medicamento m ON i.med_id = m.med_id
-                JOIN sucursales s ON i.su_id = s.su_id
-                WHERE i.inv_minimo > 0
-                AND i.inv_total_unidades <= i.inv_minimo";
-        
+        // Always determine su_id from session for security
+        $su_id = null;
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (in_array($rol, [2, 3])) {
+            $su_id = $_SESSION['sucursal_smp'] ?? null;
+        }
+
+        $sql = "SELECT
+                     i.inv_id,
+                     m.med_nombre_quimico,
+                     i.inv_total_unidades,
+                     i.inv_minimo,
+                     s.su_nombre,
+                     CASE
+                         WHEN i.inv_total_unidades <= 0 THEN 'sin_stock'
+                         WHEN i.inv_total_unidades < i.inv_minimo THEN 'bajo_stock'
+                         ELSE 'adecuado'
+                     END as estado_stock
+                 FROM inventarios i
+                 JOIN medicamento m ON i.med_id = m.med_id
+                 JOIN sucursales s ON i.su_id = s.su_id
+                 WHERE i.inv_minimo > 0
+                 AND i.inv_total_unidades > 0
+                 AND i.inv_total_unidades <= i.inv_minimo";
+
         if ($su_id) {
             $sql .= " AND i.su_id = :su_id";
         }
-        
+
         $sql .= " ORDER BY i.inv_total_unidades ASC LIMIT 6";
-        
+
         $stmt = mainModel::conectar()->prepare($sql);
-        
+
         if ($su_id) {
             $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
         }
-        
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

@@ -156,9 +156,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
 <?php } else { ?>
-    <div class="error" style="padding:30px;text-align:center;">
-        <h3>⛔ Acceso Denegado</h3>
-        <p>No tiene permisos para ver esta sección</p>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>
 

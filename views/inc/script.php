@@ -1260,12 +1260,10 @@
             if (dineroHidden) dineroHidden.value = dinero;
         }
 
-        // ✅ FUNCIÓN CORREGIDA: Agregar item considerando med_id + lote_id (lote específico)
         function addItem(m) {
             const idx = findItemIndex(m.med_id, m.lote_id);
 
             if (idx !== -1) {
-                // ✅ Ya existe este lote específico, aumentar cantidad
                 const ex = cart[idx];
                 const nuevaCantidad = ex.cantidad + 1;
 
@@ -1284,7 +1282,6 @@
 
                 ex.cantidad = nuevaCantidad;
             } else {
-                // ✅ No existe este lote, crear nuevo item (aunque sea el mismo medicamento de otro lote)
                 if (m.stock != null && m.stock <= 0) {
                     Swal.fire({
                         title: 'Sin stock',
@@ -1312,7 +1309,6 @@
             renderCart();
         }
 
-        // Búsqueda de medicamentos
         function doSearch(term) {
             if (!term || term.trim().length < 1) {
                 if (resultsContainer) {
@@ -1436,7 +1432,6 @@
             });
         }
 
-        // Event listeners
         if (medSearch) {
             medSearch.addEventListener('input', e => {
                 const term = e.target.value.trim();
@@ -1487,40 +1482,51 @@
 
                     return `<tr data-id="${it.med_id}" class="${stockClass}">
                     <td>${i + 1}</td>
-                    <td>${escapeHtml(it.nombre)}</td>
+                    <td>
+                        <strong>${escapeHtml(it.nombre)}</strong><br>
+                        <small style="color: #666;">Lote: ${it.lote || 'N/A'} | ${it.linea || 'Sin lab'}</small>
+                    </td>
                     <td>Bs. ${formatMoney(it.precio_venta)} ${stockText}</td>
                     <td>
-                        <a href="#" 
-                           class="btn caja btn-add" 
-                           data-id="${it.med_id}" 
-                           data-nombre="${escapeHtml(it.nombre)}" 
+                        <button type="button"
+                           class="btn caja btn-add"
+                           data-id="${it.med_id}"
+                           data-nombre="${escapeHtml(it.nombre)}"
+                           data-lote-id="${it.lote_id}"
+                           data-lote="${it.lote}"
+                           data-presentacion="${it.presentacion}"
+                           data-linea="${it.linea}"
                            data-precio="${it.precio_venta}"
                            data-stock="${stock}">
                             agregar
-                        </a>
+                        </button>
                     </td>
                 </tr>`;
                 }).join('');
             });
 
-            tablaMasVendidos.querySelectorAll('.btn-add').forEach(b => {
-                b.addEventListener('click', e => {
-                    e.preventDefault();
-                    const el = e.currentTarget;
-                    const stock = Number(el.dataset.stock || 0);
+            // Attach event listener to the table for dynamic buttons
+            if (!tablaMasVendidos.dataset.hasListener) {
+                tablaMasVendidos.addEventListener('click', e => {
+                    if (e.target.classList.contains('btn-add')) {
+                        e.preventDefault();
+                        const el = e.target;
+                        const stock = Number(el.dataset.stock || 0);
 
-                    addItem({
-                        med_id: el.dataset.id,
-                        lote_id: null,
-                        lote: null,
-                        nombre: el.dataset.nombre,
-                        presentacion: '',
-                        linea: '',
-                        precio: parseFloat(el.dataset.precio || 0),
-                        stock: stock
-                    });
+                        addItem({
+                            med_id: el.dataset.id,
+                            lote_id: el.dataset.loteId || null,
+                            lote: el.dataset.lote || null,
+                            nombre: el.dataset.nombre,
+                            presentacion: el.dataset.presentacion || '',
+                            linea: el.dataset.linea || '',
+                            precio: parseFloat(el.dataset.precio || 0),
+                            stock: stock
+                        });
+                    }
                 });
-            });
+                tablaMasVendidos.dataset.hasListener = 'true';
+            }
         }
 
         if (inputDinero) inputDinero.addEventListener('input', updateTotals);
@@ -2850,3 +2856,4 @@
     });
 </script>
 <script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>
+<script src="<?php echo SERVER_URL; ?>views/script/notificaciones.js"></script>

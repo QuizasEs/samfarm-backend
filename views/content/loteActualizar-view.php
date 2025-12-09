@@ -1,6 +1,11 @@
 <?php
 if ($_SESSION['rol_smp'] != 1) {
-    echo $lc->forzar_cierre_sesion_controller();
+?>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
+    </div>
+<?php
     exit();
 }
 

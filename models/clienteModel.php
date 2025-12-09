@@ -172,10 +172,65 @@ class clienteModel extends mainModel
         return (int) $stmt->fetchColumn();
     }
 
-    protected static function exportar_clientes_excel_model()
+    protected static function exportar_clientes_excel_model($filtros = [])
     {
+        $whereParts = [];
+        $havingParts = [];
+        $params = [];
+
+        if (!empty($filtros['busqueda'])) {
+            $whereParts[] = "(
+                    c.cl_nombres LIKE :busqueda OR
+                    c.cl_apellido_paterno LIKE :busqueda OR
+                    c.cl_apellido_materno LIKE :busqueda OR
+                    c.cl_carnet LIKE :busqueda OR
+                    c.cl_telefono LIKE :busqueda
+                )";
+            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
+        }
+
+        if (isset($filtros['estado'])) {
+            if ($filtros['estado'] == 'activo') {
+                $whereParts[] = "c.cl_estado = 1";
+            } elseif ($filtros['estado'] == 'inactivo') {
+                $whereParts[] = "c.cl_estado = 0";
+            }
+        }
+
+        if (isset($filtros['con_compras'])) {
+            if ($filtros['con_compras'] == 'con_compras') {
+                $havingParts[] = "COUNT(v.ve_id) > 0";
+            } elseif ($filtros['con_compras'] == 'sin_compras') {
+                $havingParts[] = "COUNT(v.ve_id) = 0";
+            }
+        }
+
+        if (isset($filtros['ultima_compra'])) {
+            $dias = $filtros['ultima_compra'];
+            if ($dias == 'nunca') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) IS NULL";
+            } elseif ($dias == 'mas_90') {
+                $havingParts[] = "MAX(v.ve_fecha_emision) < DATE_SUB(NOW(), INTERVAL 90 DAY)";
+            } else {
+                $havingParts[] = "MAX(v.ve_fecha_emision) >= DATE_SUB(NOW(), INTERVAL " . (int)$dias . " DAY)";
+            }
+        }
+
+        if (isset($filtros['fecha_desde'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+
+        if (isset($filtros['fecha_hasta'])) {
+            $whereParts[] = "DATE(c.cl_creado_en) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+
+        $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
+        $havingSQL = count($havingParts) > 0 ? "HAVING " . implode(' AND ', $havingParts) : "";
+
         $sql = "
-                SELECT 
+                SELECT
                     c.cl_nombres AS 'Nombres',
                     c.cl_apellido_paterno AS 'Apellido Paterno',
                     c.cl_apellido_materno AS 'Apellido Materno',
@@ -185,15 +240,23 @@ class clienteModel extends mainModel
                     c.cl_direccion AS 'Dirección',
                     DATE_FORMAT(c.cl_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
                     COUNT(v.ve_id) AS 'Total Compras',
+                    FORMAT(IFNULL(SUM(v.ve_total), 0), 2) AS 'Monto Total',
                     IFNULL(DATE_FORMAT(MAX(v.ve_fecha_emision), '%d/%m/%Y'), 'Nunca') AS 'Última Compra',
                     CASE WHEN c.cl_estado = 1 THEN 'ACTIVO' ELSE 'INACTIVO' END AS 'Estado'
                 FROM clientes c
                 LEFT JOIN ventas v ON c.cl_id = v.cl_id
+                $whereSQL
                 GROUP BY c.cl_id
+                $havingSQL
                 ORDER BY c.cl_creado_en DESC
             ";
 
         $stmt = self::conectar()->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
         $stmt->execute();
         return $stmt;
     }

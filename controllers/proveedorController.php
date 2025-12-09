@@ -242,6 +242,14 @@ class proveedorController extends proveedorModel
             $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
         }
 
+        if (isset($_GET['select2']) && !empty($_GET['select2'])) {
+            $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
+        }
+
+        if (isset($_GET['select3']) && !empty($_GET['select3'])) {
+            $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
+        }
+
         if (isset($_GET['fecha_desde']) && !empty($_GET['fecha_desde'])) {
             $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
         }

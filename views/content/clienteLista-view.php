@@ -1,5 +1,5 @@
 <?php
-if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
+if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2 || $_SESSION['rol_smp'] == 3)) {
 ?>
 
     <div class="container tabla-dinamica"
@@ -69,15 +69,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <button type="button" class="btn success" onclick="ClientesModals.abrirModalNuevo()">
                     <ion-icon name="person-add-outline"></ion-icon> Nuevo
                 </button>
-
+                <?php if ($_SESSION['rol_smp'] != 3) { ?>
                 <button type="button" class="btn success" id="btnExportarExcelClientes">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
                 <button type="button" class="btn primary" id="btnExportarPDFClientes">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
+                <?php } ?>
             </div>
-
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -430,18 +430,22 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalDetalle()">
                         Cerrar
                     </a>
+                    <?php if ($_SESSION['rol_smp'] != 3) { ?>
                     <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalle">
                         <ion-icon name="power-outline"></ion-icon>Estado
                     </a>
+                    <?php } ?>
                     <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.editarDesdeDetalle()">
                         <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
+                    <?php if ($_SESSION['rol_smp'] != 3) { ?>
                     <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
                         <ion-icon name="document-text-outline"></ion-icon> PDF
                     </a>
                     <a href="javascript:void(0)" class="btn default" onclick="ClientesModals.verHistorialCompleto()">
                         <ion-icon name="time-outline"></ion-icon> Historial
                     </a>
+                    <?php } ?>
                 </div>
             </div>
         </div>
@@ -1065,7 +1069,28 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             if (btnExcelClientes) {
                 btnExcelClientes.addEventListener('click', function() {
-                    const url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_excel';
+                    const estadoSelect = document.querySelector('select[name="select1"]');
+                    const comprasSelect = document.querySelector('select[name="select2"]');
+                    const ultimaCompraSelect = document.querySelector('select[name="select3"]');
+                    const busquedaInput = document.querySelector('input[name="busqueda"]');
+                    const fechaDesdeInput = document.querySelector('input[name="fecha_desde"]');
+                    const fechaHastaInput = document.querySelector('input[name="fecha_hasta"]');
+
+                    const estado = estadoSelect ? estadoSelect.value : '';
+                    const compras = comprasSelect ? comprasSelect.value : '';
+                    const ultimaCompra = ultimaCompraSelect ? ultimaCompraSelect.value : '';
+                    const busqueda = busquedaInput ? busquedaInput.value : '';
+                    const fechaDesde = fechaDesdeInput ? fechaDesdeInput.value : '';
+                    const fechaHasta = fechaHastaInput ? fechaHastaInput.value : '';
+
+                    let url = '<?php echo SERVER_URL; ?>ajax/clientesAjax.php?clientesAjax=exportar_excel';
+
+                    if (estado) url += '&select1=' + encodeURIComponent(estado);
+                    if (compras) url += '&select2=' + encodeURIComponent(compras);
+                    if (ultimaCompra) url += '&select3=' + encodeURIComponent(ultimaCompra);
+                    if (busqueda) url += '&busqueda=' + encodeURIComponent(busqueda);
+                    if (fechaDesde) url += '&fecha_desde=' + encodeURIComponent(fechaDesde);
+                    if (fechaHasta) url += '&fecha_hasta=' + encodeURIComponent(fechaHasta);
 
                     console.log('Descargando Excel:', url);
 

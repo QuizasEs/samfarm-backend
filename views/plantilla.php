@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-server-url="<?php echo SERVER_URL; ?>ajax/notificacionesAjax.php">
 
 <?php include "inc/head.php"; ?>
 

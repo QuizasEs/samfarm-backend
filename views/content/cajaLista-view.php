@@ -1,5 +1,5 @@
 <?php
-if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
+if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
     <div class="container tabla-dinamica"

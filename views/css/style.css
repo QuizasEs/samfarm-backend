@@ -4691,3 +4691,327 @@ input[type="date"]:focus {
 }
  */
 /**************************************lista*********************************************/
+
+.notificacion-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notificacion {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+}
+
+.notificacion ion-icon {
+    font-size: 24px;
+    color: var(--accent-primary, #333);
+    transition: all 0.3s ease;
+}
+
+.notificacion:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+.notificacion:hover ion-icon {
+    color: var(--accent-primary, #2196F3);
+    animation: bell-ring 0.5s ease;
+}
+
+@keyframes bell-ring {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    10%,
+    30% {
+        transform: rotate(-10deg);
+    }
+    20%,
+    40% {
+        transform: rotate(10deg);
+    }
+}
+
+.notificacion-badge {
+    position: absolute;
+    top: 5px;
+    right: 0px;
+    background: #f44336;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.notificacion-modal {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    z-index: 1000;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.dark .notificacion-modal {
+    background: var(--dark-bg-secondary);
+    border-color: var(--dark-border-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notificacion-modal.active {
+    display: flex;
+}
+
+.notificacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.dark .notificacion-header {
+    border-bottom-color: var(--dark-border-dark);
+}
+
+.notificacion-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.dark .notificacion-header h3 {
+    color: var(--dark-text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.dark .modal-close {
+    color: var(--dark-text-secondary);
+}
+
+.dark .modal-close:hover {
+    color: var(--dark-text-primary);
+}
+
+.notificacion-list {
+    overflow-y: auto;
+    flex: 1;
+    max-height: 380px;
+}
+
+.notificacion-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notificacion-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notificacion-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.notificacion-list::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+.notificacion-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    position: relative;
+}
+
+.notificacion-item:hover {
+    background: var(--bg-secondary);
+}
+
+.dark .notificacion-item {
+    border-bottom-color: var(--dark-border-dark);
+}
+
+.dark .notificacion-item:hover {
+    background: var(--dark-bg-primary);
+}
+
+.notificacion-item.no-leida {
+    background: rgba(100, 150, 255, 0.05);
+}
+
+.dark .notificacion-item.no-leida {
+    background: rgba(100, 150, 255, 0.1);
+}
+
+.notificacion-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    font-size: 18px;
+}
+
+.dark .notificacion-icon {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.notificacion-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notificacion-titulo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.dark .notificacion-titulo {
+    color: var(--dark-text-primary);
+}
+
+.notificacion-mensaje {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.dark .notificacion-mensaje {
+    color: var(--dark-text-secondary);
+}
+
+.notificacion-fecha {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.notificacion-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-light);
+}
+
+.dark .notificacion-footer {
+    border-top-color: var(--dark-border-dark);
+}
+
+.btn-marcar-todas {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-marcar-todas:hover {
+    background: var(--btn-default-hover);
+}
+
+.dark .btn-marcar-todas {
+    background: var(--dark-accent-primary);
+}
+
+.dark .btn-marcar-todas:hover {
+    background: #1b5fa9;
+}
+
+.notificacion-discard {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 18px;
+    padding: 4px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    transition: color 0.3s ease;
+}
+.dark .notificacion-discard {
+
+    color: var(--dark-text-secondary);
+
+}
+
+.notificacion-item:hover .notificacion-mensaje {
+    overflow: visible;
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+    display: block;
+    white-space: normal;
+}
+
+.notificacion-item:hover .notificacion-discard {
+    display: block;
+}
+
+.notificacion-discard:hover {
+    color: var(--btn-danger);
+}
+
+.notificacion-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.notificacion-empty ion-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}

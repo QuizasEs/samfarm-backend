@@ -2,7 +2,7 @@
     <h2><ion-icon name="desktop-outline"></ion-icon> dashboard</h2>
 </div>
 
-<?php if ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2) {
+<?php if (in_array($_SESSION['rol_smp'], [1, 2, 3 ])) {
     require_once './controllers/dashboardController.php';
 
     $su_id = null;
@@ -99,6 +99,7 @@
         </div>
     <?php } ?>
 
+    <?php if (in_array($_SESSION['rol_smp'], [1, 2])) { ?>
     <!-- tabla de fechas de vencimiento -->
     <div class="sub-title">
         <h2>proximas fechas de vencimiento</h2>
@@ -218,6 +219,7 @@
             <div id="chartStockMinimo" style="width: 100%; height: 400px;"></div>
         </div>
     </div>
+    <?php } ?>
 
     <!-- tabla de productos mas vendidos -->
     <div class="sub-title">
@@ -692,9 +694,9 @@
         }
     </script>
 
-<?php } else { ?>
-    <div class="sub-title" style="text-align: center; padding: 40px;">
-        <h2>Acceso no autorizado</h2>
-        <p>Su rol no tiene permisos para ver el dashboard</p>
+    <?php } else { ?>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>

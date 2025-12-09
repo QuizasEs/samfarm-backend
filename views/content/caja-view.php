@@ -2,6 +2,13 @@
 
 if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
     /* en caso que no se cuente con un rol correspodiente */
+?>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
+    </div>
+<?php
+    exit();
 } else {
     /* preguntamos si el cliente de la session tiene cajas activas a su id */
     require_once "./controllers/ventaController.php";

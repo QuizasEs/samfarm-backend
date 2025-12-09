@@ -277,7 +277,7 @@ class loteController extends loteModel
                         : $estado_html)
                     . '</td>
                         <td class="buttons">
-                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_cantidad_actual'] > 0
+                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_cantidad_actual'] > 0 && $rol_usuario == 1
                                 ? '<a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>'
                                 : '<span style="color:#999;font-size:12px;">No disponible</span>')
                             . '

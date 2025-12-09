@@ -12,8 +12,8 @@ $response = ['success' => false, 'data' => null, 'message' => ''];
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $su_id = null;
-        if (isset($_SESSION['su_smp'])) {
-            $su_id = $_SESSION['su_smp'];
+        if (isset($_SESSION['sucursal_smp'])) {
+            $su_id = $_SESSION['sucursal_smp'];
         }
 
         if (isset($_GET['dashboardAjax'])) {

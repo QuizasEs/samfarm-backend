@@ -1,5 +1,5 @@
 <?php
-if (isset($_SESSION['id_smp'])) {
+if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
@@ -78,7 +78,7 @@ if (isset($_SESSION['id_smp'])) {
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">
-        <h2>Acceso Denegado</h2>
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
         <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>

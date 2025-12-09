@@ -14,13 +14,6 @@ class clienteController extends clienteModel
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
 
-        if ($rol_usuario == 3) {
-            return '<div class="error" style="padding:30px;text-align:center;">
-                            <h3><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h3>
-                            <p>No tiene permisos para ver clientes</p>
-                        </div>';
-        }
-
         $pagina = mainModel::limpiar_cadena($pagina);
         $registros = mainModel::limpiar_cadena($registros);
         $url = mainModel::limpiar_cadena($url);
@@ -155,25 +148,25 @@ class clienteController extends clienteModel
                             <td style="text-align:center;"><strong style="color:#1976D2;">' . $total_compras . '</strong></td>
                             <td>' . $estado_html . '</td>
                             <td class="accion-buttons">
-                                <a href="javascript:void(0)" 
-                                class="btn default" 
+                                ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
+                                class="btn default"
                                 title="Ver detalle"
                                 onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
                                     <ion-icon name="eye-outline"></ion-icon> Detalle
-                                </a>
-                                <a href="javascript:void(0)" 
-                                class="btn primary" 
+                                </a>' : '') . '
+                                <a href="javascript:void(0)"
+                                class="btn primary"
                                 title="Editar"
                                 onclick="ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
                                     <ion-icon name="create-outline"></ion-icon> Editar
                                 </a>
-                                <a href="javascript:void(0)" 
-                                class="btn ' . ($row['cl_estado'] == 1 ? 'danger' : 'success') . '" 
+                                ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
+                                class="btn ' . ($row['cl_estado'] == 1 ? 'danger' : 'success') . '"
                                 title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
                                 onclick="ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
-                                    <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon> 
+                                    <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon>
                                     ' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '
-                                </a>
+                                </a>' : '') . '
                             </td>
                         </tr>
                     ';
@@ -205,12 +198,55 @@ class clienteController extends clienteModel
             return;
         }
 
+        // Recibir filtros de la URL
+        $filtros = [];
+
+        $busqueda = isset($_GET['busqueda']) ? mainModel::limpiar_cadena($_GET['busqueda']) : '';
+        $select1 = isset($_GET['select1']) ? mainModel::limpiar_cadena($_GET['select1']) : '';
+        $select2 = isset($_GET['select2']) ? mainModel::limpiar_cadena($_GET['select2']) : '';
+        $select3 = isset($_GET['select3']) ? mainModel::limpiar_cadena($_GET['select3']) : '';
+        $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : '';
+        $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : '';
+
+        if (!empty($busqueda)) {
+            $filtros['busqueda'] = $busqueda;
+        }
+
+        if (!empty($select1)) {
+            $estados_validos = ['activo', 'inactivo'];
+            if (in_array($select1, $estados_validos)) {
+                $filtros['estado'] = $select1;
+            }
+        }
+
+        if (!empty($select2)) {
+            $compras_validas = ['con_compras', 'sin_compras'];
+            if (in_array($select2, $compras_validas)) {
+                $filtros['con_compras'] = $select2;
+            }
+        }
+
+        if (!empty($select3)) {
+            $ultima_compra_valida = ['7', '30', '90', 'mas_90', 'nunca'];
+            if (in_array($select3, $ultima_compra_valida)) {
+                $filtros['ultima_compra'] = $select3;
+            }
+        }
+
+        if (!empty($fecha_desde) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_desde)) {
+            $filtros['fecha_desde'] = $fecha_desde;
+        }
+
+        if (!empty($fecha_hasta) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_hasta)) {
+            $filtros['fecha_hasta'] = $fecha_hasta;
+        }
+
         try {
-            $stmt = self::exportar_clientes_excel_model();
+            $stmt = self::exportar_clientes_excel_model($filtros);
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($datos)) {
-                echo "No hay datos para exportar";
+                echo "No hay datos para exportar con los filtros aplicados";
                 return;
             }
 
@@ -222,39 +258,320 @@ class clienteController extends clienteModel
             header('Pragma: no-cache');
             header('Expires: 0');
 
+            // Crear tabla HTML con estilos elegantes
             echo '<!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                </head>
-                <body>';
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                /* Estilos generales */
+                body {
+                    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+                    font-size: 11pt;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    margin: 0;
+                    padding: 20px;
+                }
 
-            echo '<div style="text-align:center;padding:20px;background:#2c3e50;color:white;">
-                        <h1>REPORTE DE CLIENTES - SAMFARM PHARMA</h1>
-                        <p>Fecha de generación: ' . date('d/m/Y H:i:s') . '</p>
-                        <p>Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '</p>
-                        <p>Total de registros: ' . count($datos) . '</p>
+                .container {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin: 0 auto;
+                    max-width: 1200px;
+                }
+
+                /* Encabezado elegante */
+                .header {
+                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                    color: black;
+                    font-size: 20pt;
+                    font-weight: 300;
+                    text-align: center;
+                    padding: 25px;
+                    margin-bottom: 0;
+                    letter-spacing: 1px;
+                    position: relative;
+                }
+
+                .header::after {
+                    content: "";
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
+                }
+
+                /* Panel de información */
+                .info {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    padding: 20px;
+                    border-bottom: 1px solid #dee2e6;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    font-size: 10pt;
+                }
+
+                .info-item {
+                    background: white;
+                    padding: 12px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                    border-left: 4px solid #3498db;
+                }
+
+                .info-item strong {
+                    color: #2c3e50;
+                    display: block;
+                    margin-bottom: 5px;
+                    font-size: 9pt;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                /* Tabla moderna */
+                table {
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    width: 100%;
+                    font-size: 10pt;
+                    background: white;
+                }
+
+                th {
+                    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+                    color: black;
+                    font-weight: 500;
+                    text-align: center;
+                    padding: 14px 10px;
+                    border: none;
+                    position: relative;
+                    font-size: 9pt;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                }
+
+                th::after {
+                    content: "";
+                    position: absolute;
+                    right: 0;
+                    top: 25%;
+                    height: 50%;
+                    width: 1px;
+                    background: rgba(255,255,255,0.3);
+                }
+
+                th:last-child::after {
+                    display: none;
+                }
+
+                td {
+                    padding: 12px 10px;
+                    border-bottom: 1px solid #f8f9fa;
+                    text-align: left;
+                    transition: all 0.2s ease;
+                }
+
+                tr:hover td {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+
+                /* Estilos numéricos mejorados */
+                .numero {
+                    text-align: right;
+                    font-weight: 600;
+                    font-family: "Courier New", monospace;
+                    color: #2c3e50;
+                }
+
+                .moneda {
+                    text-align: right;
+                    font-weight: 700;
+                    font-family: "Courier New", monospace;
+                    color: #27ae60;
+                    background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+                    border-left: 3px solid #27ae60;
+                }
+
+                /* Estados con diseño moderno */
+                .estado-activo {
+                    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+                    color: #2e7d32;
+                    font-weight: 600;
+                    text-align: center;
+                    border-radius: 20px;
+                    padding: 6px 12px;
+                    margin: 2px;
+                    border: 1px solid #4caf50;
+                }
+
+                .estado-inactivo {
+                    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+                    color: #c62828;
+                    font-weight: 600;
+                    text-align: center;
+                    border-radius: 20px;
+                    padding: 6px 12px;
+                    margin: 2px;
+                    border: 1px solid #ef5350;
+                }
+
+                /* Fila de totales premium */
+                .total-row {
+                    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                    color: #001670;
+                    font-weight: 600;
+                    font-size: 11pt;
+                }
+
+                .total-row td {
+                    border: none;
+                    padding: 16px 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .total-row .numero, .total-row .moneda {
+                    color: #001670;
+                    background: none;
+                    border-left: none;
+                    font-size: 11pt;
+                }
+
+                /* Pie de página elegante */
+                .footer {
+                    margin-top: 0;
+                    padding: 25px;
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    border-top: 1px solid #dee2e6;
+                    font-size: 9pt;
+                    color: #6c757d;
+                    text-align: center;
+                }
+
+                .footer strong {
+                    color: #2c3e50;
+                    display: block;
+                    margin-bottom: 8px;
+                    font-size: 10pt;
+                }
+
+                /* Efectos de separación */
+                tbody tr:not(.total-row) {
+                    border-left: 3px solid transparent;
+                    transition: border-left 0.3s ease;
+                }
+
+                tbody tr:not(.total-row):hover {
+                    border-left: 3px solid #3498db;
+                }
+
+                /* Responsive para Excel */
+                @media print {
+                    body { background: white; }
+                    .container { box-shadow: none; }
+                }
+            </style>
+        </head>
+        <body>';
+
+            // Encabezado elegante
+            echo '<div class="container">
+                    <div class="header">
+                        👥 REPORTE DE CLIENTES - SAMFARM PHARMA
                     </div>';
 
-            echo '<table border="1" style="width:100%;border-collapse:collapse;">';
+            // Información del reporte en formato grid
+            $filtros_aplicados = [];
+            if (!empty($filtros['busqueda'])) $filtros_aplicados[] = "Búsqueda: '{$filtros['busqueda']}'";
+            if (!empty($filtros['estado'])) $filtros_aplicados[] = "Estado: " . ucfirst($filtros['estado']);
+            if (!empty($filtros['con_compras'])) $filtros_aplicados[] = "Compras: " . str_replace('_', ' ', $filtros['con_compras']);
+            if (!empty($filtros['ultima_compra'])) $filtros_aplicados[] = "Última compra: " . str_replace('_', ' ', $filtros['ultima_compra']);
+            if (!empty($filtros['fecha_desde'])) $filtros_aplicados[] = "Desde: " . date('d/m/Y', strtotime($filtros['fecha_desde']));
+            if (!empty($filtros['fecha_hasta'])) $filtros_aplicados[] = "Hasta: " . date('d/m/Y', strtotime($filtros['fecha_hasta']));
 
-            echo '<thead style="background:#34495e;color:white;"><tr>';
+            echo '<div class="info">
+                        <div class="info-item">
+                            <strong>📅 Fecha de Generación</strong>
+                            ' . date('d/m/Y H:i:s') . '
+                        </div>
+                        <div class="info-item">
+                            <strong>👤 Usuario</strong>
+                            ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
+                        </div>
+                        <div class="info-item">
+                            <strong>📋 Total de Registros</strong>
+                            ' . count($datos) . '
+                        </div>
+                        <div class="info-item">
+                            <strong>🔍 Filtros Aplicados</strong>
+                            ' . (count($filtros_aplicados) > 0 ? implode('<br>', $filtros_aplicados) : 'Sin filtros') . '
+                        </div>
+                    </div>';
+
+            // Tabla de datos
+            echo '<table>';
+
+            // Encabezados
+            echo '<thead><tr>';
             $headers = array_keys($datos[0]);
             foreach ($headers as $header) {
-                echo '<th style="padding:10px;">' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
+                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
             }
             echo '</tr></thead>';
 
+            // Cuerpo de la tabla
             echo '<tbody>';
+
+            $total_compras = 0;
+            $total_monto = 0;
+
             foreach ($datos as $row) {
                 echo '<tr>';
+
                 foreach ($headers as $key) {
                     $valor = $row[$key];
-                    echo '<td style="padding:8px;">' . htmlspecialchars($valor ?? '-') . '</td>';
+
+                    // Aplicar formato según el campo
+                    if ($key === 'Total Compras') {
+                        echo '<td class="numero">' . number_format($valor, 0, ',', '.') . '</td>';
+                        $total_compras += $valor;
+                    } elseif ($key === 'Monto Total') {
+                        echo '<td class="moneda">Bs ' . number_format(floatval(str_replace(',', '', $valor)), 2, ',', '.') . '</td>';
+                        $total_monto += floatval(str_replace(',', '', $valor));
+                    } elseif ($key === 'Estado') {
+                        $clase = 'estado-' . strtolower($valor);
+                        echo '<td class="' . $clase . '">' . $valor . '</td>';
+                    } else {
+                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
+                    }
                 }
+
                 echo '</tr>';
             }
+
+            // Fila de totales elegante
+            echo '<tr class="total-row">
+                    <td colspan="8" style="text-align: right; padding-right: 20px;">📊 TOTALES GENERALES:</td>
+                    <td class="numero">' . number_format($total_compras, 0, ',', '.') . '</td>
+                    <td class="moneda">Bs ' . number_format($total_monto, 2, ',', '.') . '</td>
+                    <td colspan="2"></td>
+                </tr>';
+
             echo '</tbody></table>';
+
+            // Pie de página elegante
+            echo '<div class="footer">
+                        <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>
+                        Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
+                    </div>
+                </div>';
 
             echo '</body></html>';
 
@@ -793,6 +1110,13 @@ class clienteController extends clienteModel
 
     public function exportar_pdf_detalle_controller()
     {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario == 3) {
+            echo "Acceso denegado";
+            return;
+        }
+
         $cl_id = isset($_GET['cl_id']) ? (int)$_GET['cl_id'] : 0;
 
         if ($cl_id <= 0) {

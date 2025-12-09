@@ -1,5 +1,5 @@
 <?php
-if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
+if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     require_once "./controllers/MedicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
@@ -162,6 +162,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             const inputBusqueda = document.getElementById('busquedaMedicamento');
             inputBusqueda.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
                     buscarMedicamentos(1);
                 }
             });
@@ -496,8 +497,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
     </script>
 
 <?php } else { ?>
-    <div class="error" style="padding:30px;text-align:center;">
-        <h3>Acceso Denegado</h3>
-        <p>No tiene permisos para ver esta sección</p>
+    <div style="text-align: center; padding: 60px;">
+        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
+        <p>No tiene permisos para acceder a esta sección.</p>
     </div>
 <?php } ?>

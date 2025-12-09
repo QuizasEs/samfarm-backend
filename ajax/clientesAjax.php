@@ -80,7 +80,11 @@ if (isset($_POST['clientesAjax'])) {
     }
 
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
-    if ($rol_usuario == 3) {
+
+    $valor = $_POST['clientesAjax'];
+
+    // Actions denied for role 3
+    if ($rol_usuario == 3 && in_array($valor, ['toggle_estado', 'historial_completo'])) {
         echo json_encode([
             "Alerta" => "simple",
             "Titulo" => "Acceso denegado",
@@ -89,8 +93,6 @@ if (isset($_POST['clientesAjax'])) {
         ]);
         exit();
     }
-
-    $valor = $_POST['clientesAjax'];
 
     require_once "../controllers/clienteController.php";
     $ins_cliente = new clienteController();
