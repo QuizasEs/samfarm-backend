@@ -206,6 +206,8 @@ class devolucionController extends devolucionModel
                 $total_devolucion += ($cantidad * $precio_unitario);
                 $cantidad_total += $cantidad;
 
+                $temp_ref = "temp_dev_" . $usuario_id . "_" . $ve_id . "_" . time() . "_" . mt_rand(1000, 9999);
+
                 $datos_baja = [
                     'lm_id' => $lm_id,
                     'med_id' => $med_id,
@@ -213,7 +215,7 @@ class devolucionController extends devolucionModel
                     'us_id' => $usuario_id,
                     'mi_cantidad' => $cantidad,
                     'mi_unidad' => 'unidad',
-                    'mi_referencia_id' => 0,
+                    'mi_referencia_id' => $temp_ref,
                     'mi_motivo' => "Devolución: {$motivo}"
                 ];
 
@@ -222,59 +224,16 @@ class devolucionController extends devolucionModel
                     throw new Exception("No se pudo registrar movimiento de baja");
                 }
 
-                $descuento_lote_ok = self::descontar_lote_devolucion_model($lm_id, $cantidad);
-                if (!$descuento_lote_ok) {
-                    throw new Exception("No se pudo descontar del lote medicamento");
-                }
-
-                $inv_ok = self::descontar_inventario_consolidado_devolucion_model($med_id, $su_id, $cantidad, $precio_unitario);
-                if (!$inv_ok) {
-                    throw new Exception("No se pudo actualizar inventario consolidado en devolución");
-                }
-
+                // Solo por devoluciones con cambio: restar unidades del lote original proporcionalmente
                 if ($tipo === 'cambio') {
-                    $stmt_lotes = self::obtener_lotes_disponibles_model($med_id, $su_id);
-                    $lotes_disponibles = $stmt_lotes->fetchAll(PDO::FETCH_ASSOC);
-
-                    if (count($lotes_disponibles) === 0) {
-                        throw new Exception("No hay lotes disponibles para el cambio del medicamento ID: {$med_id}");
+                    $descuento_lote_ok = self::descontar_lote_cambio_devolucion_model($lm_id, $cantidad);
+                    if (!$descuento_lote_ok) {
+                        throw new Exception("Stock insuficiente para cambio del lote {$lm_id}");
                     }
 
-                    $cantidad_pendiente = $cantidad;
-                    foreach ($lotes_disponibles as $lote) {
-                        if ($cantidad_pendiente <= 0) break;
-
-                        $lm_cambio_id = (int)$lote['lm_id'];
-                        $stock_disponible = (int)$lote['lm_cant_actual_unidades'];
-
-                        $cantidad_usar = min($stock_disponible, $cantidad_pendiente);
-
-                        $descuento_ok = self::descontar_lote_cambio_model($lm_cambio_id, $cantidad_usar);
-                        if (!$descuento_ok) {
-                            throw new Exception("No se pudo descontar del lote {$lm_cambio_id}");
-                        }
-
-                        $datos_cambio = [
-                            'lm_id' => $lm_cambio_id,
-                            'med_id' => $med_id,
-                            'su_id' => $su_id,
-                            'us_id' => $usuario_id,
-                            'mi_cantidad' => $cantidad_usar,
-                            'mi_unidad' => 'unidad',
-                            'mi_referencia_id' => 0,
-                            'mi_motivo' => "Cambio por devolución: {$motivo}"
-                        ];
-
-                        $cambio_result = self::registrar_movimiento_cambio_model($datos_cambio);
-                        if (!$cambio_result || $cambio_result->rowCount() <= 0) {
-                            throw new Exception("No se pudo registrar movimiento de cambio");
-                        }
-
-                        $cantidad_pendiente -= $cantidad_usar;
-                    }
-
-                    if ($cantidad_pendiente > 0) {
-                        throw new Exception("Stock insuficiente para completar el cambio");
+                    $inv_ok = self::descontar_inventario_consolidado_devolucion_model($med_id, $su_id, $cantidad, $precio_unitario, $lm_id);
+                    if (!$inv_ok) {
+                        throw new Exception("No se pudo actualizar inventario consolidado en cambio");
                     }
                 }
 
@@ -299,7 +258,35 @@ class devolucionController extends devolucionModel
                 throw new Exception("No se pudo registrar la devolución");
             }
 
-            $db->exec("UPDATE movimiento_inventario SET mi_referencia_id = {$dev_id} WHERE mi_referencia_id = 0 AND mi_referencia_tipo IN ('devolucion', 'cambio') AND us_id = {$usuario_id}");
+            // Actualizar referencias temporales específicas de esta devolución (solo registros creados en esta transacción)
+            $stmt_update_refs = $db->prepare("
+                UPDATE movimiento_inventario
+                SET mi_referencia_id = :dev_id, mi_referencia_tipo = 'devolucion'
+                WHERE mi_referencia_id LIKE :temp_pattern
+                AND us_id = :us_id
+                AND mi_referencia_tipo = 'devolucion'
+                AND mi_creado_en >= DATE_SUB(NOW(), INTERVAL 30 SECOND)
+            ");
+            $stmt_update_refs->execute([
+                ':dev_id' => $dev_id,
+                ':temp_pattern' => "temp_dev_{$usuario_id}_{$ve_id}%",
+                ':us_id' => $usuario_id
+            ]);
+
+            // Actualizar referencias de cambio si las hay (solo registros de esta transacción)
+            $stmt_update_cambios = $db->prepare("
+                UPDATE movimiento_inventario
+                SET mi_referencia_id = :dev_id, mi_referencia_tipo = 'cambio'
+                WHERE mi_referencia_id LIKE :temp_pattern_cambio
+                AND us_id = :us_id
+                AND mi_referencia_tipo = 'cambio'
+                AND mi_creado_en >= DATE_SUB(NOW(), INTERVAL 30 SECOND)
+            ");
+            $stmt_update_cambios->execute([
+                ':dev_id' => $dev_id,
+                ':temp_pattern_cambio' => "temp_cambio_{$usuario_id}_{$ve_id}%",
+                ':us_id' => $usuario_id
+            ]);
 
             $venta_result = self::actualizar_estado_venta_model($ve_id);
             if (!$venta_result || $venta_result->rowCount() <= 0) {

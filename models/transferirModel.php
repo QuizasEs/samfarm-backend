@@ -4,10 +4,10 @@ require_once "mainModel.php";
 class transferirModel extends mainModel
 {
 
-    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $laboratorio, $fecha_venc_max)
+    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $laboratorio, $fecha_venc_max, $mostrar_todos = false)
     {
         $sql = "
-                    SELECT 
+                    SELECT
                         lm.lm_id,
                         lm.lm_numero_lote,
                         lm.lm_cant_actual_cajas,
@@ -19,6 +19,11 @@ class transferirModel extends mainModel
                         lm.lm_fecha_vencimiento,
                         lm.pr_id,
                         lm.pr_id_compra,
+                        lm.lm_origen_id,
+                        CASE
+                            WHEN lm.lm_origen_id IS NULL THEN 1
+                            ELSE 0
+                        END AS transferible,
                         DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_vencer,
                         m.med_id,
                         m.med_nombre_quimico,
@@ -137,23 +142,47 @@ class transferirModel extends mainModel
         return $stmt;
     }
 
-    protected static function descontar_inventario_model($med_id, $su_id, $cajas, $unidades, $valorado)
+    protected static function descontar_inventario_model($med_id, $su_id, $cajas, $unidades, $valorado, $lm_id = null)
     {
-        $sql = "UPDATE inventarios
-                        SET inv_total_cajas = inv_total_cajas - :cajas,
-                            inv_total_unidades = inv_total_unidades - :unidades,
-                            inv_total_valorado = inv_total_valorado - :valorado,
-                            inv_actualizado_en = NOW()
-                        WHERE med_id = :med_id AND su_id = :su_id";
+        // Si tenemos lm_id específico, calcular cajas proporcionalmente al lote
+        if ($lm_id) {
+            $sql = "UPDATE inventarios
+                    SET inv_total_cajas = GREATEST(0, inv_total_cajas - CEIL(:unidades / COALESCE((
+                        SELECT (lm_cant_blister * lm_cant_unidad)
+                        FROM lote_medicamento
+                        WHERE lm_id = :lm_id
+                    ), 1))),
+                        inv_total_unidades = GREATEST(0, inv_total_unidades - :unidades),
+                        inv_total_valorado = GREATEST(0, inv_total_valorado - :valorado),
+                        inv_actualizado_en = NOW()
+                    WHERE med_id = :med_id AND su_id = :su_id";
 
-        $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->execute([
-            ':cajas' => $cajas,
-            ':unidades' => $unidades,
-            ':valorado' => $valorado,
-            ':med_id' => $med_id,
-            ':su_id' => $su_id
-        ]);
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->execute([
+                ':unidades' => $unidades,
+                ':valorado' => $valorado,
+                ':lm_id' => $lm_id,
+                ':med_id' => $med_id,
+                ':su_id' => $su_id
+            ]);
+        } else {
+            // Fallback: sustracción directa (para casos donde no se especifica lote)
+            $sql = "UPDATE inventarios
+                    SET inv_total_cajas = GREATEST(0, inv_total_cajas - :cajas),
+                        inv_total_unidades = GREATEST(0, inv_total_unidades - :unidades),
+                        inv_total_valorado = GREATEST(0, inv_total_valorado - :valorado),
+                        inv_actualizado_en = NOW()
+                    WHERE med_id = :med_id AND su_id = :su_id";
+
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->execute([
+                ':cajas' => $cajas,
+                ':unidades' => $unidades,
+                ':valorado' => $valorado,
+                ':med_id' => $med_id,
+                ':su_id' => $su_id
+            ]);
+        }
 
         return $stmt;
     }

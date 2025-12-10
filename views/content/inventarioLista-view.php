@@ -387,7 +387,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="InventarioModals.cerrar('modalDetalleInventario')">
+                    <a href="javascript:void(0)" class="btn warning" onclick="InventarioModals.cerrar('modalDetalleInventario')">
                         Cerrar
                     </a>
                 </div>
@@ -435,7 +435,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn default" onclick="InventarioModals.cerrar('modalHistorialInventario')">
+                    <a href="javascript:void(0)" class="btn warning" onclick="InventarioModals.cerrar('modalHistorialInventario')">
                         Cerrar
                     </a>
                 </div>

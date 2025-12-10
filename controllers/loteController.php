@@ -132,8 +132,10 @@ class loteController extends loteModel
                 m.med_principio_activo,
                 p.pr_nombres,
                 s.su_nombre,
-                lm.lm_cant_caja AS lm_cantidad_inicial,
-                lm.lm_cant_actual_unidades AS lm_cantidad_actual,
+                lm.lm_cant_caja AS lm_cajas_inicial,
+                lm.lm_total_unidades AS lm_unidades_inicial,
+                lm.lm_cant_actual_cajas AS lm_cajas_actual,
+                lm.lm_cant_actual_unidades AS lm_unidades_actual,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_fecha_ingreso,
@@ -184,7 +186,7 @@ class loteController extends loteModel
 
         // Determinar si mostrar columna SUCURSAL (solo para admin)
         $mostrar_columna_sucursal = ($rol_usuario == 1);
-        $colspan_total = $mostrar_columna_sucursal ? 14 : 13;
+        $colspan_total = $mostrar_columna_sucursal ? 16 : 15;
 
         $tabla .= '
             <div class="table-container">
@@ -196,8 +198,10 @@ class loteController extends loteModel
                             <th>MEDICAMENTO</th>
                             <th>PROVEEDOR</th>' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>CANT. cajas</th>
-                            <th>CANT. unidades</th>
+            '<th>CANT. cajas inicial</th>
+                            <th>CANT. unidades inicial</th>
+                            <th>CANT. cajas actual</th>
+                            <th>CANT. unidades actual</th>
                             <th>PRECIO COMPRA</th>
                             <th>PRECIO VENTA</th>
                             <th>FECHA INGRESO</th>
@@ -259,8 +263,10 @@ class loteController extends loteModel
                         <td>' . htmlspecialchars($rows['med_nombre_quimico']) . '<br><small>' . htmlspecialchars($rows['med_principio_activo']) . '</small></td>
                         <td>' . htmlspecialchars($rows['pr_nombres'] ?? 'N/A') . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 10px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($rows['su_nombre']) . '</span></td>' : '') .
-                    '<td>' . $rows['lm_cantidad_inicial'] . '</td>
-                        <td><strong style="color:#1976D2;font-size:16px;">' . $rows['lm_cantidad_actual'] . '</strong></td>
+                    '<td>' . $rows['lm_cajas_inicial'] . '</td>
+                        <td>' . number_format($rows['lm_unidades_inicial']) . '</td>
+                        <td>' . $rows['lm_cajas_actual'] . '</td>
+                        <td><strong style="color:#1976D2;font-size:16px;">' . $rows['lm_unidades_actual'] . '</strong></td>
                         <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
                         <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
                         <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
@@ -277,7 +283,7 @@ class loteController extends loteModel
                         : $estado_html)
                     . '</td>
                         <td class="buttons">
-                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_cantidad_actual'] > 0 && $rol_usuario == 1
+                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_unidades_actual'] > 0 && $rol_usuario == 1
                                 ? '<a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>'
                                 : '<span style="color:#999;font-size:12px;">No disponible</span>')
                             . '

@@ -7,24 +7,22 @@ class proveedorModel extends mainModel
     protected static function datos_proveedores_model($inicio, $registros, $filtros = [])
     {
         $sql = "
-                    SELECT 
+                    SELECT
                         p.pr_id,
                         p.pr_nombres,
-                        p.pr_apellido_paterno,
-                        p.pr_apellido_materno,
                         p.pr_nit,
                         p.pr_telefono,
                         p.pr_direccion,
                         p.pr_creado_en,
                         p.pr_estado,
-                        
+
                         COALESCE(COUNT(DISTINCT c.co_id), 0) AS total_compras,
                         COALESCE(SUM(c.co_total), 0) AS monto_total_compras,
                         MAX(c.co_fecha) AS ultima_compra,
                         COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
-                        
+
                         DATEDIFF(CURDATE(), MAX(c.co_fecha)) AS dias_ultima_compra
-                        
+
                     FROM proveedores p
                     LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
                     LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
@@ -35,12 +33,10 @@ class proveedorModel extends mainModel
 
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
-                        p.pr_nombres LIKE :busqueda OR
-                        p.pr_apellido_paterno LIKE :busqueda OR
-                        p.pr_apellido_materno LIKE :busqueda OR
-                        p.pr_nit LIKE :busqueda OR
-                        p.pr_telefono LIKE :busqueda
-                    )";
+                p.pr_nombres LIKE :busqueda OR
+                p.pr_nit LIKE :busqueda OR
+                p.pr_telefono LIKE :busqueda
+            )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
@@ -117,8 +113,6 @@ class proveedorModel extends mainModel
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
                         p.pr_nombres LIKE :busqueda OR
-                        p.pr_apellido_paterno LIKE :busqueda OR
-                        p.pr_apellido_materno LIKE :busqueda OR
                         p.pr_nit LIKE :busqueda OR
                         p.pr_telefono LIKE :busqueda
                     )";
@@ -236,8 +230,8 @@ class proveedorModel extends mainModel
     protected static function exportar_proveedores_excel_model($filtros = [])
     {
         $sql = "
-            SELECT 
-                CONCAT_WS(' ', p.pr_nombres, p.pr_apellido_paterno, p.pr_apellido_materno) AS 'Proveedor',
+            SELECT
+                p.pr_nombres AS 'Proveedor',
                 p.pr_nit AS 'NIT',
                 p.pr_telefono AS 'Teléfono',
                 p.pr_direccion AS 'Dirección',
@@ -245,11 +239,11 @@ class proveedorModel extends mainModel
                 COALESCE(COUNT(DISTINCT c.co_id), 0) AS 'Total Compras',
                 COALESCE(SUM(c.co_total), 0) AS 'Monto Total (Bs)',
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS 'Lotes Generados',
-                CASE 
+                CASE
                     WHEN MAX(c.co_fecha) IS NULL THEN 'Nunca'
                     ELSE DATE_FORMAT(MAX(c.co_fecha), '%d/%m/%Y')
                 END AS 'Última Compra',
-                CASE 
+                CASE
                     WHEN p.pr_estado = 1 THEN 'ACTIVO'
                     ELSE 'INACTIVO'
                 END AS 'Estado'
@@ -263,12 +257,10 @@ class proveedorModel extends mainModel
 
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
-                p.pr_nombres LIKE :busqueda OR
-                p.pr_apellido_paterno LIKE :busqueda OR
-                p.pr_apellido_materno LIKE :busqueda OR
-                p.pr_nit LIKE :busqueda OR
-                p.pr_telefono LIKE :busqueda
-            )";
+                        p.pr_nombres LIKE :busqueda OR
+                        p.pr_nit LIKE :busqueda OR
+                        p.pr_telefono LIKE :busqueda
+                    )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
@@ -309,16 +301,12 @@ class proveedorModel extends mainModel
         $sql = "
             INSERT INTO proveedores (
                 pr_nombres,
-                pr_apellido_paterno,
-                pr_apellido_materno,
                 pr_nit,
                 pr_telefono,
                 pr_direccion,
                 pr_estado
             ) VALUES (
                 :nombres,
-                :paterno,
-                :materno,
                 :nit,
                 :telefono,
                 :direccion,
@@ -328,8 +316,6 @@ class proveedorModel extends mainModel
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->bindParam(':nombres', $datos['nombres']);
-        $stmt->bindParam(':paterno', $datos['paterno']);
-        $stmt->bindParam(':materno', $datos['materno']);
         $stmt->bindParam(':nit', $datos['nit']);
         $stmt->bindParam(':telefono', $datos['telefono']);
         $stmt->bindParam(':direccion', $datos['direccion']);
@@ -366,8 +352,6 @@ class proveedorModel extends mainModel
         $sql = "
             UPDATE proveedores SET
                 pr_nombres = :nombres,
-                pr_apellido_paterno = :paterno,
-                pr_apellido_materno = :materno,
                 pr_nit = :nit,
                 pr_telefono = :telefono,
                 pr_direccion = :direccion,
@@ -377,8 +361,6 @@ class proveedorModel extends mainModel
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->bindParam(':nombres', $datos['nombres']);
-        $stmt->bindParam(':paterno', $datos['paterno']);
-        $stmt->bindParam(':materno', $datos['materno']);
         $stmt->bindParam(':nit', $datos['nit']);
         $stmt->bindParam(':telefono', $datos['telefono']);
         $stmt->bindParam(':direccion', $datos['direccion']);

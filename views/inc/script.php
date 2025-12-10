@@ -389,15 +389,15 @@
             const activar = document.getElementById("cb5").checked ? 1 : 0;
 
             if (!numero) {
-                alert("No se pudo generar el número de lote.");
+                Swal.fire('Error', 'No se pudo generar el número de lote.', 'error');
                 return false;
             }
             if (!cantidad || cantidad <= 0) {
-                alert("La cantidad debe ser mayor a 0.");
+                Swal.fire('Error', 'La cantidad debe ser mayor a 0.', 'error');
                 return false;
             }
             if (!vencimiento) {
-                alert("Debe ingresar una fecha de vencimiento.");
+                Swal.fire('Error', 'Debe ingresar una fecha de vencimiento.', 'error');
                 return false;
             }
 
@@ -405,16 +405,16 @@
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
             if (fechaVenc < hoy) {
-                alert("La fecha de vencimiento no puede ser anterior a hoy.");
+                Swal.fire('Error', 'La fecha de vencimiento no puede ser anterior a hoy.', 'error');
                 return false;
             }
 
             if (!precioCompra || precioCompra <= 0) {
-                alert("Precio de compra inválido.");
+                Swal.fire('Error', 'Precio de compra inválido.', 'error');
                 return false;
             }
             if (!precioVenta || precioVenta <= 0) {
-                alert("Precio de venta inválido.");
+                Swal.fire('Error', 'Precio de venta inválido.', 'error');
                 return false;
             }
 
@@ -678,7 +678,7 @@
 
                 if (lotes.length === 0) {
                     e.preventDefault();
-                    alert('⚠️ Debe agregar al menos un lote antes de guardar la compra');
+                    Swal.fire('Advertencia', 'Debe agregar al menos un lote antes de guardar la compra', 'warning');
                     return false;
                 }
 

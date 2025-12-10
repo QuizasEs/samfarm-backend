@@ -7,8 +7,13 @@ function obtenerAjaxConfig(container) {
     };
 }
 (function () {
-    // Detecta automáticamente el path base del proyecto
+    // Obtiene la URL base del servidor desde el data attribute
     function getBaseURL() {
+        const serverUrl = document.documentElement.dataset.serverUrl;
+        if (serverUrl) {
+            return serverUrl.replace('ajax/notificacionesAjax.php', '');
+        }
+        // Fallback al método anterior si no está disponible
         const path = window.location.pathname;
         const match = path.match(/^\/([^\/]+)\//);
         return match ? "/" + match[1] + "/" : "/";
@@ -230,7 +235,7 @@ function obtenerAjaxConfig(container) {
             destino.style.opacity = "0.6";
 
             const base = getBaseURL();
-            const fullUrl = window.location.origin + base + ajaxUrl.replace(/^\//, "");
+            const fullUrl = base + ajaxUrl.replace(/^\//, "");
             const formData = new URLSearchParams();
 
             formData.append(paramName, ajaxAction);

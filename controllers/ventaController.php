@@ -371,6 +371,8 @@ class ventaController extends ventaModel
 
                     self::verificar_estado_lote_terminado_model($lm_id);
 
+                    $temp_ref_venta = "temp_venta_" . $usuario_id . "_" . $ve_id . "_" . $lm_id . "_" . time() . "_" . mt_rand(1000, 9999);
+
                     $mov_inv = [
                         "lm_id" => $lm_id,
                         "med_id" => $med_id,
@@ -380,7 +382,7 @@ class ventaController extends ventaModel
                         "mi_cantidad" => $unidades_requeridas,
                         "mi_unidad" => "unidad",
                         "mi_referencia_tipo" => "venta",
-                        "mi_referencia_id" => $ve_id,
+                        "mi_referencia_id" => $temp_ref_venta,
                         "mi_motivo" => "Venta {$ve_numero_documento} (lm_id {$lm_id})"
                     ];
                     $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
@@ -420,6 +422,8 @@ class ventaController extends ventaModel
 
                         self::verificar_estado_lote_terminado_model($lm_id);
 
+                        $temp_ref_multiple = "temp_venta_" . $usuario_id . "_" . $ve_id . "_" . $lm_id . "_" . time() . "_" . mt_rand(1000, 9999);
+
                         $mov_inv = [
                             "lm_id" => $lm_id,
                             "med_id" => $med_id,
@@ -429,7 +433,7 @@ class ventaController extends ventaModel
                             "mi_cantidad" => $take,
                             "mi_unidad" => "unidad",
                             "mi_referencia_tipo" => "venta",
-                            "mi_referencia_id" => $ve_id,
+                            "mi_referencia_id" => $temp_ref_multiple,
                             "mi_motivo" => "Venta {$ve_numero_documento} (lm_id {$lm_id})"
                         ];
                         $mov_res = self::agregar_movimiento_inventario_model($mov_inv);
@@ -494,6 +498,21 @@ class ventaController extends ventaModel
                 "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
             ];
             $informe_res = self::agregar_informe_venta_model($informe_data);
+
+            // Actualizar referencias temporales específicas de esta venta (solo registros de esta transacción)
+            $stmt_update_refs = $db->prepare("
+                UPDATE movimiento_inventario
+                SET mi_referencia_id = :ve_id, mi_referencia_tipo = 'venta'
+                WHERE mi_referencia_id LIKE :temp_pattern
+                AND us_id = :us_id
+                AND mi_referencia_tipo = 'venta'
+                AND mi_creado_en >= DATE_SUB(NOW(), INTERVAL 30 SECOND)
+            ");
+            $stmt_update_refs->execute([
+                ':ve_id' => $ve_id,
+                ':temp_pattern' => "temp_venta_{$usuario_id}_{$ve_id}%",
+                ':us_id' => $usuario_id
+            ]);
 
             $pdf_base64 = self::generar_pdf_factura_model($fa_id, 'nota_venta');
 

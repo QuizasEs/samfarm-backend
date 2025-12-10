@@ -244,37 +244,23 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                             <div class="modal-bloque">
                                 <label class="required">Nombres / Razón Social</label>
-                                <input type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
+                                <input type="text" name="Nombres_pr" id="registroNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Paterno</label>
-                                <input type="text" name="Paterno_pr_up" id="edicionPaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_pr_up" id="edicionMaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">NIT</label>
-                                <input type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,50}" maxlength="50" required>
+                                <input type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,50}" maxlength="50" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Teléfono</label>
-                                <input type="text" name="Telefono_pr_up" id="edicionTelefono" pattern="[0-9]{6,30}" maxlength="30">
+                                <input type="text" name="Telefono_pr" id="registroTelefono" pattern="[0-9]{6,30}" maxlength="30">
                             </div>
                         </div>
                     </div>
@@ -283,15 +269,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Dirección</label>
-                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250" rows="3"></input>
+                                <textarea name="Direccion_pr" id="registroDireccion" maxlength="250" rows="3"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</a>
+                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarRegistro()">Cancelar</a>
                         <button type="submit" class="btn success">
-                            <ion-icon name="checkmark-outline"></ion-icon> Actualizar
+                            <ion-icon name="checkmark-outline"></ion-icon> Registrar
                         </button>
                     </div>
                 </div>
@@ -325,20 +311,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Paterno</label>
-                                <input type="text" name="Paterno_pr_up" id="edicionPaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_pr_up" id="edicionMaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="row">
                         <div class="col">
@@ -359,7 +331,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Dirección</label>
-                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250" rows="3"></input>
+                                <textarea name="Direccion_pr_up" id="edicionDireccion" maxlength="250" rows="3"></textarea>
                             </div>
                         </div>
                     </div>
@@ -566,8 +538,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     document.getElementById('edicionPrId').value = data.pr_id;
                     document.getElementById('edicionNombres').value = data.pr_nombres || '';
-                    document.getElementById('edicionPaterno').value = data.pr_apellido_paterno || '';
-                    document.getElementById('edicionMaterno').value = data.pr_apellido_materno || '';
                     document.getElementById('edicionNit').value = data.pr_nit || '';
                     document.getElementById('edicionTelefono').value = data.pr_telefono || '';
                     document.getElementById('edicionDireccion').value = data.pr_direccion || '';

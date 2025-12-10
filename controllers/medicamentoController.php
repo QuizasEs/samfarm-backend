@@ -47,7 +47,7 @@ class medicamentoController extends medicamentoModel
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "No se han llenado todos los campos obligatorios!",
+                "texto" => "No se ha podido registrar el medicamento, por favor intente nuevamente!",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);
@@ -134,7 +134,7 @@ class medicamentoController extends medicamentoModel
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "No se ha podido registrar el medicamento, por favor intente nuevamente!",
+                "texto" => "No se ha podido registrar el medicamento, por favor intente nuevamente.",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);

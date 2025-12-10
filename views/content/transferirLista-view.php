@@ -316,20 +316,31 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + lote.lm_cant_actual_unidades + '</strong></td>';
                     html += '<td style="color: ' + colorVenc + ';">' + formatearFecha(lote.lm_fecha_vencimiento) + advertencia + '</td>';
                     html += '<td>';
-                    html += '<button type="button" class="btn primary" onclick="TransferManager.abrirModalAgregar(' +
-                        lote.lm_id + ', ' +
-                        lote.med_id + ', \'' +
-                        escapeHtml(lote.med_nombre_quimico) + '\', \'' +
-                        escapeHtml(lote.lm_numero_lote) + '\', ' +
-                        lote.lm_cant_actual_cajas + ', ' +
-                        lote.lm_cant_actual_unidades + ', ' +
-                        lote.lm_cant_blister + ', ' +
-                        lote.lm_cant_unidad + ', ' +
-                        lote.lm_precio_compra + ', ' +
-                        lote.lm_precio_venta + ', \'' +
-                        lote.lm_fecha_vencimiento + '\')">';
-                    html += '<ion-icon name="add-circle-outline"></ion-icon> Seleccionar';
-                    html += '</button>';
+
+                    if (parseInt(lote.transferible) === 1) {
+                        // Lote transferible
+                        html += '<button type="button" class="btn primary" onclick="TransferManager.abrirModalAgregar(' +
+                            lote.lm_id + ', ' +
+                            lote.med_id + ', \'' +
+                            escapeHtml(lote.med_nombre_quimico) + '\', \'' +
+                            escapeHtml(lote.lm_numero_lote) + '\', ' +
+                            lote.lm_cant_actual_cajas + ', ' +
+                            lote.lm_cant_actual_unidades + ', ' +
+                            lote.lm_cant_blister + ', ' +
+                            lote.lm_cant_unidad + ', ' +
+                            lote.lm_precio_compra + ', ' +
+                            lote.lm_precio_venta + ', \'' +
+                            lote.lm_fecha_vencimiento + '\')">';
+                        html += '<ion-icon name="add-circle-outline"></ion-icon> Seleccionar';
+                        html += '</button>';
+                    } else {
+                        // Lote no transferible
+                        html += '<span style="color: #666; font-style: italic;">';
+                        html += '<ion-icon name="lock-closed-outline"></ion-icon> ';
+                        html += 'No transferible<br><small>Lote recibido de transferencia</small>';
+                        html += '</span>';
+                    }
+
                     html += '</td>';
                     html += '</tr>';
                 });
@@ -390,7 +401,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     unidades = cajas * unidadesPorCaja;
                 }
 
-                const subtotal = cajas * precioCompra;
+                const subtotal = unidades * precioVenta;
 
                 document.getElementById('modal-cantidad-unidades-transfer').value = unidades;
                 document.getElementById('modal-subtotal-transfer').textContent = 'Bs. ' + subtotal.toFixed(2);
@@ -429,7 +440,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                const subtotal = cajas * precioCompra;
+                const subtotal = unidades * precioVenta;
 
                 items.push({
                     lm_id: lmId,

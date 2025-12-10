@@ -90,7 +90,15 @@ class transferirController extends transferirModel
 
                 $lote = transferirModel::datos_lote_transfer_model($lm_id)->fetch();
 
-                if (!$lote || $lote['lm_cant_actual_cajas'] < $cantidad_cajas) {
+                if (!$lote) {
+                    throw new Exception("Lote no encontrado");
+                }
+
+                if ($lote['lm_origen_id'] !== null) {
+                    throw new Exception("No se puede transferir lote recibido de otra sucursal (" . $lote['lm_numero_lote'] . ")");
+                }
+
+                if ($lote['lm_cant_actual_cajas'] < $cantidad_cajas) {
                     throw new Exception("Stock insuficiente en lote " . ($lote['lm_numero_lote'] ?? 'desconocido'));
                 }
 
@@ -117,7 +125,8 @@ class transferirController extends transferirModel
                     $su_origen,
                     $cantidad_cajas,
                     $cantidad_unidades,
-                    $subtotal
+                    $subtotal,
+                    $lm_id
                 );
 
                 $datos_movimiento = [
@@ -412,5 +421,3 @@ class transferirController extends transferirModel
         return $texto;
     }
 }
-
-

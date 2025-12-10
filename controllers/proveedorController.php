@@ -84,7 +84,7 @@ class proveedorController extends proveedorModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>PROVEEDOR</th>
+                            <th>PROVEEDOR/RAZON SOCIAL</th>
                             <th>NIT</th>
                             <th>TELÉFONO</th>
                             <th>DIRECCIÓN</th>
@@ -103,7 +103,7 @@ class proveedorController extends proveedorModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $row) {
-                $nombre_completo = trim(($row['pr_nombres'] ?? '') . ' ' . ($row['pr_apellido_paterno'] ?? '') . ' ' . ($row['pr_apellido_materno'] ?? ''));
+                $nombre_completo = $row['pr_nombres'] ?? '';
 
                 $estado_html = $row['pr_estado'] == 1
                     ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
@@ -135,14 +135,14 @@ class proveedorController extends proveedorModel
                         <td>' . $ultima_compra . '</td>
                         <td>' . $estado_html . '</td>
                         <td class="accion-buttons">
-                            <a href="javascript:void(0)" 
-                            class="btn default" 
+                            <a href="javascript:void(0)"
+                            class="btn default"
                             title="Ver detalle"
                             onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
                                 <ion-icon name="eye-outline"></ion-icon> Detalle
                             </a>
-                            <a href="javascript:void(0)" 
-                            class="btn primary" 
+                            <a href="javascript:void(0)"
+                            class="btn primary"
                             title="Editar proveedor"
                             onclick="ProveedoresModals.abrirEdicion(' . $row['pr_id'] . ')">
                                 <ion-icon name="create-outline"></ion-icon> Editar
@@ -191,9 +191,7 @@ class proveedorController extends proveedorModel
             $topMedicamentosStmt = self::top_medicamentos_proveedor_model($pr_id, 5);
             $topMedicamentos = $topMedicamentosStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $nombre_completo = trim(($proveedor['pr_nombres'] ?? '') . ' ' .
-                ($proveedor['pr_apellido_paterno'] ?? '') . ' ' .
-                ($proveedor['pr_apellido_materno'] ?? ''));
+            $nombre_completo = $proveedor['pr_nombres'] ?? '';
 
             $promedio = $proveedor['total_compras'] > 0
                 ? $proveedor['monto_total_compras'] / $proveedor['total_compras']
@@ -569,8 +567,6 @@ class proveedorController extends proveedorModel
     public function registrar_proveedor_controller()
     {
         $nombres = mainModel::limpiar_cadena($_POST['Nombres_pr'] ?? '');
-        $paterno = mainModel::limpiar_cadena($_POST['Paterno_pr'] ?? '');
-        $materno = mainModel::limpiar_cadena($_POST['Materno_pr'] ?? '');
         $nit = mainModel::limpiar_cadena($_POST['Nit_pr'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_pr'] ?? '');
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_pr'] ?? '');
@@ -596,30 +592,6 @@ class proveedorController extends proveedorModel
             echo json_encode($alerta);
             exit();
         };
-        if (!empty($paterno)) {
-            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
-                $alerta = [
-                    "Alerta" => "simple",
-                    "Titulo" => "ocurrio un error inesperado",
-                    "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
-                    "Tipo" => "error"
-                ];
-                echo json_encode($alerta);
-                exit();
-            };
-        }
-        if (!empty($materno)) {
-            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
-                $alerta = [
-                    "Alerta" => "simple",
-                    "Titulo" => "ocurrio un error inesperado",
-                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
-                    "Tipo" => "error"
-                ];
-                echo json_encode($alerta);
-                exit();
-            };
-        }
         if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
             $alerta = [
                 "Alerta" => "simple",
@@ -657,8 +629,6 @@ class proveedorController extends proveedorModel
 
         $datos = [
             'nombres' => $nombres,
-            'paterno' => $paterno,
-            'materno' => $materno,
             'nit' => $nit,
             'telefono' => $telefono,
             'direccion' => $direccion
@@ -669,7 +639,7 @@ class proveedorController extends proveedorModel
 
             if ($registrar->rowCount() == 1) {
                 $alerta = [
-                    'Alerta' => 'limpiar',
+                    'Alerta' => 'recargar',
                     'Titulo' => 'Proveedor registrado',
                     'texto' => 'El proveedor se registró correctamente',
                     'Tipo' => 'success'
@@ -723,8 +693,6 @@ class proveedorController extends proveedorModel
     {
         $pr_id = mainModel::limpiar_cadena($_POST['PrId_up'] ?? '');
         $nombres = mainModel::limpiar_cadena($_POST['Nombres_pr_up'] ?? '');
-        $paterno = mainModel::limpiar_cadena($_POST['Paterno_pr_up'] ?? '');
-        $materno = mainModel::limpiar_cadena($_POST['Materno_pr_up'] ?? '');
         $nit = mainModel::limpiar_cadena($_POST['Nit_pr_up'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_pr_up'] ?? '');
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_pr_up'] ?? '');
@@ -751,30 +719,6 @@ class proveedorController extends proveedorModel
             echo json_encode($alerta);
             exit();
         };
-        if (!empty($paterno)) {
-            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $paterno)) {
-                $alerta = [
-                    "Alerta" => "simple",
-                    "Titulo" => "ocurrio un error inesperado",
-                    "texto" => "El APELLIDO PATERNO no coincide con el formato solicitado!",
-                    "Tipo" => "error"
-                ];
-                echo json_encode($alerta);
-                exit();
-            };
-        }
-        if (!empty($materno)) {
-            if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $materno)) {
-                $alerta = [
-                    "Alerta" => "simple",
-                    "Titulo" => "ocurrio un error inesperado",
-                    "texto" => "El APELLIDO MATERNO no coincide con el formato solicitado!",
-                    "Tipo" => "error"
-                ];
-                echo json_encode($alerta);
-                exit();
-            };
-        }
         if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
             $alerta = [
                 "Alerta" => "simple",
@@ -825,8 +769,6 @@ class proveedorController extends proveedorModel
         $datos = [
             'pr_id' => $pr_id,
             'nombres' => $nombres,
-            'paterno' => $paterno,
-            'materno' => $materno,
             'nit' => $nit,
             'telefono' => $telefono,
             'direccion' => $direccion

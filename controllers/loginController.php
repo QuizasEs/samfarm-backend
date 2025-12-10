@@ -20,7 +20,7 @@ class loginController extends loginModel
                     <script>
                         Swal.fire({
                             title: "Ocurrio un error inesperado",
-                            text: "No se han llenado todos los campos obligatorios!",
+                        text: "No se han llenado todos los campos obligatorios!",
                             icon: "error",
                             confirmButtonText: "Aceptar"
                         });

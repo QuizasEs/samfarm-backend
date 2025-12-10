@@ -409,13 +409,11 @@ class ventaModel extends mainModel
             SET lm_cant_actual_unidades = :unidades_despues,
                 lm_cant_actual_cajas = :cajas_despues,
                 lm_actualizado_en = NOW()
-            WHERE lm_id = :lm_id 
-            AND lm_cant_actual_unidades >= :cantidad_unidades
+            WHERE lm_id = :lm_id
         ");
         $upd->bindParam(":unidades_despues", $unidades_despues, PDO::PARAM_INT);
         $upd->bindParam(":cajas_despues", $cajas_despues, PDO::PARAM_INT);
         $upd->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
-        $upd->bindParam(":cantidad_unidades", $cantidad_unidades, PDO::PARAM_INT);
         $upd->execute();
 
         return $upd->rowCount() > 0;

@@ -1,10 +1,11 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
-    /* Admin o Gerente */
-
-    require_once "./controllers/MedicamentoController.php";
+    require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
+
+    /* Admin o Gerente */
+
 
 ?>
 
@@ -88,6 +89,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         <div class="tabla-contenedor"></div>
     </div>
+
+    <script>document.documentElement.setAttribute('data-server-url', '<?php echo SERVER_URL; ?>');</script>
 
     <!-- Modal Detalle de Venta -->
     <div id="modalDetalleVenta" class="modal" style="display:none;">
