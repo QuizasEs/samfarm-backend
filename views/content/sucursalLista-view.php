@@ -66,10 +66,6 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             <div id="graficoCostoBeneficio"></div>
         </div>
     </div>
-
-    <script>document.documentElement.setAttribute('data-server-url', '<?php echo SERVER_URL; ?>ajax/sucursalAjax.php');</script>
-    <script src="<?php echo SERVER_URL; ?>views/script/sucursales.js"></script>
-
     <!-- cajas abiertas -->
     <div class="modal" id="modalCajasAbiertas" style="display: none;">
         <div class="modal-content detalle">

@@ -1,6 +1,7 @@
 <?php
 /* administrador vista */
 if ($_SESSION['rol_smp'] == 1) {
+    $current_view = isset($_GET['views']) ? explode("/", $_GET['views'])[0] : '';
 
 ?>
     <div class="sidebar">

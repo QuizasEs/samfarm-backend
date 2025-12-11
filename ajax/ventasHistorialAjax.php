@@ -6,9 +6,9 @@ if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exp
     session_start(['name' => 'SMP']);
 
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
-
-
-
+        
+        
+        
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }
@@ -24,20 +24,6 @@ if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exp
     $ins_ventas = new ventasHistorialController();
     $ins_ventas->exportar_excel_controller();
     exit();
-}
-
-if (isset($_GET['views']) && $_GET['views'] == 'ajax/ventasHistorialAjax') {
-  $_POST['ventasHistorialAjax'] = 'listar';
-  $_POST['pagina'] = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-  $_POST['registros'] = isset($_GET['registros']) ? (int)$_GET['registros'] : 10;
-  $_POST['busqueda'] = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
-  $_POST['select1'] = isset($_GET['select1']) ? $_GET['select1'] : '';
-  $_POST['select2'] = isset($_GET['select2']) ? $_GET['select2'] : '';
-  $_POST['select3'] = isset($_GET['select3']) ? $_GET['select3'] : '';
-  $_POST['select4'] = isset($_GET['select4']) ? $_GET['select4'] : '';
-  $_POST['select5'] = isset($_GET['select5']) ? $_GET['select5'] : '';
-  $_POST['fecha_desde'] = isset($_GET['fecha_desde']) ? $_GET['fecha_desde'] : '';
-  $_POST['fecha_hasta'] = isset($_GET['fecha_hasta']) ? $_GET['fecha_hasta'] : '';
 }
 
 if (isset($_POST['ventasHistorialAjax'])) {

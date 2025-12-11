@@ -54,7 +54,6 @@
 
         <!---------------- -----------------------------Script--------------------------------------------------->
         <?php
-        /* ✅ MOVER ESTAS INCLUSIONES DENTRO DEL BLOQUE ELSE */
         include_once "inc/logOut.php";
         include_once "inc/script.php";
         include_once "inc/footer.php";

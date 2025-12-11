@@ -1,7 +1,7 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     /* en caso que el rol del usuario este en admin o genrente */
-    require_once "./controllers/MedicamentoController.php";
+    require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
 
@@ -20,7 +20,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
 
-                
+
                 <!-- Fechas -->
                 <div class="form-fechas">
                     <small>
@@ -43,7 +43,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <option value="activo">Activo</option>
                         <option value="terminado">Terminado</option>
                         <option value="caducado">Caducado</option>
-  <!--                       <option value="devuelto">Devuelto</option>
+                        <!--                       <option value="devuelto">Devuelto</option>
                         <option value="bloqueado">Bloqueado</option> -->
                     </select>
                 </div>
@@ -66,18 +66,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </select>
                 </div> -->
                 <!-- select de sucursales solo para administrador -->
-                <div class="form-fechas">
+                <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                    <div class="form-fechas">
 
-                    <small>Sucursales</small>
-                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                        <small>Sucursales</small>
                         <select class="select-filtro" name="select3" id="">
                             <option value="">Sucursales</option>
                             <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
                                 <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
                             <?php } ?>
                         </select>
-                    <?php } ?>
-                </div>
+                    </div>
+                <?php } ?>
 
                 <div class="search">
                     <!-- Búsqueda -->

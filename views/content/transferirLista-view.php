@@ -316,9 +316,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + lote.lm_cant_actual_unidades + '</strong></td>';
                     html += '<td style="color: ' + colorVenc + ';">' + formatearFecha(lote.lm_fecha_vencimiento) + advertencia + '</td>';
                     html += '<td>';
-
-                    if (parseInt(lote.transferible) === 1) {
-                        // Lote transferible
+                    if (lote.transferible == 1) {
                         html += '<button type="button" class="btn primary" onclick="TransferManager.abrirModalAgregar(' +
                             lote.lm_id + ', ' +
                             lote.med_id + ', \'' +
@@ -334,13 +332,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         html += '<ion-icon name="add-circle-outline"></ion-icon> Seleccionar';
                         html += '</button>';
                     } else {
-                        // Lote no transferible
-                        html += '<span style="color: #666; font-style: italic;">';
-                        html += '<ion-icon name="lock-closed-outline"></ion-icon> ';
-                        html += 'No transferible<br><small>Lote recibido de transferencia</small>';
-                        html += '</span>';
+                        html += '<span style="color: #999; font-style: italic;">No transferible</span>';
                     }
-
                     html += '</td>';
                     html += '</tr>';
                 });
@@ -401,7 +394,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     unidades = cajas * unidadesPorCaja;
                 }
 
-                const subtotal = unidades * precioVenta;
+                const subtotal = cajas * precioCompra;
 
                 document.getElementById('modal-cantidad-unidades-transfer').value = unidades;
                 document.getElementById('modal-subtotal-transfer').textContent = 'Bs. ' + subtotal.toFixed(2);
@@ -440,7 +433,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                const subtotal = unidades * precioVenta;
+                const subtotal = cajas * precioCompra;
 
                 items.push({
                     lm_id: lmId,

@@ -10,9 +10,6 @@ if (isset($_POST['sucursalAjax']) || isset($_GET['sucursalAjax'])) {
     session_start(['name' => 'SMP']);
 
     if (!isset($_SESSION['id_smp']) || $_SESSION['rol_smp'] != 1) {
-        session_unset();
-        session_destroy();
-
         echo json_encode([
             "Alerta" => "simple",
             "Titulo" => "Sesión expirada",

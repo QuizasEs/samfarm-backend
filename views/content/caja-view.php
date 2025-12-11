@@ -17,7 +17,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
 
     if ($caja_activa == true) {
 
-        require_once "./controllers/MedicamentoController.php";
+        require_once "./controllers/medicamentoController.php";
         $ins_med = new medicamentoController();
         $datos_select = $ins_med->datos_extras_controller();
 ?>

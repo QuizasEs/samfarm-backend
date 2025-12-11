@@ -470,7 +470,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalleUsuario">
                         <ion-icon name="power-outline"></ion-icon> Estado
                     </a>
-                    <a href="javascript:void(0)" class="btn primary" onclick="UsuariosModals.editarDesdeDetalle()">
+                    <a href="javascript:void(0)" class="btn default" onclick="UsuariosModals.editarDesdeDetalle()">
                         <ion-icon name="create-outline"></ion-icon> Editar
                     </a>
                 </div>

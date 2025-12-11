@@ -1,39 +1,20 @@
 <?php
-$debug_log = dirname(__FILE__) . '/debug_compra.log';
-file_put_contents($debug_log, "\n=== SOLICITUD " . date('Y-m-d H:i:s') . " ===\n", FILE_APPEND);
-file_put_contents($debug_log, print_r($_POST, true) . "\n", FILE_APPEND);
+
 
 // Indicamos que esta petición viene vía AJAX
 $peticionAjax = true;
-
+    
 // Importamos la configuración general
 require_once "../config/APP.php";
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    global $debug_log;
-    $mensaje_error = "[$errno] $errstr en $errfile:$errline";
-    file_put_contents($debug_log, "ERROR: $mensaje_error\n", FILE_APPEND);
-    
-    echo json_encode([
-        "Alerta" => "simple",
-        "Titulo" => "Error interno",
-        "texto" => $mensaje_error,
-        "Tipo" => "error"
-    ]);
-    exit();
-}, E_ALL);
 
-// Forzamos salida JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// ✅ VALIDACIÓN DE SEGURIDAD (igual que userAjax.php)
 if (isset($_POST['compraAjax'])) {
 
-    // Iniciamos sesión para validar permisos
     session_start(['name' => 'SMP']);
 
-    // Verificar que el usuario tenga sesión activa y permisos
     if (!isset($_SESSION['id_smp']) || $_SESSION['rol_smp'] != 1) {
         // Sesión inválida o sin permisos
         session_unset();
@@ -48,7 +29,6 @@ if (isset($_POST['compraAjax'])) {
         exit();
     }
 
-    // ✅ Sesión válida, procesar petición
     $valor = $_POST['compraAjax'];
 
     require_once "../controllers/compraController.php";
@@ -83,7 +63,6 @@ if (isset($_POST['compraAjax'])) {
         exit();
     }
 } else {
-    // ❌ Petición inválida - cerrar sesión
     session_start(['name' => 'SMP']);
     session_unset();
     session_destroy();

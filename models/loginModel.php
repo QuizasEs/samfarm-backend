@@ -9,7 +9,7 @@
             AND us_password_hash = :Password AND us_estado = 1");
             $sql->bindParam(":Usuario",$datos['usuario']);
             $sql->bindParam(":Password",$datos['password']);
-            var_dump($datos);
+            
 
             $sql->execute();
             return $sql;
