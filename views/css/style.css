@@ -4197,16 +4197,17 @@ input[type="date"]:focus {
     .sucursal-card {
         max-width: 100%;
     }
-    
+
     .sucursal-actions {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .sucursal-actions .btn {
         width: 100%;
     }
 }
+
 @media (max-width: 768px) {
     .grafico-header {
         flex-direction: column;
@@ -4730,14 +4731,17 @@ input[type="date"]:focus {
 }
 
 @keyframes bell-ring {
+
     0%,
     100% {
         transform: rotate(0deg);
     }
+
     10%,
     30% {
         transform: rotate(-10deg);
     }
+
     20%,
     40% {
         transform: rotate(10deg);
@@ -4981,6 +4985,7 @@ input[type="date"]:focus {
     right: 8px;
     transition: color 0.3s ease;
 }
+
 .dark .notificacion-discard {
 
     color: var(--dark-text-secondary);
@@ -5014,4 +5019,172 @@ input[type="date"]:focus {
     display: block;
     margin-bottom: 12px;
     opacity: 0.5;
+}
+
+/* Transferencias */
+.transfer-search-result {
+    margin-top: 20px;
+}
+
+.transfer-empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.transfer-empty-state ion-icon {
+    font-size: 48px;
+}
+
+.transfer-items-title {
+    margin-top: 40px;
+}
+
+.transfer-items-empty {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+}
+
+.transfer-items-empty ion-icon {
+    font-size: 48px;
+}
+
+.transfer-summary-container {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.transfer-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.transfer-summary-value {
+    font-size: 20px;
+    color: #1976D2;
+}
+
+.transfer-summary-value.success {
+    color: #27ae60;
+}
+
+.transfer-observations {
+    margin-top: 20px;
+}
+
+.transfer-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.transfer-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.transfer-btn-generate {
+    font-size: 16px;
+    padding: 12px 30px;
+}
+
+/* Dark mode overrides */
+.dark .transfer-summary-container {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.dark .transfer-textarea {
+    background: var(--bg-color);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* transferiri contenxt lista */
+#resumen-transfer-container {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.dark #resumen-transfer-container {
+    background: var(--dark-bg-primary);
+}
+
+.resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.resumen-grid strong {
+    color: var(--text-primary);
+}
+
+.dark .resumen-grid strong {
+    color: var(--dark-text-primary);
+}
+
+
+.resumen-valor {
+    font-size: 20px;
+    color: var(--accent-primary);
+}
+.dark .resumen-valor {
+    color: var(--dark-accent-primary);
+}
+
+.resumen-valor.total {
+    color: var(--btn-success);
+}
+
+.observaciones-container {
+    margin-top: 20px;
+}
+
+.observaciones-container label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.dark .observaciones-container label {
+    color: var(--dark-text-primary);
+}
+
+.observaciones-container textarea {
+    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.dark .observaciones-container textarea {
+    border: 1px solid var(--dark-border-dark);
+
+    background: var(--dark-bg-primary);
+    color: var(--dark-text-primary);
+}
+
+#observaciones-transfer {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+}
+
+.btn-generar-container {
+    margin-top: 20px;
+    text-align: right;
+}
+
+#btn-generar-transfer {
+    font-size: 16px;
+    padding: 12px 30px;
 }

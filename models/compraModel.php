@@ -56,13 +56,13 @@ class compraModel extends mainModel
         $db = mainModel::conectar();
         $sql = $db->prepare("
             INSERT INTO lote_medicamento
-            (pr_id, pr_id_compra, med_id, su_id, lm_numero_lote,
-            lm_cant_caja, lm_cant_blister, lm_cant_unidad, lm_total_unidades,
+            (pr_id, pr_id_compra, med_id, su_id, lm_numero_lote, 
+            lm_cant_caja, lm_cant_blister, lm_cant_unidad,
             lm_cant_actual_cajas, lm_cant_actual_unidades,
             lm_precio_compra, lm_precio_venta, lm_fecha_ingreso, lm_fecha_vencimiento, lm_estado)
             VALUES
-            (:pr_id, :pr_id_compra, :med_id, :su_id, :lm_numero_lote,
-            :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad, :lm_total_unidades,
+            (:pr_id, :pr_id_compra, :med_id, :su_id, :lm_numero_lote, 
+            :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad,
             :lm_cant_actual_cajas, :lm_cant_actual_unidades,
             :lm_precio_compra, :lm_precio_venta, NOW(), :lm_fecha_vencimiento, :lm_estado)
         ");
@@ -75,7 +75,6 @@ class compraModel extends mainModel
         $sql->bindParam(":lm_cant_caja", $datos['lm_cant_caja']);
         $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
         $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
-        $sql->bindParam(":lm_total_unidades", $datos['lm_total_unidades']);
         $sql->bindParam(":lm_cant_actual_cajas", $datos['lm_cant_actual_cajas']);
         $sql->bindParam(":lm_cant_actual_unidades", $datos['lm_cant_actual_unidades']);
         $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);

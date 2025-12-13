@@ -71,33 +71,33 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </p>
         </div>
 
-        <div id="resumen-transfer-container" style="display:none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+        <div id="resumen-transfer-container">
+            <div class="resumen-grid">
                 <div>
                     <strong>Total Items:</strong>
-                    <p id="resumen-total-items-transfer" style="font-size: 20px; color: #1976D2;">0</p>
+                    <p id="resumen-total-items-transfer" class="resumen-valor">0</p>
                 </div>
                 <div>
                     <strong>Total Cajas:</strong>
-                    <p id="resumen-total-cajas-transfer" style="font-size: 20px; color: #1976D2;">0</p>
+                    <p id="resumen-total-cajas-transfer" class="resumen-valor">0</p>
                 </div>
                 <div>
                     <strong>Total Unidades:</strong>
-                    <p id="resumen-total-unidades-transfer" style="font-size: 20px; color: #1976D2;">0</p>
+                    <p id="resumen-total-unidades-transfer" class="resumen-valor">0</p>
                 </div>
                 <div>
                     <strong>Total Valorado:</strong>
-                    <p id="resumen-total-valorado-transfer" style="font-size: 20px; color: #27ae60;">Bs. 0.00</p>
+                    <p id="resumen-total-valorado-transfer" class="resumen-valor total">Bs. 0.00</p>
                 </div>
             </div>
 
-            <div style="margin-top: 20px;">
+            <div class="observaciones-container">
                 <label for="observaciones-transfer">Observaciones (opcional):</label>
-                <textarea id="observaciones-transfer" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                <textarea id="observaciones-transfer" rows="3"></textarea>
             </div>
 
-            <div style="margin-top: 20px; text-align: right;">
-                <button type="button" class="btn success" id="btn-generar-transfer" style="font-size: 16px; padding: 12px 30px;">
+            <div class="btn-generar-container">
+                <button type="button" class="btn success" id="btn-generar-transfer">
                     <ion-icon name="send-outline"></ion-icon> Generar Transferencia
                 </button>
             </div>
@@ -180,6 +180,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
     </div>
+
+
+    
 
     <script>
         const TransferManager = (function() {

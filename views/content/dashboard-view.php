@@ -355,56 +355,67 @@
 
                 if (result.success) {
                     const data = result.data;
-                    const chart = echarts.init(document.getElementById('chartVencimientos'));
+                    const chartDom = document.getElementById('chartVencimientos');
+                    
+                    // Asegurarse de destruir cualquier instancia previa
+                    if (echarts.getInstanceByDom(chartDom)) {
+                        echarts.dispose(chartDom);
+                    }
+                    
+                    const chart = echarts.init(chartDom);
+                    
                     const option = {
                         title: {
-                            text: 'Estado de Vencimientos',
+                            text: 'Próximas Fechas de Vencimiento',
                             left: 'center'
                         },
                         tooltip: {
-                            trigger: 'item',
-                            formatter: '{b}: {c} ({d}%)'
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'shadow'
+                            }
                         },
-                        legend: {
-                            orient: 'vertical',
-                            left: 'left'
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: ['Expirados', 'Próximos', 'Disponibles'],
+                            axisLabel: {
+                                interval: 0
+                            }
+                        },
+                        yAxis: {
+                            type: 'value'
                         },
                         series: [{
-                            name: 'Vencimientos',
-                            type: 'pie',
-                            radius: '50%',
+                            name: 'Cantidad',
+                            type: 'bar',
                             data: [{
                                     value: data.expirados,
-                                    name: 'Expirados',
                                     itemStyle: {
                                         color: '#d32f2f'
                                     }
                                 },
                                 {
                                     value: data.proximos,
-                                    name: 'Próximos',
                                     itemStyle: {
                                         color: '#ffa500'
                                     }
                                 },
                                 {
                                     value: data.disponibles,
-                                    name: 'Disponibles',
                                     itemStyle: {
                                         color: '#4caf50'
                                     }
                                 }
-                            ],
-                            emphasis: {
-                                itemStyle: {
-                                    shadowBlur: 10,
-                                    shadowOffsetX: 0,
-                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                }
-                            }
+                            ]
                         }]
                     };
-                    chart.setOption(option);
+                    chart.setOption(option, true);
                     window.addEventListener('resize', () => chart.resize());
                 } else {
                     console.error('Failed to load vencimientos data:', result.message);
@@ -430,6 +441,12 @@
 
                 const data = result.data;
                 const chartContainer = document.getElementById('chartStockMinimo');
+
+                // Asegurarse de destruir cualquier instancia previa
+                if (echarts.getInstanceByDom(chartContainer)) {
+                    echarts.dispose(chartContainer);
+                }
+
                 const chart = echarts.init(chartContainer);
 
                 const productos = data.map(item => item.med_nombre_quimico);
@@ -445,7 +462,8 @@
                         left: 'center',
                         textStyle: {
                             fontSize: isSmall ? 14 : 18,
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            
                         }
                     },
 
@@ -460,7 +478,9 @@
                         top: 25,
                         textStyle: {
                             fontSize: isSmall ? 11 : 14,
-                            color: '#EB3434'
+                            fontWeight:'bold',
+                            color: '#919191'
+
                         }
                     },
 
@@ -500,7 +520,7 @@
                             type: 'bar',
                             data: stocks,
                             itemStyle: {
-                                color: '#ffa500'
+                                color: '#3CBF24'
                             },
                             barMaxWidth: 40
                         },

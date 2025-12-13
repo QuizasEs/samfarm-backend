@@ -6,8 +6,6 @@ $peticionAjax = true;
     
 // Importamos la configuración general
 require_once "../config/APP.php";
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -15,7 +13,7 @@ if (isset($_POST['compraAjax'])) {
 
     session_start(['name' => 'SMP']);
 
-    if (!isset($_SESSION['id_smp']) || $_SESSION['rol_smp'] != 1) {
+    if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2])) {
         // Sesión inválida o sin permisos
         session_unset();
         session_destroy();
@@ -40,7 +38,6 @@ if (isset($_POST['compraAjax'])) {
             echo $ins_compra->agregar_compra_controller();
         }
     } catch (Throwable $e) {
-        file_put_contents($debug_log, "EXCEPTION: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
         echo json_encode([
             "Alerta" => "simple",
             "Titulo" => "Excepción",

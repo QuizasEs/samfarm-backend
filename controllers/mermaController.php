@@ -247,10 +247,8 @@ class mermaController extends mermaModel
         } elseif ($fecha_hasta_valida) {
             $filtros['fecha_desde'] = $fecha_hasta;
             $filtros['fecha_hasta'] = $fecha_hasta;
-        } else {
-            $filtros['fecha_desde'] = date('Y-m-d');
-            $filtros['fecha_hasta'] = date('Y-m-d');
         }
+        // Removido el filtro automático del día actual - ahora muestra todos los registros por defecto
 
         try {
             $datosStmt = mermaModel::obtener_todas_mermas_model($inicio, $registros, $filtros);

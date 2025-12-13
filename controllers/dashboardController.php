@@ -15,7 +15,7 @@ class dashboardController extends mainModel
 
     public static function contar_medicamentos_inventario_controller()
     {
-        $sql = "SELECT SUM(i.inv_total_unidades) as total 
+        $sql = "SELECT SUM(i.inv_total_cajas) as total 
                 FROM inventarios i";
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute();

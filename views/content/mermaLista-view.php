@@ -26,12 +26,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="form-fechas">
                     <small>Desde</small>
-                    <input type="date" name="fecha_desde" value="<?php echo date('Y-m-d'); ?>" required>
+                    <input type="date" name="fecha_desde" placeholder="Selecciona fecha desde">
                 </div>
 
                 <div class="form-fechas">
                     <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" value="<?php echo date('Y-m-d'); ?>" required>
+                    <input type="date" name="fecha_hasta" placeholder="Selecciona fecha hasta">
                 </div>
 
                 <?php if ($rol_usuario == 1) { ?>

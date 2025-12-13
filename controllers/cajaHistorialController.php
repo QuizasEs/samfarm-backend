@@ -81,12 +81,8 @@ class cajaHistorialController extends cajaHistorialModel
         } elseif ($fecha_hasta_valida) {
             $filtros['fecha_desde'] = $fecha_hasta;
             $filtros['fecha_hasta'] = $fecha_hasta;
-        } else {
-            $filtros['fecha_desde'] = date('Y-m-d');
-            $filtros['fecha_hasta'] = date('Y-m-d');
         }
-
-        error_log("DEBUG FILTROS CAJA: " . print_r($filtros, true));
+        // Removido el filtro automático del día actual - ahora muestra todos los registros por defecto
 
         try {
             $conexion = mainModel::conectar();
@@ -96,7 +92,6 @@ class cajaHistorialController extends cajaHistorialModel
 
             $total = self::contar_historial_caja_model($filtros);
 
-            error_log("DEBUG RESULTADOS CAJA: Total=$total, Registros=" . count($datos));
         } catch (PDOException $e) {
             error_log("ERROR SQL CAJA: " . $e->getMessage());
             return '<div class="error" style="padding:20px;color:red;">
