@@ -2,6 +2,28 @@
 $peticionAjax = true;
 require_once "../config/APP.php";
 
+// GET para descarga de PDF (como compras)
+if (isset($_GET['transferirHistorialAjax']) && $_GET['transferirHistorialAjax'] == "generar_pdf") {
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para descargar PDF.";
+        exit();
+    }
+
+    require_once "../controllers/transferirHistorialController.php";
+    $ins_historial = new transferirHistorialController();
+    $_GET['tr_id'] = isset($_GET['tr_id']) ? (int)$_GET['tr_id'] : 0;
+    $ins_historial->generar_pdf_transferencia_controller();
+    exit();
+}
+
 if (isset($_POST['transferirHistorialAjax'])) {
     session_start(['name' => 'SMP']);
 

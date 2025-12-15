@@ -166,68 +166,68 @@ class sucursalController extends sucursalModel
             $sucursales = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($sucursales)) {
-                echo "No hay datos para exportar";
+                echo "No hay sucursales para exportar.";
                 return;
             }
 
-            $filename = "Sucursales_" . date('Y-m-d_His') . ".pdf";
+            $info_superior = [
+                'Total de Sucursales' => count($sucursales),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
 
-            $root = dirname(__DIR__);
-            require_once $root . "/libs/fpdf/fpdf.php";
+            $headers = [
+                ['text' => 'N°', 'width' => 15],
+                ['text' => 'NOMBRE', 'width' => 60],
+                ['text' => 'DIRECCIÓN', 'width' => 60],
+                ['text' => 'TELÉFONO', 'width' => 30],
+                ['text' => 'CAJAS ABIERTAS', 'width' => 25],
+                ['text' => 'ESTADO', 'width' => 20]
+            ];
 
-            $pdf = new FPDF('P', 'mm', 'Letter');
-            $pdf->AddPage();
-            $pdf->SetMargins(15, 15, 15);
-
-            $pdf->SetFont('Arial', 'B', 16);
-            $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'REPORTE DE SUCURSALES'), 0, 1, 'C');
-            $pdf->Ln(5);
-
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, 'Fecha: ' . date('d/m/Y H:i:s'), 0, 1);
-            $pdf->Cell(0, 5, 'Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema'), 0, 1);
-            $pdf->Ln(5);
-
-            $pdf->SetFillColor(52, 73, 94);
-            $pdf->SetTextColor(255, 255, 255);
-            $pdf->SetFont('Arial', 'B', 9);
-
-            $pdf->Cell(10, 8, 'N', 1, 0, 'C', true);
-            $pdf->Cell(60, 8, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Nombre'), 1, 0, 'C', true);
-            $pdf->Cell(60, 8, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Dirección'), 1, 0, 'C', true);
-            $pdf->Cell(25, 8, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Teléfono'), 1, 0, 'C', true);
-            $pdf->Cell(15, 8, 'Cajas', 1, 0, 'C', true);
-            $pdf->Cell(20, 8, 'Estado', 1, 1, 'C', true);
-
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('Arial', '', 8);
-
+            $rows = [];
             $contador = 1;
             foreach ($sucursales as $suc) {
-                $estado = (int)$suc['su_estado'] === 1 ? 'ACTIVA' : 'INACTIVA';
-                $fillColor = (int)$suc['su_estado'] === 1 ? [232, 245, 233] : [255, 235, 238];
+                $estado = (int)$suc['su_estado'] === 1 ? 'Activa' : 'Inactiva';
 
-                $pdf->SetFillColor($fillColor[0], $fillColor[1], $fillColor[2]);
+                $cells = [
+                    ['text' => $contador, 'align' => 'C'],
+                    ['text' => $suc['su_nombre'], 'align' => 'L'],
+                    ['text' => $suc['su_direccion'] ?? 'N/A', 'align' => 'L'],
+                    ['text' => $suc['su_telefono'] ?? 'N/A', 'align' => 'C'],
+                    ['text' => $suc['cajas_abiertas'], 'align' => 'C'],
+                    ['text' => $estado, 'align' => 'C']
+                ];
 
-                $pdf->Cell(10, 7, $contador, 1, 0, 'C', true);
-                $pdf->Cell(60, 7, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', substr($suc['su_nombre'], 0, 30)), 1, 0, 'L', true);
-                $pdf->Cell(60, 7, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', substr($suc['su_direccion'] ?? 'N/A', 0, 30)), 1, 0, 'L', true);
-                $pdf->Cell(25, 7, $suc['su_telefono'] ?? 'N/A', 1, 0, 'C', true);
-                $pdf->Cell(15, 7, $suc['cajas_abiertas'], 1, 0, 'C', true);
-                $pdf->Cell(20, 7, $estado, 1, 1, 'C', true);
-
+                $rows[] = ['cells' => $cells];
                 $contador++;
             }
 
-            $pdf->Ln(10);
-            $pdf->SetFont('Arial', 'I', 8);
-            $pdf->SetTextColor(100, 100, 100);
-            $pdf->Cell(0, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'SAMFARM PHARMA - Sistema de Gestión Farmacéutica'), 0, 1, 'C');
+            $datos_pdf = [
+                'titulo' => 'REPORTE DE SUCURSALES',
+                'nombre_archivo' => 'Sucursales_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ]
+            ];
 
-            $pdf->Output('I', $filename);
+            // Generar y descargar PDF directamente
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
         } catch (Exception $e) {
-            error_log("Error exportando PDF: " . $e->getMessage());
-            echo "Error al generar archivo: " . $e->getMessage();
+            error_log("Error exportando PDF sucursales: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
         }
     }
 

@@ -368,20 +368,43 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
             };
 
-            function imprimirPDF() {
+            async function imprimirPDF() {
                 const coId = document.getElementById('modalCompraId').value;
-                if (coId) {
-                    const url = `<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?comprasHistorialAjax=exportar_pdf_detalle&id=${coId}`;
-                    window.open(url, '_blank');
-                    Swal.fire({
-                        title: 'Generando PDF',
-                        text: 'La descarga del PDF comenzará en breve.',
-                        icon: 'info',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                } else {
+                if (!coId) {
                     Swal.fire('Error', 'No se ha podido obtener el ID de la compra.', 'error');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Generando PDF...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const data = await utils.ajax({
+                        comprasHistorialAjax: 'exportar_pdf_detalle',
+                        co_id: coId
+                    });
+
+                    Swal.close();
+
+                    if (data.success && data.pdf_base64) {
+                        window.abrirPDFDesdeBase64(data.pdf_base64, `Compra_${coId}.pdf`);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'PDF generado',
+                            text: 'El PDF se ha abierto en una nueva ventana',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'No se pudo generar el PDF', 'error');
                 }
             }
 
@@ -592,37 +615,36 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 });
             }
 
-            function exportarPDFComprasHistorial() {
-                const form = document.querySelector('.filtro-dinamico');
-                const params = new URLSearchParams();
-                params.append('comprasHistorialAjax', 'exportar_pdf');
+        function exportarPDFComprasHistorial() {
+            const form = document.querySelector('.filtro-dinamico');
+            const params = new URLSearchParams();
+            params.append('comprasHistorialAjax', 'exportar_pdf');
 
-                if (form) {
-                    const fechaDesde = form.querySelector('input[name="fecha_desde"]');
-                    const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
-                    const select1 = form.querySelector('select[name="select1"]');
-                    const select2 = form.querySelector('select[name="select2"]');
-                    const select3 = form.querySelector('select[name="select3"]');
+            if (form) {
+                const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+                const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+                const select1 = form.querySelector('select[name="select1"]');
+                const select2 = form.querySelector('select[name="select2"]');
+                const select3 = form.querySelector('select[name="select3"]');
 
-                    if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
-                    if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
-                    if (select1 && select1.value) params.append('select1', select1.value);
-                    if (select2 && select2.value) params.append('select2', select2.value);
-                    if (select3 && select3.value) params.append('su_id', select3.value);
-                }
-
-                const url = '<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?' + params.toString();
-
-                window.open(url, '_blank');
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Generando PDF',
-                    text: 'El reporte se está generando...',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
+                if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
+                if (select1 && select1.value) params.append('select1', select1.value);
+                if (select2 && select2.value) params.append('select2', select2.value);
+                if (select3 && select3.value) params.append('select3', select3.value);
             }
+
+            const url = '<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?' + params.toString();
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando PDF',
+                text: 'El reporte se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
 
             document.addEventListener('click', function(e) {
                 const modal = document.getElementById('modalDetalleCompra');

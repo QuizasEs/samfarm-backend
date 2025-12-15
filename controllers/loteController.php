@@ -692,4 +692,252 @@ class loteController extends loteModel
         echo json_encode($alerta);
         exit();
     }
+
+    public function exportar_pdf_lotes_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario == 3) {
+            echo "Acceso denegado";
+            return;
+        }
+
+        $filtros = [];
+
+        // Filtrar por sucursal según rol
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+
+        if ($rol_usuario == 1) {
+            if (isset($_GET['select3']) && $_GET['select3'] !== '') {
+                $filtros['su_id'] = (int)$_GET['select3'];
+            }
+        } elseif ($rol_usuario == 2) {
+            $filtros['su_id'] = $sucursal_usuario;
+        }
+
+        // Filtros de búsqueda y estado
+        if (isset($_GET['busqueda']) && !empty($_GET['busqueda'])) {
+            $filtros['busqueda'] = mainModel::limpiar_cadena($_GET['busqueda']);
+        }
+
+        if (isset($_GET['select1']) && $_GET['select1'] !== '') {
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            if (in_array($_GET['select1'], $estados_validos)) {
+                $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
+            }
+        }
+
+        if (isset($_GET['select2']) && is_numeric($_GET['select2'])) {
+            $mes = (int)$_GET['select2'];
+            if ($mes >= 1 && $mes <= 12) {
+                $filtros['mes'] = $mes;
+            }
+        }
+
+        // Filtros de fecha
+        if (isset($_GET['fecha_desde']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['fecha_desde'])) {
+            $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
+        }
+        if (isset($_GET['fecha_hasta']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['fecha_hasta'])) {
+            $filtros['fecha_hasta'] = mainModel::limpiar_cadena($_GET['fecha_hasta']);
+        }
+
+        try {
+            // Usar la consulta existente pero con límite mayor para PDF
+            $stmt = self::paginado_lote_controller(1, 1000, '#', $filtros['busqueda'] ?? '', $filtros['estado'] ?? '', $filtros['mes'] ?? '', $filtros['su_id'] ?? '');
+
+            // Obtener datos directamente del modelo para PDF
+            $consulta = "
+                SELECT DISTINCT
+                    lm.lm_id,
+                    lm.lm_numero_lote,
+                    m.med_nombre_quimico,
+                    m.med_principio_activo,
+                    p.pr_nombres,
+                    s.su_nombre,
+                    lm.lm_cant_caja AS lm_cajas_inicial,
+                    lm.lm_total_unidades AS lm_unidades_inicial,
+                    lm.lm_cant_actual_cajas AS lm_cajas_actual,
+                    lm.lm_cant_actual_unidades AS lm_unidades_actual,
+                    lm.lm_precio_compra,
+                    lm.lm_precio_venta,
+                    lm.lm_fecha_ingreso,
+                    lm.lm_fecha_vencimiento,
+                    lm.lm_estado,
+                    lm.lm_creado_en
+                FROM lote_medicamento lm
+                INNER JOIN medicamento m ON lm.med_id = m.med_id
+                INNER JOIN sucursales s ON lm.su_id = s.su_id
+                LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            ";
+
+            $whereParts = [];
+            if (!empty($filtros['busqueda'])) {
+                $whereParts[] = "(
+                    m.med_nombre_quimico LIKE '%{$filtros['busqueda']}%' OR
+                    m.med_principio_activo LIKE '%{$filtros['busqueda']}%' OR
+                    p.pr_nombres LIKE '%{$filtros['busqueda']}%' OR
+                    lm.lm_numero_lote LIKE '%{$filtros['busqueda']}%'
+                )";
+            }
+            if (!empty($filtros['estado'])) {
+                $whereParts[] = "lm.lm_estado = '{$filtros['estado']}'";
+            }
+            if (!empty($filtros['mes'])) {
+                $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = {$filtros['mes']}";
+            }
+            if (!empty($filtros['su_id'])) {
+                $whereParts[] = "lm.su_id = '{$filtros['su_id']}'";
+            }
+
+            $fecha_desde = $filtros['fecha_desde'] ?? '';
+            $fecha_hasta = $filtros['fecha_hasta'] ?? '';
+
+            if ($fecha_desde && $fecha_hasta) {
+                $timestamp_desde = strtotime($fecha_desde);
+                $timestamp_hasta = strtotime($fecha_hasta);
+                if ($timestamp_desde <= $timestamp_hasta) {
+                    $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '{$fecha_desde}' AND '{$fecha_hasta}'";
+                } else {
+                    $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '{$fecha_hasta}' AND '{$fecha_desde}'";
+                }
+            } elseif ($fecha_desde) {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) >= '{$fecha_desde}'";
+            } elseif ($fecha_hasta) {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) <= '{$fecha_hasta}'";
+            }
+
+            if (count($whereParts) > 0) {
+                $consulta .= " WHERE " . implode(' AND ', $whereParts);
+            }
+
+            $consulta .= " ORDER BY lm.lm_fecha_ingreso DESC LIMIT 1000";
+
+            $conexion = mainModel::conectar();
+            $stmt = $conexion->query($consulta);
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($datos)) {
+                echo "No hay datos para exportar con los filtros aplicados.";
+                return;
+            }
+
+            $periodo = '';
+            if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+                $periodo = date('d/m/Y', strtotime($fecha_desde)) . ' al ' . date('d/m/Y', strtotime($fecha_hasta));
+            } else {
+                $periodo = 'Todo el período';
+            }
+
+            $info_superior = [
+                'Periodo' => $periodo,
+                'Total de Lotes' => count($datos),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [];
+            if ($rol_usuario == 1) {
+                $headers = [
+                    ['text' => 'N° LOTE', 'width' => 25],
+                    ['text' => 'MEDICAMENTO', 'width' => 35],
+                    ['text' => 'PROVEEDOR', 'width' => 25],
+                    ['text' => 'SUCURSAL', 'width' => 20],
+                    ['text' => 'CAJAS ACT.', 'width' => 15],
+                    ['text' => 'UND ACT.', 'width' => 15],
+                    ['text' => 'PRECIO COMPRA', 'width' => 20],
+                    ['text' => 'PRECIO VENTA', 'width' => 20],
+                    ['text' => 'VENCIMIENTO', 'width' => 20],
+                    ['text' => 'ESTADO', 'width' => 15]
+                ];
+            } else {
+                $headers = [
+                    ['text' => 'N° LOTE', 'width' => 30],
+                    ['text' => 'MEDICAMENTO', 'width' => 40],
+                    ['text' => 'PROVEEDOR', 'width' => 30],
+                    ['text' => 'CAJAS ACT.', 'width' => 15],
+                    ['text' => 'UND ACT.', 'width' => 15],
+                    ['text' => 'PRECIO COMPRA', 'width' => 20],
+                    ['text' => 'PRECIO VENTA', 'width' => 20],
+                    ['text' => 'VENCIMIENTO', 'width' => 25],
+                    ['text' => 'ESTADO', 'width' => 15]
+                ];
+            }
+
+            $rows = [];
+            foreach ($datos as $row) {
+                $estado_texto = '';
+                switch ($row['lm_estado']) {
+                    case 'en_espera': $estado_texto = 'En Espera'; break;
+                    case 'activo': $estado_texto = 'Activo'; break;
+                    case 'terminado': $estado_texto = 'Terminado'; break;
+                    case 'caducado': $estado_texto = 'Caducado'; break;
+                    case 'devuelto': $estado_texto = 'Devuelto'; break;
+                    case 'bloqueado': $estado_texto = 'Bloqueado'; break;
+                    default: $estado_texto = ucfirst($row['lm_estado']);
+                }
+
+                if ($rol_usuario == 1) {
+                    $cells = [
+                        ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
+                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 25), 'align' => 'L'],
+                        ['text' => substr($row['pr_nombres'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => substr($row['su_nombre'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
+                        ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
+                        ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
+                        ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
+                        ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
+                        ['text' => $estado_texto, 'align' => 'C']
+                    ];
+                } else {
+                    $cells = [
+                        ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
+                        ['text' => substr($row['med_nombre_químico'] ?? 'N/A', 0, 30), 'align' => 'L'],
+                        ['text' => substr($row['pr_nombres'] ?? 'N/A', 0, 20), 'align' => 'L'],
+                        ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
+                        ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
+                        ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
+                        ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
+                        ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
+                        ['text' => $estado_texto, 'align' => 'C']
+                    ];
+                }
+
+                $rows[] = ['cells' => $cells];
+            }
+
+            $resumen = [
+                'Total de Lotes' => ['text' => count($datos)]
+            ];
+
+            $datos_pdf = [
+                'titulo' => 'REPORTE DE LOTES DE MEDICAMENTOS',
+                'nombre_archivo' => 'Lotes_Medicamentos_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            // Generar y descargar PDF directamente
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
+        } catch (Exception $e) {
+            error_log("Error exportando PDF lotes: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
 }

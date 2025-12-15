@@ -64,7 +64,8 @@ class notificacionesModel extends mainModel
 
     protected static function generar_notificaciones_proximos_caducar_model($conexion)
     {
-        $sql = "INSERT IGNORE INTO notificaciones (not_tipo, not_referencia_id, not_su_id, not_titulo, not_mensaje, not_icono, not_color, not_aplicable_rol_1, not_aplicable_rol_2)
+        // Eliminamos las notificaciones existentes que ya no son relevantes y actualizamos las que siguen siendo válidas
+        $sql = "INSERT INTO notificaciones (not_tipo, not_referencia_id, not_su_id, not_titulo, not_mensaje, not_icono, not_color, not_aplicable_rol_1, not_aplicable_rol_2)
                 SELECT 'proximo_caducar', l.lm_id, l.su_id, 'Próximo a Caducar',
                 CONCAT(m.med_nombre_quimico, ' Lote: ', l.lm_numero_lote, ' caduca en ', DATEDIFF(l.lm_fecha_vencimiento, CURDATE()), ' días'),
                 'alert-circle-outline', '#ff5722', 1, 1
@@ -73,11 +74,29 @@ class notificacionesModel extends mainModel
                 JOIN sucursales s ON l.su_id = s.su_id
                 WHERE DATEDIFF(l.lm_fecha_vencimiento, CURDATE()) > 0 AND DATEDIFF(l.lm_fecha_vencimiento, CURDATE()) <= 30
                 AND l.lm_cant_actual_unidades > 0
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'proximo_caducar' 
-                  AND not_referencia_id = l.lm_id AND not_leida = 0 AND not_descartada = 0)";
+                ON DUPLICATE KEY UPDATE
+                    not_mensaje = VALUES(not_mensaje),
+                    not_fecha_creacion = CASE
+                        WHEN not_mensaje = VALUES(not_mensaje) THEN not_fecha_creacion
+                        ELSE NOW()
+                    END";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
+
+        // Limpiamos las notificaciones que ya no son relevantes (productos que dejaron de caducar próximamente)
+        $sql_cleanup = "DELETE FROM notificaciones
+                        WHERE not_tipo = 'proximo_caducar'
+                        AND NOT EXISTS (
+                            SELECT 1 FROM lote_medicamento l
+                            WHERE l.lm_id = notificaciones.not_referencia_id
+                            AND DATEDIFF(l.lm_fecha_vencimiento, CURDATE()) > 0
+                            AND DATEDIFF(l.lm_fecha_vencimiento, CURDATE()) <= 30
+                            AND l.lm_cant_actual_unidades > 0
+                        )";
+
+        $stmt_cleanup = $conexion->prepare($sql_cleanup);
+        $stmt_cleanup->execute();
     }
 
     protected static function generar_notificaciones_ya_caducados_model($conexion)
@@ -149,7 +168,8 @@ class notificacionesModel extends mainModel
 
     protected static function limpiar_notificaciones_antiguas_model($conexion)
     {
-        $sql = "DELETE FROM notificaciones WHERE not_descartada = 1 AND not_fecha_creacion < DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        // Eliminar notificaciones obsoletas cada mes (30 días)
+        $sql = "DELETE FROM notificaciones WHERE (not_descartada = 1 OR not_leida = 1) AND not_fecha_creacion < DATE_SUB(NOW(), INTERVAL 30 DAY)";
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
     }
@@ -158,35 +178,55 @@ class notificacionesModel extends mainModel
     {
         self::generar_notificaciones_automaticas_model();
 
+        // Agrupamos por mensaje para evitar duplicados
         $sql = "SELECT not_id as id, not_tipo as tipo, not_icono as icono, not_color as color,
-                not_titulo as titulo, not_mensaje as mensaje, not_fecha_creacion as fecha, not_leida as leida
+                not_titulo as titulo, not_mensaje as mensaje, MAX(not_fecha_creacion) as fecha,
+                MIN(not_leida) as leida
                 FROM notificaciones
                 WHERE not_descartada = 0 AND (not_aplicable_rol_1 = 1)
-                ORDER BY not_leida ASC, not_fecha_creacion DESC
+                GROUP BY not_mensaje, not_tipo, not_su_id
+                ORDER BY leida ASC, fecha DESC
                 LIMIT 100";
 
         $conexion = mainModel::conectar();
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Convertir MIN(not_leida) de 0/1 a booleano true/false para que sea leída
+        foreach ($resultados as $i => $resultado) {
+            $resultados[$i]['leida'] = (bool)$resultado['leida'];
+        }
+
+        return $resultados;
     }
 
     protected static function obtener_notificaciones_sucursal_model($su_id)
     {
         self::generar_notificaciones_automaticas_model();
 
+        // Agrupamos por mensaje para evitar duplicados también para usuarios normales
         $sql = "SELECT not_id as id, not_tipo as tipo, not_icono as icono, not_color as color,
-                not_titulo as titulo, not_mensaje as mensaje, not_fecha_creacion as fecha, not_leida as leida
+                not_titulo as titulo, not_mensaje as mensaje, MAX(not_fecha_creacion) as fecha,
+                MIN(not_leida) as leida
                 FROM notificaciones
                 WHERE not_descartada = 0 AND not_su_id = :su_id AND (not_aplicable_rol_2 = 1)
-                ORDER BY not_leida ASC, not_fecha_creacion DESC
+                GROUP BY not_mensaje, not_tipo
+                ORDER BY leida ASC, fecha DESC
                 LIMIT 100";
 
         $conexion = mainModel::conectar();
         $stmt = $conexion->prepare($sql);
         $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Convertir MIN(not_leida) de 0/1 a booleano true/false
+        foreach ($resultados as $i => $resultado) {
+            $resultados[$i]['leida'] = (bool)$resultado['leida'];
+        }
+
+        return $resultados;
     }
 
     protected static function marcar_como_leida_model($id)

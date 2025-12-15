@@ -142,7 +142,7 @@ class userController extends userModel
                             <td><span style="text-transform:uppercase; font-weight:600;color:' . $rol_color . ';">' . $rol_nombre . '</span></td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="font-weight:600;color:#E65100; text-transform:uppercase;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
                     '<td>' . $estado_html . '</td>
-                            <td class="accion-buttons">
+                            <td class="buttons">
                                 <a href="javascript:void(0)" 
                                 class="btn default" 
                                 title="Ver detalle"
@@ -562,12 +562,24 @@ class userController extends userModel
             exit();
         }
 
-        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT us_id FROM usuarios WHERE us_id = '$us_id'");
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT us_id, ro_id FROM usuarios WHERE us_id = '$us_id'");
         if ($check_usuario->rowCount() <= 0) {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Usuario no existe",
                 "texto" => "El usuario no fue encontrado en el sistema",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $usuario = $check_usuario->fetch();
+        if ($usuario['ro_id'] == 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acción no permitida",
+                "texto" => "No se puede cambiar el estado de usuarios administradores",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);

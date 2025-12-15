@@ -133,8 +133,8 @@ class clienteController extends clienteModel
                 $total_compras = (int)($row['total_compras'] ?? 0);
 
                 $estado_html = $row['cl_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="estado-badge activo">Activo</span>'
+                    : '<span class="estado-badge caducado">Inactivo</span>';
 
                 $tabla .= '
                         <tr>
@@ -147,24 +147,23 @@ class clienteController extends clienteModel
                             <td>' . $ultima_compra . '</td>
                             <td style="text-align:center;"><strong style="color:#1976D2;">' . $total_compras . '</strong></td>
                             <td>' . $estado_html . '</td>
-                            <td class="accion-buttons">
+                        <td class="buttons">
                                 ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
                                 class="btn default"
                                 title="Ver detalle"
                                 onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
-                                    <ion-icon name="eye-outline"></ion-icon> Detalle
+                                    Detalle
                                 </a>' : '') . '
                                 <a href="javascript:void(0)"
                                 class="btn primary"
                                 title="Editar"
                                 onclick="ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
-                                    <ion-icon name="create-outline"></ion-icon> Editar
+                                    Editar
                                 </a>
                                 ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
                                 class="btn ' . ($row['cl_estado'] == 1 ? 'danger' : 'success') . '"
                                 title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
                                 onclick="ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
-                                    <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon>
                                     ' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '
                                 </a>' : '') . '
                             </td>
@@ -175,7 +174,7 @@ class clienteController extends clienteModel
             $reg_final = $contador - 1;
         } else {
             $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
-                            <ion-icon name="people-outline"></ion-icon> No hay registros
+                            No hay registros
                         </td></tr>';
         }
 
@@ -1101,7 +1100,16 @@ class clienteController extends clienteModel
                 $contador++;
             }
 
-            self::generar_pdf_reporte_fpdf($datos_pdf);
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
         } catch (Exception $e) {
             error_log("Error exportando PDF: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
@@ -1217,7 +1225,16 @@ class clienteController extends clienteModel
                 ];
             }
 
-            self::generar_pdf_reporte_fpdf($datos_pdf);
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
         } catch (Exception $e) {
             error_log("Error exportando PDF detalle: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();

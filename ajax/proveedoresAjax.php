@@ -26,6 +26,29 @@ if (isset($_GET['exportar']) && $_GET['exportar'] === 'excel') {
     exit();
 }
 
+if (isset($_GET['exportar']) && $_GET['exportar'] === 'pdf') {
+
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        session_unset();
+        session_destroy();
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "Acceso denegado. No cuenta con los privilegios necesarios.";
+        exit();
+    }
+
+    require_once "../controllers/proveedorController.php";
+    $ins_proveedor = new proveedorController();
+    $ins_proveedor->exportar_pdf_proveedores_controller();
+    exit();
+}
+
 if (isset($_POST['proveedoresAjax'])) {
 
     session_start(['name' => 'SMP']);

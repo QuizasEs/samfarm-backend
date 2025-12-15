@@ -7,7 +7,7 @@ if ($peticionAjax) {
 }
 class ventasHistorialController extends ventasHistorialModel
 {
-
+    /* Paginador para el historial de ventas */
     public function paginado_ventas_historial_controller($pagina, $registros, $url, $busqueda = "", $f1 = "", $f2 = "", $f3 = "", $f4 = "", $f5 = "")
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -20,7 +20,6 @@ class ventasHistorialController extends ventasHistorialModel
                     </div>';
         }
 
-        // ===== LIMPIAR PARÁMETROS =====
         $pagina = mainModel::limpiar_cadena($pagina);
         $registros = mainModel::limpiar_cadena($registros);
         $url = mainModel::limpiar_cadena($url);
@@ -36,10 +35,8 @@ class ventasHistorialController extends ventasHistorialModel
         $pagina = (isset($pagina) && $pagina > 0) ? (int) $pagina : 1;
         $inicio = ($pagina > 0) ? (($pagina * $registros) - $registros) : 0;
 
-        // ===== CONSTRUIR FILTROS =====
         $filtros = [];
 
-        
         if ($rol_usuario == 1) {
             // Admin: puede ver todas o filtrar
             if ($f1 !== '') {
@@ -50,7 +47,6 @@ class ventasHistorialController extends ventasHistorialModel
             $filtros['su_id'] = $sucursal_usuario;
         }
 
-        //  Filtros de fecha
         $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
 
@@ -62,27 +58,22 @@ class ventasHistorialController extends ventasHistorialModel
             $filtros['fecha_hasta'] = $fecha_hasta;
         }
 
-        //  Filtro por cliente
         if ($f2 !== '' && is_numeric($f2)) {
             $filtros['cliente'] = (int)$f2;
         }
 
-        //  Filtro por vendedor
         if ($f3 !== '' && is_numeric($f3)) {
             $filtros['vendedor'] = (int)$f3;
         }
 
-        //  Filtro por tipo de documento
         if ($f4 !== '') {
             $filtros['tipo_documento'] = $f4;
         }
 
-        // Búsqueda
         if (!empty($busqueda)) {
             $filtros['busqueda'] = $busqueda;
         }
 
-        // ===== CONSULTAR DATOS =====
         try {
             $conexion = mainModel::conectar();
 
@@ -100,11 +91,9 @@ class ventasHistorialController extends ventasHistorialModel
 
         $Npaginas = ceil($total / $registros);
 
-        // Determinar si mostrar columna sucursal
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f1));
         $colspan_total = $mostrar_columna_sucursal ? 10 : 9;
 
-        // ===== CONSTRUIR TABLA =====
         $tabla .= '
             <div class="table-container">
                 <table class="table">
@@ -130,19 +119,16 @@ class ventasHistorialController extends ventasHistorialModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $row) {
-                // Cliente
                 $cliente_display = !empty($row['cliente_nombre'])
                     ? htmlspecialchars($row['cliente_nombre'])
                     : '<span style="color:#999;">Sin cliente</span>';
 
-                // Tipo documento con badge
                 $tipo_doc = !empty($row['ve_tipo_documento'])
                     ? strtoupper($row['ve_tipo_documento'])
                     : 'VENTA';
 
                 $tipo_doc_html = '<span class="estado-badge activo" style="font-size:10px;">' . $tipo_doc . '</span>';
 
-                // Tiene factura
                 $tiene_factura = !empty($row['fa_id']);
 
                 $tabla .= '
@@ -155,7 +141,7 @@ class ventasHistorialController extends ventasHistorialModel
                     ($mostrar_columna_sucursal ? '<td><span style=";padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .'
                         <td style="text-align:right;font-size:14px;"><strong style="color:#2e7d32;">Bs. ' . number_format($row['ve_total'], 2) . '</strong></td>
                         <td style="text-align:center;">' . $tipo_doc_html . '</td>
-                        <td class="accion-buttons">
+                        <td class="buttons">
                             <a href="javascript:void(0)" 
                                class="btn default" 
                                title="Ver detalle"
@@ -191,6 +177,7 @@ class ventasHistorialController extends ventasHistorialModel
     }
 
 
+    /* Obtener el detalle completo de una venta */
     public function detalle_venta_controller()
     {
         $ve_id = isset($_POST['ve_id']) ? (int)$_POST['ve_id'] : 0;
@@ -207,7 +194,6 @@ class ventasHistorialController extends ventasHistorialModel
         }
 
         try {
-            // Obtener datos de la venta
             $stmt = self::detalle_venta_completo_model($ve_id);
             $venta = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -222,11 +208,9 @@ class ventasHistorialController extends ventasHistorialModel
                 exit();
             }
 
-            // Obtener items
             $itemsStmt = self::detalle_items_venta_model($ve_id);
             $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Formatear items
             $itemsFormateados = array_map(function ($item) {
                 $nombre_medicamento = $item['med_nombre_quimico'];
                 if (!empty($item['med_version_comercial'])) {
@@ -244,7 +228,6 @@ class ventasHistorialController extends ventasHistorialModel
                 ];
             }, $items);
 
-            // Cliente
             $cliente_nombre = trim(
                 ($venta['cl_nombres'] ?? '') . ' ' .
                     ($venta['cl_apellido_paterno'] ?? '') . ' ' .
@@ -254,7 +237,6 @@ class ventasHistorialController extends ventasHistorialModel
                 $cliente_nombre = 'Sin cliente';
             }
 
-            // Vendedor
             $vendedor_nombre = trim(
                 ($venta['us_nombres'] ?? '') . ' ' .
                     ($venta['us_apellido_paterno'] ?? '') . ' ' .
@@ -294,9 +276,9 @@ class ventasHistorialController extends ventasHistorialModel
         }
     }
 
+    /* Generar el PDF de reimpresión de nota de venta desde historial */
     public function generar_pdf_nota_controller()
     {
-        
         $ve_id = isset($_POST['ve_id']) ? (int)$_POST['ve_id'] : 0;
 
         if ($ve_id <= 0) {
@@ -309,46 +291,82 @@ class ventasHistorialController extends ventasHistorialModel
             echo json_encode($alerta);
             exit();
         }
-        $consulta = self::ejecutar_consulta_simple("
-                SELECT fa_id 
-                FROM factura 
-                WHERE ve_id = $ve_id
-                LIMIT 1
-            ");
-        if ($consulta->rowCount() <= 0) {
-            $alerta = [
-                'Alerta' => 'simple',
-                'Titulo' => 'Error',
-                'texto' => 'La venta no tiene factura registrada',
-                'Tipo' => 'error'
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
-
-        // Extraer fa_id
-        $data = $consulta->fetch(PDO::FETCH_ASSOC);
-        $fa_id = (int)$data['fa_id'];
-
-
 
         try {
-            require_once dirname(__DIR__).'./models/ventaModel.php';
-            $ins_venta = new ventaModel();
-            $pdf_base64 = $ins_venta->generar_pdf_factura_model($fa_id, 'nota_venta');
+            require_once '../libs/fpdf/fpdf.php';
 
-            if (!$pdf_base64) {
+            // Consulta directa desde ventas (sin depender de factura)
+            $db = mainModel::conectar();
+            $sql = "
+                SELECT
+                    v.ve_id, v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_impuesto, v.ve_fecha_emision,
+                    c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet,
+                    u.us_nombres, u.us_apellido_paterno,
+                    s.su_nombre
+                FROM ventas v
+                LEFT JOIN clientes c ON c.cl_id = v.cl_id
+                INNER JOIN usuarios u ON u.us_id = v.us_id
+                INNER JOIN sucursales s ON s.su_id = v.su_id
+                WHERE v.ve_id = :ve_id
+            ";
+
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() <= 0) {
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Error',
-                    'texto' => 'Nonononono se pudo generar el PDF',
+                    'texto' => 'Venta no encontrada',
                     'Tipo' => 'error'
                 ];
                 echo json_encode($alerta);
                 exit();
             }
 
-            // Respuesta exitosa
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Consulta detalles de venta
+            $sql2 = "
+                SELECT dv.*,
+                    m.med_nombre_quimico AS med_nombre,
+                    COALESCE(m.med_version_comercial, '') AS version_comercial,
+                    COALESCE(ff.ff_nombre, '') AS presentacion
+                FROM detalle_venta dv
+                INNER JOIN medicamento m ON m.med_id = dv.med_id
+                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                WHERE dv.ve_id = :ve_id
+            ";
+            $stmt2 = $db->prepare($sql2);
+            $stmt2->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
+            $stmt2->execute();
+            $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+            // Config empresa
+            $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
+            $cfg_stmt = $db->prepare($cfg_sql);
+            $cfg_stmt->execute();
+            $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$empresa) {
+                $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
+            }
+
+            // Generar PDF usando la misma lógica que venta (sin utf8_decode deprecated)
+            $pdf_base64 = $this->generar_pdf_nota_venta_rep($data, $detalles, $empresa);
+
+            if (!$pdf_base64) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error',
+                    'texto' => 'No se pudo generar el PDF',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+
             $response = [
                 'success' => true,
                 'pdf_base64' => $pdf_base64
@@ -369,7 +387,128 @@ class ventasHistorialController extends ventasHistorialModel
         }
     }
 
+    /* Método para generar PDF de nota de venta para reimpresión (igual que venta pero sin utf8_decode) */
+    private function generar_pdf_nota_venta_rep($data, $detalles, $empresa)
+    {
+        // Calcular altura dinámica
+        $altura_base = 95;
+        $altura_items = 0;
+        $line_height = 4;
+        $char_per_line = 45;
 
+        foreach ($detalles as $d) {
+            $nombre_producto = $d['med_nombre'] ?? 'Producto';
+            $lineas_nombre = ceil(mb_strlen($nombre_producto, 'UTF-8') / $char_per_line);
+            $altura_items += $lineas_nombre * $line_height;
+        }
+
+        $altura_total = $altura_base + $altura_items;
+
+        $pdf = new FPDF('P', 'mm', [80, $altura_total]);
+        $pdf->AddPage();
+        $pdf->SetMargins(5, 5, 5);
+        $pdf->SetAutoPageBreak(false);
+
+        // Encabezado empresa
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(0, 5, ($empresa['ce_nombre']), 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->Cell(0, 4, 'Sucursal: ' . ($data['su_nombre']), 0, 1, 'C');
+        $pdf->MultiCell(0, 4, ($empresa['ce_direccion']), 0, 'C');
+        $pdf->Cell(0, 4, 'Telf: ' . $empresa['ce_telefono'], 0, 1, 'C');
+        $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'C');
+        $pdf->Ln(3);
+
+        // Título
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(0, 5, 'NOTA DE VENTA', 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
+
+        // Datos venta
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'N Venta:', 0, 0);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->Cell(0, 4, $data['ve_numero_documento'], 0, 1);
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Fecha:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
+
+        $nombre_cliente = trim(
+            ($data['cl_nombres'] ?? '') . ' ' .
+                ($data['cl_apellido_paterno'] ?? '') . ' ' .
+                ($data['cl_apellido_materno'] ?? '')
+        );
+        if (empty($nombre_cliente)) $nombre_cliente = 'Sin Cliente';
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Cliente:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->MultiCell(0, 4, ($nombre_cliente));
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'CI/NIT:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, $data['cl_carnet'] ?? 'S/N', 0, 1);
+
+        $vendedor_nombre = trim(($data['us_nombres'] ?? '') . ' ' . ($data['us_apellido_paterno'] ?? ''));
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Vendedor:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, ($vendedor_nombre), 0, 1);
+
+        $pdf->Ln(2);
+
+        // Tabla detalles
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(35, 5, 'Producto', 'B', 0, 'L');
+        $pdf->Cell(10, 5, 'Cant.', 'B', 0, 'C');
+        $pdf->Cell(12, 5, 'P.U.', 'B', 0, 'R');
+        $pdf->Cell(13, 5, 'Subtotal', 'B', 1, 'R');
+
+        $pdf->SetFont('Arial', '', 7);
+        foreach ($detalles as $d) {
+            $y_actual = $pdf->GetY();
+            $x_actual = $pdf->GetX();
+
+            $pdf->MultiCell(35, 4, ($d['med_nombre']), 0, 'L');
+            $y_despues = $pdf->GetY();
+
+            $pdf->SetXY($x_actual + 35, $y_actual);
+            $pdf->Cell(10, 4, $d['dv_cantidad'], 0, 0, 'C');
+            $pdf->Cell(12, 4, number_format($d['dv_precio_unitario'], 2), 0, 0, 'R');
+            $pdf->Cell(13, 4, number_format($d['dv_subtotal'], 2), 0, 1, 'R');
+            $pdf->SetY($y_despues);
+        }
+        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
+
+        // Totales
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->Cell(45, 5, 'Subtotal:', 0, 0, 'R');
+        $pdf->Cell(25, 5, 'Bs. ' . number_format($data['ve_subtotal'], 2), 0, 1, 'R');
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(45, 6, 'TOTAL A PAGAR:', 0, 0, 'R');
+        $pdf->Cell(25, 6, 'Bs. ' . number_format($data['ve_total'], 2), 0, 1, 'R');
+
+        $pdf->Ln(5);
+
+        // Pie
+        $pdf->SetFont('Arial', 'I', 7);
+        $pdf->Cell(0, 4, '¡Gracias por su compra!', 0, 1, 'C');
+        $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
+
+        $contenido_pdf = $pdf->Output('S');
+        $pdf_base64 = base64_encode($contenido_pdf);
+
+        error_log("PDF reimpresión generado exitosamente para venta #{$data['ve_id']}");
+        return $pdf_base64;
+    }
+
+
+    /* Exportar el historial de ventas a un archivo Excel */
     public function exportar_excel_controller()
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -435,7 +574,7 @@ class ventasHistorialController extends ventasHistorialModel
             }
 
             mainModel::generar_excel_reporte([
-                'titulo' => 'HISTORIAL DE VENTAS - SAMFARM PHARMA',
+                'titulo' => 'HISTORIAL DE VENTAS',
                 'datos' => $datos,
                 'headers' => $headers,
                 'nombre_archivo' => $filename,

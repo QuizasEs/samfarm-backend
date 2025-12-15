@@ -56,8 +56,6 @@ function obtenerAjaxConfig(container) {
         // Eventos de formulario (filtros)
         if (form) {
 
-            // 📅 Eventos para filtros de fecha
-            // 📅 Eventos para filtros de fecha CON VALIDACIÓN
             const fechaInputs = form.querySelectorAll('input[name="fecha_desde"], input[name="fecha_hasta"]');
             if (fechaInputs.length > 0) {
                 const fechaDesde = form.querySelector('input[name="fecha_desde"]');

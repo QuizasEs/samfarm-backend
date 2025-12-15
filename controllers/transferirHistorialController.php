@@ -77,6 +77,8 @@ class transferirHistorialController extends transferirModel
                     $fecha = date('d/m/Y H:i', strtotime($tr['tr_fecha_envio']));
                     $monto = number_format($tr['tr_total_valorado'], 2, '.', ',');
 
+                    $url_pdf = SERVER_URL . 'ajax/transferirHistorialAjax.php?transferirHistorialAjax=generar_pdf&tr_id=' . $tr['tr_id'];
+
                     $html .= '<tr>
                                 <td><strong>' . htmlspecialchars($tr['tr_numero']) . '</strong></td>
                                 <td>' . htmlspecialchars($tr['sucursal_origen']) . ' → ' . htmlspecialchars($tr['sucursal_destino']) . '</td>
@@ -88,8 +90,8 @@ class transferirHistorialController extends transferirModel
                                     <a href="#" class="btn primary" onclick="event.preventDefault(); TransferirHistorialModals.verDetalle(' . (int)$tr['tr_id'] . ', \'' . htmlspecialchars($tr['tr_numero']) . '\')" title="Ver detalles">
                                         <ion-icon name="eye-outline"></ion-icon> Detalles
                                     </a>
-                                    <a href="#" class="btn success" onclick="event.preventDefault(); TransferirHistorialModals.descargarPDF(' . (int)$tr['tr_id'] . ')" title="Descargar PDF">
-                                        <ion-icon name="download-outline"></ion-icon> EXCEL
+                                    <a href="javascript:void(0)" class="btn default" title="Descargar PDF" onclick="window.open(\'' . $url_pdf . '\', \'_blank\')">
+                                        <ion-icon name="download-outline"></ion-icon> PDF
                                     </a>
                                 </td>
                             </tr>';
@@ -158,12 +160,13 @@ class transferirHistorialController extends transferirModel
 
     public function generar_pdf_transferencia_controller()
     {
-        $tr_id = isset($_POST['tr_id']) ? (int)$_POST['tr_id'] : 0;
+        $tr_id = isset($_GET['tr_id']) ? (int)$_GET['tr_id'] : 0;
         $rol = $_SESSION['rol_smp'] ?? 1;
         $su_usuario = $_SESSION['sucursal_smp'] ?? 0;
 
         if (!$tr_id) {
-            return json_encode(['success' => false, 'error' => 'ID inválido']);
+            echo "ID inválido";
+            return;
         }
 
         try {
@@ -171,118 +174,319 @@ class transferirHistorialController extends transferirModel
             $transferencia = $stmt_tr->fetch(PDO::FETCH_ASSOC);
 
             if (!$transferencia) {
-                return json_encode(['success' => false, 'error' => 'Transferencia no encontrada']);
+                echo "Transferencia no encontrada";
+                return;
             }
 
             if ($rol != 1 && $transferencia['su_origen_id'] != $su_usuario && $transferencia['su_destino_id'] != $su_usuario) {
-                return json_encode(['success' => false, 'error' => 'No tiene permiso']);
+                echo "No tiene permiso";
+                return;
             }
 
             $stmt_dt = transferirModel::detalle_transferencia_model($tr_id);
             $detalles = $stmt_dt->fetchAll(PDO::FETCH_ASSOC);
 
-            require_once '../libs/fpdf/fpdf.php';
+            if (empty($detalles)) {
+                echo "La transferencia no tiene detalles";
+                return;
+            }
 
-            $pdf = new FPDF('P', 'mm', 'Letter');
-            $pdf->SetMargins(10, 10, 10);
-            $pdf->AddPage();
-
-            $pdf->SetFont('Arial', 'B', 14);
-            $pdf->SetTextColor(44, 62, 80);
-            $pdf->Cell(0, 8, utf8_decode('COMPROBANTE DE TRANSFERENCIA'), 0, 1, 'C');
-            $pdf->Ln(3);
-
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Número:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, utf8_decode($transferencia['tr_numero']), 0, 1);
-
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Fecha Envío:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, utf8_decode(date('d/m/Y H:i', strtotime($transferencia['tr_fecha_envio']))), 0, 1);
+            // Información superior
+            $info_superior = [
+                'Número' => $transferencia['tr_numero'],
+                'Fecha Envío' => date('d/m/Y H:i', strtotime($transferencia['tr_fecha_envio'])),
+                'Origen' => $transferencia['sucursal_origen'],
+                'Destino' => $transferencia['sucursal_destino'],
+                'Emisor' => $transferencia['usuario_emisor'],
+                'Estado' => ucfirst(str_replace(['pendiente', 'aceptada', 'rechazada'], ['Pendiente', 'Aceptada', 'Rechazada'], $transferencia['tr_estado']))
+            ];
 
             if ($transferencia['tr_fecha_respuesta']) {
-                $pdf->SetFont('Arial', 'B', 9);
-                $pdf->Cell(40, 5, utf8_decode('Fecha Recepción:'), 0, 0);
-                $pdf->SetFont('Arial', '', 9);
-                $pdf->Cell(0, 5, utf8_decode(date('d/m/Y H:i', strtotime($transferencia['tr_fecha_respuesta']))), 0, 1);
+                $info_superior['Fecha Recepción'] = date('d/m/Y H:i', strtotime($transferencia['tr_fecha_respuesta']));
             }
-
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Origen:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, utf8_decode($transferencia['sucursal_origen']), 0, 1);
-
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Destino:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, utf8_decode($transferencia['sucursal_destino']), 0, 1);
-
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Emisor:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $pdf->Cell(0, 5, utf8_decode($transferencia['usuario_emisor']), 0, 1);
 
             if (!empty($transferencia['usuario_receptor'])) {
-                $pdf->SetFont('Arial', 'B', 9);
-                $pdf->Cell(40, 5, utf8_decode('Receptor:'), 0, 0);
-                $pdf->SetFont('Arial', '', 9);
-                $pdf->Cell(0, 5, utf8_decode($transferencia['usuario_receptor']), 0, 1);
+                $info_superior['Receptor'] = $transferencia['usuario_receptor'];
             }
 
-            $pdf->SetFont('Arial', 'B', 9);
-            $pdf->Cell(40, 5, utf8_decode('Estado:'), 0, 0);
-            $pdf->SetFont('Arial', '', 9);
-            $estado_texto = ucfirst(str_replace(['pendiente', 'aceptada', 'rechazada'], ['Pendiente', 'Aceptada', 'Rechazada'], $transferencia['tr_estado']));
-            $pdf->Cell(0, 5, utf8_decode($estado_texto), 0, 1);
+            // Headers
+            $headers = [
+                ['text' => '#', 'width' => 8],
+                ['text' => 'Medicamento', 'width' => 55],
+                ['text' => 'Lote', 'width' => 25],
+                ['text' => 'Cajas', 'width' => 18],
+                ['text' => 'Unidades', 'width' => 25],
+                ['text' => 'Subtotal', 'width' => 30]
+            ];
 
-            $pdf->Ln(3);
-
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->SetFillColor(52, 73, 94);
-            $pdf->SetTextColor(255, 255, 255);
-            $pdf->Cell(8, 6, '#', 1, 0, 'C', true);
-            $pdf->Cell(55, 6, 'Medicamento', 1, 0, 'L', true);
-            $pdf->Cell(25, 6, 'Lote', 1, 0, 'C', true);
-            $pdf->Cell(18, 6, 'Cajas', 1, 0, 'C', true);
-            $pdf->Cell(25, 6, 'Unidades', 1, 0, 'C', true);
-            $pdf->Cell(30, 6, 'Subtotal', 1, 1, 'R', true);
-
-            $pdf->SetFont('Arial', '', 7);
-            $pdf->SetTextColor(44, 62, 80);
-
+            // Rows
+            $rows = [];
             $index = 1;
             foreach ($detalles as $det) {
-                $pdf->Cell(8, 5, $index, 1, 0, 'C');
-                $pdf->Cell(55, 5, utf8_decode(substr($det['med_nombre_quimico'], 0, 35)), 1, 0, 'L');
-                $pdf->Cell(25, 5, utf8_decode($det['dt_numero_lote_origen']), 1, 0, 'C');
-                $pdf->Cell(18, 5, $det['dt_cantidad_cajas'], 1, 0, 'C');
-                $pdf->Cell(25, 5, number_format($det['dt_cantidad_unidades']), 1, 0, 'C');
-                $pdf->Cell(30, 5, 'Bs. ' . number_format($det['dt_subtotal_valorado'], 2), 1, 1, 'R');
+                $cells = [
+                    ['text' => $index, 'align' => 'C'],
+                    ['text' => substr($det['med_nombre_quimico'], 0, 35), 'align' => 'L'],
+                    ['text' => $det['dt_numero_lote_origen'], 'align' => 'C'],
+                    ['text' => $det['dt_cantidad_cajas'], 'align' => 'C'],
+                    ['text' => number_format($det['dt_cantidad_unidades']), 'align' => 'C'],
+                    ['text' => 'Bs. ' . number_format($det['dt_subtotal_valorado'], 2), 'align' => 'R']
+                ];
+                $rows[] = ['cells' => $cells];
                 $index++;
             }
 
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->SetFillColor(41, 128, 185);
-            $pdf->SetTextColor(255, 255, 255);
-            $pdf->Cell(8, 5, '', 1, 0);
-            $pdf->Cell(55, 5, 'TOTALES', 1, 0, 'R');
-            $pdf->Cell(25, 5, '', 1, 0);
-            $pdf->Cell(18, 5, $transferencia['tr_total_cajas'], 1, 0, 'C');
-            $pdf->Cell(25, 5, number_format($transferencia['tr_total_unidades']), 1, 0, 'C');
-            $pdf->Cell(30, 5, 'Bs. ' . number_format($transferencia['tr_total_valorado'], 2), 1, 1, 'R');
+            // Fila de totales
+            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
+            $cells_total[0] = ['text' => 'TOTALES', 'align' => 'R'];
+            $cells_total[count($headers) - 5] = ['text' => $transferencia['tr_total_cajas'], 'align' => 'C'];
+            $cells_total[count($headers) - 2] = ['text' => number_format($transferencia['tr_total_unidades']), 'align' => 'C'];
+            $cells_total[count($headers) - 1] = ['text' => 'Bs. ' . number_format($transferencia['tr_total_valorado'], 2), 'align' => 'R'];
 
-            $pdf_output = $pdf->Output('S');
-            $pdf_base64 = base64_encode($pdf_output);
+            $rows[] = [
+                'cells' => $cells_total,
+                'es_total' => true
+            ];
 
-            return json_encode([
-                'success' => true,
-                'pdf_base64' => $pdf_base64
-            ], JSON_UNESCAPED_UNICODE);
+            // Resumen
+            $resumen = [
+                'Total Medicamentos' => ['text' => count($detalles)],
+                'Total Cajas' => ['text' => $transferencia['tr_total_cajas']],
+                'Total Unidades' => ['text' => number_format($transferencia['tr_total_unidades'])],
+                'Valor Total Transferido' => [
+                    'text' => 'Bs. ' . number_format($transferencia['tr_total_valorado'], 2),
+                    'color' => [46, 125, 50]
+                ]
+            ];
+
+            // Configuración PDF
+            $datos_pdf = [
+                'titulo' => 'COMPROBANTE DE TRANSFERENCIA',
+                'nombre_archivo' => 'Transferencia_' . $transferencia['tr_numero'] . '_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            // Crear PDF usando FPDF directamente - igual style que comprasHistorial
+            require_once '../libs/fpdf/fpdf.php';
+
+            // --- Integración de dimensiones y orientación personalizadas ---
+            $orientacion = 'P';
+            $unidad = 'mm';
+            $tamano_papel = 'Letter'; // Tamaño por defecto
+
+            $pdf = new FPDF($orientacion, $unidad, $tamano_papel);
+            $pdf->AddPage();
+
+            $config_empresa = mainModel::obtener_config_empresa_model();
+
+            // Encabezado más compacto
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->SetTextColor(44, 62, 80);
+            $pdf->Cell(0, 6, ($config_empresa['ce_nombre']), 0, 1, 'C');
+
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->Cell(0, 3, ('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
+            $pdf->Cell(0, 3, ($config_empresa['ce_direccion']), 0, 1, 'C');
+
+            $pdf->SetDrawColor(52, 152, 219);
+            $pdf->SetLineWidth(0.2);
+
+            // Ancho de la línea dinámico
+            $ancho_pagina = $pdf->GetPageWidth();
+            $pdf->Line(10, $pdf->GetY() + 1, $ancho_pagina - 10, $pdf->GetY() + 1);
+            $pdf->Ln(2);
+
+            // Título
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->SetTextColor(44, 62, 80);
+            $pdf->Cell(0, 5, $datos_pdf['titulo'], 0, 1, 'C');
+            $pdf->Ln(1);
+
+            // Información superior compacta - igual que mainModel
+            if (isset($datos_pdf['info_superior'])) {
+                $pdf->SetFillColor(245, 245, 245);
+                $pdf->Rect(10, $pdf->GetY(), $ancho_pagina - 20, 12, 'F');
+
+                $pdf->SetFont('Arial', '', 7);
+                $pdf->SetTextColor(52, 73, 94);
+
+                $y_start = $pdf->GetY() + 2;
+                $x_pos = 15;
+                $count = 0;
+
+                foreach ($datos_pdf['info_superior'] as $key => $value) {
+                    $pdf->SetXY($x_pos, $y_start);
+                    $pdf->SetFont('Arial', 'B', 7);
+                    $pdf->Cell(25, 3, ($key . ':'), 0, 0, 'L');
+                    $pdf->SetFont('Arial', '', 7);
+                    $pdf->Cell(40, 3, ($value), 0, 0, 'L');
+
+                    $count++;
+                    $x_pos += 80;
+                    if ($count % 2 == 0) {
+                        $y_start += 4;
+                        $x_pos = 15;
+                    }
+                }
+                $pdf->Ln(8);
+            }
+
+            // DEFINIR ALTURA MÁXIMA ANTES DEL PIE DE PÁGINA
+            $altura_maxima = 250;
+
+            // Tabla optimizada - igual que mainModel
+            if (isset($datos_pdf['tabla'])) {
+                $tabla = $datos_pdf['tabla'];
+
+                // Ajustar anchos de columnas
+                $ancho_total_tabla = array_sum(array_column($tabla['headers'], 'width'));
+                $ancho_disponible = $ancho_pagina - 20;
+
+                if ($ancho_total_tabla > $ancho_disponible) {
+                    $factor_ajuste = $ancho_disponible / $ancho_total_tabla;
+                    foreach ($tabla['headers'] as &$header) {
+                        $header['width'] = round($header['width'] * $factor_ajuste);
+                    }
+                }
+
+                // Encabezados compactos
+                $pdf->SetFont('Arial', 'B', 6);
+                $pdf->SetFillColor(52, 73, 94);
+                $pdf->SetTextColor(255, 255, 255);
+                $pdf->SetDrawColor(52, 73, 94);
+
+                foreach ($tabla['headers'] as $header) {
+                    $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
+                }
+                $pdf->Ln();
+
+                // Filas compactas
+                $pdf->SetFont('Arial', '', 6);
+                $pdf->SetTextColor(44, 62, 80);
+                $pdf->SetFillColor(248, 249, 250);
+
+                $fill = false;
+                foreach ($tabla['rows'] as $row) {
+                    // VERIFICAR ESPACIO CONSIDERANDO EL PIE DE PÁGINA
+                    if ($pdf->GetY() > $altura_maxima) {
+                        $pdf->AddPage();
+                        // Redibujar encabezados
+                        $pdf->SetFont('Arial', 'B', 6);
+                        $pdf->SetFillColor(52, 73, 94);
+                        $pdf->SetTextColor(255, 255, 255);
+                        foreach ($tabla['headers'] as $header) {
+                            $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
+                        }
+                        $pdf->Ln();
+                        $pdf->SetFont('Arial', '', 6);
+                        $pdf->SetTextColor(44, 62, 80);
+                    }
+
+                    if (isset($row['es_total']) && $row['es_total']) {
+                        $pdf->SetFont('Arial', 'B', 7);
+                        $pdf->SetFillColor(41, 128, 185);
+                        $pdf->SetTextColor(255, 255, 255);
+                        $fill_total = true;
+                    } else {
+                        $pdf->SetFont('Arial', '', 6);
+                        $pdf->SetTextColor(44, 62, 80);
+                        $fill_total = false;
+                    }
+
+                    // Filtrar celdas duplicadas también
+                    $cells_filtrados = [];
+                    $cell_count = 0;
+                    foreach ($row['cells'] as $i => $cell) {
+                        if ($cell_count < count($tabla['headers'])) {
+                            $cells_filtrados[] = $cell;
+                            $cell_count++;
+                        }
+                    }
+
+                    foreach ($cells_filtrados as $i => $cell) {
+                        $text = isset($cell['text']) ? $cell['text'] : '';
+                        $width = $tabla['headers'][$i]['width'];
+                        $align = isset($cell['align']) ? $cell['align'] : 'C';
+
+                        if (isset($cell['color'])) {
+                            $pdf->SetTextColor($cell['color'][0], $cell['color'][1], $cell['color'][2]);
+                        }
+
+                        $pdf->Cell($width, 4, $text, 1, 0, $align, $fill_total ? true : $fill);
+
+                        if (isset($cell['color'])) {
+                            $pdf->SetTextColor(44, 62, 80);
+                        }
+                    }
+                    $pdf->Ln();
+                    $fill = !$fill;
+                }
+            }
+
+            // Resumen compacto - VERIFICAR ESPACIO PARA EL RESUMEN TAMBIÉN
+            if (isset($datos_pdf['resumen'])) {
+                // Altura aproximada del resumen
+                $altura_resumen = 20;
+
+                // Verificar si hay espacio para el resumen + pie de página
+                if ($pdf->GetY() + $altura_resumen > $altura_maxima) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->Ln(3);
+                $pdf->SetFillColor(236, 240, 241);
+                $pdf->Rect(10, $pdf->GetY(), $ancho_pagina - 20, 15, 'F');
+
+                $y_start = $pdf->GetY() + 2;
+                $pdf->SetXY(15, $y_start);
+                $pdf->SetFont('Arial', 'B', 8);
+                $pdf->Cell(0, 4, ('RESUMEN DEL PERIODO'), 0, 1, 'L');
+
+                foreach ($datos_pdf['resumen'] as $key => $value) {
+                    $pdf->SetX(15);
+                    $pdf->SetFont('Arial', 'B', 7);
+                    $pdf->Cell(50, 3, ($key . ':'), 0, 0, 'L');
+                    $pdf->SetFont('Arial', '', 7);
+
+                    if (isset($value['color'])) {
+                        $pdf->SetTextColor($value['color'][0], $value['color'][1], $value['color'][2]);
+                    }
+
+                    $pdf->Cell(0, 3, ($value['text']), 0, 1, 'L');
+
+                    if (isset($value['color'])) {
+                        $pdf->SetTextColor(44, 62, 80);
+                    }
+                }
+            }
+
+            // Pie de página - SOLO SI ESTAMOS EN LA PRIMERA PÁGINA O HAY SUFICIENTE ESPACIO
+            $pdf->SetY(-40); // Posición fija desde el fondo
+            $pdf->SetFont('Arial', 'I', 6);
+            $pdf->SetTextColor(150, 150, 150);
+            $pdf->Cell(0, 2, ('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
+            $pdf->Cell(0, 2, ('Página ') . $pdf->PageNo(), 0, 0, 'C');
+
+            // Generar y descargar PDF directamente como comprasHistorial
+            $content = $pdf->Output('S');
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
         } catch (Exception $e) {
             error_log("Error en generar_pdf_transferencia: " . $e->getMessage());
-            return json_encode(['success' => false, 'error' => 'Error al generar PDF']);
+            echo "Error al generar PDF: " . $e->getMessage();
         }
     }
 

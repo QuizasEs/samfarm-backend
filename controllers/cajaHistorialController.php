@@ -103,7 +103,7 @@ class cajaHistorialController extends cajaHistorialModel
         $Npaginas = ceil($total / $registros);
 
         $mostrar_columna_sucursal = ($rol_usuario == 1);
-        $colspan_total = $mostrar_columna_sucursal ? 10 : 9;
+        $colspan_total = $mostrar_columna_sucursal ? 9 : 8;
 
         $tabla .= '
             <div class="table-container">
@@ -116,7 +116,6 @@ class cajaHistorialController extends cajaHistorialModel
                             <th>FECHA</th>
                             <th>TIPO</th>
                             <th>CONCEPTO</th>
-                            <th>REFERENCIA</th>
                             <th>MONTO</th>' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '<th>ACCIONES</th>
@@ -132,7 +131,6 @@ class cajaHistorialController extends cajaHistorialModel
             foreach ($datos as $row) {
                 $tipo_badge = self::generar_badge_tipo($row['mc_tipo']);
                 $monto_formato = self::formatear_monto($row['mc_monto'], $row['mc_tipo']);
-                $referencia = self::formatear_referencia($row['mc_referencia_tipo'], $row['mc_referencia_id']);
                 $fecha_formato = date('d/m/Y H:i', strtotime($row['mc_fecha']));
                 $usuario = trim(($row['us_nombres'] ?? 'Sistema') . ' ' . ($row['us_apellido_paterno'] ?? ''));
 
@@ -144,7 +142,6 @@ class cajaHistorialController extends cajaHistorialModel
                         <td>' . $fecha_formato . '</td>
                         <td>' . $tipo_badge . '</td>
                         <td>' . htmlspecialchars($row['mc_concepto'] ?? '-') . '</td>
-                        <td>' . $referencia . '</td>
                         <td>' . $monto_formato . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['su_nombre']) . '</span></td>' : '') .
                     '<td class="accion-buttons">
@@ -154,10 +151,7 @@ class cajaHistorialController extends cajaHistorialModel
                             onclick="CajaHistorial.verReferencia(\'' . $row['mc_referencia_tipo'] . '\', ' . $row['mc_referencia_id'] . ')">
                                 <ion-icon name="open-outline"></ion-icon> Detalles
                             </a>
-                            <a href="javascript:void(0)" 
-                            class="btn success" 
-                            title="Exportar PDF"
-                            onclick="CajaHistorial.exportarMovimiento(' . $row['mc_id'] . ')">
+                            <a href="javascript:void(0)" class="btn primary" title="Exportar PDF" onclick="window.open(\'' . SERVER_URL . 'ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' . $row['mc_id'] . '\', \'_blank\')">
                                 <ion-icon name="document-text-outline"></ion-icon> PDF
                             </a>
                         </td>
@@ -289,7 +283,7 @@ class cajaHistorialController extends cajaHistorialModel
     public function usuario_caja_controller($id, $rol)
     {
         $sql_cajas = mainModel::conectar()->prepare("
-                        SELECT c.caja_id, c.caja_nombre, s.su_nombre 
+                        SELECT c.caja_id, c.caja_nombre, s.su_nombre
                         FROM caja c
                         INNER JOIN sucursales s ON c.su_id = s.su_id
                         WHERE c.caja_activa = 1
@@ -383,34 +377,34 @@ class cajaHistorialController extends cajaHistorialModel
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
         $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 
+        if ($rol_usuario == 3) {
+            echo "Acceso denegado";
+            return;
+        }
+
         $filtros = [];
 
         if ($rol_usuario == 2) {
             $filtros['su_id'] = $sucursal_usuario;
-        } elseif ($rol_usuario == 1 && isset($_GET['su_id']) && $_GET['su_id'] !== '') {
-            $filtros['su_id'] = (int)$_GET['su_id'];
+        } elseif ($rol_usuario == 1 && isset($_GET['select3']) && $_GET['select3'] !== '') {
+            $filtros['su_id'] = (int)$_GET['select3'];
         }
 
         $fecha_desde = isset($_GET['fecha_desde']) ? mainModel::limpiar_cadena($_GET['fecha_desde']) : '';
         $fecha_hasta = isset($_GET['fecha_hasta']) ? mainModel::limpiar_cadena($_GET['fecha_hasta']) : '';
 
-        if (!empty($fecha_desde)) {
+        if (!empty($fecha_desde) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_desde)) {
             $filtros['fecha_desde'] = $fecha_desde;
         }
-        if (!empty($fecha_hasta)) {
+        if (!empty($fecha_hasta) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_hasta)) {
             $filtros['fecha_hasta'] = $fecha_hasta;
         }
 
         if (isset($_GET['select1']) && $_GET['select1'] !== '') {
-            $filtros['caja_id'] = (int)$_GET['select1'];
+            $filtros['tipo'] = mainModel::limpiar_cadena($_GET['select1']);
         }
-
         if (isset($_GET['select2']) && $_GET['select2'] !== '') {
-            $filtros['tipo'] = mainModel::limpiar_cadena($_GET['select2']);
-        }
-
-        if (isset($_GET['select3']) && $_GET['select3'] !== '') {
-            $filtros['usuario'] = (int)$_GET['select3'];
+            $filtros['usuario'] = (int)$_GET['select2'];
         }
 
         try {
@@ -418,7 +412,7 @@ class cajaHistorialController extends cajaHistorialModel
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($datos)) {
-                echo "No hay datos para exportar en el periodo seleccionado.";
+                echo "No hay datos para exportar con los filtros aplicados.";
                 return;
             }
 
@@ -428,71 +422,66 @@ class cajaHistorialController extends cajaHistorialModel
             if (!empty($fecha_desde) && !empty($fecha_hasta)) {
                 $periodo = date('d/m/Y', strtotime($fecha_desde)) . ' al ' . date('d/m/Y', strtotime($fecha_hasta));
             } else {
-                $periodo = 'Todo el historial';
+                $periodo = 'Todo el período';
             }
 
             $info_superior = [
                 'Periodo' => $periodo,
-                'Total Registros' => count($datos),
+                'Total de Registros' => count($datos),
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];
 
             $headers = [
                 ['text' => 'CAJA', 'width' => 25],
-                ['text' => 'FECHA', 'width' => 22],
-                ['text' => 'TIPO', 'width' => 18],
-                ['text' => 'CONCEPTO', 'width' => 30],
+                ['text' => 'FECHA Y HORA', 'width' => 30],
+                ['text' => 'TIPO', 'width' => 20],
+                ['text' => 'CONCEPTO', 'width' => 35],
                 ['text' => 'REFERENCIA', 'width' => 30],
-                ['text' => 'USUARIO', 'width' => 20],
-                ['text' => 'MONTO', 'width' => 25]
+                ['text' => 'MONTO', 'width' => 25],
+                ['text' => 'SALDO', 'width' => 25]
             ];
 
             $rows = [];
-            $total_ingresos = $resumen['total_ingresos'] ?? 0;
-            $total_egresos = $resumen['total_egresos'] ?? 0;
+            $saldo_acumulado = 0;
 
             foreach ($datos as $row) {
                 $tipo_text = strtoupper($row['mc_tipo']);
-                $signo = in_array($tipo_text, ['INGRESO', 'VENTA']) ? '+' : '-';
-                $color_monto = in_array($tipo_text, ['INGRESO', 'VENTA']) ? [39, 174, 96] : [231, 76, 60];
+                $monto = (float)$row['mc_monto'];
+
+                if (in_array($tipo_text, ['INGRESO', 'VENTA'])) {
+                    $saldo_acumulado += $monto;
+                    $signo = '+';
+                    $color_monto = [39, 174, 96]; // verde
+                } else {
+                    $saldo_acumulado -= $monto;
+                    $signo = '-';
+                    $color_monto = [231, 76, 60]; // rojo
+                }
 
                 $referencia = $row['mc_referencia_tipo'] ? strtoupper($row['mc_referencia_tipo']) . ' #' . $row['mc_referencia_id'] : 'N/A';
-                $usuario = trim(($row['us_nombres'] ?? 'Sistema') . ' ' . ($row['us_apellido_paterno'] ?? ''));
 
                 $cells = [
-                    ['text' => substr($row['caja_nombre'], 0, 20), 'align' => 'L'],
+                    ['text' => $row['caja_nombre'], 'align' => 'L'],
                     ['text' => date('d/m/Y H:i', strtotime($row['mc_fecha'])), 'align' => 'C'],
                     ['text' => $tipo_text, 'align' => 'C'],
-                    ['text' => substr($row['mc_concepto'] ?? '-', 0, 25), 'align' => 'L'],
-                    ['text' => substr($referencia, 0, 25), 'align' => 'C'],
-                    ['text' => substr($usuario, 0, 15), 'align' => 'L'],
-                    ['text' => $signo . 'Bs ' . number_format($row['mc_monto'], 2), 'align' => 'R', 'color' => $color_monto]
+                    ['text' => $row['mc_concepto'] ?? '-', 'align' => 'L'],
+                    ['text' => $referencia, 'align' => 'C'],
+                    ['text' => $signo . 'Bs ' . number_format($monto, 2), 'align' => 'R'],
+                    ['text' => 'Bs ' . number_format($saldo_acumulado, 2), 'align' => 'R']
                 ];
 
                 $rows[] = ['cells' => $cells];
             }
 
+            $total_ingresos = $resumen['total_ingresos'] ?? 0;
+            $total_egresos = $resumen['total_egresos'] ?? 0;
             $balance = $resumen['balance'] ?? 0;
-            $color_balance = $balance >= 0 ? [39, 174, 96] : [231, 76, 60];
-
-            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
-            $cells_total[0] = ['text' => 'TOTAL GENERAL', 'align' => 'R'];
-            $cells_total[count($headers) - 1] = [
-                'text' => 'Bs ' . number_format($balance, 2),
-                'align' => 'R',
-                'color' => [255, 255, 255]
-            ];
-
-            $rows[] = [
-                'cells' => $cells_total,
-                'es_total' => true
-            ];
 
             $resumen_pdf = [
-                'Total Ingresos' => ['text' => '+Bs ' . number_format($total_ingresos, 2), 'color' => [39, 174, 96]],
-                'Total Egresos' => ['text' => '-Bs ' . number_format($total_egresos, 2), 'color' => [231, 76, 60]],
-                'Balance Final' => ['text' => 'Bs ' . number_format($balance, 2), 'color' => $color_balance]
+                'Total Ingresos' => ['text' => 'Bs ' . number_format($total_ingresos, 2), 'color' => [39, 174, 96]],
+                'Total Egresos' => ['text' => 'Bs ' . number_format($total_egresos, 2), 'color' => [231, 76, 60]],
+                'Balance Neto' => ['text' => 'Bs ' . number_format($balance, 2), 'color' => $balance >= 0 ? [39, 174, 96] : [231, 76, 60]]
             ];
 
             $datos_pdf = [
@@ -506,7 +495,18 @@ class cajaHistorialController extends cajaHistorialModel
                 'resumen' => $resumen_pdf
             ];
 
-            self::generar_pdf_reporte_fpdf($datos_pdf);
+            // Generar y descargar PDF directamente
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
         } catch (Exception $e) {
             error_log("Error exportando PDF historial: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
@@ -533,53 +533,71 @@ class cajaHistorialController extends cajaHistorialModel
 
             $tipo_text = strtoupper($movimiento['mc_tipo']);
             $signo = in_array($tipo_text, ['INGRESO', 'VENTA']) ? '+' : '-';
-            $color_monto = in_array($tipo_text, ['INGRESO', 'VENTA']) ? [39, 174, 96] : [231, 76, 60];
 
             $referencia = $movimiento['mc_referencia_tipo'] ? strtoupper($movimiento['mc_referencia_tipo']) . ' #' . $movimiento['mc_referencia_id'] : 'N/A';
 
-            $datos_pdf = [
-                'titulo' => 'COMPROBANTE DE MOVIMIENTO DE CAJA',
-                'nombre_archivo' => 'Movimiento_' . $mc_id . '.pdf',
-                'info_superior' => [
-                    'N° Movimiento' => $movimiento['mc_id'],
-                    'Fecha' => date('d/m/Y H:i:s', strtotime($movimiento['mc_fecha'])),
-                    'Caja' => $movimiento['caja_nombre'],
-                    'Sucursal' => $movimiento['su_nombre']
-                ],
-                'tabla' => [
-                    'headers' => [
-                        ['text' => 'DETALLE', 'width' => 60, 'align' => 'L'],
-                        ['text' => 'INFORMACION', 'width' => 115, 'align' => 'L']
-                    ],
-                    'rows' => [
-                        ['cells' => [
-                            ['text' => 'Tipo de Movimiento'],
-                            ['text' => $tipo_text]
-                        ]],
-                        ['cells' => [
-                            ['text' => 'Concepto'],
-                            ['text' => $movimiento['mc_concepto'] ?? '-']
-                        ]],
-                        ['cells' => [
-                            ['text' => 'Referencia'],
-                            ['text' => $referencia]
-                        ]],
-                        ['cells' => [
-                            ['text' => 'Usuario Responsable'],
-                            ['text' => $movimiento['usuario_completo']]
-                        ]],
-                        [
-                            'es_total' => true,
-                            'cells' => [
-                                ['text' => 'MONTO TOTAL'],
-                                ['text' => $signo . 'Bs ' . number_format($movimiento['mc_monto'], 2), 'color' => [255, 255, 255]]
-                            ]
-                        ]
-                    ]
-                ]
-            ];
+            $root = dirname(__DIR__);
+            require_once $root . "/libs/fpdf/fpdf.php";
 
-            mainModel::generar_pdf_reporte_fpdf($datos_pdf);
+            $pdf = new FPDF('P', 'mm', 'Letter');
+            $pdf->AddPage();
+            $pdf->SetMargins(15, 15, 15);
+
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, 'COMPROBANTE DE MOVIMIENTO DE CAJA', 0, 1, 'C');
+            $pdf->Ln(5);
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->Cell(0, 4, 'N° Movimiento: ' . $movimiento['mc_id'], 0, 1);
+            $pdf->Cell(0, 4, 'Fecha: ' . date('d/m/Y H:i:s', strtotime($movimiento['mc_fecha'])), 0, 1);
+            $pdf->Cell(0, 4, 'Caja: ' . $movimiento['caja_nombre'], 0, 1);
+            $pdf->Cell(0, 4, 'Sucursal: ' . $movimiento['su_nombre'], 0, 1);
+            $pdf->Cell(0, 4, 'Usuario: ' . $movimiento['usuario_completo'], 0, 1);
+            $pdf->Ln(10);
+
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(52, 73, 94);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->Cell(70, 8, 'DETALLE', 1, 0, 'C', true);
+            $pdf->Cell(115, 8, 'INFORMACION', 1, 1, 'C', true);
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetTextColor(0, 0, 0);
+
+            $pdf->Cell(70, 6, 'Tipo de Movimiento', 1, 0, 'L');
+            $pdf->Cell(115, 6, $tipo_text, 1, 1, 'L');
+
+            $pdf->Cell(70, 6, 'Concepto', 1, 0, 'L');
+            $pdf->Cell(115, 6, $movimiento['mc_concepto'] ?? '-', 1, 1, 'L');
+
+            $pdf->Cell(70, 6, 'Referencia', 1, 0, 'L');
+            $pdf->Cell(115, 6, $referencia, 1, 1, 'L');
+
+            $pdf->Cell(70, 6, 'Usuario Responsable', 1, 0, 'L');
+            $pdf->Cell(115, 6, $movimiento['usuario_completo'], 1, 1, 'L');
+
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetFillColor(46, 125, 50);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->Cell(70, 8, 'MONTO TOTAL', 1, 0, 'R', true);
+            $pdf->Cell(115, 8, $signo . 'Bs ' . number_format($movimiento['mc_monto'], 2), 1, 1, 'L', true);
+
+            $pdf->Ln(10);
+            $pdf->SetFont('Arial', 'I', 7);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->Cell(0, 4, 'SAMFARM PHARMA - Sistema de Gestion Farmaceutica', 0, 1, 'C');
+
+            // Generar y descargar PDF directamente
+            $content = $pdf->Output('S');
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="Movimiento_' . $mc_id . '_' . date('Y-m-d_His') . '.pdf"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
         } catch (Exception $e) {
             error_log("Error exportando movimiento individual: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
@@ -598,7 +616,7 @@ class cajaHistorialController extends cajaHistorialModel
 
         try {
             $html = '';
-            
+
             switch (strtolower($tipo)) {
                 case 'venta':
                     $stmt = self::obtener_detalle_venta_model($id);
@@ -641,7 +659,7 @@ class cajaHistorialController extends cajaHistorialModel
     {
         $html = '<div class="modal-group">';
         $html .= '<div class="row"><h3><ion-icon name="receipt-outline"></ion-icon> Información de Venta</h3></div>';
-        
+
         $html .= '<div class="row">';
         $html .= '<div class="col"><label>Número de Venta:</label><p>' . htmlspecialchars($venta['v_numero'] ?? 'N/A') . '</p></div>';
         $html .= '<div class="col"><label>Fecha:</label><p>' . (isset($venta['v_fecha']) ? date('d/m/Y H:i', strtotime($venta['v_fecha'])) : 'N/A') . '</p></div>';
@@ -657,7 +675,7 @@ class cajaHistorialController extends cajaHistorialModel
         }
 
         $html .= '</div>';
-        
+
         return $html;
     }
 
@@ -665,8 +683,8 @@ class cajaHistorialController extends cajaHistorialModel
     {
         try {
             $conexion = mainModel::conectar();
-            $sql = "SELECT v.*, c.cliente_nombre FROM ventas v 
-                    LEFT JOIN clientes c ON v.cliente_id = c.cliente_id 
+            $sql = "SELECT v.*, c.cliente_nombre FROM ventas v
+                    LEFT JOIN clientes c ON v.cliente_id = c.cliente_id
                     WHERE v.v_id = :v_id LIMIT 1";
             $stmt = $conexion->prepare($sql);
             $stmt->bindParam(':v_id', $v_id, PDO::PARAM_INT);

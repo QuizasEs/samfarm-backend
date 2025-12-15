@@ -99,10 +99,11 @@ class preciosModel extends mainModel
     public static function obtener_lotes_medicamento_model($med_id, $su_id = null)
     {
         $sql = "
-            SELECT 
+            SELECT
                 lm.lm_id,
                 lm.lm_numero_lote,
                 COALESCE(la.la_nombre_comercial, 'N/A') AS med_nombre_comercial,
+                su.su_nombre AS sucursal_nombre,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
                 lm.lm_cant_actual_unidades,
@@ -113,6 +114,7 @@ class preciosModel extends mainModel
             FROM lote_medicamento lm
             LEFT JOIN medicamento m ON m.med_id = lm.med_id
             LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN sucursales su ON su.su_id = lm.su_id
             WHERE lm.med_id = :med_id
         ";
 

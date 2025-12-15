@@ -408,7 +408,7 @@ class compraHistorialController extends compraHistorialModel
         $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 
         if ($rol_usuario == 3) {
-            echo "No tiene permisos para exportar.";
+            echo "Acceso denegado";
             return;
         }
 
@@ -442,9 +442,14 @@ class compraHistorialController extends compraHistorialModel
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($datos)) {
-                echo "No hay datos para exportar en el periodo seleccionado.";
+                echo "No hay datos para exportar con los filtros aplicados.";
                 return;
             }
+
+            $root = dirname(__DIR__);
+            require_once $root . "/libs/fpdf/fpdf.php";
+
+            $pdf = new FPDF('P', 'mm', 'Letter');
 
             $periodo = '';
             if (!empty($fecha_desde) && !empty($fecha_hasta)) {
@@ -453,12 +458,23 @@ class compraHistorialController extends compraHistorialModel
                 $periodo = 'Todo el historial';
             }
 
-            $info_superior = [
-                'Periodo' => $periodo,
-                'Total Registros' => count($datos),
-                'Generado' => date('d/m/Y H:i:s'),
-                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
-            ];
+            $pdf->AddPage();
+            $pdf->SetMargins(15, 15, 15);
+
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, 'HISTORIAL DE COMPRAS', 0, 1, 'C');
+            $pdf->Ln(5);
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->Cell(0, 4, 'Periodo: ' . $periodo, 0, 1);
+            $pdf->Cell(0, 4, 'Total Registros: ' . count($datos), 0, 1);
+            $pdf->Cell(0, 4, 'Generado: ' . date('d/m/Y H:i:s'), 0, 1);
+            $pdf->Cell(0, 4, 'Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema'), 0, 1);
+            $pdf->Ln(5);
+
+            $pdf->SetFillColor(52, 73, 94);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetFont('Arial', 'B', 8);
 
             $headers = [
                 ['text' => 'N°', 'width' => 10],
@@ -475,64 +491,69 @@ class compraHistorialController extends compraHistorialModel
                 array_splice($headers, 5, 0, [['text' => 'SUCURSAL', 'width' => 25]]);
             }
 
-            $rows = [];
             $total_general = 0;
             $contador = 1;
 
+            // Header row
+            foreach ($headers as $header) {
+                $pdf->Cell($header['width'], 8, $header['text'], 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('Arial', '', 7);
+
             foreach ($datos as $row) {
                 $cells = [
-                    ['text' => $contador, 'align' => 'C'],
-                    ['text' => $row['co_numero'], 'align' => 'L'],
-                    ['text' => $row['fecha_compra'], 'align' => 'C'],
-                    ['text' => substr($row['proveedor'], 0, 25), 'align' => 'L'],
-                    ['text' => substr($row['laboratorio'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                    ['text' => $row['lotes'], 'align' => 'C'],
-                    ['text' => $row['co_numero_factura'] ?? 'N/A', 'align' => 'C'],
-                    ['text' => number_format($row['co_total'], 2), 'align' => 'R']
+                    $contador,
+                    $row['co_numero'],
+                    $row['fecha_compra'],
+                    substr($row['proveedor'], 0, 25),
+                    substr($row['laboratorio'] ?? 'N/A', 0, 20),
+                    $row['lotes'],
+                    $row['co_numero_factura'] ?? 'N/A',
+                    number_format($row['co_total'], 2)
                 ];
 
                 if ($rol_usuario == 1 && !isset($filtros['su_id'])) {
-                    array_splice($cells, 5, 0, [['text' => substr($row['sucursal'], 0, 20), 'align' => 'C']]);
+                    array_splice($cells, 5, 0, [substr($row['sucursal'], 0, 20)]);
                 }
 
-                $rows[] = ['cells' => $cells];
+                foreach ($cells as $cell) {
+                    $pdf->Cell($headers[array_search($cell, $cells) % count($headers)]['width'], 6, $cell, 1, 0, 'L');
+                }
+                $pdf->Ln();
+
                 $total_general += $row['co_total'];
                 $contador++;
             }
 
-            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
-            $cells_total[0] = ['text' => 'TOTAL GENERAL', 'align' => 'R'];
-            $cells_total[count($headers) - 1] = [
-                'text' => 'Bs ' . number_format($total_general, 2),
-                'align' => 'R',
-                'color' => [255, 255, 255]
-            ];
+            // Total row
+            $pdf->SetFillColor(46, 125, 50);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetFont('Arial', 'B', 8);
 
-            $rows[] = [
-                'cells' => $cells_total,
-                'es_total' => true
-            ];
+            $colspan = count($headers) - 1;
+            $pdf->Cell($colspan * 8, 8, 'TOTAL GENERAL', 1, 0, 'R', true);
+            $pdf->Cell(25, 8, 'Bs ' . number_format($total_general, 2), 1, 1, 'R', true);
 
-            $resumen = [
-                'Total de Compras' => ['text' => count($datos)],
-                'Monto Total' => [
-                    'text' => 'Bs ' . number_format($total_general, 2),
-                    'color' => [46, 125, 50]
-                ]
-            ];
+            $pdf->Ln(10);
+            $pdf->SetFont('Arial', 'I', 7);
+            $pdf->SetTextColor(100, 100, 100);
+            $pdf->Cell(0, 4, 'SAMFARM PHARMA - Sistema de Gestion Farmaceutica', 0, 1, 'C');
 
-            $datos_pdf = [
-                'titulo' => 'HISTORIAL DE COMPRAS',
-                'nombre_archivo' => 'Historial_Compras_' . date('Y-m-d_His') . '.pdf',
-                'info_superior' => $info_superior,
-                'tabla' => [
-                    'headers' => $headers,
-                    'rows' => $rows
-                ],
-                'resumen' => $resumen
-            ];
+            // Generar y descargar PDF directamente
+            $content = $pdf->Output('S');
 
-            self::generar_pdf_reporte_fpdf($datos_pdf);
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="Historial_Compras_' . date('Y-m-d_His') . '.pdf"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
         } catch (Exception $e) {
             error_log("Error exportando PDF compras: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();

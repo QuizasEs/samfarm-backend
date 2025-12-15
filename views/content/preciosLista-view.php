@@ -323,12 +323,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     let html = '<table class="table">';
-                    html += '<thead><tr><th>Lote</th><th>Nombre Comercial</th><th>Stock</th><th>Precio Actual</th><th>Acción</th></tr></thead><tbody>';
+                    html += '<thead><tr><th>Lote</th><th>Sucursal</th><th>Nombre Comercial</th><th>Stock</th><th>Precio Actual</th><th>Acción</th></tr></thead><tbody>';
 
                     data.forEach(lote => {
                         html += `
                             <tr>
                                 <td>${lote.lm_numero_lote}</td>
+                                <td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">${lote.sucursal_nombre || 'N/A'}</span></td>
                                 <td>${lote.med_nombre_comercial || 'N/A'}</td>
                                 <td>${lote.lm_cant_actual_unidades} ud</td>
                                 <td><strong>Bs ${parseFloat(lote.lm_precio_venta).toFixed(2)}</strong></td>

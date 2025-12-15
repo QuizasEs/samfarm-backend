@@ -143,6 +143,11 @@ if (isset($_POST['cajaHistorialAjax'])) {
         echo $ins_historial->obtener_referencia_movimiento_controller();
         exit();
     }
+
+    if ($valor === "exportar_movimiento_pdf") {
+        echo $ins_historial->exportar_movimiento_individual_pdf_controller();
+        exit();
+    }
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

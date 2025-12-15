@@ -2129,6 +2129,12 @@ dark .ventas-cliente a {
     letter-spacing: 0.2px;
     color: var(--text-secondary);
 }
+.form-bloque small{
+    color: var(--text-secondary);
+}
+.dark .form-bloque small{
+    color: var(--dark-text-secondary);
+}
 
 .form-search {
     display: flex;
@@ -3371,6 +3377,18 @@ input[type="date"]:focus {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-family: Arial, sans-serif;
+}
+.modal-bloque .select-filtro{
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    box-shadow: 5px 5px 5px var(--shadow-light);
+    color: var(--text-secondary);
+}
+.modal-bloque .select-filtro:focus{
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    box-shadow: 5px 5px 5px var(--accent-primary);
+    color: var(--text-secondary);
 }
 
 .required {
@@ -5118,6 +5136,7 @@ input[type="date"]:focus {
 .dark #resumen-transfer-container {
     background: var(--dark-bg-primary);
 }
+
 
 .resumen-grid {
     display: grid;

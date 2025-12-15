@@ -7,6 +7,7 @@ require_once "mainModel.php";
 class ventaModel extends mainModel
 {
 
+    /* Obtener lotes activos por medicamento y sucursal */
     public static function obtener_lotes_activos_por_med_sucursal_model($med_id, $sucursal_id)
     {
         $db = mainModel::conectar();
@@ -23,7 +24,7 @@ class ventaModel extends mainModel
     }
 
 
-    /* modelo que se encarga de ejecutar la consulta de busqueda de cliente */
+    /* Buscar cliente por término de búsqueda */
     protected static function buscar_cliente_model($termino)
     {
         $sql = mainModel::conectar()->prepare("
@@ -49,7 +50,7 @@ class ventaModel extends mainModel
     }
 
 
-    /* buscar medicamentos con stock disponible en sucursal */
+    /* Buscar medicamento con stock disponible en sucursal */
     protected static function buscar_medicamento_model($termino, $sucursal_id, $filtros = [])
     {
         if (!$sucursal_id) {
@@ -128,7 +129,7 @@ class ventaModel extends mainModel
     }
 
 
-    /* buscar los productos mas vendidos de la sucursal */
+    /* Obtener los productos más vendidos de la sucursal */
     protected static function top_ventas_model($sucursal_id, $limit = 5)
     {
         if (!$sucursal_id) {
@@ -170,6 +171,7 @@ class ventaModel extends mainModel
         return $sql->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /* Abrir una nueva caja */
     protected static function abrir_caja_model($datos)
     {
         $sql = mainModel::conectar()->prepare("
@@ -197,6 +199,8 @@ class ventaModel extends mainModel
         $sql->execute();
         return $sql;
     }
+
+    /* Consultar si un usuario tiene una caja activa en una sucursal */
     protected static function consulta_caja_model($datos)
     {
         $sql = mainModel::conectar()->prepare("
@@ -215,6 +219,7 @@ class ventaModel extends mainModel
         return $sql;
     }
 
+    /* Guardar una nueva venta */
     public static function guardar_venta_model($datos)
     {
         $db = mainModel::conectar();
@@ -238,7 +243,7 @@ class ventaModel extends mainModel
         return (int) $db->lastInsertId();
     }
 
-    // Insertar detalle_venta
+    /* Agregar un ítem al detalle de una venta */
     public static function agregar_detalle_venta_model($item)
     {
         $db = mainModel::conectar();
@@ -260,12 +265,7 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-
-
-
-
-
-    // Agregar informe (nota_venta)
+    /* Agregar un informe de venta */
     public static function agregar_informe_venta_model($datos)
     {
         $db = mainModel::conectar();
@@ -282,14 +282,14 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-    // Generar número de venta simple (puedes mejorar con prefijos, correlativos, etc.)
+    /* Generar un número de documento para la venta */
     public static function generar_numero_venta_model($sucursal_id)
     {
         // ejemplo: SU{su_id}-TS{timestamp}
         return "SU{$sucursal_id}-" . time();
     }
 
-    // Sumar ventas por caja y por metodo de pago (ejemplo: 'efectivo')
+    /* Sumar el total de ventas en efectivo para una caja */
     public static function sumar_ventas_por_caja_model($caja_id, $metodo = 'efectivo')
     {
         $db = mainModel::conectar();
@@ -306,7 +306,7 @@ class ventaModel extends mainModel
         return (float)$r['total'];
     }
 
-    // Cerrar caja: actualizar registro caja
+    /* Cerrar una caja actualizando su estado y saldo final */
     public static function cerrar_caja_model($datos)
     {
         $db = mainModel::conectar();
@@ -324,9 +324,7 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-
-
-
+    /* Sumar el stock total de unidades para un medicamento en una sucursal */
     public static function sumar_stock_lotes_med_sucursal_model($med_id, $sucursal_id)
     {
         $db = mainModel::conectar();
@@ -342,10 +340,7 @@ class ventaModel extends mainModel
         return (int)$r['total_unidades'];
     }
 
-    /**************************************************************************
-     * OBTENER FACTOR DE UNIDADES (caja, blister) basado en primer lote activo
-     * Devuelve ['unidades_por_caja' => int, 'unidades_por_blister' => int]
-     **************************************************************************/
+    /* Obtener el factor de conversión de unidades por caja y blister */
     public static function obtener_factor_unidades_por_tipo_model($med_id, $sucursal_id)
     {
         $db = mainModel::conectar();
@@ -368,10 +363,7 @@ class ventaModel extends mainModel
         ];
     }
 
-    /**************************************************************************
-     * DESCONTAR UNIDADES DEL LOTE (AJUSTANDO CAJAS)
-     * - Mantiene enteros para cajas
-     **************************************************************************/
+    /* Descontar unidades de un lote específico y ajustar cajas */
     public static function descontar_unidades_lote_model($lm_id, $cantidad_unidades)
     {
         if ($cantidad_unidades <= 0) return false;
@@ -419,6 +411,7 @@ class ventaModel extends mainModel
         return $upd->rowCount() > 0;
     }
 
+    /* Verificar si un lote se ha agotado para cambiar su estado a 'terminado' */
     public static function verificar_estado_lote_terminado_model($lm_id)
     {
         if ($lm_id <= 0) return false;
@@ -466,9 +459,7 @@ class ventaModel extends mainModel
         }
     }
 
-    /**************************************************************************
-     * AGREGAR MOVIMIENTO INVENTARIO (CORREGIDO: mi_referencia_tipo)
-     **************************************************************************/
+    /* Agregar un registro al historial de movimientos de inventario */
     public static function agregar_movimiento_inventario_model($datos)
     {
         $db = mainModel::conectar();
@@ -492,9 +483,7 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-    /**************************************************************************
-     * REGISTRAR MOVIMIENTO CAJA (sin cambios funcionales)
-     **************************************************************************/
+    /* Registrar un movimiento de dinero en una caja */
     public static function registrar_movimiento_caja_model($datos)
     {
         $db = mainModel::conectar();
@@ -515,11 +504,7 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-    /**************************************************************************
-     * RECALCULAR INVENTARIO CONSOLIDADO DESDE LOTES
-     * - Suma todas las unidades de lote por med/sucursal
-     * - Calcula cajas totales usando el factor del primer lote activo como referencia
-     **************************************************************************/
+    /* Recalcular el inventario consolidado a partir de los lotes activos */
     public static function recalcular_inventario_por_med_sucursal_model($med_id, $sucursal_id)
     {
         $db = mainModel::conectar();
@@ -577,9 +562,7 @@ class ventaModel extends mainModel
         }
     }
 
-    /**************************************************************************
-     * INSERTAR FACTURA (ya definido antes) - lo reuso
-     **************************************************************************/
+    /* Insertar una nueva factura asociada a una venta */
     public static function insertar_factura_model($datos)
     {
         $db = mainModel::conectar();
@@ -597,16 +580,13 @@ class ventaModel extends mainModel
         return (int)$db->lastInsertId();
     }
 
-    /**************************************************************************
-     * generar_numero_factura_model (igual que antes)
-     **************************************************************************/
+    /* Generar un número único para una factura */
     public static function generar_numero_factura_model($sucursal_id)
     {
         return "F-" . $sucursal_id . "-" . date('YmdHis') . "-" . rand(100, 999);
     }
 
-
-
+    /* Descontar el inventario consolidado tras una venta */
     public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades, $valorado_descuento = 0)
     {
         if ($cantidad_unidades <= 0) return false;
@@ -719,6 +699,7 @@ class ventaModel extends mainModel
         }
     }
 
+    /* Generar el PDF de una nota de venta o factura */
     public function generar_pdf_factura_model($fa_id, $tipo = 'nota_venta')
     {
         $fa_id = (int)$fa_id;
@@ -733,7 +714,7 @@ class ventaModel extends mainModel
             $db = mainModel::conectar();
 
             $sql = "
-            SELECT f.*, 
+            SELECT f.*,
                 v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_fecha_emision,
                 c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet,
                 u.us_nombres, u.us_apellido_paterno,
@@ -759,7 +740,7 @@ class ventaModel extends mainModel
             $ve_id = (int)$data['ve_id'];
 
             $sql2 = "
-            SELECT dv.*, 
+            SELECT dv.*,
                 m.med_nombre_quimico AS med_nombre,
                 COALESCE(m.med_version_comercial, '') AS version_comercial,
                 COALESCE(ff.ff_nombre, '') AS presentacion
@@ -779,157 +760,207 @@ class ventaModel extends mainModel
             $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$empresa) {
-                $empresa = [
-                    'ce_nombre' => 'SAMFARM',
-                    'ce_nit' => 'S/N',
-                    'ce_direccion' => '',
-                    'ce_telefono' => '',
-                    'ce_correo' => '',
-                    'ce_logo' => null
-                ];
+                $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
             }
 
-            $pdf = new FPDF('P', 'mm', array(140, 216));
-            $pdf->AddPage();
-            $pdf->SetMargins(10, 10, 10);
-            $pdf->SetAutoPageBreak(true, 10);
+            return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
 
-            $logo_x = 10;
-            $logo_y = 8;
-
-            if (!empty($empresa['ce_logo']) && file_exists($root . '/storage/' . $empresa['ce_logo'])) {
-                $pdf->Image($root . '/storage/' . $empresa['ce_logo'], $logo_x, $logo_y, 25);
-            }
-
-            $pdf->SetFont('Arial', 'B', 11);
-            $pdf->SetXY(80, $logo_y);
-            $pdf->Cell(0, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $empresa['ce_nombre']), 0, 1, 'R');
-
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->SetX(80);
-            $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'R');
-
-            if (!empty($empresa['ce_direccion'])) {
-                $pdf->SetX(80);
-                $pdf->Cell(0, 4, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $empresa['ce_direccion']), 0, 1, 'R');
-            }
-
-            if (!empty($empresa['ce_telefono'])) {
-                $pdf->SetX(80);
-                $pdf->Cell(0, 4, 'Tel: ' . $empresa['ce_telefono'], 0, 1, 'R');
-            }
-
-            $pdf->Ln(3);
-            $pdf->Line(10, $pdf->GetY(), 130, $pdf->GetY());
-            $pdf->Ln(2);
-
-            $pdf->SetFont('Arial', 'B', 13);
-            $pdf->Cell(0, 6, 'NOTA DE VENTA', 0, 1, 'C');
-            $pdf->Ln(2);
-
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(30, 5, 'Cliente:', 0, 0);
-            $pdf->SetFont('Arial', '', 8);
-
-            $nombre_cliente = trim(
-                ($data['cl_nombres'] ?? '') . ' ' .
-                    ($data['cl_apellido_paterno'] ?? '') . ' ' .
-                    ($data['cl_apellido_materno'] ?? '')
-            );
-            if (empty($nombre_cliente)) $nombre_cliente = 'Cliente General';
-
-            $pdf->Cell(60, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $nombre_cliente), 0, 0);
-
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(15, 5, 'N Venta:', 0, 0, 'R');
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->Cell(0, 5, $data['ve_numero_documento'], 0, 1);
-
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(30, 5, 'CI/NIT:', 0, 0);
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->Cell(60, 5, $data['cl_carnet'] ?? 'S/N', 0, 0);
-
-            $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(15, 5, 'Fecha:', 0, 0, 'R');
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->Cell(0, 5, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
-
-            $pdf->Ln(3);
-
-            $pdf->SetFillColor(240, 240, 240);
-            $pdf->SetFont('Arial', 'B', 7);
-            $pdf->Cell(8, 5, 'N', 1, 0, 'C', true);
-            $pdf->Cell(55, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Descripción'), 1, 0, 'C', true);
-            $pdf->Cell(12, 5, 'Cant.', 1, 0, 'C', true);
-            $pdf->Cell(20, 5, 'P. Unit.', 1, 0, 'C', true);
-            $pdf->Cell(12, 5, 'Desc.', 1, 0, 'C', true);
-            $pdf->Cell(0, 5, 'Total', 1, 1, 'C', true);
-
-            $pdf->SetFont('Arial', '', 7);
-            $contador = 1;
-            $subtotal_general = 0;
-            $descuento_general = 0;
-
-            foreach ($detalles as $d) {
-                $nombre_producto = $d['med_nombre'];
-                if (!empty($d['version_comercial'])) {
-                    $nombre_producto .= ' - ' . $d['version_comercial'];
-                }
-
-                $nombre_producto = substr($nombre_producto, 0, 45);
-
-                $pdf->Cell(8, 5, $contador, 1, 0, 'C');
-                $pdf->Cell(55, 5, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $nombre_producto), 1);
-                $pdf->Cell(12, 5, $d['dv_cantidad'], 1, 0, 'C');
-                $pdf->Cell(20, 5, number_format($d['dv_precio_unitario'], 2), 1, 0, 'R');
-                $pdf->Cell(12, 5, number_format($d['dv_descuento'], 2), 1, 0, 'R');
-                $pdf->Cell(0, 5, number_format($d['dv_subtotal'], 2), 1, 1, 'R');
-
-                $subtotal_general += ($d['dv_cantidad'] * $d['dv_precio_unitario']);
-                $descuento_general += $d['dv_descuento'];
-                $contador++;
-            }
-
-            $pdf->Ln(2);
-            $pdf->SetFont('Arial', 'B', 8);
-
-            // Subtotal
-            $pdf->Cell(95, 5, '', 0, 0);
-            $pdf->Cell(15, 5, 'Subtotal:', 0, 0, 'R');
-            $pdf->Cell(0, 5, number_format($subtotal_general, 2) . ' Bs', 0, 1, 'R');
-
-            // Descuento
-            if ($descuento_general > 0) {
-                $pdf->Cell(95, 5, '', 0, 0);
-                $pdf->Cell(15, 5, 'Descuento:', 0, 0, 'R');
-                $pdf->Cell(0, 5, '- ' . number_format($descuento_general, 2) . ' Bs', 0, 1, 'R');
-            }
-
-            // Total
-            $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetFillColor(240, 240, 240);
-            $pdf->Cell(95, 6, '', 0, 0);
-            $pdf->Cell(15, 6, 'TOTAL:', 1, 0, 'R', true);
-            $pdf->Cell(0, 6, number_format($data['ve_total'], 2) . ' Bs', 1, 1, 'R', true);
-
-            // PIE DE PÁGINA
-            $pdf->Ln(6);
-            $pdf->SetFont('Arial', 'I', 7);
-            $pdf->SetTextColor(100, 100, 100);
-            $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Gracias por su compra'), 0, 1, 'C');
-            $pdf->Cell(0, 3, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', 'Este documento es una nota de venta, no es un documento fiscal'), 0, 1, 'C');
-
-            // RETORNAR CONTENIDO EN BASE64
-            $contenido_pdf = $pdf->Output('S'); // 'S' = String
-            $pdf_base64 = base64_encode($contenido_pdf);
-
-            error_log(" PDF generado exitosamente para factura #{$fa_id}");
-            return $pdf_base64;
         } catch (Exception $e) {
             error_log("❌ Error generando PDF: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             return false;
         }
+    }
+
+    /* Generar el PDF de reimpresión de nota de venta desde historial (sin fa_id) */
+    public function generar_pdf_factura_historial_model($ve_id, $tipo = 'nota_venta')
+    {
+        $ve_id = (int)$ve_id;
+        if ($ve_id <= 0) return false;
+
+        try {
+            $root = dirname(__DIR__);
+
+            require_once $root . "/libs/fpdf/fpdf.php";
+
+            // Conectar a BD
+            $db = mainModel::conectar();
+
+            // Consulta similar pero sin dependencia de factura
+            $sql = "
+            SELECT
+                v.ve_id, v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_impuesto, v.ve_fecha_emision, v.ve_tipo_documento,
+                c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet,
+                u.us_nombres, u.us_apellido_paterno,
+                s.su_nombre
+            FROM ventas v
+            LEFT JOIN clientes c ON c.cl_id = v.cl_id
+            INNER JOIN usuarios u ON u.us_id = v.us_id
+            INNER JOIN sucursales s ON s.su_id = v.su_id
+            WHERE v.ve_id = :ve_id
+        ";
+
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() <= 0) {
+                error_log("❌ No se encontró venta con ID: {$ve_id}");
+                return false;
+            }
+
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $sql2 = "
+            SELECT dv.*,
+                m.med_nombre_quimico AS med_nombre,
+                COALESCE(m.med_version_comercial, '') AS version_comercial,
+                COALESCE(ff.ff_nombre, '') AS presentacion
+            FROM detalle_venta dv
+            INNER JOIN medicamento m ON m.med_id = dv.med_id
+            LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+            WHERE dv.ve_id = :ve_id
+        ";
+            $stmt2 = $db->prepare($sql2);
+            $stmt2->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
+            $stmt2->execute();
+            $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+            $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
+            $cfg_stmt = $db->prepare($cfg_sql);
+            $cfg_stmt->execute();
+            $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$empresa) {
+                $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
+            }
+
+            return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
+
+        } catch (Exception $e) {
+            error_log("❌ Error generando PDF reimpresión: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /* Método común para generar el PDF de nota de venta */
+    private function generar_pdf_nota_venta($data, $detalles, $empresa)
+    {
+        // Calcular altura dinámica
+        $altura_base = 95;
+        $altura_items = 0;
+        $line_height = 4;
+        $char_per_line = 45;
+
+        foreach ($detalles as $d) {
+            $nombre_producto = $d['med_nombre'] ?? 'Producto';
+            $lineas_nombre = ceil(mb_strlen($nombre_producto, 'UTF-8') / $char_per_line);
+            $altura_items += $lineas_nombre * $line_height;
+        }
+
+        $altura_total = $altura_base + $altura_items;
+
+        $pdf = new FPDF('P', 'mm', [80, $altura_total]);
+        $pdf->AddPage();
+        $pdf->SetMargins(5, 5, 5);
+        $pdf->SetAutoPageBreak(false);
+
+        // Encabezado empresa
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(0, 5, ($empresa['ce_nombre']), 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->Cell(0, 4, 'Sucursal: ' . ($data['su_nombre']), 0, 1, 'C');
+        $pdf->MultiCell(0, 4, ($empresa['ce_direccion']), 0, 'C');
+        $pdf->Cell(0, 4, 'Telf: ' . $empresa['ce_telefono'], 0, 1, 'C');
+        $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'C');
+        $pdf->Ln(3);
+
+        // Título
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(0, 5, 'NOTA DE VENTA', 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
+
+        // Datos venta
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'N Venta:', 0, 0);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->Cell(0, 4, $data['ve_numero_documento'], 0, 1);
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Fecha:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
+
+        $nombre_cliente = trim(
+            ($data['cl_nombres'] ?? '') . ' ' .
+                ($data['cl_apellido_paterno'] ?? '') . ' ' .
+                ($data['cl_apellido_materno'] ?? '')
+        );
+        if (empty($nombre_cliente)) $nombre_cliente = 'Sin Cliente';
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Cliente:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->MultiCell(0, 4, ($nombre_cliente));
+
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'CI/NIT:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, $data['cl_carnet'] ?? 'S/N', 0, 1);
+
+        $vendedor_nombre = trim(($data['us_nombres'] ?? '') . ' ' . ($data['us_apellido_paterno'] ?? ''));
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(15, 4, 'Vendedor:', 0, 0);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->Cell(0, 4, ($vendedor_nombre), 0, 1);
+
+        $pdf->Ln(2);
+
+        // Tabla detalles
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->Cell(35, 5, 'Producto', 'B', 0, 'L');
+        $pdf->Cell(10, 5, 'Cant.', 'B', 0, 'C');
+        $pdf->Cell(12, 5, 'P.U.', 'B', 0, 'R');
+        $pdf->Cell(13, 5, 'Subtotal', 'B', 1, 'R');
+
+        $pdf->SetFont('Arial', '', 7);
+        foreach ($detalles as $d) {
+            $y_actual = $pdf->GetY();
+            $x_actual = $pdf->GetX();
+
+            $pdf->MultiCell(35, 4, ($d['med_nombre']), 0, 'L');
+            $y_despues = $pdf->GetY();
+
+            $pdf->SetXY($x_actual + 35, $y_actual);
+            $pdf->Cell(10, 4, $d['dv_cantidad'], 0, 0, 'C');
+            $pdf->Cell(12, 4, number_format($d['dv_precio_unitario'], 2), 0, 0, 'R');
+            $pdf->Cell(13, 4, number_format($d['dv_subtotal'], 2), 0, 1, 'R');
+            $pdf->SetY($y_despues);
+        }
+        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
+
+        // Totales
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->Cell(45, 5, 'Subtotal:', 0, 0, 'R');
+        $pdf->Cell(25, 5, 'Bs. ' . number_format($data['ve_subtotal'], 2), 0, 1, 'R');
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell(45, 6, 'TOTAL A PAGAR:', 0, 0, 'R');
+        $pdf->Cell(25, 6, 'Bs. ' . number_format($data['ve_total'], 2), 0, 1, 'R');
+
+        $pdf->Ln(5);
+
+        // Pie
+        $pdf->SetFont('Arial', 'I', 7);
+        $pdf->Cell(0, 4, '¡Gracias por su compra!', 0, 1, 'C');
+        $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
+
+        $contenido_pdf = $pdf->Output('S');
+        $pdf_base64 = base64_encode($contenido_pdf);
+
+        error_log("PDF generado exitosamente para venta #{$data['ve_id']}");
+        return $pdf_base64;
     }
 }

@@ -228,7 +228,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     <div class="item-link">
                         <a href="<?php echo SERVER_URL ?>compraOrden/">
                             <ion-icon name="storefront-outline"></ion-icon>
-                            <span>Compra</span>
+                            <span>Registrar compra</span>
                         </a>
                     </div>
                 </div>

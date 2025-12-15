@@ -10,6 +10,6 @@
             </div>
             <h2 class="error-404-title">Sin señales vitales</h2>
             <p class="error-404-text">Esta página no responde a nuestro diagnóstico</p>
-            <a href="#" class="error-404-btn-home">Volver al inicio</a>
+            <a href="<?php echo SERVER_URL;?>dashboard/" class="error-404-btn-home">Volver al inicio</a>
         </div>
     </div>

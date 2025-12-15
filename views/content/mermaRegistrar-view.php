@@ -86,7 +86,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label style="margin-top: 15px;">Total de Unidades Caducadas:</label>
+                                <label  style="margin-top: 15px;">Total de Unidades Caducadas:</label>
                                 <input type="text" id="cantidadDisponible" readonly style="background-color: #f5f5f5;">
                                 <small style="color: #666; font-size: 0.8rem;">Se registrarán TODAS las unidades del lote como merma</small>
                             </div>
@@ -96,7 +96,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="orw">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label style="margin-top: 15px;">Motivo de la Merma:</label>
+                                <label class="required" style="margin-top: 15px;">Motivo de la Merma:</label>
                                 <textarea id="me_motivo" name="me_motivo" required placeholder="Ej: Producto caducado, Vencimiento próximo, Daño físico, etc." ></textarea>
                             </div>
                         </div>

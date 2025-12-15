@@ -6,25 +6,48 @@ $peticionAjax = true;
 require_once "../config/APP.php";
 
 if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel") {
-    
+
     session_start(['name' => 'SMP']);
-    
+
     // Verificar sesión y permisos
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         echo "Sesión expirada. Por favor inicie sesión nuevamente.";
         exit();
     }
-    
+
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
     if ($rol_usuario == 3) {
         echo "No tiene permisos para exportar inventario.";
         exit();
     }
-    
+
     // Procesar exportación
     require_once "../controllers/inventarioController.php";
     $ins_inventario = new inventarioController();
     $ins_inventario->exportar_inventario_excel_controller();
+    exit();
+}
+
+if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_pdf") {
+
+    session_start(['name' => 'SMP']);
+
+    // Verificar sesión y permisos
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo "No tiene permisos para exportar inventario.";
+        exit();
+    }
+
+    // Procesar exportación PDF
+    require_once "../controllers/inventarioController.php";
+    $ins_inventario = new inventarioController();
+    $ins_inventario->exportar_pdf_inventario_controller();
     exit();
 }
 

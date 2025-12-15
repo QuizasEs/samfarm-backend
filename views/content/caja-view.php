@@ -65,7 +65,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                             <div class="ventas-cliente">
                                 <input type="text" id="buscar_cliente_venta" placeholder="Buscar Cliente">
 
-                                <a href="javascript:void(0)" title="Nuevo" onclick="ModalCliente.abrirModal()">
+                                <a href="javascript:void(0)" title="Nuevo" style="color: green;" onclick="ModalCliente.abrirModal()">
                                     <ion-icon name="person-add-outline"></ion-icon>
                                 </a>
 

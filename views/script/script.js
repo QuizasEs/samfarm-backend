@@ -1,5 +1,5 @@
 // ===================================================
-// 🌓 MODO OSCURO
+//  MODO OSCURO
 // ===================================================
 (function () {
     const toggle = document.querySelector('#darkModeToggleInput');
@@ -28,7 +28,7 @@
 })();
 
 // ===================================================
-// 📂 DESPLIEGUE DE SUBMENÚS EN SIDEBAR
+//  DESPLIEGUE DE SUBMENÚS EN SIDEBAR
 // ===================================================
 (function () {
     const menuItems = document.querySelectorAll(".sidebar .menu-item");
@@ -52,7 +52,7 @@
 })();
 
 // ===================================================
-// 🍔 BOTÓN HAMBURGUESA (mostrar/ocultar sidebar)
+//  BOTÓN HAMBURGUESA (mostrar/ocultar sidebar)
 // ===================================================
 (function () {
     const hamburguesa = document.querySelector('.hamburguesa');
@@ -83,7 +83,7 @@
 
 
 // ===================================================
-// 📊 GRÁFICO DE INGRESOS Y EGRESOS (ECharts)
+// GRÁFICO DE INGRESOS Y EGRESOS (ECharts)
 // ===================================================
 (function () {
     const graphyc = document.getElementById('graphyc');

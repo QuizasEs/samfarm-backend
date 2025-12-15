@@ -1,5 +1,5 @@
 <?php
-if ($_SESSION['rol_smp'] != 1) {/* preguntamos que si el que intenta entrar a esta vista tien un privilegio distinto de admin que sierre su sesio */
+if ($_SESSION['rol_smp'] != 1 && $_SESSION['rol_smp'] != 2) {/* preguntamos que si el que intenta entrar a esta vista tiene un privilegio inferior que cerrar la sesión */
 ?>
     <div style="text-align: center; padding: 60px;">
         <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
@@ -39,25 +39,29 @@ if ($datos->rowCount() == 1) {
             <div class="form-group">
                 <div class="form-bloque">
                     <label for="">NOMBRE COMERCIAL*</label>
-                    <input type="text" name="Nombre_up" value="<?php echo $campos['med_nombre_quimico']; ?>" placeholder="Nombre comercial" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" required>
+                    <input type="text" name="Nombre_up" value="<?php echo $campos['med_nombre_quimico']; ?>" placeholder="Nombre comercial" maxlength="100" required>
                 </div>
                 <div class="form-bloque">
                     <label for="">PRINCIPIO ACTIVO*</label>
-                    <input type="text" name="Principio_up" value="<?php echo $campos['med_principio_activo'] ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Ingrediente principal" required>
+                    <input type="text" name="Principio_up" value="<?php echo $campos['med_principio_activo'] ?>" maxlength="100" placeholder="Ingrediente principal" required>
                 </div>
                 <div class="form-bloque">
                     <label for="">ACCION FARMACOLOGICA*</label>
-                    <input type="text" name="Accion_up" value="<?php echo $campos['med_accion_farmacologica'] ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Accion esperada" required>
+                    <input type="text" name="Accion_up" value="<?php echo $campos['med_accion_farmacologica'] ?>" maxlength="100" placeholder="Accion esperada" required>
                 </div>
             </div>
             <div class="form-group">
                 <div class="form-bloque">
                     <label for="">DESCRIPCION</label>
-                    <input type="text" name="Descripcion_up" value="<?php echo $campos['med_descripcion'] ?>" placeholder="Si serequire" maxlength="100" required>
+                    <input type="text" name="Descripcion_up" value="<?php echo $campos['med_descripcion'] ?>" placeholder="Si serequire" maxlength="200">
                 </div>
                 <div class="form-bloque">
                     <label for="">PRESENTACION*</label>
-                    <input type="text" name="Presentacion_up" value="<?php echo $campos['med_presentacion'] ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Metrica" required>
+                    <input type="text" name="Presentacion_up" value="<?php echo $campos['med_presentacion'] ?>" maxlength="100" placeholder="Metrica" required>
+                </div>
+                <div class="form-bloque">
+                    <label for="">CÓDIGO DE BARRAS</label>
+                    <input type="text" name="CodigoBarras_up" value="<?php echo htmlspecialchars($campos['med_codigo_barras'] ?? '') ?>" maxlength="100" placeholder="Código de barras opcional">
                 </div>
 
             </div>

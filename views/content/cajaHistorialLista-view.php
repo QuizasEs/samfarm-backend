@@ -97,33 +97,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <div id="grafico-movimientos" style="width: 100%; height: 400px; margin-top: 20px;"></div>
     </div>
 
-    <div class="modal" id="modalReferenciaMovimiento" style="display: none;">
-        <div class="modal-content detalle">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="document-outline"></ion-icon>
-                    Detalle de Referencia
-                </div>
-                <a class="close" onclick="CajaHistorial.cerrarModalReferencia()">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
-            </div>
-
-            <div class="modal-group" id="contenidoReferenciaMovimiento">
-                <div style="text-align: center; padding: 40px;">
-                    <ion-icon name="hourglass-outline" style="font-size: 48px; color: #999;"></ion-icon>
-                    <p>Cargando información...</p>
-                </div>
-            </div>
-
-            <div class="modal-btn-content">
-                <a href="javascript:void(0)" class="btn default" onclick="CajaHistorial.cerrarModalReferencia()">
-                    Cerrar
-                </a>
-            </div>
-        </div>
-    </div>
-
     <script>
         const CajaHistorial = (() => {
             return {
@@ -168,22 +141,49 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     modal.style.display = 'none';
                 },
 
-                exportarMovimiento: function(mc_id) {
+                exportarMovimiento: async function(mc_id) {
                     if (!mc_id) {
                         Swal.fire('Error', 'ID de movimiento inválido', 'error');
                         return;
                     }
 
-                    const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' + mc_id;
-                    window.open(url, '_blank');
-
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Generando PDF',
-                        text: 'El comprobante se está generando...',
-                        timer: 2000,
-                        showConfirmButton: false
+                        title: 'Generando PDF...',
+                        text: 'Por favor espere',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
                     });
+
+                    try {
+                        const data = await fetch('<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                cajaHistorialAjax: 'exportar_movimiento_pdf',
+                                mc_id: mc_id
+                            })
+                        }).then(response => response.json());
+
+                        Swal.close();
+
+                        if (data.success && data.pdf_base64) {
+                            window.abrirPDFDesdeBase64(data.pdf_base64, `Movimiento_${mc_id}.pdf`);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'PDF generado',
+                                text: 'El PDF se ha abierto en una nueva ventana',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'No se pudo generar el PDF', 'error');
+                    }
                 }
             };
         })();
@@ -200,15 +200,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             if (btnPDF) {
                 btnPDF.addEventListener('click', function() {
                     exportarPDFCajaHistorial();
-                });
-            }
-
-            const modal = document.getElementById('modalReferenciaMovimiento');
-            if (modal) {
-                modal.addEventListener('click', function(event) {
-                    if (event.target === this) {
-                        CajaHistorial.cerrarModalReferencia();
-                    }
                 });
             }
         });
@@ -238,8 +229,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             Swal.fire({
                 icon: 'success',
-                title: 'Descargando',
-                text: 'El archivo Excel se está descargando...',
+                title: 'Descargando Excel',
+                text: 'El archivo se está descargando...',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -261,11 +252,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
                 if (select1 && select1.value) params.append('select1', select1.value);
                 if (select2 && select2.value) params.append('select2', select2.value);
-                if (select3 && select3.value) params.append('su_id', select3.value);
+                if (select3 && select3.value) params.append('select3', select3.value);
             }
 
             const url = '<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php?' + params.toString();
-
             window.open(url, '_blank');
 
             Swal.fire({

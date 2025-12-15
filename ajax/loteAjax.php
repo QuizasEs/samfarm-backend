@@ -86,7 +86,43 @@ if (isset($_POST['loteAjax'])) {
 
         echo $ins_lote->actualizar_lote_controller();
     }
-} else {
+}
+
+// Manejar exportaciones GET (PDF/excel)
+if (isset($_GET['loteAjax'])) {
+    session_start(['name' => 'SMP']);
+
+    if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
+        session_unset();
+        session_destroy();
+        echo json_encode([
+            "Alerta" => "simple",
+            "Titulo" => "Sesión expirada",
+            "texto" => "Por favor vuelva a iniciar sesión",
+            "Tipo" => "error"
+        ]);
+        exit();
+    }
+
+    $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+    if ($rol_usuario == 3) {
+        echo json_encode([
+            "Alerta" => "simple",
+            "Titulo" => "Ocurrio un error",
+            "texto" => "No cuenta con los privilegios necesarios para ejecutar esta accion",
+            "Tipo" => "error"
+        ]);
+        exit();
+    }
+
+    $valor = $_GET['loteAjax'];
+    require_once "../controllers/loteController.php";
+    $ins_lote = new loteController();
+
+    if ($valor == "exportar_pdf") {
+        $ins_lote->exportar_pdf_lotes_controller();
+    }
+} else if (!isset($_POST['loteAjax'])) {
     //  Petición inválida - cerrar sesión
     session_start(['name' => 'SMP']);
     session_unset();

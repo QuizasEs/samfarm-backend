@@ -1268,7 +1268,16 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             }
 
             function exportarPDF() {
-                window.open(API_URL + '?sucursalAjax=exportar_pdf', '_blank');
+                const url = '<?php echo SERVER_URL; ?>ajax/sucursalAjax.php?sucursalAjax=exportar_pdf';
+                window.open(url, '_blank');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Generando PDF',
+                    text: 'El reporte se está generando...',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
 
             function buscarCajas() {

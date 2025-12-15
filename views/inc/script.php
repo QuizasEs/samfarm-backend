@@ -457,38 +457,38 @@
             }
 
             contenedorLista.innerHTML = listaLotes.map((lote, i) => `
-        <div class="lote-card">
-            <div class="lote-card-header">
-                <div class="lote-card-info">
-                    <strong class="lote-titulo">${i + 1}. ${lote.nombre}</strong>
-                    <span class="lote-estado ${lote.activar_lote ? 'activo' : 'inactivo'}">
-                        [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
-                    </span>
+                <div class="lote-card">
+                    <div class="lote-card-header">
+                        <div class="lote-card-info">
+                            <strong class="lote-titulo">${i + 1}. ${lote.nombre}</strong>
+                            <span class="lote-estado ${lote.activar_lote ? 'activo' : 'inactivo'}">
+                                [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
+                            </span>
 
-                    <br>
+                            <br>
 
-                    <div class="lote-detalles fila-1">
-                        <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
-                        <span class="espacio"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
-                        <span class="espacio"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
-                    </div>
+                            <div class="lote-detalles fila-1">
+                                <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
+                                <span class="espacio"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
+                                <span class="espacio"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
+                            </div>
 
-                    <div class="lote-detalles fila-2">
-                        <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
-                        <span class="espacio"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                        <span class="espacio"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+                            <div class="lote-detalles fila-2">
+                                <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
+                                <span class="espacio"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
+                                <span class="espacio"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="javascript:void(0)" class="btn warning btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
+                                <ion-icon name="trash-outline"></ion-icon> Eliminar
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <a href="javascript:void(0)" class="btn warning btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
-                        <ion-icon name="trash-outline"></ion-icon> Eliminar
-                    </a>
-                </div>
-            </div>
-        </div>
-
-`).join("");
+        `).join("");
         }
 
         function formatearFecha(fecha) {

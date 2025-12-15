@@ -363,12 +363,61 @@ class mainModel
 
     /* --------------------------------------generar reportes pdpf------------------------------------------------ */
 
-    protected static function generar_pdf_reporte_fpdf($datos_pdf, $modo_salida = 'I')
+    protected static function obtener_config_empresa_model()
     {
-        require_once dirname(__DIR__) . './libs/fpdf/fpdf.php';
+        try {
+            $sql = self::conectar()->prepare("SELECT * FROM configuracion_empresa WHERE ce_id = 1 LIMIT 1");
+            $sql->execute();
+            $resultado = $sql->fetch(PDO::FETCH_ASSOC);
 
-        $pdf = new FPDF('P', 'mm', 'Letter');
-        $pdf->SetMargins(10, 10, 10);
+            if (!$resultado) {
+                return [
+                    'ce_id' => 1,
+                    'ce_nombre' => 'SAMFARM PHARMA - SIN CONFIGURACIÓN',
+                    'ce_nit' => '000000000',
+                    'ce_direccion' => 'Dirección no configurada',
+                    'ce_telefono' => 'Sin teléfono',
+                    'ce_correo' => 'Sin correo',
+                    'ce_logo' => '',
+                    'ce_creado_en' => date('Y-m-d H:i:s'),
+                    'ce_actualizado_en' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            return $resultado;
+        } catch (Exception $e) {
+            return [
+                'ce_id' => 1,
+                'ce_nombre' => 'SAMFARM PHARMA - ERROR',
+                'ce_nit' => '000000000',
+                'ce_direccion' => 'Error al cargar dirección',
+                'ce_telefono' => 'Error al cargar teléfono',
+                'ce_correo' => 'Error al cargar correo',
+                'ce_logo' => '',
+                'ce_creado_en' => date('Y-m-d H:i:s'),
+                'ce_actualizado_en' => date('Y-m-d H:i:s')
+            ];
+        }
+    }
+
+    protected static function generar_pdf_reporte_fpdf($datos_pdf, $modo_salida = 'I', $output_mode = 'download')
+    {
+        require_once dirname(__DIR__) . '/libs/fpdf/fpdf.php';
+
+        // --- Integración de dimensiones y orientación personalizadas ---
+        $orientacion = $datos_pdf['orientacion'] ?? 'P';
+        $unidad = 'mm';
+        $tamano_papel = 'Letter'; // Tamaño por defecto
+
+        if (isset($datos_pdf['dimensiones']) && is_array($datos_pdf['dimensiones'])) {
+            $ancho = $datos_pdf['dimensiones']['ancho'] ?? 0;
+            $alto = $datos_pdf['dimensiones']['alto'] ?? 0;
+            if ($ancho > 0 && $alto > 0) {
+                $tamano_papel = [$ancho, $alto];
+            }
+        }
+
+        $pdf = new FPDF($orientacion, $unidad, $tamano_papel);
         $pdf->AddPage();
 
         $config_empresa = self::obtener_config_empresa_model();
@@ -376,28 +425,31 @@ class mainModel
         // Encabezado más compacto
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->SetTextColor(44, 62, 80);
-        $pdf->Cell(0, 6, utf8_decode($config_empresa['ce_nombre']), 0, 1, 'C');
+        $pdf->Cell(0, 6, ($config_empresa['ce_nombre']), 0, 1, 'C');
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetTextColor(100, 100, 100);
-        $pdf->Cell(0, 3, utf8_decode('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
-        $pdf->Cell(0, 3, utf8_decode($config_empresa['ce_direccion']), 0, 1, 'C');
+        $pdf->Cell(0, 3, ('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
+        $pdf->Cell(0, 3, ($config_empresa['ce_direccion']), 0, 1, 'C');
 
         $pdf->SetDrawColor(52, 152, 219);
         $pdf->SetLineWidth(0.2);
-        $pdf->Line(10, $pdf->GetY() + 1, 200, $pdf->GetY() + 1);
+
+        // Ancho de la línea dinámico
+        $ancho_pagina = $pdf->GetPageWidth();
+        $pdf->Line(10, $pdf->GetY() + 1, $ancho_pagina - 10, $pdf->GetY() + 1);
         $pdf->Ln(2);
 
         // Título
         $pdf->SetFont('Arial', 'B', 11);
         $pdf->SetTextColor(44, 62, 80);
-        $pdf->Cell(0, 5, utf8_decode($datos_pdf['titulo']), 0, 1, 'C');
+        $pdf->Cell(0, 5, ($datos_pdf['titulo']), 0, 1, 'C');
         $pdf->Ln(1);
 
         // Información superior compacta
         if (isset($datos_pdf['info_superior'])) {
             $pdf->SetFillColor(245, 245, 245);
-            $pdf->Rect(10, $pdf->GetY(), 190, 12, 'F');
+            $pdf->Rect(10, $pdf->GetY(), $ancho_pagina - 20, 12, 'F');
 
             $pdf->SetFont('Arial', '', 7);
             $pdf->SetTextColor(52, 73, 94);
@@ -409,9 +461,9 @@ class mainModel
             foreach ($datos_pdf['info_superior'] as $key => $value) {
                 $pdf->SetXY($x_pos, $y_start);
                 $pdf->SetFont('Arial', 'B', 7);
-                $pdf->Cell(25, 3, utf8_decode($key . ':'), 0, 0, 'L');
+                $pdf->Cell(25, 3, ($key . ':'), 0, 0, 'L');
                 $pdf->SetFont('Arial', '', 7);
-                $pdf->Cell(40, 3, utf8_decode($value), 0, 0, 'L');
+                $pdf->Cell(40, 3, ($value), 0, 0, 'L');
 
                 $count++;
                 $x_pos += 80;
@@ -445,7 +497,7 @@ class mainModel
 
             // Ajustar anchos de columnas
             $ancho_total_tabla = array_sum(array_column($tabla['headers'], 'width'));
-            $ancho_disponible = 190;
+            $ancho_disponible = $ancho_pagina - 20;
 
             if ($ancho_total_tabla > $ancho_disponible) {
                 $factor_ajuste = $ancho_disponible / $ancho_total_tabla;
@@ -461,7 +513,7 @@ class mainModel
             $pdf->SetDrawColor(52, 73, 94);
 
             foreach ($tabla['headers'] as $header) {
-                $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
+                $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
             }
             $pdf->Ln();
 
@@ -480,7 +532,7 @@ class mainModel
                     $pdf->SetFillColor(52, 73, 94);
                     $pdf->SetTextColor(255, 255, 255);
                     foreach ($tabla['headers'] as $header) {
-                        $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
+                        $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
                     }
                     $pdf->Ln();
                     $pdf->SetFont('Arial', '', 6);
@@ -509,7 +561,7 @@ class mainModel
                 }
 
                 foreach ($cells_filtrados as $i => $cell) {
-                    $text = utf8_decode($cell['text']);
+                    $text = $cell['text'];
                     $width = $tabla['headers'][$i]['width'];
                     $align = isset($cell['align']) ? $cell['align'] : 'C';
 
@@ -540,24 +592,24 @@ class mainModel
 
             $pdf->Ln(3);
             $pdf->SetFillColor(236, 240, 241);
-            $pdf->Rect(10, $pdf->GetY(), 190, 15, 'F');
+            $pdf->Rect(10, $pdf->GetY(), $ancho_pagina - 20, 15, 'F');
 
             $y_start = $pdf->GetY() + 2;
             $pdf->SetXY(15, $y_start);
             $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(0, 4, utf8_decode('RESUMEN DEL PERIODO'), 0, 1, 'L');
+            $pdf->Cell(0, 4, ('RESUMEN DEL PERIODO'), 0, 1, 'L');
 
             foreach ($datos_pdf['resumen'] as $key => $value) {
                 $pdf->SetX(15);
                 $pdf->SetFont('Arial', 'B', 7);
-                $pdf->Cell(50, 3, utf8_decode($key . ':'), 0, 0, 'L');
+                $pdf->Cell(50, 3, ($key . ':'), 0, 0, 'L');
                 $pdf->SetFont('Arial', '', 7);
 
                 if (isset($value['color'])) {
                     $pdf->SetTextColor($value['color'][0], $value['color'][1], $value['color'][2]);
                 }
 
-                $pdf->Cell(0, 3, utf8_decode($value['text']), 0, 1, 'L');
+                $pdf->Cell(0, 3, ($value['text']), 0, 1, 'L');
 
                 if (isset($value['color'])) {
                     $pdf->SetTextColor(44, 62, 80);
@@ -569,30 +621,11 @@ class mainModel
         $pdf->SetY(-40); // Posición fija desde el fondo
         $pdf->SetFont('Arial', 'I', 6);
         $pdf->SetTextColor(150, 150, 150);
-        $pdf->Cell(0, 2, utf8_decode('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
-        $pdf->Cell(0, 2, utf8_decode('Página ') . $pdf->PageNo(), 0, 0, 'C');
+        $pdf->Cell(0, 2, ('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
+        $pdf->Cell(0, 2, ('Página ') . $pdf->PageNo(), 0, 0, 'C');
 
-        $pdf->Output('I', $datos_pdf['nombre_archivo']);
-        exit();
-    }
-
-    protected static function obtener_config_empresa_model()
-    {
-        $sql = self::conectar()->prepare("SELECT * FROM configuracion_empresa WHERE ce_id = 1 LIMIT 1");
-        $sql->execute();
-        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
-
-        if (!$resultado) {
-            return [
-                'ce_nombre' => 'SAMFARM PHARMA',
-                'ce_nit' => '123456789',
-                'ce_direccion' => 'Dirección no configurada',
-                'ce_telefono' => 'Sin teléfono',
-                'ce_correo' => 'Sin correo'
-            ];
-        }
-
-        return $resultado;
+        // Retornar contenido como string - igual que ventaModel
+        return $pdf->Output('S');
     }
 
     public static function generar_excel_reporte($config)
@@ -601,6 +634,9 @@ class mainModel
             echo "Error: Configuración incompleta para generar Excel";
             return;
         }
+
+        // Obtener información de la empresa desde la base de datos
+        $config_empresa = self::obtener_config_empresa_model();
 
         $titulo = $config['titulo'] ?? 'REPORTE';
         $datos = $config['datos'];
@@ -616,211 +652,198 @@ class mainModel
         header('Expires: 0');
 
         echo "\xEF\xBB\xBF" . '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body { 
-            font-family: "Segoe UI", Arial, sans-serif; 
-            font-size: 11pt; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin: 0 auto;
-            max-width: 1400px;
-        }
-        
-        .header {
-            background: #ffffff;
-            color: #000000;
-            font-size: 20pt;
-            font-weight: 300;
-            text-align: center;
-            padding: 25px;
-            margin-bottom: 0;
-            letter-spacing: 1px;
-            position: relative;
-            border-bottom: 3px solid #34495e;
-        }
-        
-        .header::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-        }
-        
-        .info {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px;
-            border-bottom: 1px solid #dee2e6;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            font-size: 10pt;
-        }
-        
-        .info-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-left: 4px solid #3498db;
-        }
-        
-        .info-item strong {
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 5px;
-            font-size: 9pt;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            font-size: 10pt;
-            background: white;
-        }
-        
-        th {
-            background: #ecf0f1;
-            color: #000000;
-            font-weight: 500;
-            text-align: center;
-            padding: 14px 10px;
-            border: 1px solid #34495e;
-            position: relative;
-            font-size: 9pt;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        
-        th::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 25%;
-            height: 50%;
-            width: 1px;
-            background: rgba(255,255,255,0.3);
-        }
-        
-        th:last-child::after {
-            display: none;
-        }
-        
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #f8f9fa;
-            text-align: left;
-        }
-        
-        tr:hover td {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-        }
-        
-        .numero {
-            text-align: right;
-            font-weight: 600;
-            font-family: "Courier New", monospace;
-            color: #2c3e50;
-        }
-        
-        .moneda {
-            text-align: right;
-            font-weight: 700;
-            font-family: "Courier New", monospace;
-            color: #27ae60;
-            background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-            border-left: 3px solid #27ae60;
-        }
-        
-        .moneda-egreso {
-            text-align: right;
-            font-weight: 700;
-            font-family: "Courier New", monospace;
-            color: #c62828;
-            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-            border-left: 3px solid #c62828;
-        }
-        
-        .total-row {
-            background: #d5dbdb !important;
-            color: #000000;
-            font-weight: 600;
-            font-size: 11pt;
-        }
-        
-        .total-row td {
-            border: 1px solid #34495e;
-            padding: 16px 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .total-row .numero, .total-row .moneda, .total-row .moneda-egreso {
-            color: #000000;
-            background: none;
-            border-left: 1px solid #34495e;
-        }
-        
-        .resumen-box {
-            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
-            padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #3498db;
-        }
-        
-        .resumen-item {
-            padding: 10px;
-            font-size: 12pt;
-            font-weight: bold;
-        }
-        
-        .footer {
-            margin-top: 0;
-            padding: 25px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-top: 1px solid #dee2e6;
-            font-size: 9pt;
-            color: #6c757d;
-            text-align: center;
-        }
-        
-        .footer strong {
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 10pt;
-        }
-    </style>
-</head>
-<body>';
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: "Segoe UI", Arial, sans-serif;
+                            font-size: 11pt;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            margin: 0;
+                            padding: 20px;
+                        }
+
+                        .container {
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            margin: 0 auto;
+                            max-width: 1400px;
+                        }
+
+                        .header {
+                            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                            color: black;
+                            font-size: 20pt;
+                            font-weight: 300;
+                            text-align: center;
+                            padding: 25px;
+                            margin-bottom: 0;
+                            letter-spacing: 1px;
+                            position: relative;
+                        }
+
+                        .header::after {
+                            content: "";
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            height: 4px;
+                            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
+                        }
+
+                        .info {
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            padding: 20px;
+                            border-bottom: 1px solid #dee2e6;
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                            gap: 15px;
+                            font-size: 10pt;
+                        }
+
+                        .info-item {
+                            background: white;
+                            padding: 12px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                            border-left: 4px solid #3498db;
+                        }
+
+                        .info-item strong {
+                            color: #2c3e50;
+                            display: block;
+                            margin-bottom: 5px;
+                            font-size: 9pt;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+
+                        table {
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            width: 100%;
+                            font-size: 10pt;
+                            background: white;
+                        }
+
+                        th {
+                            background: #D1EBFF;
+                            color: #2B2B2B;
+                            font-weight: 600;
+                            text-align: center;
+                            padding: 14px 10px;
+                            border: none;
+                            position: relative;
+                            font-size: 11pt;
+                            text-transform: uppercase;
+                        }
+
+                        th::after {
+                            content: "";
+                            position: absolute;
+                            right: 0;
+                            top: 25%;
+                            height: 50%;
+                            width: 1px;
+                            background: rgba(255,255,255,0.3);
+                        }
+
+                        th:last-child::after {
+                            display: none;
+                        }
+
+                        td {
+                            padding: 12px 10px;
+                            border-bottom: 1px solid #f8f9fa;
+                            text-align: left;
+                            transition: all 0.2s ease;
+                        }
+
+                        tr:hover td {
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+                            transform: translateY(-1px);
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        }
+
+                        .numero {
+                            text-align: right;
+                            font-weight: 600;
+                            font-family: "Courier New", monospace;
+                            color: #2c3e50;
+                        }
+
+                        .moneda {
+                            text-align: right;
+                            font-weight: 700;
+                            font-family: "Courier New", monospace;
+                            color: #27ae60;
+                            background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+                            border-left: 3px solid #27ae60;
+                        }
+
+                        .moneda-egreso {
+                            text-align: right;
+                            font-weight: 700;
+                            font-family: "Courier New", monospace;
+                            color: #c62828;
+                            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+                            border-left: 3px solid #c62828;
+                        }
+
+                        .total-row {
+                            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                            color: white;
+                            font-weight: 600;
+                            font-size: 11pt;
+                        }
+
+                        .total-row td {
+                            border: none;
+                            padding: 16px 10px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+
+                        .total-row .numero, .total-row .moneda, .total-row .moneda-egreso {
+                            color: white;
+                            background: none;
+                            border-left: none;
+                        }
+
+                        .footer {
+                            margin-top: 0;
+                            padding: 25px;
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            border-top: 1px solid #dee2e6;
+                            font-size: 9pt;
+                            color: #6c757d;
+                            text-align: center;
+                        }
+
+                        .footer strong {
+                            color: #2c3e50;
+                            display: block;
+                            margin-bottom: 8px;
+                            font-size: 10pt;
+                        }
+                    </style>
+                </head>
+                <body>';
 
         echo '<div class="container">
-                <div class="header">' . htmlspecialchars($titulo) . '</div>';
+                                <div class="header">' . htmlspecialchars($titulo) . ' - ' . htmlspecialchars($config_empresa['ce_nombre']) . '</div>';
 
         if (!empty($info_superior)) {
             echo '<div class="info">';
             foreach ($info_superior as $key => $value) {
                 echo '<div class="info-item">
-                        <strong>' . htmlspecialchars($key) . '</strong>
-                        ' . htmlspecialchars($value) . '
-                      </div>';
+                                        <strong>' . htmlspecialchars($key) . '</strong>
+                                        ' . htmlspecialchars($value) . '
+                                    </div>';
             }
             echo '</div>';
         }
@@ -885,6 +908,10 @@ class mainModel
 
         if (!empty($totales)) {
             echo '<tr class="total-row">';
+            $cols_before_total = count($headers) - count($columnas_totales);
+            if ($cols_before_total > 0) {
+                echo '<td colspan="' . $cols_before_total . '" style="text-align: right; padding-right: 20px; color: black; font-weight: 600;">TOTAL:</td>';
+            }
             foreach ($headers as $header) {
                 if (in_array($header, $columnas_totales)) {
                     $valor_total = $totales[$header];
@@ -893,9 +920,7 @@ class mainModel
                     } elseif (isset($formato_columnas[$header]) && $formato_columnas[$header] === 'numero') {
                         $valor_total = number_format($valor_total, 2, ',', '.');
                     }
-                    echo '<td class="numero">' . htmlspecialchars($valor_total) . '</td>';
-                } else {
-                    echo '<td style="text-align: right; padding-right: 20px;">TOTAL:</td>';
+                    echo '<td class="numero" style="color:black; text-align:left;">' . htmlspecialchars($valor_total) . '</td>';
                 }
             }
             echo '</tr>';
@@ -904,9 +929,9 @@ class mainModel
         echo '</tbody></table>';
 
         echo '<div class="footer">
-                <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica</strong>
-                Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
-              </div>';
+                                <strong>' . htmlspecialchars($config_empresa['ce_nombre']) . '</strong>
+                                Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
+                            </div>';
 
         echo '</div></body></html>';
 

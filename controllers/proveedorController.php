@@ -134,7 +134,7 @@ class proveedorController extends proveedorModel
                         <td style="text-align:center;"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . '</strong></td>
                         <td>' . $ultima_compra . '</td>
                         <td>' . $estado_html . '</td>
-                        <td class="accion-buttons">
+                        <td class="buttons">
                             <a href="javascript:void(0)"
                             class="btn default"
                             title="Ver detalle"
@@ -268,296 +268,31 @@ class proveedorController extends proveedorModel
             $fecha = date('Y-m-d_His');
             $filename = "Proveedores_{$fecha}.xls";
 
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-
-            echo '<!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { 
-                        font-family: "Segoe UI", Arial, sans-serif; 
-                        font-size: 11pt; 
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        margin: 0;
-                        padding: 20px;
-                    }
-                    
-                    .container {
-                        background: white;
-                        border-radius: 12px;
-                        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                        overflow: hidden;
-                        margin: 0 auto;
-                        max-width: 1400px;
-                    }
-                    
-                    .header {
-                        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                        color: black;
-                        font-size: 20pt;
-                        font-weight: 300;
-                        text-align: center;
-                        padding: 25px;
-                        margin-bottom: 0;
-                        letter-spacing: 1px;
-                        position: relative;
-                    }
-                    
-                    .header::after {
-                        content: "";
-                        position: absolute;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        height: 4px;
-                        background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-                    }
-                    
-                    .info {
-                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                        padding: 20px;
-                        border-bottom: 1px solid #dee2e6;
-                        display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                        gap: 15px;
-                        font-size: 10pt;
-                    }
-                    
-                    .info-item {
-                        background: white;
-                        padding: 12px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                        border-left: 4px solid #3498db;
-                    }
-                    
-                    .info-item strong {
-                        color: #2c3e50;
-                        display: block;
-                        margin-bottom: 5px;
-                        font-size: 9pt;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                    }
-                    
-                    table {
-                        border-collapse: separate;
-                        border-spacing: 0;
-                        width: 100%;
-                        font-size: 10pt;
-                        background: white;
-                    }
-                    
-                    th {
-                        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                        color: black;
-                        font-weight: 500;
-                        text-align: center;
-                        padding: 14px 10px;
-                        border: none;
-                        position: relative;
-                        font-size: 9pt;
-                        letter-spacing: 0.5px;
-                        text-transform: uppercase;
-                    }
-                    
-                    th::after {
-                        content: "";
-                        position: absolute;
-                        right: 0;
-                        top: 25%;
-                        height: 50%;
-                        width: 1px;
-                        background: rgba(255,255,255,0.3);
-                    }
-                    
-                    th:last-child::after {
-                        display: none;
-                    }
-                    
-                    td {
-                        padding: 12px 10px;
-                        border-bottom: 1px solid #f8f9fa;
-                        text-align: left;
-                        transition: all 0.2s ease;
-                    }
-                    
-                    tr:hover td {
-                        background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-                    }
-                    
-                    .numero {
-                        text-align: right;
-                        font-weight: 600;
-                        font-family: "Courier New", monospace;
-                        color: #2c3e50;
-                    }
-                    
-                    .moneda {
-                        text-align: right;
-                        font-weight: 700;
-                        font-family: "Courier New", monospace;
-                        color: #27ae60;
-                        background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-                        border-left: 3px solid #27ae60;
-                    }
-                    
-                    .estado-activo {
-                        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
-                        color: #2e7d32;
-                        font-weight: 600;
-                        text-align: center;
-                        border-radius: 20px;
-                        padding: 6px 12px;
-                        margin: 2px;
-                        border: 1px solid #4caf50;
-                    }
-                    
-                    .estado-inactivo {
-                        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
-                        color: #c62828;
-                        font-weight: 600;
-                        text-align: center;
-                        border-radius: 20px;
-                        padding: 6px 12px;
-                        margin: 2px;
-                        border: 1px solid #ef5350;
-                    }
-                    
-                    .total-row {
-                        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                        color: white;
-                        font-weight: 600;
-                        font-size: 11pt;
-                    }
-                    
-                    .total-row td {
-                        border: none;
-                        padding: 16px 10px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                    }
-                    
-                    .total-row .numero, .total-row .moneda {
-                        color: white;
-                        background: none;
-                        border-left: none;
-                        font-size: 11pt;
-                    }
-                    
-                    .footer {
-                        margin-top: 0;
-                        padding: 25px;
-                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                        border-top: 1px solid #dee2e6;
-                        font-size: 9pt;
-                        color: #6c757d;
-                        text-align: center;
-                    }
-                    
-                    .footer strong {
-                        color: #2c3e50;
-                        display: block;
-                        margin-bottom: 8px;
-                        font-size: 10pt;
-                    }
-                    
-                    tbody tr:not(.total-row) {
-                        border-left: 3px solid transparent;
-                        transition: border-left 0.3s ease;
-                    }
-                    
-                    tbody tr:not(.total-row):hover {
-                        border-left: 3px solid #3498db;
-                    }
-                </style>
-            </head>
-            <body>';
-
-            echo '<div class="container">
-                    <div class="header">
-                        👥 REPORTE DE PROVEEDORES - SAMFARM PHARMA
-                    </div>';
-
-            echo '<div class="info">
-                        <div class="info-item">
-                            <strong>📅 Fecha de Generación</strong>
-                            ' . date('d/m/Y H:i:s') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>👤 Usuario</strong>
-                            ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>📋 Total de Registros</strong>
-                            ' . count($datos) . '
-                        </div>
-                    </div>';
-
-            echo '<table>';
-
-            echo '<thead><tr>';
             $headers = array_keys($datos[0]);
-            foreach ($headers as $header) {
-                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
-            }
-            echo '</tr></thead>';
 
-            echo '<tbody>';
+            $info_superior = [
+                'Fecha de Generación' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                'Total de Registros' => count($datos)
+            ];
 
-            $total_compras = 0;
-            $monto_total = 0;
-            $total_lotes = 0;
-
-            foreach ($datos as $row) {
-                echo '<tr>';
-
-                foreach ($headers as $key) {
-                    $valor = $row[$key];
-
-                    if ($key === 'Total Compras' || $key === 'Lotes Generados') {
-                        echo '<td class="numero">' . number_format($valor, 0, ',', '.') . '</td>';
-
-                        if ($key === 'Total Compras') $total_compras += $valor;
-                        if ($key === 'Lotes Generados') $total_lotes += $valor;
-                    } elseif ($key === 'Monto Total (Bs)') {
-                        echo '<td class="moneda">Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-                        $monto_total += $valor;
-                    } elseif ($key === 'Estado') {
-                        $clase = 'estado-' . strtolower($valor);
-                        $icono = $valor === 'ACTIVO' ? '✅' : '❌';
-                        echo '<td class="' . $clase . '">' . $icono . ' ' . $valor . '</td>';
-                    } else {
-                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
-                    }
-                }
-
-                echo '</tr>';
+            if (!empty($filtros['fecha_desde']) && !empty($filtros['fecha_hasta'])) {
+                $info_superior['Rango de Fechas'] = date('d/m/Y', strtotime($filtros['fecha_desde'])) . ' - ' . date('d/m/Y', strtotime($filtros['fecha_hasta']));
             }
 
-            echo '<tr class="total-row">
-                    <td colspan="5" style="text-align: right; padding-right: 20px;">📊 TOTALES GENERALES:</td>
-                    <td class="numero">' . number_format($total_compras, 0, ',', '.') . '</td>
-                    <td class="moneda">Bs ' . number_format($monto_total, 2, ',', '.') . '</td>
-                    <td class="numero">' . number_format($total_lotes, 0, ',', '.') . '</td>
-                    <td colspan="2"></td>
-                </tr>';
+            mainModel::generar_excel_reporte([
+                'titulo' => 'REPORTE DE PROVEEDORES',
+                'datos' => $datos,
+                'headers' => $headers,
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Total Compras' => 'numero',
+                    'Total Lotes' => 'numero'
+                ],
+                'columnas_totales' => [],
+                'info_superior' => $info_superior
+            ]);
 
-            echo '</tbody></table>';
-
-            echo '<div class="footer">
-                        <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>
-                        Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
-                    </div>
-                </div>';
-
-            echo '</body></html>';
-
-            exit();
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
             echo "Error al generar archivo: " . $e->getMessage();
@@ -804,5 +539,124 @@ class proveedorController extends proveedorModel
 
         echo json_encode($alerta);
         exit();
+    }
+
+    public function exportar_pdf_proveedores_controller()
+    {
+        $filtros = [];
+
+        if (isset($_GET['busqueda']) && !empty($_GET['busqueda'])) {
+            $filtros['busqueda'] = mainModel::limpiar_cadena($_GET['busqueda']);
+        }
+
+        if (isset($_GET['select1']) && !empty($_GET['select1'])) {
+            $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
+        }
+
+        if (isset($_GET['select2']) && !empty($_GET['select2'])) {
+            $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
+        }
+
+        if (isset($_GET['select3']) && !empty($_GET['select3'])) {
+            $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
+        }
+
+        if (isset($_GET['fecha_desde']) && !empty($_GET['fecha_desde'])) {
+            $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
+        }
+
+        if (isset($_GET['fecha_hasta']) && !empty($_GET['fecha_hasta'])) {
+            $filtros['fecha_hasta'] = mainModel::limpiar_cadena($_GET['fecha_hasta']);
+        }
+
+        try {
+            $stmt = self::exportar_proveedores_excel_model($filtros);
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($datos)) {
+                echo "No hay datos para exportar con los filtros aplicados.";
+                return;
+            }
+
+            $periodo = '';
+            if (!empty($filtros['fecha_desde']) && !empty($filtros['fecha_hasta'])) {
+                $periodo = date('d/m/Y', strtotime($filtros['fecha_desde'])) . ' al ' . date('d/m/Y', strtotime($filtros['fecha_hasta']));
+            } else {
+                $periodo = 'Todo el período';
+            }
+
+            $info_superior = [
+                'Periodo' => $periodo,
+                'Total de Proveedores' => count($datos),
+                'Proveedores Activos' => count(array_filter($datos, function($p) { return $p['estado'] == 'Activo'; })),
+                'Proveedores Inactivos' => count(array_filter($datos, function($p) { return $p['estado'] == 'Inactivo'; })),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [
+                ['text' => 'N°', 'width' => 10],
+                ['text' => 'PROVEEDOR', 'width' => 40],
+                ['text' => 'NIT', 'width' => 25],
+                ['text' => 'TELÉFONO', 'width' => 20],
+                ['text' => 'DIRECCIÓN', 'width' => 50],
+                ['text' => 'FECHA REGISTRO', 'width' => 25],
+                ['text' => 'TOTAL COMPRAS', 'width' => 25],
+                ['text' => 'ÚLTIMA COMPRA', 'width' => 25],
+                ['text' => 'ESTADO', 'width' => 15]
+            ];
+
+            $rows = [];
+            $total_compras = 0;
+
+            foreach ($datos as $index => $row) {
+                $cells = [
+                    ['text' => ($index + 1), 'align' => 'C'],
+                    ['text' => substr($row['Nombres'] ?? 'N/A', 0, 30), 'align' => 'L'],
+                    ['text' => $row['NIT'] ?? 'N/A', 'align' => 'C'],
+                    ['text' => $row['Teléfono'] ?? 'N/A', 'align' => 'C'],
+                    ['text' => substr($row['Dirección'] ?? 'N/A', 0, 35), 'align' => 'L'],
+                    ['text' => date('d/m/Y', strtotime($row['Fecha Registro'])), 'align' => 'C'],
+                    ['text' => 'Bs. ' . number_format($row['Total Compras'], 2), 'align' => 'R'],
+                    ['text' => $row['Última Compra'] ? date('d/m/Y', strtotime($row['Última Compra'])) : 'Nunca', 'align' => 'C'],
+                    ['text' => $row['Estado'], 'align' => 'C']
+                ];
+
+                $rows[] = ['cells' => $cells];
+                $total_compras += $row['Total Compras'];
+            }
+
+            $resumen = [
+                'Total de Proveedores' => ['text' => count($datos)],
+                'Monto Total de Compras' => ['text' => 'Bs ' . number_format($total_compras, 2), 'color' => [46, 125, 50]]
+            ];
+
+            $datos_pdf = [
+                'titulo' => 'REPORTE DE PROVEEDORES',
+                'nombre_archivo' => 'Proveedores_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            // Generar y descargar PDF directamente
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
+        } catch (Exception $e) {
+            error_log("Error exportando PDF proveedores: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
+        }
     }
 }

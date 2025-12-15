@@ -14,10 +14,10 @@ class inventarioController extends inventarioModel
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
         $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 
-        // Vendedores NO pueden acceder
+        // Vendedores NO pueden acceder al inventario
         if ($rol_usuario == 3) {
             return '<div class="error" style="padding:30px;text-align:center;">
-                            <h3>⛔ Acceso Denegado</h3>
+                            <h3> Acceso Denegado</h3>
                             <p>No tiene permisos para ver el inventario</p>
                         </div>';
         }
@@ -173,22 +173,23 @@ class inventarioController extends inventarioModel
                     $row['lotes_activos'] . '</span>
                             </td>
                             <td style="text-align:center;">' . $dias_vencer . '</td>
-                            <td class="accion-buttons">
-                                <a href="javascript:void(0)" 
-                                class="btn default" 
+                            <td class="buttons">
+                                <a href="javascript:void(0)"
+                                class="btn default"
                                 title="Ver detalle"
                                 onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="eye-outline"></ion-icon> Detalles
                                 </a>
-                                
-                                <a href="javascript:void(0)" 
-                                class="btn danger" 
+                                ' . ($rol_usuario == 1 ? '
+                                <a href="javascript:void(0)"
+                                class="btn danger"
                                 title="Configurar minimo y maximo"
                                 onclick="InventarioModals.abrirConfiguracion(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\', ' . ($row['inv_minimo'] ?? 0) . ', ' . ($row['inv_maximo'] ?? 'null') . ')">
                                     <ion-icon name="settings-outline"></ion-icon> Configurar
                                 </a>
-                                <a href="javascript:void(0)" 
-                                class="btn primary" 
+                                ' : '') . '
+                                <a href="javascript:void(0)"
+                                class="btn primary"
                                 title="Ver historial"
                                 onclick="InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="time-outline"></ion-icon> Historial
@@ -426,383 +427,32 @@ class inventarioController extends inventarioModel
             $sucursal_nombre = $su_id ? 'Sucursal_' . $su_id : 'Todas_Sucursales';
             $filename = "Inventario_{$sucursal_nombre}_{$fecha}.xls";
 
-            // Headers para forzar descarga
-            header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-
-            // Crear tabla HTML con estilos elegantes
-            echo '<!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                /* Estilos generales */
-                body { 
-                    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; 
-                    font-size: 11pt; 
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    margin: 0;
-                    padding: 20px;
-                }
-                
-                .container {
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                    overflow: hidden;
-                    margin: 0 auto;
-                    max-width: 1200px;
-                }
-                
-                /* Encabezado elegante */
-                .header {
-                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                    color: black;
-                    font-size: 20pt;
-                    font-weight: 300;
-                    text-align: center;
-                    padding: 25px;
-                    margin-bottom: 0;
-                    letter-spacing: 1px;
-                    position: relative;
-                }
-                
-                .header::after {
-                    content: "";
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 4px;
-                    background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
-                }
-                
-                /* Panel de información */
-                .info {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    padding: 20px;
-                    border-bottom: 1px solid #dee2e6;
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 15px;
-                    font-size: 10pt;
-                }
-                
-                .info-item {
-                    background: white;
-                    padding: 12px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                    border-left: 4px solid #3498db;
-                }
-                
-                .info-item strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 5px;
-                    font-size: 9pt;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                /* Tabla moderna */
-                table {
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    width: 100%;
-                    font-size: 10pt;
-                    background: white;
-                }
-                
-                th {
-                    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-                    color: black;
-                    font-weight: 500;
-                    text-align: center;
-                    padding: 14px 10px;
-                    border: none;
-                    position: relative;
-                    font-size: 9pt;
-                    letter-spacing: 0.5px;
-                    text-transform: uppercase;
-                }
-                
-                th::after {
-                    content: "";
-                    position: absolute;
-                    right: 0;
-                    top: 25%;
-                    height: 50%;
-                    width: 1px;
-                    background: rgba(255,255,255,0.3);
-                }
-                
-                th:last-child::after {
-                    display: none;
-                }
-                
-                td {
-                    padding: 12px 10px;
-                    border-bottom: 1px solid #f8f9fa;
-                    text-align: left;
-                    transition: all 0.2s ease;
-                }
-                
-                tr:hover td {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                }
-                
-                /* Estilos numéricos mejorados */
-                .numero {
-                    text-align: right;
-                    font-weight: 600;
-                    font-family: "Courier New", monospace;
-                    color: #2c3e50;
-                }
-                
-                .moneda {
-                    text-align: right;
-                    font-weight: 700;
-                    font-family: "Courier New", monospace;
-                    color: #27ae60;
-                    background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-                    border-left: 3px solid #27ae60;
-                }
-                
-                /* Estados con diseño moderno */
-                .estado-agotado {
-                    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
-                    color: #c62828;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #ef5350;
-                }
-                
-                .estado-critico {
-                    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%) !important;
-                    color: #ad1457;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #ec407a;
-                }
-                
-                .estado-bajo {
-                    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
-                    color: #ef6c00;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #ff9800;
-                }
-                
-                .estado-normal {
-                    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
-                    color: #2e7d32;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #4caf50;
-                }
-                
-                .estado-exceso {
-                    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-                    color: #1565c0;
-                    font-weight: 600;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #2196f3;
-                }
-                
-                .estado-sin-definir {
-                    background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%) !important;
-                    color: #757575;
-                    text-align: center;
-                    border-radius: 20px;
-                    padding: 6px 12px;
-                    margin: 2px;
-                    border: 1px solid #bdbdbd;
-                }
-                
-                /* Fila de totales premium */
-                .total-row {
-                    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-                    color: white;
-                    font-weight: 600;
-                    font-size: 11pt;
-                }
-                
-                .total-row td {
-                    border: none;
-                    padding: 16px 10px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                .total-row .numero, .total-row .moneda {
-                    color: white;
-                    background: none;
-                    border-left: none;
-                    font-size: 11pt;
-                }
-                
-                /* Pie de página elegante */
-                .footer {
-                    margin-top: 0;
-                    padding: 25px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-top: 1px solid #dee2e6;
-                    font-size: 9pt;
-                    color: #6c757d;
-                    text-align: center;
-                }
-                
-                .footer strong {
-                    color: #2c3e50;
-                    display: block;
-                    margin-bottom: 8px;
-                    font-size: 10pt;
-                }
-                
-                /* Efectos de separación */
-                tbody tr:not(.total-row) {
-                    border-left: 3px solid transparent;
-                    transition: border-left 0.3s ease;
-                }
-                
-                tbody tr:not(.total-row):hover {
-                    border-left: 3px solid #3498db;
-                }
-                
-                /* Responsive para Excel */
-                @media print {
-                    body { background: white; }
-                    .container { box-shadow: none; }
-                }
-            </style>
-        </head>
-        <body>';
-
-            // Encabezado elegante
-            echo '<div class="container">
-                    <div class="header">
-                        💊 REPORTE DE INVENTARIO - SAMFARM PHARMA
-                    </div>';
-
-            // Información del reporte en formato grid
-            echo '<div class="info">
-                        <div class="info-item">
-                            <strong>📅 Fecha de Generación</strong>
-                            ' . date('d/m/Y H:i:s') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>👤 Usuario</strong>
-                            ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>🏪 Sucursal</strong>
-                            ' . ($su_id ? 'Sucursal ID ' . $su_id : 'Todas las Sucursales') . '
-                        </div>
-                        <div class="info-item">
-                            <strong>📋 Total de Registros</strong>
-                            ' . count($datos) . '
-                        </div>
-                    </div>';
-
-            // Tabla de datos
-            echo '<table>';
-
-            // Encabezados
-            echo '<thead><tr>';
             $headers = array_keys($datos[0]);
-            foreach ($headers as $header) {
-                echo '<th>' . strtoupper(str_replace('_', ' ', $header)) . '</th>';
-            }
-            echo '</tr></thead>';
 
-            // Cuerpo de la tabla
-            echo '<tbody>';
+            $info_superior = [
+                'Fecha de Generación' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema',
+                'Sucursal' => ($su_id ? 'Sucursal ID ' . $su_id : 'Todas las Sucursales'),
+                'Total de Registros' => count($datos)
+            ];
 
-            $total_cajas = 0;
-            $total_unidades = 0;
-            $total_valorado = 0;
+            mainModel::generar_excel_reporte([
+                'titulo' => 'REPORTE DE INVENTARIO',
+                'datos' => $datos,
+                'headers' => $headers,
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Valorado (Bs)' => 'moneda',
+                    'Cajas' => 'numero',
+                    'Unidades' => 'numero'
+                ],
+                'columnas_totales' => ['Valorado (Bs)'],
+                'info_superior' => $info_superior
+            ]);
 
-            foreach ($datos as $row) {
-                echo '<tr>';
-
-                foreach ($headers as $key) {
-                    $valor = $row[$key];
-
-                    // Aplicar formato según el campo
-                    if ($key === 'Cajas' || $key === 'Unidades') {
-                        echo '<td class="numero">' . number_format($valor, 0, ',', '.') . '</td>';
-
-                        if ($key === 'Cajas') $total_cajas += $valor;
-                        if ($key === 'Unidades') $total_unidades += $valor;
-                    } elseif ($key === 'Valorado (Bs)') {
-                        echo '<td class="moneda">Bs ' . number_format($valor, 2, ',', '.') . '</td>';
-                        $total_valorado += $valor;
-                    } elseif ($key === 'Estado') {
-                        $clase = 'estado-' . strtolower(str_replace(' ', '-', $valor));
-                        $iconos_map = [
-                            'AGOTADO' => '❌',
-                            'CRÍTICO' => '🔴',
-                            'BAJO' => '🟡',
-                            'NORMAL' => '✅',
-                            'EXCESO' => '📦',
-                            'SIN DEFINIR' => '❓'
-                        ];
-                        $icono = isset($iconos_map[$valor]) ? $iconos_map[$valor] : '';
-                        echo '<td class="' . $clase . '">' . $icono . ' ' . $valor . '</td>';
-                    } elseif ($key === 'Última Actualización') {
-                        echo '<td>' . date('d/m/Y H:i', strtotime($valor)) . '</td>';
-                    } else {
-                        echo '<td>' . htmlspecialchars($valor ?? '-') . '</td>';
-                    }
-                }
-
-                echo '</tr>';
-            }
-
-            // Fila de totales elegante
-            echo '<tr class="total-row">
-                    <td colspan="5" style="text-align: right; padding-right: 20px;">📊 TOTALES GENERALES:</td>
-                    <td class="numero">' . number_format($total_cajas, 0, ',', '.') . '</td>
-                    <td class="numero">' . number_format($total_unidades, 0, ',', '.') . '</td>
-                    <td class="moneda">Bs ' . number_format($total_valorado, 2, ',', '.') . '</td>
-                    <td colspan="4"></td>
-                </tr>';
-
-            echo '</tbody></table>';
-
-            // Pie de página elegante
-            echo '<div class="footer">
-                        <strong>SAMFARM PHARMA - Sistema de Gestión Farmacéutica Premium</strong>
-                        Este reporte fue generado automáticamente el ' . date('d/m/Y \a \l\a\s H:i:s') . '. Para consultas contacte al administrador del sistema.
-                    </div>
-                </div>';
-
-            echo '</body></html>';
-
-            exit();
         } catch (Exception $e) {
             error_log("Error exportando Excel: " . $e->getMessage());
-            echo "Error al generar archivo: " . $e->getMessage();
+            echo "Error al generar archivo: " . htmlspecialchars($e->getMessage());
         }
     }
 
@@ -810,11 +460,12 @@ class inventarioController extends inventarioModel
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
 
-        if ($rol_usuario != 1 && $rol_usuario != 2) {
+        // Solo administradores pueden configurar mínimos y máximos
+        if ($rol_usuario != 1) {
             return json_encode([
                 'Alerta' => 'simple',
                 'Titulo' => 'Acceso denegado',
-                'texto' => 'No tiene permisos para configurar inventario',
+                'texto' => 'Solo los administradores pueden configurar mínimos y máximos de inventario',
                 'Tipo' => 'error'
             ]);
         }
@@ -876,6 +527,161 @@ class inventarioController extends inventarioModel
                 'texto' => 'Error al guardar configuración',
                 'Tipo' => 'error'
             ]);
+        }
+    }
+
+    public function exportar_pdf_inventario_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+
+        $filtros = [];
+
+        if ($rol_usuario == 1) {
+            $f3 = isset($_GET['select3']) ? $_GET['select3'] : '';
+            if ($f3 !== '') {
+                $filtros['su_id'] = (int)$f3;
+            }
+        } elseif ($rol_usuario == 2) {
+            $filtros['su_id'] = $sucursal_usuario;
+        }
+
+        $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
+        $f1 = isset($_GET['select1']) ? $_GET['select1'] : '';
+        $f2 = isset($_GET['select2']) ? $_GET['select2'] : '';
+        $f4 = isset($_GET['select4']) ? $_GET['select4'] : '';
+
+        if (!empty($busqueda)) {
+            $filtros['busqueda'] = $busqueda;
+        }
+
+        if ($f1 !== '' && is_numeric($f1)) {
+            $filtros['laboratorio'] = (int)$f1;
+        }
+
+        if ($f2 !== '') {
+            $estados_validos = ['agotado', 'bajo', 'normal', 'exceso', 'sin_definir', 'critico'];
+            if (in_array($f2, $estados_validos)) {
+                $filtros['estado'] = $f2;
+            }
+        }
+
+        if ($f4 !== '' && is_numeric($f4)) {
+            $filtros['forma'] = (int)$f4;
+        }
+
+        $su_id = $filtros['su_id'] ?? null;
+
+        try {
+            $stmt = self::exportar_inventario_excel_model($filtros);
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($datos)) {
+                echo "No hay datos para exportar con los filtros aplicados.";
+                return;
+            }
+
+            $periodo = '';
+            if (!empty($filtros['fecha_desde']) && !empty($filtros['fecha_hasta'])) {
+                $periodo = date('d/m/Y', strtotime($filtros['fecha_desde'])) . ' al ' . date('d/m/Y', strtotime($filtros['fecha_hasta']));
+            } else {
+                $periodo = 'Todo el período';
+            }
+
+            $info_superior = [
+                'Sucursal' => ($su_id ? 'Sucursal ID ' . $su_id : 'Todas las Sucursales'),
+                'Total de Medicamentos' => count($datos),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            $headers = [];
+            if ($rol_usuario == 1) {
+                $headers = [
+                    ['text' => 'N°', 'width' => 10],
+                    ['text' => 'MEDICAMENTO', 'width' => 50],
+                    ['text' => 'LABORATORIO', 'width' => 25],
+                    ['text' => 'SUCURSAL', 'width' => 25],
+                    ['text' => 'CAJAS', 'width' => 15],
+                    ['text' => 'UNIDADES', 'width' => 20],
+                    ['text' => 'VALORADO', 'width' => 30],
+                    ['text' => 'ESTADO', 'width' => 20]
+                ];
+            } else {
+                $headers = [
+                    ['text' => 'N°', 'width' => 10],
+                    ['text' => 'MEDICAMENTO', 'width' => 55],
+                    ['text' => 'LABORATORIO', 'width' => 30],
+                    ['text' => 'CAJAS', 'width' => 15],
+                    ['text' => 'UNIDADES', 'width' => 20],
+                    ['text' => 'VALORADO', 'width' => 30],
+                    ['text' => 'ESTADO', 'width' => 20]
+                ];
+            }
+
+            $rows = [];
+            foreach ($datos as $index => $row) {
+                $estado_texto = $row['Estado'] ?? 'N/A';
+
+                if ($rol_usuario == 1) {
+                    $cells = [
+                        ['text' => ($index + 1), 'align' => 'C'],
+                        ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 35), 'align' => 'L'],
+                        ['text' => substr($row['Laboratorio'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => substr($row['Sucursal'] ?? 'N/A', 0, 20), 'align' => 'L'],
+                        ['text' => $row['Cajas'], 'align' => 'C'],
+                        ['text' => number_format($row['Unidades']), 'align' => 'C'],
+                        ['text' => 'Bs. ' . number_format($row['Valorado (Bs)'], 2), 'align' => 'R'],
+                        ['text' => $estado_texto, 'align' => 'C']
+                    ];
+                } else {
+                    $cells = [
+                        ['text' => ($index + 1), 'align' => 'C'],
+                        ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 40), 'align' => 'L'],
+                        ['text' => substr($row['Laboratorio'] ?? 'N/A', 0, 20), 'align' => 'L'],
+                        ['text' => $row['Cajas'], 'align' => 'C'],
+                        ['text' => number_format($row['Unidades']), 'align' => 'C'],
+                        ['text' => 'Bs. ' . number_format($row['Valorado (Bs)'], 2), 'align' => 'R'],
+                        ['text' => $estado_texto, 'align' => 'C']
+                    ];
+                }
+
+                $rows[] = ['cells' => $cells];
+            }
+
+            $total_valorado = array_sum(array_column($datos, 'Valorado (Bs)'));
+
+            $resumen = [
+                'Total de Medicamentos' => ['text' => count($datos)],
+                'Valor Total del Inventario' => ['text' => 'Bs ' . number_format($total_valorado, 2), 'color' => [46, 125, 50]]
+            ];
+
+            $datos_pdf = [
+                'titulo' => 'REPORTE DE INVENTARIO',
+                'nombre_archivo' => 'Inventario_' . date('Y-m-d_His') . '.pdf',
+                'info_superior' => $info_superior,
+                'tabla' => [
+                    'headers' => $headers,
+                    'rows' => $rows
+                ],
+                'resumen' => $resumen
+            ];
+
+            // Generar y descargar PDF directamente
+            $content = self::generar_pdf_reporte_fpdf($datos_pdf);
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $datos_pdf['nombre_archivo'] . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            echo $content;
+            exit();
+
+        } catch (Exception $e) {
+            error_log("Error exportando PDF inventario: " . $e->getMessage());
+            echo "Error al generar PDF: " . $e->getMessage();
         }
     }
 }

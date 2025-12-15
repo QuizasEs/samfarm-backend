@@ -39,48 +39,34 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="form">
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Número de Documento</label>
-                            <input type="text" id="info_numero_documento" readonly>
-                        </div>
+                <div class="form-group">
+                    <div class="form-bloque">
+                        <label>Número de Documento</label>
+                        <input type="text" id="info_numero_documento" readonly>
                     </div>
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Número de Factura</label>
-                            <input type="text" id="info_numero_factura" readonly>
-                        </div>
+                    <div class="form-bloque">
+                        <label>Número de Factura</label>
+                        <input type="text" id="info_numero_factura" readonly>
+                    </div>
+
+                    <div class="form-bloque">
+                        <label>Cliente</label>
+                        <input type="text" id="info_cliente" readonly>
                     </div>
                 </div>
+                <div class="form-group">
+                    <div class="form-bloque">
+                        <label>Fecha de Venta</label>
+                        <input type="text" id="info_fecha" readonly>
+                    </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Cliente</label>
-                            <input type="text" id="info_cliente" readonly>
-                        </div>
+                    <div class="form-bloque">
+                        <label>Sucursal</label>
+                        <input type="text" id="info_sucursal" readonly>
                     </div>
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Fecha de Venta</label>
-                            <input type="text" id="info_fecha" readonly>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Sucursal</label>
-                            <input type="text" id="info_sucursal" readonly>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Total</label>
-                            <input type="text" id="info_total" readonly>
-                        </div>
+                    <div class="form-bloque">
+                        <label>Total</label>
+                        <input type="text" id="info_total" readonly>
                     </div>
                 </div>
             </div>
@@ -168,7 +154,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="row">
                     <div class="col">
                         <div class="modal-bloque">
-                            
+
                             <label class="required">Motivo de Devolución</label>
                             <textarea id="modal_motivo" rows="3" placeholder="Describa el motivo de la devolución..." required></textarea>
                         </div>
@@ -195,7 +181,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="modal-info">
                         <p class="info">
                             <ion-icon name="information-circle-outline"></ion-icon>
-                            <strong>Cambio:</strong> Se entregará el mismo medicamento de un lote disponible. 
+                            <strong>Cambio:</strong> Se entregará el mismo medicamento de un lote disponible.
                             <br>
                             No se genera nueva venta ni movimiento de caja.
                         </p>
@@ -363,7 +349,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <td ${estadoClass}>${item.cantidad}</td>
                 <td ${estadoClass}>Bs. ${parseFloat(item.precio_unitario).toFixed(2)}</td>
                 <td ${estadoClass}>Bs. ${parseFloat(item.subtotal).toFixed(2)}</td>
-                <td>
+                <td class="buttons">
                     <button type="button" 
                             class="btn danger" 
                             onclick="DevolucionManager.abrirModalDevolucion(${index})"

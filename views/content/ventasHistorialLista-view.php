@@ -346,7 +346,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 } catch (error) {
                     console.error(' Error:', error);
-                    Swal.fire('Error', 'aquiNo se pudo generar el PDF', 'error');
+                    Swal.fire('Error', 'No se pudo generar el PDF', 'error');
                 }
             }
         };

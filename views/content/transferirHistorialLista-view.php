@@ -318,14 +318,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     Swal.close();
 
                     if (data.success && data.pdf_base64) {
-                        window.abrirPDFDesdeBase64(data.pdf_base64, `Transferencia_${trId}.pdf`);
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'PDF generado',
-                            text: 'El PDF se ha abierto en una nueva ventana',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
+                        mostrarPDFEnModal(data.pdf_base64, `Transferencia_${trId}.pdf`);
+                        // No mostrar alert de success, el modal ya indica que se generó
                     } else {
                         Swal.fire('Error', 'No se pudo generar el PDF', 'error');
                     }

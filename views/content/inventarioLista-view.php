@@ -83,6 +83,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <button type="button" class="btn success" id="btnExportarExcel" style="margin-left: 10px;">
                 <ion-icon name="download-outline"></ion-icon> Excel
             </button>
+            <button type="button" class="btn primary" id="btnExportarPDFInventario" style="margin-left: 5px;">
+                <ion-icon name="document-text-outline"></ion-icon> PDF
+            </button>
         </form>
 
         <div class="tabla-contenedor"></div>
@@ -138,6 +141,122 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <script>
         let chartMedicamentos, chartDiario, chartSucursales;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función para el botón PDF
+            const btnPDFInventario = document.getElementById('btnExportarPDFInventario');
+            if (btnPDFInventario) {
+                btnPDFInventario.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    exportarPDFInventario();
+                });
+            }
+
+            // Función para el botón Excel
+            const btnExcelInventario = document.getElementById('btnExportarExcel');
+            if (btnExcelInventario) {
+                btnExcelInventario.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    exportarExcelInventario();
+                });
+            }
+        });
+
+        function exportarExcelInventario() {
+            const form = document.querySelector('.filtro-dinamico');
+            if (!form) {
+                console.warn('No se encontró el formulario de filtros');
+                return;
+            }
+
+            const busqueda = form.querySelector('input[name="busqueda"]');
+            const select1 = form.querySelector('select[name="select1"]');
+            const select2 = form.querySelector('select[name="select2"]');
+            const select3 = form.querySelector('select[name="select3"]');
+            const select4 = form.querySelector('select[name="select4"]');
+
+            let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel';
+
+            if (busqueda && busqueda.value.trim()) {
+                url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
+            }
+
+            if (select1 && select1.value) {
+                url += '&select1=' + encodeURIComponent(select1.value);
+            }
+
+            if (select2 && select2.value) {
+                url += '&select2=' + encodeURIComponent(select2.value);
+            }
+
+            if (select3 && select3.value) {
+                url += '&select3=' + encodeURIComponent(select3.value);
+            }
+
+            if (select4 && select4.value) {
+                url += '&select4=' + encodeURIComponent(select4.value);
+            }
+
+            console.log('📊 Generando Excel de inventario:', url);
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando Excel',
+                text: 'El archivo se está generado...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function exportarPDFInventario() {
+            const form = document.querySelector('.filtro-dinamico');
+            if (!form) {
+                console.warn('No se encontró el formulario de filtros');
+                return;
+            }
+
+            const busqueda = form.querySelector('input[name="busqueda"]');
+            const select1 = form.querySelector('select[name="select1"]');
+            const select2 = form.querySelector('select[name="select2"]');
+            const select3 = form.querySelector('select[name="select3"]');
+            const select4 = form.querySelector('select[name="select4"]');
+
+            let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_pdf';
+
+            if (busqueda && busqueda.value.trim()) {
+                url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
+            }
+
+            if (select1 && select1.value) {
+                url += '&select1=' + encodeURIComponent(select1.value);
+            }
+
+            if (select2 && select2.value) {
+                url += '&select2=' + encodeURIComponent(select2.value);
+            }
+
+            if (select3 && select3.value) {
+                url += '&select3=' + encodeURIComponent(select3.value);
+            }
+
+            if (select4 && select4.value) {
+                url += '&select4=' + encodeURIComponent(select4.value);
+            }
+
+            console.log('📄 Generando PDF de inventario:', url);
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando PDF',
+                text: 'El reporte se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
 
         function cargarGraficosMargen() {
             const formData1 = new FormData();

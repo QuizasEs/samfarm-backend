@@ -76,20 +76,20 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
         // Decodificar base64
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
-        
+
         for (let i = 0; i < byteCharacters.length; i++) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        
+
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
+
         // Crear URL temporal
         const url = URL.createObjectURL(blob);
-        
+
         // Abrir en nueva ventana
         const ventanaPDF = window.open(url, '_blank', 'width=800,height=600');
-        
+
         // Si fue bloqueado por el navegador
         if (!ventanaPDF || ventanaPDF.closed || typeof ventanaPDF.closed === 'undefined') {
             // Crear enlace de descarga como alternativa
@@ -97,7 +97,7 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
             link.href = url;
             link.download = nombreArchivo;
             link.textContent = 'Descargar PDF';
-            
+
             Swal.fire({
                 title: 'Pop-up bloqueado',
                 html: `Tu navegador bloqueó la ventana del PDF.<br><br>
@@ -119,9 +119,9 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
                 }
             }, 1000);
         }
-        
+
         return true;
-        
+
     } catch (error) {
         Swal.fire({
             icon: 'error',
@@ -130,6 +130,106 @@ function abrirPDFDesdeBase64(base64Data, nombreArchivo) {
         });
         return false;
     }
+}
+
+// Nueva función para mostrar PDF en modal integrado (previsualización)
+function mostrarPDFEnModal(base64Data, nombreArchivo) {
+    try {
+        // Decodificar base64
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+        // Crear URL temporal
+        const url = URL.createObjectURL(blob);
+
+        // Crear modal si no existe
+        let modal = document.getElementById('modalPDFViewer');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modalPDFViewer';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content pdf-viewer" style="max-width: 90%; max-height: 90%;">
+                    <div class="modal-header">
+                        <div class="modal-title">
+                            <ion-icon name="document-outline"></ion-icon>
+                            <span>Previsualización de PDF: ${nombreArchivo}</span>
+                        </div>
+                        <a class="close" onclick="cerrarModalPDF()">
+                            <ion-icon name="close-outline"></ion-icon>
+                        </a>
+                    </div>
+                    <div class="modal-body" style="height: 80vh; overflow: hidden;">
+                        <embed id="pdfViewer" type="application/pdf" style="width: 100%; height: 100%;" />
+                    </div>
+                    <div class="modal-footer" style="text-align: center; padding: 10px;">
+                        <button onclick="descargarPDF('${url}', '${nombreArchivo}')" class="btn success" style="margin-right: 10px;">
+                            <ion-icon name="download-outline"></ion-icon> Descargar
+                        </button>
+                        <button onclick="imprimirPDF('${url}')" class="btn primary">
+                            <ion-icon name="print-outline"></ion-icon> Imprimir
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Asignar URL al embed
+        const embed = document.getElementById('pdfViewer');
+        embed.src = url;
+
+        // Mostrar modal
+        modal.style.display = 'flex';
+
+        // Función para cerrar modal
+        window.cerrarModalPDF = function() {
+            modal.style.display = 'none';
+            URL.revokeObjectURL(url);
+        };
+
+        // Cerrar al hacer click fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalPDF();
+            }
+        });
+
+        return true;
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo mostrar el PDF.'
+        });
+        return false;
+    }
+}
+
+// Función para descargar PDF
+function descargarPDF(url, nombreArchivo) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Función para imprimir PDF (abre nueva ventana para imprimir)
+function imprimirPDF(url) {
+    const printWindow = window.open(url, '_blank', 'width=800,height=600');
+    printWindow.onload = function() {
+        printWindow.print();
+    };
 }
 
 // Función para manejar los mensajes de las alertas

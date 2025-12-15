@@ -1,5 +1,5 @@
 <?php
-if ($_SESSION['rol_smp'] != 1) {/* preguntamos que si el que intenta entrar a esta vista tien un privilegio distinto de admin que sierre su sesio */
+if ($_SESSION['rol_smp'] != 1 && $_SESSION['rol_smp'] != 2) {/* preguntamos que si el que intenta entrar a esta vista tiene un privilegio inferior que cerrar la sesión */
 ?>
     <div style="text-align: center; padding: 60px;">
         <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
@@ -8,7 +8,7 @@ if ($_SESSION['rol_smp'] != 1) {/* preguntamos que si el que intenta entrar a es
 <?php
     exit();
 }
-require_once "./controllers/MedicamentoController.php";
+require_once "./controllers/medicamentoController.php";
 $ins_med = new medicamentoController();
 $datos_select = $ins_med->datos_extras_controller();
 
@@ -28,15 +28,15 @@ $datos_select = $ins_med->datos_extras_controller();
         <div class="form-group">
             <div class="form-bloque">
                 <label for="">NOMBRE COMERCIAL*</label>
-                <input type="text" name="Nombre_reg" placeholder="Nombre comercial" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" required>
+                <input type="text" name="Nombre_reg" placeholder="Nombre comercial" maxlength="100" required>
             </div>
             <div class="form-bloque">
                 <label for="">PRINCIPIO ACTIVO*</label>
-                <input type="text" name="Principio_reg" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Ingrediente principal" required>
+                <input type="text" name="Principio_reg" maxlength="100" placeholder="Ingrediente principal" required>
             </div>
             <div class="form-bloque">
                 <label for="">ACCION FARMACOLOGICA*</label>
-                <input type="text" name="Accion_reg" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Accion esperada" required>
+                <input type="text" name="Accion_reg" maxlength="100" placeholder="Accion esperada" required>
             </div>
         </div>
         <div class="form-group">
@@ -46,7 +46,11 @@ $datos_select = $ins_med->datos_extras_controller();
             </div>
             <div class="form-bloque">
                 <label for="">PRESENTACION*</label>
-                <input type="text" name="Presentacion_reg" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}" maxlength="100" placeholder="Metrica" required>
+                <input type="text" name="Presentacion_reg" maxlength="100" placeholder="Metrica" required>
+            </div>
+            <div class="form-bloque">
+                <label for="">CÓDIGO DE BARRAS</label>
+                <input type="text" name="CodigoBarras_reg" maxlength="100" placeholder="Código de barras opcional">
             </div>
 
         </div>

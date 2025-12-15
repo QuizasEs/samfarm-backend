@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-12-2025 a las 00:30:54
+-- Tiempo de generación: 15-12-2025 a las 09:53:35
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 7.4.33
 
@@ -36,18 +36,7 @@ CREATE TABLE `balance_precios` (
   `bp_creado_en` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Fecha y hora del cambio'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Registro histórico de cambios de precios de venta en el balance';
 
---
--- Volcado de datos para la tabla `balance_precios`
---
 
-INSERT INTO `balance_precios` (`bp_id`, `lm_id`, `us_id`, `bp_precio_anterior`, `bp_precio_nuevo`, `bp_creado_en`) VALUES
-(2, 24, 1, '30.00', '40.00', '2025-12-11 20:11:45');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `caja`
---
 
 CREATE TABLE `caja` (
   `caja_id` bigint(20) UNSIGNED NOT NULL,
@@ -62,20 +51,7 @@ CREATE TABLE `caja` (
   `caja_observacion` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `caja`
---
 
-INSERT INTO `caja` (`caja_id`, `su_id`, `us_id`, `caja_nombre`, `caja_saldo_inicial`, `caja_saldo_final`, `caja_activa`, `caja_creado_en`, `caja_cerrado_en`, `caja_observacion`) VALUES
-(15, 1, 1, 'Caja admin', '200.00', '800.00', 0, '2025-12-10 01:14:15', '2025-12-10 15:24:42', NULL),
-(16, 1, 1, 'Caja admin', '2200.00', '2300.00', 0, '2025-12-10 19:18:35', '2025-12-11 19:59:52', NULL),
-(17, 2, 3, 'Caja gerente', '10.00', NULL, 1, '2025-12-11 20:25:36', NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `clientes`
---
 
 CREATE TABLE `clientes` (
   `cl_id` bigint(20) UNSIGNED NOT NULL,
@@ -91,23 +67,7 @@ CREATE TABLE `clientes` (
   `cl_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `clientes`
---
 
-INSERT INTO `clientes` (`cl_id`, `cl_nombres`, `cl_apellido_paterno`, `cl_apellido_materno`, `cl_telefono`, `cl_correo`, `cl_direccion`, `cl_carnet`, `cl_creado_en`, `cl_actualizado_en`, `cl_estado`) VALUES
-(13, 'jose ramiro', 'baca', 'ortega', '', '', '', '1092384712', '2025-12-03 14:52:36', '2025-12-03 14:53:19', 1),
-(14, 'raul garcia', 'maamni', 'casimiri', '58737838', 'asdfas@ffsdaf', 'por ahi que no recuerdo', '44857630', '2025-12-03 14:54:42', '2025-12-03 14:54:42', 1),
-(15, 'edmon', 'farnoli', 'jumbo', '', '', '', '14236574756', '2025-12-06 14:12:27', '2025-12-06 14:27:00', 1),
-(16, 'raul', 'ignacio', '', '', '', '', '837565631025', '2025-12-06 15:45:14', '2025-12-11 20:28:11', 1),
-(17, 'oruga', 'comeloda', '', '', '', '', '475646276234', '2025-12-08 20:07:10', '2025-12-08 20:07:10', 1),
-(18, 'hugo', 'samora', 'gomez', '6564563635', 'hugo@gmail.com', 'por ahir', '2453453534', '2025-12-10 01:15:19', '2025-12-10 01:15:19', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `compras`
---
 
 CREATE TABLE `compras` (
   `co_id` bigint(20) UNSIGNED NOT NULL,
@@ -130,19 +90,7 @@ CREATE TABLE `compras` (
   `co_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `compras`
---
 
-INSERT INTO `compras` (`co_id`, `co_numero`, `co_fecha`, `la_id`, `us_id`, `su_id`, `pr_id`, `co_subtotal`, `co_impuesto`, `co_total`, `co_numero_factura`, `co_fecha_factura`, `co_tipo_documento`, `co_nit_proveedor`, `co_razon_social`, `co_creado_en`, `co_actualizado_en`, `co_estado`) VALUES
-(14, 'COMP-2025-0001', '2025-12-10 01:03:09', 4, 1, 1, 9, '3000.00', '390.00', '3390.00', '6546565465', '2025-12-19', 'compra', NULL, 'juan ramon chochu - NIT: 6516576465', '2025-12-10 01:03:09', '2025-12-10 01:03:09', 1),
-(15, 'COMP-2025-0002', '2025-12-11 19:08:48', 6, 3, 2, 11, '4160.00', '540.80', '4700.80', '000000000000', '2025-12-27', 'compra', NULL, 'medibol - NIT: 4235263643', '2025-12-11 19:08:48', '2025-12-11 19:08:48', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `configuracion_empresa`
---
 
 CREATE TABLE `configuracion_empresa` (
   `ce_id` bigint(20) UNSIGNED NOT NULL,
@@ -161,7 +109,7 @@ CREATE TABLE `configuracion_empresa` (
 --
 
 INSERT INTO `configuracion_empresa` (`ce_id`, `ce_nombre`, `ce_nit`, `ce_direccion`, `ce_telefono`, `ce_correo`, `ce_logo`, `ce_creado_en`, `ce_actualizado_en`) VALUES
-(1, 'SAMFARM - Sistema de Gestión Farmacéutica', '123456789dfg', 'por ahi no recuerdo', '75767565656', 'contacto@samfarm.com', 'http://localhost/samfarm-backend/views/assets/img/logo_empresa_2285f77ce9add384_1764983826.png', '2025-11-19 01:22:36', '2025-12-06 18:56:37');
+(1, 'Sasuke', '123456789dfg', 'por ahi no recuerdo', '75767565656', 'contacto@samfarm.com', 'http://localhost/samfarm-backend/views/assets/img/logo_empresa_2285f77ce9add384_1764983826.png', '2025-11-19 01:22:36', '2025-12-13 19:24:28');
 
 -- --------------------------------------------------------
 
@@ -181,20 +129,7 @@ CREATE TABLE `detalle_compra` (
   `dc_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `detalle_compra`
---
 
-INSERT INTO `detalle_compra` (`dc_id`, `co_id`, `med_id`, `lm_id`, `dc_cantidad`, `dc_precio_unitario`, `dc_descuento`, `dc_subtotal`, `dc_estado`) VALUES
-(8, 14, 5, 21, 1500, '60.00', '0.00', '3000.00', 1),
-(9, 15, 2, 23, 59, '40.00', '0.00', '2360.00', 1),
-(10, 15, 3, 24, 90, '20.00', '0.00', '1800.00', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `detalle_peticion`
---
 
 CREATE TABLE `detalle_peticion` (
   `dp_id` bigint(20) UNSIGNED NOT NULL,
@@ -228,19 +163,7 @@ CREATE TABLE `detalle_transferencia` (
   `dt_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Detalle de items en cada transferencia';
 
---
--- Volcado de datos para la tabla `detalle_transferencia`
---
 
-INSERT INTO `detalle_transferencia` (`dt_id`, `tr_id`, `lm_origen_id`, `lm_destino_id`, `med_id`, `dt_numero_lote_origen`, `dt_cantidad_cajas`, `dt_cantidad_unidades`, `dt_precio_compra`, `dt_precio_venta`, `dt_subtotal_valorado`, `dt_estado`, `dt_creado_en`) VALUES
-(4, 6, 21, 22, 5, 'MED-0001', 10, 300, '60.00', '1.00', '300.00', 1, '2025-12-10 02:00:01'),
-(5, 9, 23, 25, 2, 'MED-0002', 9, 9, '40.00', '50.00', '450.00', 1, '2025-12-11 19:21:36');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `detalle_venta`
---
 
 CREATE TABLE `detalle_venta` (
   `dv_id` bigint(20) UNSIGNED NOT NULL,
@@ -255,23 +178,7 @@ CREATE TABLE `detalle_venta` (
   `dv_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `detalle_venta`
---
 
-INSERT INTO `detalle_venta` (`dv_id`, `ve_id`, `med_id`, `lm_id`, `dv_cantidad`, `dv_unidad`, `dv_precio_unitario`, `dv_descuento`, `dv_subtotal`, `dv_estado`) VALUES
-(9, 58, 5, 21, 100, 'unidad', '1.00', '0.00', '100.00', 1),
-(10, 60, 5, 21, 100, 'unidad', '1.00', '0.00', '100.00', 1),
-(11, 61, 5, 21, 100, 'unidad', '1.00', '0.00', '100.00', 1),
-(12, 62, 5, 21, 300, 'unidad', '1.00', '0.00', '300.00', 0),
-(13, 63, 2, 25, 2, 'unidad', '50.00', '0.00', '100.00', 0),
-(14, 64, 2, 23, 6, 'unidad', '50.00', '0.00', '300.00', 0);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `devoluciones`
---
 
 CREATE TABLE `devoluciones` (
   `dev_id` bigint(20) UNSIGNED NOT NULL,
@@ -286,20 +193,7 @@ CREATE TABLE `devoluciones` (
   `dev_estado` enum('pendiente','aceptada','rechazada') NOT NULL DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `devoluciones`
---
 
-INSERT INTO `devoluciones` (`dev_id`, `ve_id`, `fa_id`, `su_id`, `us_id`, `dev_total`, `dev_cantidad`, `dev_motivo`, `dev_fecha`, `dev_estado`) VALUES
-(4, 62, 59, 1, 1, '300.00', 300, 'se me cayo al agua', '2025-12-10 02:51:30', 'aceptada'),
-(5, 63, 60, 1, 1, '100.00', 2, 'jjjjjjjjjj', '2025-12-11 20:01:52', 'aceptada'),
-(6, 64, 61, 2, 3, '300.00', 6, 'yhh54htrh rthtyj', '2025-12-11 20:27:45', 'aceptada');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `factura`
---
 
 CREATE TABLE `factura` (
   `fa_id` bigint(20) UNSIGNED NOT NULL,
@@ -316,24 +210,6 @@ CREATE TABLE `factura` (
   `fa_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `factura`
---
-
-INSERT INTO `factura` (`fa_id`, `ve_id`, `cl_id`, `us_id`, `su_id`, `fa_numero`, `fa_fecha_emision`, `fa_monto_total`, `fa_codigo_control`, `fa_cuf`, `fa_estado`, `fa_creado_en`) VALUES
-(56, 58, NULL, 1, 1, 'F-1-20251210011531-231', '2025-12-10 01:15:31', '100.00', NULL, NULL, 1, '2025-12-10 01:15:31'),
-(57, 60, NULL, 1, 1, 'F-1-20251210012756-545', '2025-12-10 01:27:56', '100.00', NULL, NULL, 1, '2025-12-10 01:27:56'),
-(58, 61, NULL, 1, 1, 'F-1-20251210015609-451', '2025-12-10 01:56:09', '100.00', NULL, NULL, 1, '2025-12-10 01:56:09'),
-(59, 62, NULL, 1, 1, 'F-1-20251210020745-753', '2025-12-10 02:07:45', '300.00', NULL, NULL, 1, '2025-12-10 02:07:45'),
-(60, 63, 15, 1, 1, 'F-1-20251211195814-153', '2025-12-11 19:58:14', '100.00', NULL, NULL, 1, '2025-12-11 19:58:14'),
-(61, 64, 17, 3, 2, 'F-2-20251211202556-313', '2025-12-11 20:25:56', '300.00', NULL, NULL, 1, '2025-12-11 20:25:56');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `facturacion_electronica`
---
-
 CREATE TABLE `facturacion_electronica` (
   `fe_id` bigint(20) UNSIGNED NOT NULL,
   `fa_id` bigint(20) UNSIGNED NOT NULL,
@@ -346,11 +222,6 @@ CREATE TABLE `facturacion_electronica` (
   `fe_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `forma_farmaceutica`
---
 
 CREATE TABLE `forma_farmaceutica` (
   `ff_id` bigint(20) UNSIGNED NOT NULL,
@@ -361,60 +232,17 @@ CREATE TABLE `forma_farmaceutica` (
   `ff_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `forma_farmaceutica`
---
 
-INSERT INTO `forma_farmaceutica` (`ff_id`, `ff_nombre`, `ff_imagen`, `ff_creado_en`, `ff_actualizado_en`, `ff_estado`) VALUES
-(1, 'Tableta', 'tableta.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(2, 'Cápsula', 'capsula.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(3, 'Jarabe', 'jarabe.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(4, 'Crema', 'crema.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(5, 'Inyectable', 'inyectable.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(6, 'Suspensión', 'suspension.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(7, 'Ungüento', 'unguento.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(8, 'Supositorio', 'supositorio.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(9, 'Spray', 'spray.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(10, 'Polvo', 'polvo.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `historial_lote`
---
 
 CREATE TABLE `historial_lote` (
   `hl_id` bigint(20) UNSIGNED NOT NULL,
   `lm_id` bigint(20) UNSIGNED NOT NULL,
   `us_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `hl_accion` enum('creacion','activacion','ajuste','caducidad','terminacion','devolucion','bloqueo','desbloqueo','transferencia_salida','transferencia_entrada') NOT NULL,
+  `hl_accion` enum('creacion','activacion','ajuste','caducidad','terminacion','devolucion','bloqueo','desbloqueo','transferencia_salida','transferencia_entrada','recepcion_transferencia','rechazo_transferencia') NOT NULL,
   `hl_descripcion` text DEFAULT NULL,
   `hl_fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `historial_lote`
---
-
-INSERT INTO `historial_lote` (`hl_id`, `lm_id`, `us_id`, `hl_accion`, `hl_descripcion`, `hl_fecha`) VALUES
-(74, 21, 1, 'creacion', 'Lote creado por compra #COMP-2025-0001 en estado \'activo\'.', '2025-12-10 01:03:09'),
-(75, 21, 1, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0001.', '2025-12-10 01:03:09'),
-(76, 21, 1, '', 'Salida de 10 cajas por transferencia #TRANS-2025-0001', '2025-12-10 02:00:01'),
-(77, 22, 3, '', 'Recepción de 10 cajas por transferencia #TRANS-2025-0001', '2025-12-10 02:02:07'),
-(78, 21, 1, 'ajuste', 'Actualización de datos del lote (cantidades/precios/fecha de vencimiento)', '2025-12-10 15:17:41'),
-(79, 23, 3, 'creacion', 'Lote creado por compra #COMP-2025-0002 en estado \'activo\'.', '2025-12-11 19:08:48'),
-(80, 23, 3, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0002.', '2025-12-11 19:08:48'),
-(81, 24, 3, 'creacion', 'Lote creado por compra #COMP-2025-0002 en estado \'activo\'.', '2025-12-11 19:08:48'),
-(82, 24, 3, 'activacion', 'Lote activado automáticamente al registrar compra #COMP-2025-0002.', '2025-12-11 19:08:48'),
-(83, 23, 3, 'transferencia_salida', 'Salida de 9 cajas por transferencia #TRANS-2025-0002', '2025-12-11 19:21:36'),
-(84, 25, 1, '', 'Recepción de 9 cajas por transferencia #TRANS-2025-0002', '2025-12-11 19:22:11'),
-(85, 25, 1, 'ajuste', 'Actualización de datos del lote (cantidades/precios/fecha de vencimiento)', '2025-12-11 20:03:32');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `informes`
---
 
 CREATE TABLE `informes` (
   `inf_id` bigint(20) UNSIGNED NOT NULL,
@@ -425,32 +253,7 @@ CREATE TABLE `informes` (
   `inf_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `informes`
---
 
-INSERT INTO `informes` (`inf_id`, `inf_nombre`, `inf_tipo`, `inf_usuario`, `inf_config`, `inf_creado_en`) VALUES
-(89, 'Compra COMP-2025-0001 - juan ramon chochu - NIT: 6516576465', 'compra', 1, '{\"compra_id\":14,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"9\",\"laboratorio_id\":\"4\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-12-19\",\"numero_factura\":\"6546565465\",\"razon_social\":\"juan ramon chochu - NIT: 6516576465\",\"subtotal\":\"3000.00\",\"impuestos\":\"390.00\",\"total\":\"3390.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"5\",\"numero_lote\":\"MED-0001\",\"cantidad\":50,\"precio_compra\":60,\"precio_venta\":1,\"vencimiento\":\"2026-01-03\",\"activar_lote\":1}]}', '2025-12-10 01:03:09'),
-(90, 'Nota Venta F-1-20251210011531-231', 'nota_venta', 1, '{\"ve_id\":58,\"fa_id\":56,\"ve_numero_documento\":\"SU1-1765343731\",\"fa_numero\":\"F-1-20251210011531-231\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"lote_id\":\"21\",\"cantidad\":100,\"precio\":1,\"subtotal\":100}],\"subtotal\":100,\"total\":100,\"metodo_pago\":\"efectivo\"}', '2025-12-10 01:15:31'),
-(91, 'Nota Venta F-1-20251210012756-545', 'nota_venta', 1, '{\"ve_id\":60,\"fa_id\":57,\"ve_numero_documento\":\"SU1-1765344476\",\"fa_numero\":\"F-1-20251210012756-545\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"lote_id\":\"21\",\"cantidad\":100,\"precio\":1,\"subtotal\":100}],\"subtotal\":100,\"total\":100,\"metodo_pago\":\"efectivo\"}', '2025-12-10 01:27:56'),
-(92, 'Nota Venta F-1-20251210015609-451', 'nota_venta', 1, '{\"ve_id\":61,\"fa_id\":58,\"ve_numero_documento\":\"SU1-1765346169\",\"fa_numero\":\"F-1-20251210015609-451\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"lote_id\":\"21\",\"cantidad\":100,\"precio\":1,\"subtotal\":100}],\"subtotal\":100,\"total\":100,\"metodo_pago\":\"efectivo\"}', '2025-12-10 01:56:09'),
-(93, 'Transferencia TRANS-2025-0001', 'transferencia', 1, '{\"tipo_informe\":\"transferencia_salida\",\"tr_id\":\"6\",\"tr_numero\":\"TRANS-2025-0001\",\"su_origen\":\"1\",\"us_emisor\":\"1\",\"total_items\":1,\"total_cajas\":10,\"total_unidades\":300,\"total_valorado\":300,\"tr_estado\":\"pendiente\"}', '2025-12-10 02:00:01'),
-(94, 'Recepción de Transferencia TRANS-2025-0001', 'transferencia_recepcion', 3, '{\"tipo_informe\":\"transferencia_entrada\",\"tr_id\":6,\"tr_numero\":\"TRANS-2025-0001\",\"su_destino\":\"2\",\"us_receptor\":\"3\",\"total_items\":1,\"total_cajas\":\"10\",\"total_unidades\":\"300\",\"total_valorado\":\"300.00\",\"tr_estado\":\"aceptada\"}', '2025-12-10 02:02:07'),
-(95, 'Nota Venta F-1-20251210020745-753', 'nota_venta', 1, '{\"ve_id\":62,\"fa_id\":59,\"ve_numero_documento\":\"SU1-1765346865\",\"fa_numero\":\"F-1-20251210020745-753\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"5\",\"lote_id\":\"21\",\"cantidad\":300,\"precio\":1,\"subtotal\":300}],\"subtotal\":300,\"total\":300,\"metodo_pago\":\"efectivo\"}', '2025-12-10 02:07:45'),
-(96, 'Devolución #4 - Venta #62', 'devolucion', 1, '{\"dev_id\":4,\"ve_id\":62,\"fa_id\":59,\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"dv_id\":\"12\",\"med_id\":\"5\",\"lm_id\":\"21\",\"cantidad\":300,\"precio_unitario\":\"1.00\",\"motivo\":\"se me cayo al agua\",\"tipo\":\"cambio\"}],\"total_devolucion\":300,\"cantidad_items\":300,\"motivo\":\"se me cayo al agua\",\"fecha\":\"2025-12-10 02:51:30\"}', '2025-12-10 02:51:30'),
-(97, 'Compra COMP-2025-0002 - medibol - NIT: 4235263643', 'compra', 3, '{\"compra_id\":15,\"numero_compra\":\"COMP-2025-0002\",\"proveedor_id\":\"11\",\"laboratorio_id\":\"6\",\"sucursal_id\":\"2\",\"fecha_factura\":\"2025-12-27\",\"numero_factura\":\"000000000000\",\"razon_social\":\"medibol - NIT: 4235263643\",\"subtotal\":\"4160.00\",\"impuestos\":\"540.80\",\"total\":\"4700.80\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"2\",\"numero_lote\":\"MED-0002\",\"cantidad\":59,\"precio_compra\":40,\"precio_venta\":50,\"vencimiento\":\"2026-01-31\",\"activar_lote\":1},{\"medicamento_id\":\"3\",\"numero_lote\":\"MED-0003\",\"cantidad\":90,\"precio_compra\":20,\"precio_venta\":30,\"vencimiento\":\"2026-02-19\",\"activar_lote\":1}]}', '2025-12-11 19:08:48'),
-(98, 'Transferencia TRANS-2025-0002', 'transferencia', 3, '{\"tipo_informe\":\"transferencia_salida\",\"tr_id\":\"9\",\"tr_numero\":\"TRANS-2025-0002\",\"su_origen\":\"2\",\"us_emisor\":\"3\",\"total_items\":1,\"total_cajas\":9,\"total_unidades\":9,\"total_valorado\":450,\"tr_estado\":\"pendiente\"}', '2025-12-11 19:21:36'),
-(99, 'Recepción de Transferencia TRANS-2025-0002', 'transferencia_recepcion', 1, '{\"tipo_informe\":\"transferencia_entrada\",\"tr_id\":9,\"tr_numero\":\"TRANS-2025-0002\",\"su_destino\":\"1\",\"us_receptor\":\"1\",\"total_items\":1,\"total_cajas\":\"9\",\"total_unidades\":\"9\",\"total_valorado\":\"450.00\",\"tr_estado\":\"aceptada\"}', '2025-12-11 19:22:11'),
-(100, 'Nota Venta F-1-20251211195814-153', 'nota_venta', 1, '{\"ve_id\":63,\"fa_id\":60,\"ve_numero_documento\":\"SU1-1765497494\",\"fa_numero\":\"F-1-20251211195814-153\",\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"med_id\":\"2\",\"lote_id\":\"25\",\"cantidad\":2,\"precio\":50,\"subtotal\":100}],\"subtotal\":100,\"total\":100,\"metodo_pago\":\"efectivo\"}', '2025-12-11 19:58:14'),
-(101, 'Devolución #5 - Venta #63', 'devolucion', 1, '{\"dev_id\":5,\"ve_id\":63,\"fa_id\":60,\"usuario_id\":1,\"sucursal_id\":1,\"items\":[{\"dv_id\":\"13\",\"med_id\":\"2\",\"lm_id\":\"25\",\"cantidad\":2,\"precio_unitario\":\"50.00\",\"motivo\":\"jjjjjjjjjj\",\"tipo\":\"cambio\"}],\"total_devolucion\":100,\"cantidad_items\":2,\"motivo\":\"jjjjjjjjjj\",\"fecha\":\"2025-12-11 20:01:52\"}', '2025-12-11 20:01:52'),
-(102, 'Nota Venta F-2-20251211202556-313', 'nota_venta', 3, '{\"ve_id\":64,\"fa_id\":61,\"ve_numero_documento\":\"SU2-1765499156\",\"fa_numero\":\"F-2-20251211202556-313\",\"usuario_id\":3,\"sucursal_id\":2,\"items\":[{\"med_id\":\"2\",\"lote_id\":\"23\",\"cantidad\":6,\"precio\":50,\"subtotal\":300}],\"subtotal\":300,\"total\":300,\"metodo_pago\":\"efectivo\"}', '2025-12-11 20:25:56'),
-(103, 'Devolución #6 - Venta #64', 'devolucion', 3, '{\"dev_id\":6,\"ve_id\":64,\"fa_id\":61,\"usuario_id\":3,\"sucursal_id\":2,\"items\":[{\"dv_id\":\"14\",\"med_id\":\"2\",\"lm_id\":\"23\",\"cantidad\":6,\"precio_unitario\":\"50.00\",\"motivo\":\"yhh54htrh rthtyj\",\"tipo\":\"cambio\"}],\"total_devolucion\":300,\"cantidad_items\":6,\"motivo\":\"yhh54htrh rthtyj\",\"fecha\":\"2025-12-11 20:27:45\"}', '2025-12-11 20:27:45');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `informes_compra`
---
 
 CREATE TABLE `informes_compra` (
   `ic_id` int(11) NOT NULL,
@@ -468,19 +271,7 @@ CREATE TABLE `informes_compra` (
   `ic_config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ic_config_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
---
--- Volcado de datos para la tabla `informes_compra`
---
 
-INSERT INTO `informes_compra` (`ic_id`, `co_id`, `pr_id`, `us_id`, `su_id`, `ic_numero_compra`, `ic_numero_factura`, `ic_fecha_compra`, `ic_subtotal`, `ic_impuestos`, `ic_total`, `ic_cantidad_lotes`, `ic_config_json`) VALUES
-(2, 14, 9, 1, 1, 'COMP-2025-0001', '6546565465', '2025-12-10 01:03:09', '3000.00', '390.00', '3390.00', 1, '{\"compra_id\":14,\"numero_compra\":\"COMP-2025-0001\",\"proveedor_id\":\"9\",\"laboratorio_id\":\"4\",\"sucursal_id\":\"1\",\"fecha_factura\":\"2025-12-19\",\"numero_factura\":\"6546565465\",\"razon_social\":\"juan ramon chochu - NIT: 6516576465\",\"subtotal\":\"3000.00\",\"impuestos\":\"390.00\",\"total\":\"3390.00\",\"cantidad_lotes\":1,\"lotes\":[{\"medicamento_id\":\"5\",\"numero_lote\":\"MED-0001\",\"cantidad\":50,\"precio_compra\":60,\"precio_venta\":1,\"vencimiento\":\"2026-01-03\",\"activar_lote\":1}]}'),
-(3, 15, 11, 3, 2, 'COMP-2025-0002', '000000000000', '2025-12-11 19:08:48', '4160.00', '540.80', '4700.80', 2, '{\"compra_id\":15,\"numero_compra\":\"COMP-2025-0002\",\"proveedor_id\":\"11\",\"laboratorio_id\":\"6\",\"sucursal_id\":\"2\",\"fecha_factura\":\"2025-12-27\",\"numero_factura\":\"000000000000\",\"razon_social\":\"medibol - NIT: 4235263643\",\"subtotal\":\"4160.00\",\"impuestos\":\"540.80\",\"total\":\"4700.80\",\"cantidad_lotes\":2,\"lotes\":[{\"medicamento_id\":\"2\",\"numero_lote\":\"MED-0002\",\"cantidad\":59,\"precio_compra\":40,\"precio_venta\":50,\"vencimiento\":\"2026-01-31\",\"activar_lote\":1},{\"medicamento_id\":\"3\",\"numero_lote\":\"MED-0003\",\"cantidad\":90,\"precio_compra\":20,\"precio_venta\":30,\"vencimiento\":\"2026-02-19\",\"activar_lote\":1}]}');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `inventarios`
---
 
 CREATE TABLE `inventarios` (
   `inv_id` bigint(20) UNSIGNED NOT NULL,
@@ -497,22 +288,7 @@ CREATE TABLE `inventarios` (
   `inv_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `inventarios`
---
 
-INSERT INTO `inventarios` (`inv_id`, `med_id`, `su_id`, `inv_total_cajas`, `inv_total_unidades`, `inv_total_valorado`, `inv_minimo`, `inv_maximo`, `inv_codigo_barras`, `inv_stock_alerta`, `inv_actualizado_en`, `inv_creado_en`) VALUES
-(23, 5, 1, 0, 0, '0.00', 0, NULL, NULL, 0, '2025-12-11 20:30:20', '2025-12-10 01:03:09'),
-(24, 5, 2, 10, 300, '300.00', 300, NULL, NULL, 0, '2025-12-11 20:30:20', '2025-12-10 02:02:07'),
-(25, 2, 2, 38, 38, '1900.00', 0, NULL, NULL, 0, '2025-12-11 20:30:20', '2025-12-11 19:08:48'),
-(26, 3, 2, 90, 90, '3600.00', 0, NULL, NULL, 0, '2025-12-11 20:30:20', '2025-12-11 19:08:48'),
-(27, 2, 1, 0, 0, '0.00', 0, NULL, NULL, 0, '2025-12-11 20:30:20', '2025-12-11 19:22:11');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `laboratorios`
---
 
 CREATE TABLE `laboratorios` (
   `la_id` bigint(20) UNSIGNED NOT NULL,
@@ -523,25 +299,7 @@ CREATE TABLE `laboratorios` (
   `la_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `laboratorios`
---
 
-INSERT INTO `laboratorios` (`la_id`, `la_nombre_comercial`, `la_logo`, `la_creado_en`, `la_actualizado_en`, `la_estado`) VALUES
-(1, 'Bayer', 'bayer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(2, 'Pfizer', 'pfizer.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(3, 'Roche', 'roche.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(4, 'Novartis', 'novartis.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(5, 'GSK', 'gsk.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(6, 'Sanofi', 'sanofi.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(7, 'Merck', 'merck.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1),
-(8, 'AstraZeneca', 'astrazeneca.png', '2025-11-06 11:06:04', '2025-11-06 11:06:04', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `lote_medicamento`
---
 
 CREATE TABLE `lote_medicamento` (
   `lm_id` bigint(20) UNSIGNED NOT NULL,
@@ -567,22 +325,7 @@ CREATE TABLE `lote_medicamento` (
   `lm_tr_bloqueado` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'ID de transferencia que tiene bloqueado este stock'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `lote_medicamento`
---
 
-INSERT INTO `lote_medicamento` (`lm_id`, `med_id`, `su_id`, `pr_id`, `pr_id_compra`, `lm_numero_lote`, `lm_cant_caja`, `lm_cant_blister`, `lm_cant_unidad`, `lm_cant_actual_cajas`, `lm_cant_actual_unidades`, `lm_precio_compra`, `lm_precio_venta`, `lm_fecha_ingreso`, `lm_fecha_vencimiento`, `lm_estado`, `lm_creado_en`, `lm_actualizado_en`, `lm_origen_id`, `lm_tr_bloqueado`) VALUES
-(21, 5, 1, 9, 14, 'MED-0001', 50, 5, 6, 10, 300, '60.00', '1.00', '2025-12-10 01:03:09', '2025-12-10', 'caducado', '2025-12-10 01:03:09', '2025-12-10 15:18:04', NULL, NULL),
-(22, 5, 2, 9, 14, 'MED-0001', 10, 5, 6, 10, 300, '60.00', '1.00', '2025-12-10 02:02:07', '2026-01-03', 'activo', '2025-12-10 02:02:07', '2025-12-10 02:02:07', 21, NULL),
-(23, 2, 2, 11, 15, 'MED-0002', 59, 1, 1, 38, 38, '40.00', '50.00', '2025-12-11 19:08:48', '2026-01-31', 'activo', '2025-12-11 19:08:48', '2025-12-11 20:27:45', NULL, NULL),
-(24, 3, 2, 11, 15, 'MED-0003', 90, 1, 1, 90, 90, '20.00', '40.00', '2025-12-11 19:08:48', '2026-02-19', 'activo', '2025-12-11 19:08:48', '2025-12-11 20:11:45', NULL, NULL),
-(25, 2, 1, 11, 15, 'MED-0002', 9, 1, 1, 5, 5, '40.00', '50.00', '2025-12-11 19:22:11', '2025-12-11', 'caducado', '2025-12-11 19:22:11', '2025-12-11 20:04:17', 23, NULL);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `medicamento`
---
 
 CREATE TABLE `medicamento` (
   `med_id` bigint(20) UNSIGNED NOT NULL,
@@ -603,27 +346,7 @@ CREATE TABLE `medicamento` (
   `us_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `medicamento`
---
 
-INSERT INTO `medicamento` (`med_id`, `med_nombre_quimico`, `med_principio_activo`, `med_accion_farmacologica`, `med_presentacion`, `med_descripcion`, `med_codigo_barras`, `med_version_comercial`, `med_creado_en`, `med_actualizado_en`, `uf_id`, `ff_id`, `vd_id`, `la_id`, `su_id`, `us_id`) VALUES
-(1, 'Paracetamol', 'Paracetamol', 'Analgésico y antipirético', 'Tabletas 500mg x 10', 'Analgésico para dolor leve a moderado', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 1, 1, 1, 1, 1, 1),
-(2, 'Ibuprofeno', 'Ibuprofeno', 'Antiinflamatorio no esteroideo', 'Tabletas 400mg x 20', 'Antiinflamatorio y analgésico', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 3, 1, 1, 2, 1, 1),
-(3, 'Amoxicilina', 'Amoxicilina', 'Antibiótico de amplio espectro', 'Cápsulas 500mg x 12', 'Antibiótico para infecciones bacterianas', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 2, 2, 1, 3, 1, 1),
-(4, 'Loratadina', 'Loratadina', 'Antihistamínico', 'Tabletas 10mg x 10', 'Para alergias y rinitis', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 4, 1, 1, 4, 1, 1),
-(5, 'Omeprazol', 'Omeprazol', 'Inhibidor de bomba de protones', 'Cápsulas 20mg x 14', 'Para úlceras y reflujo gastroesofágico', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 8, 2, 1, 5, 1, 1),
-(6, 'Metformina', 'Metformina', 'Hipoglucemiante oral', 'Tabletas 850mg x 30', 'Para diabetes tipo 2', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 6, 1, 1),
-(7, 'Atorvastatina', 'Atorvastatina', 'Hipolipemiante', 'Tabletas 20mg x 30', 'Para reducir colesterol', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 7, 1, 1),
-(8, 'Salbutamol', 'Salbutamol', 'Broncodilatador', 'Spray 100mcg x 200 dosis', 'Para asma y broncoespasmo', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 10, 9, 10, 8, 1, 1),
-(9, 'Losartán', 'Losartán', 'Antihipertensivo', 'Tabletas 50mg x 30', 'Para hipertensión arterial', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 7, 1, 1, 1, 1, 1),
-(10, 'Diazepam', 'Diazepam', 'Ansiolítico y relajante muscular', 'Tabletas 5mg x 20', 'Para ansiedad y espasmos musculares', NULL, NULL, '2025-11-06 11:06:05', '2025-11-06 11:06:05', 9, 1, 1, 2, 1, 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `merma`
---
 
 CREATE TABLE `merma` (
   `me_id` bigint(20) UNSIGNED NOT NULL,
@@ -636,19 +359,6 @@ CREATE TABLE `merma` (
   `me_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `merma`
---
-
-INSERT INTO `merma` (`me_id`, `med_id`, `lm_id`, `su_id`, `us_id`, `me_cantidad`, `me_motivo`, `me_fecha`) VALUES
-(3, 5, 21, 1, 1, 300, 'caducado', '2025-12-10 15:18:04'),
-(4, 2, 25, 1, 1, 5, 'gggg', '2025-12-11 20:04:17');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `movimiento_caja`
---
 
 CREATE TABLE `movimiento_caja` (
   `mc_id` bigint(20) UNSIGNED NOT NULL,
@@ -662,23 +372,7 @@ CREATE TABLE `movimiento_caja` (
   `mc_fecha` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `movimiento_caja`
---
 
-INSERT INTO `movimiento_caja` (`mc_id`, `caja_id`, `us_id`, `mc_tipo`, `mc_monto`, `mc_concepto`, `mc_referencia_tipo`, `mc_referencia_id`, `mc_fecha`) VALUES
-(57, 15, 1, 'venta', '100.00', 'Venta SU1-1765343731', 'venta', 58, '2025-12-10 01:15:31'),
-(58, 15, 1, 'venta', '100.00', 'Venta SU1-1765344476', 'venta', 60, '2025-12-10 01:27:56'),
-(59, 15, 1, 'venta', '100.00', 'Venta SU1-1765346169', 'venta', 61, '2025-12-10 01:56:09'),
-(60, 15, 1, 'venta', '300.00', 'Venta SU1-1765346865', 'venta', 62, '2025-12-10 02:07:45'),
-(61, 16, 1, 'venta', '100.00', 'Venta SU1-1765497494', 'venta', 63, '2025-12-11 19:58:14'),
-(62, 17, 3, 'venta', '300.00', 'Venta SU2-1765499156', 'venta', 64, '2025-12-11 20:25:56');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `movimiento_inventario`
---
 
 CREATE TABLE `movimiento_inventario` (
   `mi_id` bigint(20) UNSIGNED NOT NULL,
@@ -690,41 +384,14 @@ CREATE TABLE `movimiento_inventario` (
   `mi_cantidad` int(11) NOT NULL,
   `mi_unidad` varchar(30) DEFAULT 'unidad',
   `mi_referencia_tipo` varchar(30) DEFAULT NULL,
-  `mi_referencia_id` bigint(20) DEFAULT NULL,
+  `mi_referencia_id` varchar(200) DEFAULT NULL,
   `mi_motivo` text DEFAULT NULL,
   `mi_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `mi_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `movimiento_inventario`
---
 
-INSERT INTO `movimiento_inventario` (`mi_id`, `lm_id`, `med_id`, `su_id`, `us_id`, `mi_tipo`, `mi_cantidad`, `mi_unidad`, `mi_referencia_tipo`, `mi_referencia_id`, `mi_motivo`, `mi_creado_en`, `mi_estado`) VALUES
-(109, 21, 5, 1, 1, 'entrada', 1500, 'unidad', 'compra', 14, 'Ingreso por compra COMP-2025-0001', '2025-12-10 01:03:09', 1),
-(110, 21, 5, 1, 1, 'salida', 100, 'unidad', 'venta', 0, 'Venta SU1-1765343731 (lm_id 21)', '2025-12-10 01:15:31', 1),
-(111, 21, 5, 1, 1, 'salida', 100, 'unidad', 'venta', 0, 'Venta SU1-1765344476 (lm_id 21)', '2025-12-10 01:27:56', 1),
-(112, 21, 5, 1, 1, 'salida', 100, 'unidad', 'venta', 0, 'Venta SU1-1765346169 (lm_id 21)', '2025-12-10 01:56:09', 1),
-(113, 21, 5, 1, 1, 'salida', 300, 'unidad', 'transferencia_salida', 6, 'Transferencia #TRANS-2025-0001 hacia sucursal destino', '2025-12-10 02:00:01', 1),
-(114, 22, 5, 2, 3, 'entrada', 300, 'unidad', 'transferencia_entrada', 6, 'Recepción de transferencia #TRANS-2025-0001 desde Sucursal Central', '2025-12-10 02:02:07', 1),
-(115, 21, 5, 1, 1, 'salida', 300, 'unidad', 'venta', 0, 'Venta SU1-1765346865 (lm_id 21)', '2025-12-10 02:07:45', 1),
-(116, 21, 5, 1, 1, 'baja', 300, 'unidad', 'devolucion', 0, 'Devolución: se me cayo al agua', '2025-12-10 02:51:30', 1),
-(117, 21, 5, 1, 1, 'salida', 300, 'unidad', 'merma', 3, 'Merma: caducado', '2025-12-10 15:18:04', 1),
-(118, 23, 2, 2, 3, 'entrada', 59, 'unidad', 'compra', 15, 'Ingreso por compra COMP-2025-0002', '2025-12-11 19:08:48', 1),
-(119, 24, 3, 2, 3, 'entrada', 90, 'unidad', 'compra', 15, 'Ingreso por compra COMP-2025-0002', '2025-12-11 19:08:48', 1),
-(120, 23, 2, 2, 3, 'salida', 9, 'unidad', 'transferencia_salida', 9, 'Transferencia #TRANS-2025-0002 hacia sucursal destino', '2025-12-11 19:21:36', 1),
-(121, 25, 2, 1, 1, 'entrada', 9, 'unidad', 'transferencia_entrada', 9, 'Recepción de transferencia #TRANS-2025-0002 desde sucursal 2', '2025-12-11 19:22:11', 1),
-(122, 25, 2, 1, 1, 'salida', 2, 'unidad', 'venta', 0, 'Venta SU1-1765497494 (lm_id 25)', '2025-12-11 19:58:14', 1),
-(123, 25, 2, 1, 1, 'baja', 2, 'unidad', 'devolucion', 0, 'Devolución: jjjjjjjjjj', '2025-12-11 20:01:52', 1),
-(124, 25, 2, 1, 1, 'salida', 5, 'unidad', 'merma', 4, 'Merma: gggg', '2025-12-11 20:04:17', 1),
-(125, 23, 2, 2, 3, 'salida', 6, 'unidad', 'venta', 0, 'Venta SU2-1765499156 (lm_id 23)', '2025-12-11 20:25:56', 1),
-(126, 23, 2, 2, 3, 'baja', 6, 'unidad', 'devolucion', 0, 'Devolución: yhh54htrh rthtyj', '2025-12-11 20:27:45', 1);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `notificaciones`
---
 
 CREATE TABLE `notificaciones` (
   `not_id` bigint(20) UNSIGNED NOT NULL,
@@ -744,37 +411,7 @@ CREATE TABLE `notificaciones` (
   `not_aplicable_rol_3` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Visible para Rol 3 (Caja)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `notificaciones`
---
 
-INSERT INTO `notificaciones` (`not_id`, `not_tipo`, `not_referencia_id`, `not_su_id`, `not_titulo`, `not_mensaje`, `not_icono`, `not_color`, `not_leida`, `not_descartada`, `not_fecha_creacion`, `not_fecha_lectura`, `not_aplicable_rol_1`, `not_aplicable_rol_2`, `not_aplicable_rol_3`) VALUES
-(27, 'proximo_caducar', '21', 1, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 01:03:11', NULL, 1, 1, 0),
-(28, 'transferencia_pendiente', '6', 2, 'Transferencia Pendiente', 'Transferencia #TRANS-2025-0001 de Sucursal Central pendiente de recepcionar', 'swap-horizontal-outline', '#2196f3', 0, 1, '2025-12-10 02:00:22', NULL, 1, 1, 0),
-(29, 'proximo_caducar', '22', 2, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 02:02:38', NULL, 1, 1, 0),
-(30, 'proximo_caducar', '21', 1, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 02:52:17', NULL, 1, 1, 0),
-(31, 'sin_stock', '5_1', 1, 'Sin Stock', 'Omeprazol en Sucursal Central no tiene existencias', 'close-outline', '#f44336', 0, 1, '2025-12-10 15:18:06', NULL, 1, 1, 0),
-(32, 'stock_bajo', '5_2', 2, 'Stock Bajo', 'Omeprazol - sucursal 2: 300 unidades', 'warning-outline', '#ff9800', 0, 1, '2025-12-10 15:19:52', NULL, 1, 1, 0),
-(33, 'stock_bajo', '5_2', 2, 'Stock Bajo', 'Omeprazol - sucursal 2: 300 unidades', 'warning-outline', '#ff9800', 0, 1, '2025-12-10 20:34:46', NULL, 1, 1, 0),
-(34, 'proximo_caducar', '22', 2, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 20:34:47', NULL, 1, 1, 0),
-(35, 'sin_stock', '5_1', 1, 'Sin Stock', 'Omeprazol en Sucursal Central no tiene existencias', 'close-outline', '#f44336', 0, 1, '2025-12-10 20:34:47', NULL, 1, 1, 0),
-(36, 'proximo_caducar', '22', 2, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 20:42:17', NULL, 1, 1, 0),
-(37, 'stock_bajo', '5_2', 2, 'Stock Bajo', 'Omeprazol - sucursal 2: 300 unidades', 'warning-outline', '#ff9800', 0, 1, '2025-12-10 20:44:43', NULL, 1, 1, 0),
-(38, 'proximo_caducar', '22', 2, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 24 días', 'alert-circle-outline', '#ff5722', 0, 1, '2025-12-10 20:44:43', NULL, 1, 1, 0),
-(39, 'sin_stock', '5_1', 1, 'Sin Stock', 'Omeprazol en Sucursal Central no tiene existencias', 'close-outline', '#f44336', 0, 0, '2025-12-10 20:44:43', NULL, 1, 1, 0),
-(40, 'ya_caducado', '21', 1, 'Producto Caducado', 'Omeprazol Lote: MED-0001 caducó el 10/12/2025', 'close-circle-outline', '#f44336', 0, 0, '2025-12-11 18:30:32', NULL, 1, 1, 0),
-(41, 'stock_bajo', '5_2', 2, 'Stock Bajo', 'Omeprazol - sucursal 2: 300 unidades', 'warning-outline', '#ff9800', 0, 1, '2025-12-11 18:41:12', NULL, 1, 1, 0),
-(42, 'transferencia_pendiente', '9', 1, 'Transferencia Pendiente', 'Transferencia #TRANS-2025-0002 de sucursal 2 pendiente de recepcionar', 'swap-horizontal-outline', '#2196f3', 0, 0, '2025-12-11 19:21:53', NULL, 1, 1, 0),
-(43, 'sin_stock', '2_1', 1, 'Sin Stock', 'Ibuprofeno en Sucursal Central no tiene existencias', 'close-outline', '#f44336', 0, 0, '2025-12-11 20:04:20', NULL, 1, 1, 0),
-(44, 'ya_caducado', '25', 1, 'Producto Caducado', 'Ibuprofeno Lote: MED-0002 caducó el 11/12/2025', 'close-circle-outline', '#f44336', 0, 0, '2025-12-12 19:09:54', NULL, 1, 1, 0),
-(45, 'stock_bajo', '5_2', 2, 'Stock Bajo', 'Omeprazol - sucursal 2: 300 unidades', 'warning-outline', '#ff9800', 0, 0, '2025-12-12 19:12:55', NULL, 1, 1, 0),
-(46, 'proximo_caducar', '22', 2, 'Próximo a Caducar', 'Omeprazol Lote: MED-0001 caduca en 22 días', 'alert-circle-outline', '#ff5722', 0, 0, '2025-12-12 19:12:55', NULL, 1, 1, 0);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `peticiones`
---
 
 CREATE TABLE `peticiones` (
   `pe_id` bigint(20) UNSIGNED NOT NULL,
@@ -813,20 +450,7 @@ CREATE TABLE `proveedores` (
   `pr_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `proveedores`
---
 
-INSERT INTO `proveedores` (`pr_id`, `pr_nombres`, `pr_apellido_paterno`, `pr_apellido_materno`, `pr_telefono`, `pr_nit`, `pr_direccion`, `pr_creado_en`, `pr_actualizado_en`, `pr_estado`) VALUES
-(9, 'juan ramon chochu', 'portillo', 'Sanahoria', '5646764', '6516576465', 'por ahi qu eno recuerdo', '2025-12-10 00:50:19', '2025-12-10 01:01:12', 1),
-(10, 'ronso quiñones SRL', NULL, NULL, '', '654846465465', '', '2025-12-10 00:58:38', '2025-12-10 00:58:38', 1),
-(11, 'medibol', NULL, NULL, '5432124423', '4235263643', 'afasdfasdff 232', '2025-12-10 01:00:12', '2025-12-10 01:00:12', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `proveedores_laboratorio`
---
 
 CREATE TABLE `proveedores_laboratorio` (
   `pl_id` bigint(20) UNSIGNED NOT NULL,
@@ -880,9 +504,8 @@ CREATE TABLE `sucursales` (
 --
 
 INSERT INTO `sucursales` (`su_id`, `su_nombre`, `su_direccion`, `su_telefono`, `su_creado_en`, `su_actualizado_en`, `su_estado`) VALUES
-(1, 'Sucursal Central', 'Av. Principal 123, Ciudad', '+591-2-1234567', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1),
-(2, 'sucursal 2', 'calle siempre viva', '123456789', '2025-11-20 21:18:42', '2025-12-06 14:55:33', 1),
-(3, 'dasd', 'fsfsdfads', '21312', '2025-12-02 20:37:20', '2025-12-04 20:34:54', 1);
+(1, 'Sucursal Central', 'Av. Principal 123, Ciudad', '+591-2-1234567', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1);
+
 
 -- --------------------------------------------------------
 
@@ -910,19 +533,7 @@ CREATE TABLE `transferencias` (
   `tr_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Registro padre de transferencias entre sucursales';
 
---
--- Volcado de datos para la tabla `transferencias`
---
 
-INSERT INTO `transferencias` (`tr_id`, `tr_numero`, `su_origen_id`, `su_destino_id`, `us_emisor_id`, `us_receptor_id`, `tr_total_items`, `tr_total_cajas`, `tr_total_unidades`, `tr_total_valorado`, `tr_estado`, `tr_observaciones`, `tr_motivo_rechazo`, `tr_fecha_envio`, `tr_fecha_respuesta`, `tr_creado_en`, `tr_actualizado_en`) VALUES
-(6, 'TRANS-2025-0001', 1, 2, 1, 3, 1, 10, 300, '300.00', 'aceptada', 'ovserbacion de nose que', NULL, '2025-12-10 02:00:01', '2025-12-10 02:02:07', '2025-12-10 02:00:01', '2025-12-10 02:02:07'),
-(9, 'TRANS-2025-0002', 2, 1, 3, 1, 1, 9, 9, '450.00', 'aceptada', 'exceso', NULL, '2025-12-11 19:21:36', '2025-12-11 19:22:11', '2025-12-11 19:21:36', '2025-12-11 19:22:11');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `uso_farmacologico`
---
 
 CREATE TABLE `uso_farmacologico` (
   `uf_id` bigint(20) UNSIGNED NOT NULL,
@@ -933,29 +544,7 @@ CREATE TABLE `uso_farmacologico` (
   `uf_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `uso_farmacologico`
---
 
-INSERT INTO `uso_farmacologico` (`uf_id`, `uf_nombre`, `uf_imagen`, `uf_creado_en`, `uf_actualizado_en`, `uf_estado`) VALUES
-(1, 'Analgésico', NULL, '2025-11-06 11:06:03', '2025-12-05 20:55:49', 1),
-(2, 'Antibiótico', 'antibiotico.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(3, 'Antiinflamatorio', 'antiinflamatorio.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(4, 'Antihistamínico', 'antihistaminico.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(5, 'Antipirético', 'antipiretico.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(6, 'Antiséptico', 'antiseptico.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(7, 'Cardiovascular', 'cardiovascular.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(8, 'Digestivo', 'digestivo.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(9, 'Dermatológico', 'dermatologico.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(10, 'Respiratorio', 'respiratorio.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(11, 'aviar', '', '2025-11-29 14:17:38', '2025-11-29 14:17:38', 1),
-(15, 'fefefefe', 'http://localhost/samfarm-backend/views/assets/img/uso_farmacologico_b3184fc74f48ed6e_1765499383.png', '2025-12-11 20:29:43', '2025-12-11 20:29:43', 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `usuarios`
---
 
 CREATE TABLE `usuarios` (
   `us_id` bigint(20) UNSIGNED NOT NULL,
@@ -983,15 +572,9 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`us_id`, `us_nombres`, `us_apellido_paterno`, `us_apellido_materno`, `us_numero_carnet`, `us_telefono`, `us_correo`, `us_direccion`, `us_username`, `us_password_hash`, `us_token_recuperacion`, `us_token_expiracion`, `us_creado_en`, `us_actualizado_en`, `us_estado`, `su_id`, `ro_id`) VALUES
 (1, 'admin', 'admin', 'admin', '000000000', '111111111', 'admin@admin.com', 'admin calle admin', 'admin', 'dlo5ZmZvbmRjME41dGlDY01tTGcrUT09', NULL, NULL, '2025-11-06 10:17:03', '2025-12-04 12:41:09', 1, 1, 1),
-(2, 'usuario', 'usuario', 'usuario', '1235497866656', '122565165464', 'usuario@usuario.usuario', 'usuariousuario', 'usuario', 'Q0oxTTdMNktnMzhoQjBDOXFJWXI1Zz09', NULL, NULL, '2025-11-20 21:30:31', '2025-12-12 19:29:57', 1, 1, 1),
-(3, 'gerente', 'gerente', 'gerente', '123321321', '', '', 'gerente', 'gerente', 'ZFA3UHhUdGwrVERjWjVCSmhWaFJpdz09', NULL, NULL, '2025-11-27 18:05:22', '2025-12-04 13:20:18', 1, 2, 2),
-(7, 'admin2', 'admin2', 'admin2', NULL, NULL, NULL, NULL, 'admin2', 'dlo5ZmZvbmRjME41dGlDY01tTGcrUT09', NULL, NULL, '2025-12-12 19:26:17', '2025-12-12 19:27:55', 1, 1, 1);
+(2, 'usuario', 'usuario', 'usuario', '1235497866656', '122565165464', 'usuario@usuario.usuario', 'usuariousuario', 'usuario', 'Q0oxTTdMNktnMzhoQjBDOXFJWXI1Zz09', NULL, NULL, '2025-11-20 21:30:31', '2025-12-12 19:29:57', 1, 1, 1);
 
--- --------------------------------------------------------
 
---
--- Estructura de tabla para la tabla `ventas`
---
 
 CREATE TABLE `ventas` (
   `ve_id` bigint(20) UNSIGNED NOT NULL,
@@ -1012,23 +595,6 @@ CREATE TABLE `ventas` (
   `ve_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `ventas`
---
-
-INSERT INTO `ventas` (`ve_id`, `ve_numero_documento`, `ve_fecha_emision`, `cl_id`, `us_id`, `su_id`, `caja_id`, `ve_subtotal`, `ve_impuesto`, `ve_total`, `ve_actualizado_en`, `ve_metodo_pago`, `ve_tipo_documento`, `ve_estado_documento`, `ve_numero_control`, `ve_estado`) VALUES
-(58, 'SU1-1765343731', '2025-12-10 01:15:31', NULL, 1, 1, 15, '100.00', '0.00', '100.00', '2025-12-10 01:15:31', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(60, 'SU1-1765344476', '2025-12-10 01:27:56', NULL, 1, 1, 15, '100.00', '0.00', '100.00', '2025-12-10 01:27:56', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(61, 'SU1-1765346169', '2025-12-10 01:56:09', NULL, 1, 1, 15, '100.00', '0.00', '100.00', '2025-12-10 01:56:09', 'efectivo', 'nota de venta', '\'emitida\'', NULL, 1),
-(62, 'SU1-1765346865', '2025-12-10 02:07:45', NULL, 1, 1, 15, '300.00', '0.00', '300.00', '2025-12-10 02:51:30', 'efectivo', 'nota de venta', 'devuelto', NULL, 1),
-(63, 'SU1-1765497494', '2025-12-11 19:58:14', 15, 1, 1, 16, '100.00', '0.00', '100.00', '2025-12-11 20:01:52', 'efectivo', 'nota de venta', 'devuelto', NULL, 1),
-(64, 'SU2-1765499156', '2025-12-11 20:25:56', 17, 3, 2, 17, '300.00', '0.00', '300.00', '2025-12-11 20:27:45', 'efectivo', 'nota de venta', 'devuelto', NULL, 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `via_de_administracion`
---
 
 CREATE TABLE `via_de_administracion` (
   `vd_id` bigint(20) UNSIGNED NOT NULL,
@@ -1039,29 +605,7 @@ CREATE TABLE `via_de_administracion` (
   `vd_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `via_de_administracion`
---
 
-INSERT INTO `via_de_administracion` (`vd_id`, `vd_nombre`, `vd_imagen`, `vd_creado_en`, `vd_actualizado_en`, `vd_estado`) VALUES
-(1, 'Oral', 'oral.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(2, 'Tópica', 'topica.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(3, 'Intramuscular', 'intramuscular.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(4, 'Intravenosa', 'intravenosa.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(5, 'Subcutánea', 'subcutanea.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(6, 'Rectal', 'rectal.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(7, 'Vaginal', 'vaginal.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(8, 'Oftálmica', 'oftalmica.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(9, 'Ótica', 'otica.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1),
-(10, 'Nasal', 'nasal.png', '2025-11-06 11:06:03', '2025-11-06 11:06:03', 1);
-
---
--- Índices para tablas volcadas
---
-
---
--- Indices de la tabla `balance_precios`
---
 ALTER TABLE `balance_precios`
   ADD PRIMARY KEY (`bp_id`),
   ADD KEY `idx_bp_lote` (`lm_id`),
@@ -1379,19 +923,19 @@ ALTER TABLE `balance_precios`
 -- AUTO_INCREMENT de la tabla `caja`
 --
 ALTER TABLE `caja`
-  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `cl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `configuracion_empresa`
@@ -1403,7 +947,7 @@ ALTER TABLE `configuracion_empresa`
 -- AUTO_INCREMENT de la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_peticion`
@@ -1421,7 +965,7 @@ ALTER TABLE `detalle_transferencia`
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `devoluciones`
@@ -1433,7 +977,7 @@ ALTER TABLE `devoluciones`
 -- AUTO_INCREMENT de la tabla `factura`
 --
 ALTER TABLE `factura`
-  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT de la tabla `facturacion_electronica`
@@ -1451,25 +995,25 @@ ALTER TABLE `forma_farmaceutica`
 -- AUTO_INCREMENT de la tabla `historial_lote`
 --
 ALTER TABLE `historial_lote`
-  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT de la tabla `informes`
 --
 ALTER TABLE `informes`
-  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT de la tabla `informes_compra`
 --
 ALTER TABLE `informes_compra`
-  MODIFY `ic_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ic_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT de la tabla `laboratorios`
@@ -1481,37 +1025,37 @@ ALTER TABLE `laboratorios`
 -- AUTO_INCREMENT de la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
-  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `medicamento`
 --
 ALTER TABLE `medicamento`
-  MODIFY `med_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `med_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `merma`
 --
 ALTER TABLE `merma`
-  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
-  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT de la tabla `notificaciones`
 --
 ALTER TABLE `notificaciones`
-  MODIFY `not_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `not_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=193;
 
 --
 -- AUTO_INCREMENT de la tabla `peticiones`
@@ -1523,7 +1067,7 @@ ALTER TABLE `peticiones`
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
-  MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores_laboratorio`
@@ -1565,7 +1109,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT de la tabla `via_de_administracion`

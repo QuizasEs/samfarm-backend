@@ -24,6 +24,18 @@ class medicamentoController extends medicamentoModel
     /* -----------------------------------controlador para agregar medicamentos------------------------------------------ */
     public function agregar_medicamento_controller()
     {
+        $privilegio = $_SESSION['rol_smp'] ?? 0;
+
+        if ($privilegio == 3) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acceso denegado",
+                "texto" => "Solo los administradores y gerentes pueden agregar medicamentos",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
 
         /* limpiamos cadena de caracteres ingresados en POST */
         $nombre = mainModel::limpiar_cadena($_POST['Nombre_reg']);
@@ -31,6 +43,7 @@ class medicamentoController extends medicamentoModel
         $accion = mainModel::limpiar_cadena($_POST['Accion_reg']);
         $descripcion = mainModel::limpiar_cadena($_POST['Descripcion_reg']);
         $presentacion = mainModel::limpiar_cadena($_POST['Presentacion_reg']);
+        $codigoBarras = mainModel::limpiar_cadena($_POST['CodigoBarras_reg']);
 
         $uso = mainModel::limpiar_cadena($_POST['Uso_reg']);
         $forma = mainModel::limpiar_cadena($_POST['Forma_reg']);
@@ -53,47 +66,51 @@ class medicamentoController extends medicamentoModel
             echo json_encode($alerta);
             exit();
         }
-        /* verificamos la integridad de los parents */
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $nombre)) {
+        /* Validaciones simples: solo verificar campos obligatorios no vacíos */
+        if (mb_strlen($nombre) < 1) {
             $alerta = [
                 "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "El NOMBRE COMERCIAL no cumple con el formato requerido",
+                "Titulo" => "Campo requerido",
+                "texto" => "El NOMBRE COMERCIAL es obligatorio",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);
             exit();
         }
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $principio)) {
+
+        if (mb_strlen($principio) < 1) {
             $alerta = [
                 "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "El PRINCIPIO ACTIVO no cumple con el formato requerido",
+                "Titulo" => "Campo requerido",
+                "texto" => "El PRINCIPIO ACTIVO es obligatorio",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);
             exit();
         }
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $accion)) {
+
+        if (mb_strlen($accion) < 1) {
             $alerta = [
                 "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "La ACCION FARMACOLOGICA no cumple con el formato requerido",
+                "Titulo" => "Campo requerido",
+                "texto" => "La ACCION FARMACOLOGICA es obligatoria",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);
             exit();
         }
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $presentacion)) {
+
+        if (mb_strlen($presentacion) < 1) {
             $alerta = [
                 "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "La PRESENTACION no cumple con el formato requerido",
+                "Titulo" => "Campo requerido",
+                "texto" => "La PRESENTACION es obligatoria",
                 "Tipo" => "error"
             ];
             echo json_encode($alerta);
             exit();
         }
+
 
         /* verificar valor de selects no negativo */
         if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0) {
@@ -115,7 +132,8 @@ class medicamentoController extends medicamentoModel
             "Forma" => $forma,
             "Via" => $via,
             "Laboratorio" => $laboratorio,
-            "Descripcion" => $descripcion
+            "Descripcion" => $descripcion,
+            "CodigoBarras" => $codigoBarras
         ];
         $agregar_datos = medicamentoModel::agregar_medicamento_model($datos_med);
 
@@ -178,6 +196,7 @@ class medicamentoController extends medicamentoModel
                     m.med_principio_activo LIKE '%$busqueda%' OR
                     m.med_presentacion LIKE '%$busqueda%' OR
                     m.med_accion_farmacologica LIKE '%$busqueda%' OR
+                    m.med_codigo_barras LIKE '%$busqueda%' OR
                     la.la_nombre_comercial LIKE '%$busqueda%'
                 )";
         }
@@ -203,13 +222,14 @@ class medicamentoController extends medicamentoModel
 
         /* ===== CONSULTA SQL ===== */
         $consulta = "
-                SELECT 
-                    SQL_CALC_FOUND_ROWS 
+                SELECT
+                    SQL_CALC_FOUND_ROWS
                     m.med_id,
                     m.med_nombre_quimico,
                     m.med_principio_activo,
                     m.med_accion_farmacologica,
                     m.med_presentacion,
+                    m.med_codigo_barras,
                     m.med_creado_en,
                     m.med_actualizado_en,
                     la.la_nombre_comercial AS laboratorio_nombre,
@@ -222,7 +242,7 @@ class medicamentoController extends medicamentoModel
                 LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
                 LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
                 $whereSQL
-                ORDER BY m.med_nombre_quimico ASC 
+                ORDER BY m.med_nombre_quimico ASC
                 LIMIT $inicio, $registros
             ";
 
@@ -265,6 +285,7 @@ class medicamentoController extends medicamentoModel
                                 <th>VÍA</th>
                                 <th>USO</th>
                                 <th>PRESENTACIÓN</th>
+                                <th>CÓDIGO DE BARRAS</th>
                                 <th>ACCIONES</th>
                             </tr>
                         </thead>
@@ -276,6 +297,26 @@ class medicamentoController extends medicamentoModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $rows) {
+                $actions = '';
+                if ($privilegio != 3) {
+                    $actions = '
+                            <td class="buttons">
+                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn danger">
+                                    <ion-icon name="create-outline"></ion-icon> Editar
+                                </a>
+                            </td>
+                        ';
+                } else {
+                    $actions = '<td>No disponible</td>';
+                }
+
+                $barcodeText = $rows['med_codigo_barras'];
+                if (!empty($barcodeText)) {
+                    $barcodeDisplay = '<span class="barcode-text">' . htmlspecialchars($barcodeText) . '</span>';
+                } else {
+                    $barcodeDisplay = '<span class="barcode-cell-empty">—</span>';
+                }
+
                 $tabla .= '
                         <tr>
                             <td>' . $contador . '</td>
@@ -286,21 +327,18 @@ class medicamentoController extends medicamentoModel
                             <td>' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . '</td>
                             <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
                             <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
-                            <td class="accion-buttons">
-                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn danger">
-                                    <ion-icon name="create-outline"></ion-icon> Editar
-                                </a>
-                            </td>
-                        </tr>
+                            <td>' . $barcodeDisplay . '</td>'
+                            . $actions .
+                        '</tr>
                     ';
                 $contador++;
             }
             $reg_final = $contador - 1;
         } else {
             if ($total >= 1) {
-                $tabla .= '<tr><td colspan="9"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
+                $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
             } else {
-                $tabla .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;">
+                $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
                                 <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
                             </td></tr>';
             }
@@ -316,6 +354,8 @@ class medicamentoController extends medicamentoModel
             $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
+
+
 
         return $tabla;
     }
@@ -336,6 +376,18 @@ class medicamentoController extends medicamentoModel
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
     public function actualizar_medicamento_controller()
     {
+        $privilegio = $_SESSION['rol_smp'] ?? 0;
+
+        if ($privilegio == 3) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Acceso denegado",
+                "texto"  => "Solo los administradores y gerentes pueden actualizar medicamentos",
+                "Tipo"   => "error"
+            ]);
+            exit();
+        }
+
         /* desencritamos la id de medicamento */
         $id = mainModel::decryption($_POST['id']);
         $id = mainModel::limpiar_cadena($id);
@@ -358,6 +410,7 @@ class medicamentoController extends medicamentoModel
         $accion        = mainModel::limpiar_cadena($_POST['Accion_up']);
         $descripcion   = mainModel::limpiar_cadena($_POST['Descripcion_up']);
         $presentacion  = mainModel::limpiar_cadena($_POST['Presentacion_up']);
+        $codigoBarras  = mainModel::limpiar_cadena($_POST['CodigoBarras_up']);
         $uso           = mainModel::limpiar_cadena($_POST['Uso_up']);
         $forma         = mainModel::limpiar_cadena($_POST['Forma_up']);
         $via           = mainModel::limpiar_cadena($_POST['Via_up']);
@@ -375,26 +428,45 @@ class medicamentoController extends medicamentoModel
             ]);
             exit();
         }
-        /* verificamos que el formulario tenga el formato solicitado */
-        $pattern_texto = "[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}";
+        /* Validaciones simples: solo verificar campos obligatorios no vacíos */
+        if (mb_strlen($nombre) < 1) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Campo requerido",
+                "texto"  => "El NOMBRE COMERCIAL es obligatorio",
+                "Tipo"   => "error"
+            ]);
+            exit();
+        }
 
-        $validaciones = [
-            ["campo" => $nombre, "patron" => $pattern_texto, "msg" => "El nombre comercial no cumple con el formato requerido."],
-            ["campo" => $principio, "patron" => $pattern_texto, "msg" => "El principio activo no cumple con el formato requerido."],
-            ["campo" => $accion, "patron" => $pattern_texto, "msg" => "La acción farmacológica no cumple con el formato requerido."],
-            ["campo" => $presentacion, "patron" => $pattern_texto, "msg" => "La presentación no cumple con el formato requerido."]
-        ];
+        if (mb_strlen($principio) < 1) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Campo requerido",
+                "texto"  => "El PRINCIPIO ACTIVO es obligatorio",
+                "Tipo"   => "error"
+            ]);
+            exit();
+        }
 
-        foreach ($validaciones as $v) {
-            if (mainModel::verificar_datos($v["patron"], $v["campo"])) {
-                echo json_encode([
-                    "Alerta" => "simple",
-                    "Titulo" => "Error de formato",
-                    "texto"  => $v["msg"],
-                    "Tipo"   => "error"
-                ]);
-                exit();
-            }
+        if (mb_strlen($accion) < 1) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Campo requerido",
+                "texto"  => "La ACCION FARMACOLOGICA es obligatoria",
+                "Tipo"   => "error"
+            ]);
+            exit();
+        }
+
+        if (mb_strlen($presentacion) < 1) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Campo requerido",
+                "texto"  => "La PRESENTACION es obligatoria",
+                "Tipo"   => "error"
+            ]);
+            exit();
         }
         /* validamos en enteros los campos con id foraneas */
         $uso = (int)$uso;
@@ -432,6 +504,7 @@ class medicamentoController extends medicamentoModel
             "Accion"         => $accion,
             "Descripcion"    => $descripcion,
             "Presentacion"   => $presentacion,
+            "CodigoBarras"   => $codigoBarras,
             "Uso"            => $uso,
             "Forma"          => $forma,
             "Via"            => $via,

@@ -19,7 +19,8 @@ class medicamentoModel extends mainModel
                 ff_id,
                 vd_id,
                 la_id,
-                med_descripcion
+                med_descripcion,
+                med_codigo_barras
             ) VALUES (
                 :Nombre,
                 :Principio,
@@ -29,7 +30,8 @@ class medicamentoModel extends mainModel
                 :Forma,
                 :Via,
                 :Laboratorio,
-                :Descripcion
+                :Descripcion,
+                :CodigoBarras
             )
         ");
         $sql->bindParam(":Nombre", $datos['Nombre']);
@@ -41,6 +43,7 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Via", $datos['Via']);
         $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
         $sql->bindParam(":Descripcion", $datos['Descripcion']);
+        $sql->bindParam(":CodigoBarras", $datos['CodigoBarras']);
 
         $sql->execute();
         return $sql;
@@ -49,7 +52,7 @@ class medicamentoModel extends mainModel
     protected static function actualizar_medicamento_model($datos)
     {
         $sql = mainModel::conectar()->prepare("
-            UPDATE medicamento SET 
+            UPDATE medicamento SET
                 med_nombre_quimico = :Nombre,
                 med_principio_activo = :Principio,
                 med_accion_farmacologica = :Accion,
@@ -58,7 +61,8 @@ class medicamentoModel extends mainModel
                 uf_id = :Uso,
                 ff_id = :Forma,
                 vd_id = :Via,
-                la_id = :Laboratorio
+                la_id = :Laboratorio,
+                med_codigo_barras = :CodigoBarras
             WHERE med_id = :Id
         ");
 
@@ -71,6 +75,7 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
         $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
+        $sql->bindParam(":CodigoBarras", $datos['CodigoBarras']);
         $sql->bindParam(":Id", $datos['Id']);
 
         return $sql->execute();

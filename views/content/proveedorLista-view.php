@@ -76,6 +76,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <button type="button" class="btn success" id="btnExportarExcelProveedor">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
+                <button type="button" class="btn primary" id="btnExportarPDFProveedor">
+                    <ion-icon name="document-text-outline"></ion-icon> PDF
+                </button>
             </div>
         </form>
 
@@ -223,7 +226,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
     </div>
-    <!-- modal para registro y editar -->
+    <!-- modal para registro -->
     <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/proveedoresAjax.php" method="POST" autocomplete="off" data-form="save" id="formRegistroProveedor">
         <input type="hidden" name="proveedoresAjax" value="registrar">
 
@@ -241,25 +244,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="modal-group">
                     <div class="row">
                         <div class="col">
-
                             <div class="modal-bloque">
                                 <label class="required">Nombres / Razón Social</label>
-                                <input type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Paterno</label>
-                                <input type="text" name="Paterno_pr_up" id="edicionPaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_pr_up" id="edicionMaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
+                                <input type="text" name="Nombres_pr" id="registroNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
                     </div>
@@ -268,13 +255,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">NIT</label>
-                                <input type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,50}" maxlength="50" required>
+                                <input type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,30}" maxlength="30" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Teléfono</label>
-                                <input type="text" name="Telefono_pr_up" id="edicionTelefono" pattern="[0-9]{6,30}" maxlength="30">
+                                <input type="text" name="Telefono_pr" id="registroTelefono" pattern="[0-9]{6,30}" maxlength="30">
                             </div>
                         </div>
                     </div>
@@ -283,15 +270,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Dirección</label>
-                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250" rows="3"></input>
+                                <input type="text" name="Direccion_pr" id="registroDireccion" maxlength="250">
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</a>
+                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarRegistro()">Cancelar</a>
                         <button type="submit" class="btn success">
-                            <ion-icon name="checkmark-outline"></ion-icon> Actualizar
+                            <ion-icon name="checkmark-outline"></ion-icon> Registrar
                         </button>
                     </div>
                 </div>
@@ -317,7 +304,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="modal-group">
                     <div class="row">
                         <div class="col">
-
                             <div class="modal-bloque">
                                 <label class="required">Nombres / Razón Social</label>
                                 <input type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
@@ -328,23 +314,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Apellido Paterno</label>
-                                <input type="text" name="Paterno_pr_up" id="edicionPaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_pr_up" id="edicionMaterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,80}" maxlength="80">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
                                 <label class="required">NIT</label>
-                                <input type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,50}" maxlength="50" required>
+                                <input type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,30}" maxlength="30" required>
                             </div>
                         </div>
                         <div class="col">
@@ -359,7 +330,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label>Dirección</label>
-                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250" rows="3"></input>
+                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250">
                             </div>
                         </div>
                     </div>
@@ -436,6 +407,62 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     });
                 });
             }
+        });
+
+        // Función para el botón PDF de proveedores
+        document.getElementById('btnExportarPDFProveedor').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const form = this.closest('.container').querySelector('.filtro-dinamico');
+            if (!form) {
+                console.warn('No se encontró el formulario de filtros');
+                return;
+            }
+
+            const busqueda = form.querySelector('input[name="busqueda"]');
+            const select1 = form.querySelector('select[name="select1"]');
+            const select2 = form.querySelector('select[name="select2"]');
+            const select3 = form.querySelector('select[name="select3"]');
+            const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+            const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+
+            let url = '<?php echo SERVER_URL; ?>ajax/proveedoresAjax.php?exportar=pdf';
+
+            if (busqueda && busqueda.value.trim()) {
+                url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
+            }
+
+            if (select1 && select1.value) {
+                url += '&select1=' + encodeURIComponent(select1.value);
+            }
+
+            if (select2 && select2.value) {
+                url += '&select2=' + encodeURIComponent(select2.value);
+            }
+
+            if (select3 && select3.value) {
+                url += '&select3=' + encodeURIComponent(select3.value);
+            }
+
+            if (fechaDesde && fechaDesde.value) {
+                url += '&fecha_desde=' + encodeURIComponent(fechaDesde.value);
+            }
+
+            if (fechaHasta && fechaHasta.value) {
+                url += '&fecha_hasta=' + encodeURIComponent(fechaHasta.value);
+            }
+
+            console.log('📄 Generando PDF de proveedores:', url);
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando PDF',
+                text: 'El reporte se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
         });
     </script>
     <!-- escript para modal y funcionamientos del mismo del modulo de proveedor -->
@@ -566,8 +593,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     document.getElementById('edicionPrId').value = data.pr_id;
                     document.getElementById('edicionNombres').value = data.pr_nombres || '';
-                    document.getElementById('edicionPaterno').value = data.pr_apellido_paterno || '';
-                    document.getElementById('edicionMaterno').value = data.pr_apellido_materno || '';
                     document.getElementById('edicionNit').value = data.pr_nit || '';
                     document.getElementById('edicionTelefono').value = data.pr_telefono || '';
                     document.getElementById('edicionDireccion').value = data.pr_direccion || '';

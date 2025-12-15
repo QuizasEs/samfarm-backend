@@ -180,7 +180,7 @@ if ($valor === "crear") {
                     <td>' . htmlspecialchars($lote['lm_fecha_vencimiento']) . '</td>
                     <td>' . $estado_html . '</td>
                     <td>' . number_format($lote['lm_cant_actual_unidades'], 0) . ' unidades</td>
-                    <td class="accion-buttons">
+                    <td class="buttons">
                         <button type="button" class="btn success btn-sm" onclick="abrirModalMermaRegistro(' . (int)$lote['lm_id'] . ', \'' . htmlspecialchars($lote['med_nombre_quimico']) . '\', ' . (int)$lote['lm_cant_actual_unidades'] . ')">
                             <ion-icon name="create-outline"></ion-icon> Registrar
                         </button>
