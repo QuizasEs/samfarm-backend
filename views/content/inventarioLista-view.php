@@ -79,13 +79,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
             </div>
-            <!-- Botón Exportar Excel -->
-            <button type="button" class="btn success" id="btnExportarExcel" style="margin-left: 10px;">
-                <ion-icon name="download-outline"></ion-icon> Excel
-            </button>
-            <button type="button" class="btn primary" id="btnExportarPDFInventario" style="margin-left: 5px;">
-                <ion-icon name="document-text-outline"></ion-icon> PDF
-            </button>
+            <div class="filtro-dinamico-buttons">
+                <!-- Botón Exportar Excel -->
+                <button type="button" class="btn success" id="btnExportarExcel" style="margin-left: 10px;">
+                    <ion-icon name="download-outline"></ion-icon> Excel
+                </button>
+                <button type="button" class="btn primary" id="btnExportarPDFInventario" style="margin-left: 5px;">
+                    <ion-icon name="document-text-outline"></ion-icon> PDF
+                </button>
+            </div>
         </form>
 
         <div class="tabla-contenedor"></div>
