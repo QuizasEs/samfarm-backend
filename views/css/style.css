@@ -3791,6 +3791,7 @@ input[type="date"]:focus {
 .primary {
     background: var(--bg-primary);
     color: var(--text-primary);
+    border: 2px solid var(--accent-primary)
 }
 
 .primary:hover {

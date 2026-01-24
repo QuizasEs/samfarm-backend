@@ -271,13 +271,15 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad">Blisters por caja </label>
+                                <label for="cantidad">Unidades de empaque por caja</label>
+                                <small>Blister, sobres, sachets, etc.</small>
                                 <input type="number" name="Cantidad_blister_reg" id="cantidad_blister" min="1" placeholder="si aplica">
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="fecha_vencimiento">Unidades por blister </label>
+                                <label for="fecha_vencimiento">Unidades individuales por empaque</label>
+                                <small>Unidades por blister, sobre, sachet, etc.</small>
                                 <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" placeholder="si aplica">
                             </div>
                         </div>

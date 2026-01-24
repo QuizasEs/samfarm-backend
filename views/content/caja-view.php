@@ -107,15 +107,20 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                         <table class="table caja-lista">
                             <thead>
                                 <tr>
-                                    <th>N°</th>
+                                    <th></th>
                                     <th>Medicamento</th>
                                     <th>presentacion</th>
-                                    <th>cantidad</th>
+                                    <th>Unidades</th>
+                                    <th>Cajas</th>
                                     <th>precio</th>
                                     <th>subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla_items_venta"></tbody>
+                            <tbody id="tabla_items_venta">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;color:#666;padding:12px">No hay medicamentos en la lista</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
 

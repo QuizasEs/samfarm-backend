@@ -105,13 +105,13 @@ if ($datos->rowCount() == 1) {
             </div>
             <div class="form-group">
                 <div class="form-bloque">
-                    <label for="">cantidad blister por caja</label>
-                    <small>Solo en caso que sea necesario</small>
+                    <label for="">Unidades de empaque por caja</label>
+                    <small>Blister, sobres, sachets, etc. (por defecto 1)</small>
                     <input type="number" value="<?php echo $lote['lm_cant_blister'] ?>" name="Cantidad_blister_up" id="" placeholder="Por defecto 1">
                 </div>
                 <div class="form-bloque">
-                    <label for="">Cantidad unidades por blister</label>
-                    <small>Solo en caso que sea necesario</small>
+                    <label for="">Unidades individuales por empaque</label>
+                    <small>Unidades por blister, sobre, sachet, etc. (por defecto 1)</small>
                     <input type="number" value="<?php echo $lote['lm_cant_unidad'] ?>" class="Cantidad_unidades_up" placeholder="Por defecto 1">
                 </div>
                 <!-- solo para el administrador -->

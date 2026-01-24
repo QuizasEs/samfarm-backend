@@ -71,6 +71,8 @@ class ventaModel extends mainModel
             COALESCE(la.la_nombre_comercial, '') AS linea,
             lm.lm_precio_venta AS precio_venta,
             lm.lm_cant_actual_unidades AS stock,
+            lm.lm_cant_blister,
+            lm.lm_cant_unidad,
             DATE_FORMAT(lm.lm_fecha_vencimiento, '%Y-%m-%d') AS fecha_vencimiento
         FROM lote_medicamento lm
         INNER JOIN medicamento m ON m.med_id = lm.med_id
@@ -146,7 +148,9 @@ class ventaModel extends mainModel
                 COALESCE(la.la_nombre_comercial, '') AS linea,
                 lm.lm_precio_venta AS precio_venta,
                 COALESCE(SUM(dv.dv_cantidad), 0) AS vendidos,
-                lm.lm_cant_actual_unidades AS stock
+                lm.lm_cant_actual_unidades AS stock,
+                lm.lm_cant_blister,
+                lm.lm_cant_unidad
             FROM medicamento m
             INNER JOIN detalle_venta dv ON dv.med_id = m.med_id
             INNER JOIN ventas v ON v.ve_id = dv.ve_id AND v.su_id = :sucursal_id

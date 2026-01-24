@@ -1095,7 +1095,7 @@
             tablaBody.innerHTML = '';
 
             if (cart.length === 0) {
-                tablaBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:12px">No hay medicamentos en la lista</td></tr>';
+                tablaBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:12px">No hay medicamentos en la lista</td></tr>';
             } else {
                 cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
@@ -1110,17 +1110,35 @@
                             '</small>';
                     }
 
+                    // Calcular cajas y unidades restantes
+                    const unidadesPorCaja = it.unidades_por_caja || 1;
+                    const cajas = Math.floor(it.cantidad / unidadesPorCaja);
+                    const unidadesRestantes = it.cantidad % unidadesPorCaja;
+
                     tr.innerHTML =
-                        '<td>' + (i + 1) + '</td>' +
+                        '<td>' +
+                        '<button type="button" class="btn delete-item" data-index="' + i + '" title="Eliminar" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<ion-icon name="trash-outline" style="font-size: 20px; color: red;"></ion-icon>' +
+                        '</button>' +
+                        '</td>' +
                         '<td>' + nombreDisplay + '</td>' +
                         '<td>' + escapeHtml(it.presentacion || '') + '</td>' +
-                        '<td><div class="table-cantidad">' +
-                        '<button type="button" class="qty-dec" data-index="' + i + '">' +
-                        '<ion-icon name="remove-outline"></ion-icon>' +
+                        '<td><div class="table-cantidad-unidades" style="display:flex; align-items:center; gap:4px;">' +
+                        '<button type="button" class="qty-dec-unidades" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<ion-icon name="remove-outline" style="font-size: 14px;"></ion-icon>' +
                         '</button>' +
-                        '<input type="number" class="qty-input" data-index="' + i + '" value="' + it.cantidad + '" min="1">' +
-                        '<button type="button" class="qty-inc" data-index="' + i + '">' +
-                        '<ion-icon name="add-outline"></ion-icon>' +
+                        '<input type="number" class="qty-input-unidades" data-index="' + i + '" value="' + unidadesRestantes + '" min="0" max="' + (unidadesPorCaja - 1) + '" style="width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 2px; font-size: 12px;">' +
+                        '<button type="button" class="qty-inc-unidades" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<ion-icon name="add-outline" style="font-size: 14px;"></ion-icon>' +
+                        '</button>' +
+                        '</div></td>' +
+                        '<td><div class="table-cantidad-cajas" style="display:flex; align-items:center; gap:4px;">' +
+                        '<button type="button" class="qty-dec-cajas" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<ion-icon name="remove-outline" style="font-size: 14px;"></ion-icon>' +
+                        '</button>' +
+                        '<input type="number" class="qty-input-cajas" data-index="' + i + '" value="' + cajas + '" min="0" style="width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 2px; font-size: 12px;">' +
+                        '<button type="button" class="qty-inc-cajas" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<ion-icon name="add-outline" style="font-size: 14px;"></ion-icon>' +
                         '</button>' +
                         '</div></td>' +
                         '<td>' + formatMoney(it.precio) + '</td>' +
@@ -1130,75 +1148,230 @@
                 });
             }
 
-            itemsHidden.value = JSON.stringify(cart.map(i => ({
-                med_id: i.med_id,
-                lote_id: i.lote_id || null,
-                cantidad: i.cantidad,
-                precio: Number(i.precio),
-                subtotal: Number((i.precio * i.cantidad).toFixed(2))
-            })));
+            itemsHidden.value = JSON.stringify(cart.map(i => {
+                const upc = i.unidades_por_caja || 1;
+                return {
+                    med_id: i.med_id,
+                    lote_id: i.lote_id || null,
+                    cantidad: i.cantidad,
+                    unidades: i.cantidad % upc,
+                    cajas: Math.floor(i.cantidad / upc),
+                    unidades_por_caja: upc,
+                    precio: Number(i.precio),
+                    subtotal: Number((i.precio * i.cantidad).toFixed(2))
+                };
+            }));
 
             updateTotals();
             attachQtyEvents();
         }
 
+        function eliminarItem(index) {
+            if (index < 0 || index >= cart.length) return;
+
+            Swal.fire({
+                title: '¿Eliminar este medicamento?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    cart.splice(index, 1);
+                    renderCart();
+                }
+            });
+        }
+
         function attachQtyEvents() {
-            $all('.qty-inc').forEach(b => {
+            // Eventos para unidades
+            $all('.qty-inc-unidades').forEach(b => {
                 b.onclick = function() {
-                    changeQtyByIndex(parseInt(this.dataset.index), 1);
+                    changeQtyUnidadesByIndex(parseInt(this.dataset.index), 1);
                 };
             });
-            $all('.qty-dec').forEach(b => {
+            $all('.qty-dec-unidades').forEach(b => {
                 b.onclick = function() {
-                    changeQtyByIndex(parseInt(this.dataset.index), -1);
+                    changeQtyUnidadesByIndex(parseInt(this.dataset.index), -1);
                 };
             });
-            $all('.qty-input').forEach(i => {
+            $all('.qty-input-unidades').forEach(i => {
                 i.onchange = function() {
-                    setQtyByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                    setQtyUnidadesByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                };
+            });
+
+            // Eventos para cajas
+            $all('.qty-inc-cajas').forEach(b => {
+                b.onclick = function() {
+                    changeQtyCajasByIndex(parseInt(this.dataset.index), 1);
+                };
+            });
+            $all('.qty-dec-cajas').forEach(b => {
+                b.onclick = function() {
+                    changeQtyCajasByIndex(parseInt(this.dataset.index), -1);
+                };
+            });
+            $all('.qty-input-cajas').forEach(i => {
+                i.onchange = function() {
+                    setQtyCajasByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                };
+            });
+
+            // Eventos para botones de eliminar
+            $all('.delete-item').forEach(btn => {
+                btn.onclick = function() {
+                    const index = parseInt(this.dataset.index);
+                    eliminarItem(index);
                 };
             });
         }
 
-        function changeQtyByIndex(idx, delta) {
+        function changeQtyUnidadesByIndex(idx, delta) {
             if (idx < 0 || idx >= cart.length) return;
 
             const item = cart[idx];
-            const nuevo = item.cantidad + delta;
+            const unidadesPorCaja = item.unidades_por_caja || 1;
+            const unidadesActuales = item.cantidad % unidadesPorCaja;
+            const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
+            
+            let nuevasUnidades = unidadesActuales + delta;
 
-            if (nuevo <= 0) {
-                Swal.fire({
-                    title: '¿Eliminar medicamento?',
-                    text: 'La cantidad llegaría a 0. ¿Deseas eliminarlo?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
-                }).then(r => {
-                    if (r.isConfirmed) {
-                        cart.splice(idx, 1);
-                        renderCart();
-                    } else {
-                        renderCart();
-                    }
-                });
-                return;
+            // Validar límites de unidades (0 a unidadesPorCaja-1)
+            if (nuevasUnidades < 0) {
+                nuevasUnidades = 0;
+            } else if (nuevasUnidades >= unidadesPorCaja) {
+                nuevasUnidades = unidadesPorCaja - 1;
             }
 
-            if (item.stock != null && nuevo > item.stock) {
+            const nuevaCantidadTotal = (cajasActuales * unidadesPorCaja) + nuevasUnidades;
+
+            // Validar stock total
+            if (item.stock != null && nuevaCantidadTotal > item.stock) {
                 Swal.fire({
                     title: 'Sin stock suficiente',
                     html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                   ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                   <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                   <p>Intentando agregar: <strong>${nuevo}</strong> unidades</p>`,
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
                     icon: 'warning',
                     confirmButtonText: 'Entendido'
                 });
                 return;
             }
 
-            item.cantidad = nuevo;
+            item.cantidad = nuevaCantidadTotal;
+            renderCart();
+        }
+
+        function changeQtyCajasByIndex(idx, delta) {
+            if (idx < 0 || idx >= cart.length) return;
+
+            const item = cart[idx];
+            const unidadesPorCaja = item.unidades_por_caja || 1;
+            const unidadesActuales = item.cantidad % unidadesPorCaja;
+            const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
+            
+            let nuevasCajas = cajasActuales + delta;
+
+            // Validar que no sea negativo
+            if (nuevasCajas < 0) {
+                nuevasCajas = 0;
+            }
+
+            const nuevaCantidadTotal = (nuevasCajas * unidadesPorCaja) + unidadesActuales;
+
+            // Validar stock total
+            if (item.stock != null && nuevaCantidadTotal > item.stock) {
+                // Calcular cuántas cajas completas y unidades restantes se pueden agregar
+                const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
+                const unidadesRestantes = item.stock % unidadesPorCaja;
+                
+                // Mostrar alerta con información detallada
+                Swal.fire({
+                    title: 'Sin stock suficiente',
+                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
+                       <p>Intentando agregar: <strong>${nuevasCajas}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            item.cantidad = nuevaCantidadTotal;
+            renderCart();
+        }
+
+        function setQtyUnidadesByIndex(idx, val) {
+            if (idx < 0 || idx >= cart.length) return;
+
+            const item = cart[idx];
+            const unidadesPorCaja = item.unidades_por_caja || 1;
+            const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
+            
+            // Validar rango de unidades
+            if (val < 0) val = 0;
+            if (val >= unidadesPorCaja) val = unidadesPorCaja - 1;
+
+            const nuevaCantidadTotal = (cajasActuales * unidadesPorCaja) + val;
+
+            // Validar stock total
+            if (item.stock != null && nuevaCantidadTotal > item.stock) {
+                Swal.fire({
+                    title: 'Sin stock suficiente',
+                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            item.cantidad = nuevaCantidadTotal;
+            renderCart();
+        }
+
+        function setQtyCajasByIndex(idx, val) {
+            if (idx < 0 || idx >= cart.length) return;
+
+            const item = cart[idx];
+            const unidadesPorCaja = item.unidades_por_caja || 1;
+            const unidadesActuales = item.cantidad % unidadesPorCaja;
+            
+            // Validar que no sea negativo
+            if (val < 0) val = 0;
+
+            const nuevaCantidadTotal = (val * unidadesPorCaja) + unidadesActuales;
+
+            // Validar stock total
+            if (item.stock != null && nuevaCantidadTotal > item.stock) {
+                // Calcular cuántas cajas completas y unidades restantes se pueden agregar
+                const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
+                const unidadesRestantes = item.stock % unidadesPorCaja;
+                
+                // Mostrar alerta con información detallada
+                Swal.fire({
+                    title: 'Sin stock suficiente',
+                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>Equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
+                       <p>Intentando agregar: <strong>${val}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            item.cantidad = nuevaCantidadTotal;
             renderCart();
         }
 
@@ -1303,7 +1476,8 @@
                     linea: m.linea || '',
                     precio: parseFloat(m.precio) || 0,
                     cantidad: 1,
-                    stock: m.stock != null ? Number(m.stock) : null
+                    stock: m.stock != null ? Number(m.stock) : null,
+                    unidades_por_caja: m.unidades_por_caja || 1
                 });
             }
             renderCart();
@@ -1358,6 +1532,9 @@
                 const linea = escapeHtml(it.linea || 'Sin laboratorio');
                 const precio = formatMoney(it.precio_venta || 0);
                 const stock = Number(it.stock || 0);
+                const blister = Number(it.lm_cant_blister || 1);
+                const unidad = Number(it.lm_cant_unidad || 1);
+                const unidadesPorCaja = blister * unidad;
 
                 let diasVenc = '';
                 if (it.fecha_vencimiento) {
@@ -1388,7 +1565,8 @@
                 data-presentacion="${presentacion}" 
                 data-linea="${linea}"
                 data-precio="${it.precio_venta || 0}"
-                data-stock="${stock}">
+                data-stock="${stock}"
+                data-unidades-por-caja="${unidadesPorCaja}">
                 
                 <div class="search-result-name">
                     <strong>${nombre}</strong>
@@ -1422,7 +1600,8 @@
                         presentacion: el.dataset.presentacion,
                         linea: el.dataset.linea,
                         precio: parseFloat(el.dataset.precio || 0),
-                        stock: stock
+                        stock: stock,
+                        unidades_por_caja: parseInt(el.dataset.unidadesPorCaja || 1)
                     });
 
                     resultsContainer.innerHTML = '';
@@ -1497,7 +1676,8 @@
                            data-presentacion="${it.presentacion}"
                            data-linea="${it.linea}"
                            data-precio="${it.precio_venta}"
-                           data-stock="${stock}">
+                           data-stock="${stock}"
+                           data-unidades-por-caja="${Number(it.lm_cant_blister || 1) * Number(it.lm_cant_unidad || 1)}">
                             agregar
                         </button>
                     </td>
@@ -1521,7 +1701,8 @@
                             presentacion: el.dataset.presentacion || '',
                             linea: el.dataset.linea || '',
                             precio: parseFloat(el.dataset.precio || 0),
-                            stock: stock
+                            stock: stock,
+                            unidades_por_caja: parseInt(el.dataset.unidadesPorCaja || 1)
                         });
                     }
                 });

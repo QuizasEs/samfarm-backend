@@ -308,18 +308,29 @@ class ventaController extends ventaModel
             $ve_id = self::guardar_venta_model($datos_venta);
             if ($ve_id <= 0) throw new Exception("No se pudo registrar la venta");
 
-            foreach ($venta_items as $item) {
-                $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
-                $lm_id_solicitado = isset($item['lote_id']) ? (int)$item['lote_id'] : 0;
-                $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 0;
-                $precio_unitario = isset($item['precio']) ? (float)$item['precio'] : 0.0;
-                $descuento_item = isset($item['descuento']) ? (float)$item['descuento'] : 0.00;
+        foreach ($venta_items as $item) {
+            $med_id = isset($item['med_id']) ? (int)$item['med_id'] : 0;
+            $lm_id_solicitado = isset($item['lote_id']) ? (int)$item['lote_id'] : 0;
+            $cajas = isset($item['cajas']) ? (int)$item['cajas'] : 0;
+            $unidades = isset($item['unidades']) ? (int)$item['unidades'] : 0;
+            $precio_unitario = isset($item['precio']) ? (float)$item['precio'] : 0.0;
+            $descuento_item = isset($item['descuento']) ? (float)$item['descuento'] : 0.00;
 
-                if ($med_id <= 0 || $cantidad <= 0 || $precio_unitario <= 0) {
-                    throw new Exception("Ítem inválido");
-                }
+            if ($med_id <= 0 || ($cajas <= 0 && unidades <= 0) || $precio_unitario <= 0) {
+                throw new Exception("Ítem inválido");
+            }
 
-                $unidades_requeridas = $cantidad;
+            // Obtener factor de conversión para este medicamento
+            $factor = self::obtener_factor_unidades_por_tipo_model($med_id, $sucursal_id);
+            if (!$factor) {
+                throw new Exception("No se pudo obtener factor de conversión para med_id {$med_id}");
+            }
+            
+            $unidades_por_caja = $factor['unidades_por_caja'];
+            $unidades_por_blister = $factor['unidades_por_blister'];
+
+            // Calcular unidades totales requeridas
+            $unidades_requeridas = ($cajas * $unidades_por_caja) + $unidades;
                 $stock_total = self::sumar_stock_lotes_med_sucursal_model($med_id, $sucursal_id);
 
                 if ($stock_total < $unidades_requeridas) {
@@ -603,5 +614,39 @@ class ventaController extends ventaModel
         ];
         echo json_encode($alerta);
         exit();
+    }
+
+    public function obtener_factores_conversion_controller($med_id, $sucursal_id) {
+        if (!isset($_SESSION['sucursal_smp'])) {
+            return json_encode([
+                "error" => true,
+                "mensaje" => "No se ha asignado una sucursal"
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        $med_id = (int)mainModel::limpiar_cadena($med_id);
+        $sucursal_id = (int)mainModel::limpiar_cadena($sucursal_id);
+
+        if ($med_id <= 0 || $sucursal_id <= 0) {
+            return json_encode([
+                "error" => true,
+                "mensaje" => "Parámetros inválidos"
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        $factor = self::obtener_factor_unidades_por_tipo_model($med_id, $sucursal_id);
+        
+        if (!$factor) {
+            return json_encode([
+                "error" => true,
+                "mensaje" => "No se encontró factor de conversión"
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        return json_encode([
+            "error" => false,
+            "unidades_por_caja" => $factor['unidades_por_caja'],
+            "unidades_por_blister" => $factor['unidades_por_blister']
+        ], JSON_UNESCAPED_UNICODE);
     }
 }
