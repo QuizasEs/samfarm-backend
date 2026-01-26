@@ -45,6 +45,7 @@
                 "preciosBalance",
                 "cajaLista",
                 "cajaHistorialTotales",
+                "preciosActualizar",
             ];
 
             if(in_array($vistas,$listaBlanca)){

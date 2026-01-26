@@ -24,8 +24,8 @@ try {
     $stock_por_medicamento = 2000;
     $sucursal_id = 1; // Cambia según la sucursal donde deseas registrar el stock
     $usuario_id = 1;  // ID del usuario que realizará la operación (admin)
-    $precio_compra_base = 10.00;  // Precio de compra base
-    $precio_venta_base = 15.00;   // Precio de venta base
+    $precio_compra_base = 998.00;  // Precio de compra base
+    $precio_venta_base = 999.00;   // Precio de venta base
     $unidades_por_caja_base = 10; // Unidades por caja base
     $meses_vencimiento_base = 24; // Meses de vencimiento base
     
@@ -62,7 +62,7 @@ try {
             echo "Procesando medicamento: $med_nombre (ID: $med_id)\n";
             
             // Generar número de lote único
-            $numero_lote = "BULK-" . date('Ymd') . "-" . $med_id . "-" . rand(1000, 9999);
+            $numero_lote = "MED-" . str_pad($med_id, 7, '0', STR_PAD_LEFT);
             
             // Calcular cantidades
             $cajas = ceil($stock_por_medicamento / $unidades_por_caja_base);
@@ -161,7 +161,7 @@ try {
                 ':mi_tipo' => 'entrada',
                 ':mi_cantidad' => $total_unidades,
                 ':mi_unidad' => 'unidad',
-                ':mi_referencia_tipo' => 'bulk_import',
+                ':mi_referencia_tipo' => 'importacion masiva sin especificaciones de cantidades',
                 ':mi_referencia_id' => $lote_id,
                 ':mi_motivo' => "Ingreso masivo de stock inicial: $stock_por_medicamento unidades - Precio Compra: Bs. $precio_compra_base - Precio Venta: Bs. $precio_venta_base"
             ]);
