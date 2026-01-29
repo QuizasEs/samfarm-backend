@@ -220,7 +220,7 @@ class mainModel
                 JOIN usuarios AS u ON u.ro_id = r.ro_id 
                 WHERE u.us_id = $id;");
         } else if ($tipo == "Multiple") {
-            $sql = mainModel::conectar()->prepare("SELECT ro_nombre, ro_id FROM roles WHERE ro_estado = 1");
+            $sql = mainModel::conectar()->prepare("SELECT ro_nombre, ro_id FROM roles WHERE ro_estado = 1 ORDER BY ro_nombre ASC");
         }
         $sql->execute();
         return $sql;
@@ -236,7 +236,7 @@ class mainModel
             JOIN usuarios AS u ON u.su_id = s.su_id 
             WHERE u.us_id = $id;");
         } else if ($tipo == "Multiple") {
-            $sql = mainModel::conectar()->prepare("SELECT su_id, su_nombre FROM sucursales WHERE su_estado = 1");
+            $sql = mainModel::conectar()->prepare("SELECT su_id, su_nombre FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC");
         }
         $sql->execute();
         return $sql;
@@ -248,22 +248,22 @@ class mainModel
     {
 
         $sql_uf = self::conectar()->prepare("
-                SELECT * FROM uso_farmacologico WHERE uf_estado = 1
+                SELECT * FROM uso_farmacologico WHERE uf_estado = 1 ORDER BY uf_nombre ASC
             ");
         $sql_ff = self::conectar()->prepare("
-                SELECT * FROM forma_farmaceutica WHERE ff_estado = 1
+                SELECT * FROM forma_farmaceutica WHERE ff_estado = 1 ORDER BY ff_nombre ASC
             ");
         $sql_vd = self::conectar()->prepare("
-                SELECT * FROM via_de_administracion WHERE vd_estado = 1
+                SELECT * FROM via_de_administracion WHERE vd_estado = 1 ORDER BY vd_nombre ASC
             ");
         $sql_la = self::conectar()->prepare("
-                SELECT * FROM laboratorios WHERE la_estado =1    
+                SELECT * FROM laboratorios WHERE la_estado =1 ORDER BY la_nombre_comercial ASC   
             ");
         $sql_su = self::conectar()->prepare("
-                SELECT * FROM sucursales WHERE su_estado = 1
+                SELECT * FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC
             ");
-        $sql_pr = self::conectar()->prepare("SELECT * FROM proveedores WHERE pr_estado = 1");
-        $sql_caja = self::conectar()->prepare("SELECT * FROM `usuarios` WHERE ro_id != 1");
+        $sql_pr = self::conectar()->prepare("SELECT * FROM proveedores WHERE pr_estado = 1 ORDER BY pr_nombres ASC");
+        $sql_caja = self::conectar()->prepare("SELECT * FROM `usuarios` WHERE ro_id != 1 ORDER BY us_nombres ASC");
 
         /* ejecutamos todas las consultas */
         $sql_uf->execute();

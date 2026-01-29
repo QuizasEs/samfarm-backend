@@ -1303,6 +1303,70 @@ table .buttons {
     }
 }
 
+/* ===================== Product Column Styling ===================== */
+/* Reusable class for product columns in tables */
+.product-column {
+    width: 400px;
+    max-width: 500px;
+    min-width: 300px;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    vertical-align: top;
+    padding: 15px;
+
+}
+
+/* Ensure table layout works with fixed column widths */
+
+
+/* Force all table cells to wrap text properly */
+.table td,
+.table th {
+    white-space: normal;
+    
+    hyphens: auto;
+}
+
+/* Ensure product column text is left-aligned */
+
+
+/* Override any inherited text-align from parent elements */
+.product-column th,
+.product-column td {
+    text-align: left !important;
+    text-align: start !important;
+    text-align: -webkit-left !important;
+    text-align: -moz-left !important;
+}
+
+/* Force left alignment for any nested elements within product column */
+.product-column * {
+    text-align: left !important;
+    text-align: start !important;
+    text-align: -webkit-left !important;
+    text-align: -moz-left !important;
+}
+
+/* Responsive adjustments for product column */
+@media screen and (max-width: 768px) {
+    .product-column {
+        width: 200px;
+        max-width: 200px;
+        min-width: 200px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .product-column {
+        width: 150px;
+        max-width: 150px;
+        min-width: 150px;
+    }
+}
+
 /********************************************caja - ventas*************************************/
 
 /* debig */

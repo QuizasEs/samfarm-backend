@@ -108,7 +108,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Medicamento</th>
+                                    <th class="product-column">Medicamento</th>
                                     <th>presentacion</th>
                                     <th>Unidades</th>
                                     <th>Cajas</th>

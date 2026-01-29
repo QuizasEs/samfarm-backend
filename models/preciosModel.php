@@ -221,54 +221,55 @@ class preciosModel extends mainModel
         try {
             $conexion->beginTransaction();
 
-            // 1) Si no se proporciona su_id, obtenerlo del primer lote del medicamento
-            if ($su_id === null) {
-                $sql_su = $conexion->prepare("
-                    SELECT su_id 
-                    FROM lote_medicamento 
-                    WHERE med_id = :med_id 
-                    AND lm_estado IN ('activo', 'en_espera')
-                    LIMIT 1
-                ");
-                $sql_su->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-                $sql_su->execute();
-                $resultado_su = $sql_su->fetch(PDO::FETCH_ASSOC);
-                $su_id = $resultado_su['su_id'] ?? null;
-                
-                if ($su_id === null) {
-                    throw new Exception("No se encontraron lotes activos para el medicamento");
-                }
-            }
-
-            // 2) Obtener lotes actuales para el histórico
-            $sql_get = $conexion->prepare("
-                SELECT lm_id, lm_precio_venta 
+            // 1) Obtener lotes actuales para el histórico (filtrando por su_id si se proporciona)
+            $sql_get_query = "
+                SELECT lm_id, lm_precio_venta, su_id
                 FROM lote_medicamento 
                 WHERE med_id = :med_id 
-                AND su_id = :su_id
                 AND lm_estado IN ('activo', 'en_espera')
-            ");
+            ";
+            
+            if ($su_id !== null) {
+                $sql_get_query .= " AND su_id = :su_id";
+            }
+
+            $sql_get = $conexion->prepare($sql_get_query);
             $sql_get->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-            $sql_get->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            if ($su_id !== null) {
+                $sql_get->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            }
             $sql_get->execute();
             $lotes = $sql_get->fetchAll(PDO::FETCH_ASSOC);
             $cantidad_lotes = count($lotes);
 
+            if ($cantidad_lotes === 0) {
+                throw new Exception("No se encontraron lotes activos para el medicamento");
+            }
+
             // 2) Actualizar todos los lotes del medicamento
-            $sql_update = $conexion->prepare("
+            $sql_update_query = "
                 UPDATE lote_medicamento 
                 SET lm_precio_venta = :precio_nuevo,
                     lm_actualizado_en = NOW()
                 WHERE med_id = :med_id 
-                AND su_id = :su_id
                 AND lm_estado IN ('activo', 'en_espera')
-            ");
+            ";
+            
+            if ($su_id !== null) {
+                $sql_update_query .= " AND su_id = :su_id";
+            }
+
+            $sql_update = $conexion->prepare($sql_update_query);
             $sql_update->bindParam(':precio_nuevo', $precio_nuevo, PDO::PARAM_STR);
             $sql_update->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-            $sql_update->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            if ($su_id !== null) {
+                $sql_update->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            }
             $sql_update->execute();
 
-            // 3) Recalcular valorado del inventario (UNA SOLA VEZ)
+            // 3) Recalcular valorado del inventario para todas las sucursales afectadas
+            $sucursales_afectadas = array_unique(array_column($lotes, 'su_id'));
+            
             $sql_inv = $conexion->prepare("
                 UPDATE inventarios i
                 SET i.inv_total_valorado = COALESCE((
@@ -280,9 +281,12 @@ class preciosModel extends mainModel
                 ), 0)
                 WHERE i.med_id = :med_id AND i.su_id = :su_id
             ");
-            $sql_inv->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-            $sql_inv->bindParam(':su_id', $su_id, PDO::PARAM_INT);
-            $sql_inv->execute();
+
+            foreach ($sucursales_afectadas as $id_sucursal) {
+                $sql_inv->bindValue(':med_id', $med_id, PDO::PARAM_INT);
+                $sql_inv->bindValue(':su_id', $id_sucursal, PDO::PARAM_INT);
+                $sql_inv->execute();
+            }
 
             // 4) Registrar en balance_precios (un registro por cada lote)
             foreach ($lotes as $lote) {
@@ -302,7 +306,9 @@ class preciosModel extends mainModel
             ];
 
         } catch (Exception $e) {
-            $conexion->rollBack();
+            if ($conexion->inTransaction()) {
+                $conexion->rollBack();
+            }
             error_log("Error actualizando precios de todos los lotes: " . $e->getMessage());
             return [
                 'success' => false,

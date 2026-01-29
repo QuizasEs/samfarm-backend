@@ -127,7 +127,7 @@ if ($datos->rowCount() == 1) {
                     <div class="form-bloque">
                         <label for="">Precio venta por unidad</label>
                         <small>Monto por unidad a la venta en Bs</small>
-                        <input type="number" value="<?php echo $lote['lm_precio_venta'] ?>" name="Precio_venta_up" id="" placeholder="Ej. pastilla a 1bs" required>
+                        <input type="number" step="0.01" value="<?php echo $lote['lm_precio_venta'] ?>" name="Precio_venta_up" id="" placeholder="Ej. pastilla a 1bs" required>
                     </div>
                     <!-- solo para admin o gerente -->
                     <div class="form-bloque">

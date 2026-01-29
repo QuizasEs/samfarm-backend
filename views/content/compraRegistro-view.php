@@ -124,7 +124,7 @@ if (!isset($_SESSION['id_smp'])) {
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>Producto</th>
+                            <th class="product-column">Producto</th>
                             <th>Presentación</th>
                             <th>Descripción</th>
                             <th>Código de Barras</th>

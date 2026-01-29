@@ -88,20 +88,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Nombres</label>
-                                <input type="text" name="Nombres_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                                <input type="text" name="Nombres_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ1-9 ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
 
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Paterno</label>
-                                <input type="text" name="ApellidoPaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                                <input type="text" name="ApellidoPaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
                                 <label class="required">Apellido Materno</label>
-                                <input type="text" name="ApellidoMaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                                <input type="text" name="ApellidoMaterno_reg" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                             </div>
                         </div>
                     </div>
