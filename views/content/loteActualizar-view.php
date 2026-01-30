@@ -105,6 +105,11 @@ if ($datos->rowCount() == 1) {
             </div>
             <div class="form-group">
                 <div class="form-bloque">
+                    <label for="">Cajas del lote</label>
+                    <small>Cantidad de cajas a ingresar</small>
+                    <input type="number" value="<?php echo $lote['lm_cant_caja'] ?>" name="Cantidad_caja_up" id="">
+                </div>
+                <div class="form-bloque">
                     <label for="">Unidades de empaque por caja</label>
                     <small>Blister, sobres, sachets, etc. (por defecto 1)</small>
                     <input type="number" value="<?php echo $lote['lm_cant_blister'] ?>" name="Cantidad_blister_up" id="" placeholder="Por defecto 1">
@@ -112,7 +117,7 @@ if ($datos->rowCount() == 1) {
                 <div class="form-bloque">
                     <label for="">Unidades individuales por empaque</label>
                     <small>Unidades por blister, sobre, sachet, etc. (por defecto 1)</small>
-                    <input type="number" value="<?php echo $lote['lm_cant_unidad'] ?>" class="Cantidad_unidades_up" placeholder="Por defecto 1">
+                    <input type="number" value="<?php echo $lote['lm_cant_unidad'] ?>" name="Cantidad_unidades_up" class="Cantidad_unidades_up" placeholder="Por defecto 1">
                 </div>
                 <!-- solo para el administrador -->
                 <?php if ($_SESSION['id_smp'] == 1 || $_SESSION['id_smp'] == 2) { ?>

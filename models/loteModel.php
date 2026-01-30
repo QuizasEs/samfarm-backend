@@ -63,6 +63,7 @@ class loteModel extends mainModel
         $sql = self::conectar()->prepare("
             UPDATE lote_medicamento
             SET
+                lm_cant_caja = :lm_cant_caja,
                 lm_cant_blister = :lm_cant_blister,
                 lm_cant_unidad = :lm_cant_unidad,
                 lm_precio_compra = :lm_precio_compra,
@@ -73,6 +74,7 @@ class loteModel extends mainModel
             WHERE lm_id = :ID
         ");
 
+        $sql->bindParam(":lm_cant_caja", $datos['lm_cant_caja']);
         $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
         $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
         $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);

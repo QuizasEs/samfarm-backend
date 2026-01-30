@@ -109,6 +109,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>loteLista/">Lote</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>inventarioLista/">Inventario</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>ajusteInventarioCompleto/">Ajuste de Inventario</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorLista/">Proveedor</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>transferirLista/">Tranferencias</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>recepcionarLista/">Recepcionar</a></li>
@@ -259,6 +260,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <ul class="sub-links">
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>loteLista/">Lote</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>inventarioLista/">Inventario</a></li>
+                    <li class="sub-link"><a href="<?php echo SERVER_URL ?>ajusteInventario/">Ajuste de Inventario</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>proveedorLista/">Proveedor</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>transferirLista/">Tranferencias</a></li>
                     <li class="sub-link"><a href="<?php echo SERVER_URL ?>recepcionarLista/">Recepcionar</a></li>

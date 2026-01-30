@@ -362,6 +362,7 @@ class loteController extends loteModel
         }
 
         /* Obtenemos los valores del formulario */
+        $cant_caja    = (int)mainModel::limpiar_cadena($_POST['Cantidad_caja_up'] ?? $lote['lm_cant_caja']);
         $cant_blister = (int)mainModel::limpiar_cadena($_POST['Cantidad_blister_up'] ?? $lote['lm_cant_blister']);
         $cant_unidad  = (int)mainModel::limpiar_cadena($_POST['Cantidad_unidades_up'] ?? $lote['lm_cant_unidad']);
         $precio_compra = (float)mainModel::limpiar_cadena($_POST['Precio_compra_up'] ?? $lote['lm_precio_compra']);
@@ -381,6 +382,20 @@ class loteController extends loteModel
         }
 
         /* Validaciones de formato para campos numéricos cuando se proporcionan */
+        if (!empty($_POST['Cantidad_caja_up'])) {
+            $cant_caja_input = mainModel::limpiar_cadena($_POST['Cantidad_caja_up']);
+            if (mainModel::verificar_datos("[0-9]{1,10}", $cant_caja_input)) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Formato inválido',
+                    'texto' => 'La CANTIDAD DE CAJAS debe ser un número válido.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+        }
+
         if (!empty($_POST['Cantidad_blister_up'])) {
             $cant_blister_input = mainModel::limpiar_cadena($_POST['Cantidad_blister_up']);
             if (mainModel::verificar_datos("[0-9]{1,10}", $cant_blister_input)) {
@@ -439,6 +454,7 @@ class loteController extends loteModel
 
         /* Estructura para actualizar */
         $datos_up = [
+            'lm_cant_caja' => $cant_caja,
             'lm_cant_blister' => $cant_blister,
             'lm_cant_unidad' => $cant_unidad,
             'lm_precio_compra' => $precio_compra,

@@ -45,6 +45,7 @@
                 "preciosBalance",
                 "cajaLista",
                 "cajaHistorialTotales",
+                "ajusteInventarioCompleto",
 
             ];
 
