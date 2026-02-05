@@ -91,7 +91,7 @@ if (!isset($datos_decoded['error']) && $datos_decoded) {
             </div>
 
             <div class="form-buttons">
-                <a href="<?php echo SERVER_URL; ?>usuarios/" class="btn warning">Cancelar</a>
+                <a href="<?php echo SERVER_URL; ?>dashboard/" class="btn warning">Cancelar</a>
                 <button class="btn success">Actualizar Perfil</button>
             </div>
 

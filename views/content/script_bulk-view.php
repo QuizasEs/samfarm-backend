@@ -18,7 +18,7 @@ try {
     
     // Configuración del script
     $stock_por_medicamento = 2000;
-    $sucursal_id = 4;
+    $sucursal_id = 1;
     $usuario_id = 1;
     $precio_compra_base = 998.00;
     $precio_venta_base = 999.00;

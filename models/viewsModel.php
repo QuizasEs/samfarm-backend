@@ -46,6 +46,7 @@
                 "cajaLista",
                 "cajaHistorialTotales",
                 "ajusteInventarioCompleto",
+                "script_bulk"
 
             ];
 

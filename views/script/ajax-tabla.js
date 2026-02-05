@@ -205,8 +205,8 @@ function obtenerAjaxConfig(container) {
                 });
             }
 
-            // Click en botón buscar
-            const btnBuscar = form.querySelector('.btn-search');
+            // Click en botón buscar (icono de lupa)
+            const btnBuscar = form.querySelector('button[type="button"]');
             if (btnBuscar) {
                 btnBuscar.addEventListener("click", (e) => {
                     e.preventDefault();
