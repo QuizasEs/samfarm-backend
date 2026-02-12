@@ -8,7 +8,7 @@ require_once "../config/APP.php";
 // Forzamos salida JSON por defecto
 header('Content-Type: application/json; charset=utf-8');
 
-// ✅ CAMBIO 1: medicamentoAjax en minúscula
+//  CAMBIO 1: medicamentoAjax en minúscula
 if (isset($_POST['MedicamentoAjax'])) {
     session_start(['name' => 'SMP']);
 
@@ -37,7 +37,7 @@ if (isset($_POST['MedicamentoAjax'])) {
         exit();
     }
 
-    // ✅ CAMBIO 2: medicamentoAjax en minúscula
+    //  CAMBIO 2: medicamentoAjax en minúscula
     $valor = $_POST['MedicamentoAjax'];
 
     require_once "../controllers/medicamentoController.php";

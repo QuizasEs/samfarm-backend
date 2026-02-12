@@ -177,7 +177,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         const utils = {
             async ajax(params) {
                 try {
-                    console.log('📡 Enviando petición:', params);
+                    console.log(' Enviando petición:', params);
 
                     const response = await fetch(API_URL, {
                         method: 'POST',
@@ -192,11 +192,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     const data = await response.json();
-                    console.log('✅ Respuesta recibida:', data);
+                    console.log(' Respuesta recibida:', data);
                     return data;
 
                 } catch (error) {
-                    console.error('❌ Error AJAX:', error);
+                    console.error('  Error AJAX:', error);
                     throw error;
                 }
             },
@@ -205,9 +205,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
-                    console.log(`✅ Modal abierto: ${modalId}`);
+                    console.log(` Modal abierto: ${modalId}`);
                 } else {
-                    console.error(`❌ Modal no encontrado: ${modalId}`);
+                    console.error(`  Modal no encontrado: ${modalId}`);
                 }
             },
 
@@ -215,7 +215,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'none';
-                    console.log(`✅ Modal cerrado: ${modalId}`);
+                    console.log(` Modal cerrado: ${modalId}`);
                 }
             },
 
@@ -231,7 +231,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         // ==================== MODAL DETALLE ====================
         const detalle = {
             async abrir(veId, numeroDocumento) {
-                console.log('📋 Abriendo detalle de venta:', {
+                console.log(' Abriendo detalle de venta:', {
                     veId,
                     numeroDocumento
                 });
@@ -295,7 +295,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
+                    console.error('  Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
                     utils.cerrar('modalDetalleVenta');
                 }
@@ -305,7 +305,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         // ==================== REIMPRIMIR NOTA ====================
         const reimprimir = {
             async nota(veId) {
-                console.log('🖨️ Reimprimiendo nota de venta:', veId);
+                console.log(' Reimprimiendo nota de venta:', veId);
 
                 Swal.fire({
                     title: 'Generando PDF...',
@@ -353,7 +353,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         // ==================== VER FACTURA ====================
         const factura = {
             ver(faId) {
-                console.log('📄 Viendo factura:', faId);
+                console.log(' Viendo factura:', faId);
 
                 Swal.fire({
                     title: 'Funcionalidad en desarrollo',
@@ -421,7 +421,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     url += '&tipo_documento=' + encodeURIComponent(select4.value);
                 }
 
-                console.log('📥 Descargando archivo:', url);
+                console.log(' Descargando archivo:', url);
 
                 window.open(url, '_blank');
 

@@ -81,7 +81,7 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
-    // ✅ Sesión válida, procesar petición
+    //  Sesión válida, procesar petición
     $valor = $_POST['inventarioAjax'];
 
     require_once "../controllers/inventarioController.php";

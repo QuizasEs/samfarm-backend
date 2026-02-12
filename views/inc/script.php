@@ -377,7 +377,7 @@
             if (modal) modal.style.display = "none";
         }
 
-        /** ✅ Valida datos antes de agregar lote */
+        /**  Valida datos antes de agregar lote */
         function validarCampos() {
             const numero = document.getElementById("numero_lote").value.trim();
             const cantidad = parseInt(document.getElementById("cantidad").value);
@@ -507,7 +507,7 @@
             document.getElementById("total").textContent = `Bs. ${total.toFixed(2)}`;
         }
 
-        /** ❌ Eliminar lote */
+        /**   Eliminar lote */
         function eliminarLote(i) {
             Swal.fire({
                 title: "¿Estás seguro?",
@@ -1081,7 +1081,7 @@
             });
         }
 
-        // ✅ FUNCIÓN MEJORADA: Buscar índice considerando med_id + lm_id (lote específico)
+        //  FUNCIÓN MEJORADA: Buscar índice considerando med_id + lm_id (lote específico)
         function findItemIndex(med_id, lote_id) {
             return cart.findIndex(item =>
                 String(item.med_id) === String(med_id) &&
@@ -1537,10 +1537,17 @@
                 const unidadesPorCaja = blister * unidad;
 
                 let diasVenc = '';
+                let fechaVencimientoDisplay = '';
                 if (it.fecha_vencimiento) {
                     const hoy = new Date();
                     const vence = new Date(it.fecha_vencimiento);
                     const diff = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
+
+                    // Formatear fecha de vencimiento para mostrar
+                    const dia = String(vence.getDate()).padStart(2, '0');
+                    const mes = String(vence.getMonth() + 1).padStart(2, '0');
+                    const anio = vence.getFullYear();
+                    fechaVencimientoDisplay = `${dia}/${mes}/${anio}`;
 
                     if (diff < 0) {
                         diasVenc = '<span style="color: red; font-weight: bold;">⚠ VENCIDO</span>';
@@ -1581,6 +1588,7 @@
                     <span><ion-icon name="pricetag-outline"></ion-icon> Bs. ${precio}</span>
                     <span style="margin: 0 6px;">•</span>
                     ${stockText}
+                    ${fechaVencimientoDisplay ? '<span style="margin: 0 6px;">•</span><span><ion-icon name="calendar-outline"></ion-icon> Vence: ' + fechaVencimientoDisplay + '</span>' : ''}
                     ${diasVenc ? '<span style="margin: 0 6px;">•</span>' + diasVenc : ''}
                 </div>
             </div>`;
@@ -2040,7 +2048,7 @@
                             reverseButtons: true
                         }).then((result2) => {
                             if (result2.isConfirmed) {
-                                // ✅ Proceder con el cierre
+                                //  Proceder con el cierre
                                 cerrarCajaAjax();
                             }
                         });
@@ -2491,7 +2499,7 @@
             abrirConfiguracion: configuracion.abrir,
             guardarConfiguracion: configuracion.guardar
         };
-    })(); // ✅ Cierre correcto del IIFE
+    })(); //  Cierre correcto del IIFE
 
     // ==================== EXPORTAR EXCEL ====================
     document.addEventListener('DOMContentLoaded', function() {
@@ -2519,7 +2527,7 @@
                 if (formaId) url += '&select4=' + encodeURIComponent(formaId);
                 if (busqueda) url += '&busqueda=' + encodeURIComponent(busqueda);
 
-                console.log('📥 Descargando archivo:', url);
+                console.log(' Descargando archivo:', url);
 
                 window.open(url, '_blank');
 

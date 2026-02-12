@@ -11,6 +11,8 @@ if ($_SESSION['rol_smp'] != 1) {
 require_once "./controllers/userController.php";
 $ins_usuario = new userController();
 
+$datos_sucursales = $ins_usuario->datos_extras_usuarios_controller();
+
 $datos = $ins_usuario->datos_usuario_controller($pagina[1]);
 $datos_decoded = json_decode($datos, true);
 
@@ -67,6 +69,22 @@ if (!isset($datos_decoded['error']) && $datos_decoded) {
                     <input type="text" name="Direccion_perfil" value="<?php echo htmlspecialchars($campos['us_direccion'] ?? ''); ?>" placeholder="Dirección" maxlength="255">
                 </div>
             </div>
+
+            <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                <div class="form-group">
+                    <div class="form-bloque">
+                        <label for="">SUCURSAL*</label>
+                        <select name="Sucursal_perfil" required>
+                            <option value="" disabled>Seleccione una sucursal</option>
+                            <?php foreach ($datos_sucursales['sucursales'] as $sucursal) { ?>
+                                <option value="<?php echo $sucursal['su_id']; ?>" <?php echo ($sucursal['su_id'] == $campos['su_id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($sucursal['su_nombre']); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+            <?php } ?>
 
             <div class="form-title">
                 <h3>Credenciales de Acceso</h3>

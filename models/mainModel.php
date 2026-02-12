@@ -27,7 +27,7 @@ class mainModel
             self::$conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return self::$conexion;
         } catch (PDOException $e) {
-            die("❌ Error de conexión: " . $e->getMessage());
+            die("  Error de conexión: " . $e->getMessage());
         }
     }
 
@@ -134,18 +134,22 @@ class mainModel
         }
 
 
-        $ci = 0;
-        for ($i = $pagina; $i <= $Npaginas; $i++) {
-            if ($i >= $botones) {
-                break;
-            }
+        // Calcular el rango de páginas a mostrar centrado en la página actual
+        $mitad = floor($botones / 2);
+        $inicio = max(1, $pagina - $mitad);
+        $fin = min($Npaginas, $inicio + $botones - 1);
 
+        // Ajustar el inicio si estamos cerca del final
+        if ($fin - $inicio + 1 < $botones) {
+            $inicio = max(1, $fin - $botones + 1);
+        }
+
+        for ($i = $inicio; $i <= $fin; $i++) {
             if ($pagina == $i) {
                 $tabla .= '<li class="page-item active"><a class="page-link" href="' . $url . $i . '/">' . $i . '</a></li>';
             } else {
                 $tabla .= '<li class="page-item"><a class="page-link" href="' . $url . $i . '/">' . $i . '</a></li>';
             }
-            $ci++;
         }
 
         if ($pagina == $Npaginas) {
@@ -178,18 +182,22 @@ class mainModel
                     </li>';
         }
 
-        $ci = 0;
-        for ($i = $pagina; $i <= $Npaginas; $i++) {
-            if ($ci >= $botones) {
-                break;
-            }
+        // Calcular el rango de páginas a mostrar centrado en la página actual
+        $mitad = floor($botones / 2);
+        $inicio = max(1, $pagina - $mitad);
+        $fin = min($Npaginas, $inicio + $botones - 1);
 
+        // Ajustar el inicio si estamos cerca del final
+        if ($fin - $inicio + 1 < $botones) {
+            $inicio = max(1, $fin - $botones + 1);
+        }
+
+        for ($i = $inicio; $i <= $fin; $i++) {
             if ($pagina == $i) {
                 $tabla .= '<li class="page-item active"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
             } else {
                 $tabla .= '<li class="page-item"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
             }
-            $ci++;
         }
 
         if ($pagina == $Npaginas) {

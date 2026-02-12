@@ -241,7 +241,7 @@ function alertas_ajax(alerta) {
             text: alerta.texto,
             icon: alerta.Tipo,
             showCancelButton: true,
-            confirmButtonText: '📄 Ver Nota de Venta',
+            confirmButtonText: ' Ver Nota de Venta',
             cancelButtonText: 'Cerrar',
             allowOutsideClick: false
         }).then((result) => {
@@ -258,7 +258,7 @@ function alertas_ajax(alerta) {
         return;
     }
     
-    // ✅ COMPATIBILIDAD: PDF por URL (sistema antiguo)
+    //  COMPATIBILIDAD: PDF por URL (sistema antiguo)
     if (alerta.pdf_url) {
         let ventana = window.open(alerta.pdf_url, "_blank");
 
@@ -268,7 +268,7 @@ function alertas_ajax(alerta) {
                 title: "Pop-up bloqueado",
                 html: `Tu navegador bloqueó la ventana del PDF.<br><br>
                    <a href="${alerta.pdf_url}" target="_blank" class="btn btn-primary" style="display:inline-block; padding:10px 20px; background:#3085d6; color:white; text-decoration:none; border-radius:5px;">
-                       📄 Clic aquí para abrir el PDF
+                        Clic aquí para abrir el PDF
                    </a>`,
                 icon: "warning",
                 confirmButtonText: "Entendido",
@@ -276,7 +276,7 @@ function alertas_ajax(alerta) {
         }
     }
 
-    // ✅ ALERTAS ESTÁNDAR
+    //  ALERTAS ESTÁNDAR
     if (alerta.Alerta === "simple") {
         Swal.fire({
             title: alerta.Titulo,

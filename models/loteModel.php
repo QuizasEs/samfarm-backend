@@ -135,7 +135,7 @@ class loteModel extends mainModel
                 throw new Exception("No se pudo actualizar el estado del lote");
             }
 
-            // 3) ✅ ACTUALIZAR INVENTARIO CONSOLIDADO (ESTO FALTABA)
+            // 3)  ACTUALIZAR INVENTARIO CONSOLIDADO (ESTO FALTABA)
             $datos_inventario = [
                 "su_id" => $su_id,
                 "med_id" => $med_id,
@@ -150,7 +150,7 @@ class loteModel extends mainModel
                 throw new Exception("No se pudo actualizar el inventario consolidado");
             }
 
-            // 4) ✅ REGISTRAR MOVIMIENTO DE INVENTARIO (ESTO FALTABA)
+            // 4)  REGISTRAR MOVIMIENTO DE INVENTARIO (ESTO FALTABA)
             $datos_movimiento = [
                 "lm_id" => $datos['lm_id'],
                 "med_id" => $med_id,

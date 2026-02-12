@@ -451,14 +451,14 @@ class ventaModel extends mainModel
                 $update_stmt->execute();
 
                 // Log para debugging
-                error_log("✅ Lote #{$lm_id} actualizado a estado 'terminado' (stock agotado)");
+                error_log(" Lote #{$lm_id} actualizado a estado 'terminado' (stock agotado)");
 
                 return $update_stmt->rowCount() > 0;
             }
 
             return false;
         } catch (PDOException $e) {
-            error_log("❌ Error verificando estado lote: " . $e->getMessage());
+            error_log("  Error verificando estado lote: " . $e->getMessage());
             return false;
         }
     }
@@ -736,7 +736,7 @@ class ventaModel extends mainModel
             $stmt->execute();
 
             if ($stmt->rowCount() <= 0) {
-                error_log("❌ No se encontró factura con ID: {$fa_id}");
+                error_log("  No se encontró factura con ID: {$fa_id}");
                 return false;
             }
 
@@ -770,7 +770,7 @@ class ventaModel extends mainModel
             return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
 
         } catch (Exception $e) {
-            error_log("❌ Error generando PDF: " . $e->getMessage());
+            error_log("  Error generando PDF: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             return false;
         }
@@ -809,7 +809,7 @@ class ventaModel extends mainModel
             $stmt->execute();
 
             if ($stmt->rowCount() <= 0) {
-                error_log("❌ No se encontró venta con ID: {$ve_id}");
+                error_log("  No se encontró venta con ID: {$ve_id}");
                 return false;
             }
 
@@ -842,7 +842,7 @@ class ventaModel extends mainModel
             return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
 
         } catch (Exception $e) {
-            error_log("❌ Error generando PDF reimpresión: " . $e->getMessage());
+            error_log("  Error generando PDF reimpresión: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             return false;
         }

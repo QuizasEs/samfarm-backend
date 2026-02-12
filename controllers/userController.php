@@ -739,6 +739,7 @@ class userController extends userModel
         $usuarioName = mainModel::limpiar_cadena($_POST['UsuarioName_perfil'] ?? '');
         $password = mainModel::limpiar_cadena($_POST['Password_perfil'] ?? '');
         $password_confirm = mainModel::limpiar_cadena($_POST['PasswordConfirm_perfil'] ?? '');
+        $sucursal = mainModel::limpiar_cadena($_POST['Sucursal_perfil'] ?? '');
 
         if (empty($nombres) || empty($apellido_paterno) || empty($apellido_materno) || empty($carnet) || empty($usuarioName)) {
             $alerta = [
@@ -834,6 +835,9 @@ class userController extends userModel
             $password_hash = mainModel::encryption($password);
         }
 
+        // Si es admin y envió sucursal, usamos la nueva, sino la actual
+        $sucursal_final = ($rol_actual == 1 && !empty($sucursal)) ? $sucursal : $usuario_actual['su_id'];
+
         $datos_usuario = [
             'us_id' => $us_id_perfil,
             'Nombres' => $nombres,
@@ -845,7 +849,7 @@ class userController extends userModel
             'Direccion' => $direccion,
             'UsuarioName' => $usuarioName,
             'Password' => $password_hash,
-            'Sucursal' => $usuario_actual['su_id'],
+            'Sucursal' => $sucursal_final,
             'Rol' => $usuario_actual['ro_id']
         ];
 
@@ -853,6 +857,10 @@ class userController extends userModel
 
         if ($actualizar->rowCount() >= 0) {
             $_SESSION['nombre_smp'] = $nombres . ' ' . $apellido_paterno;
+            
+            if ($rol_actual == 1 && !empty($sucursal)) {
+                $_SESSION['sucursal_smp'] = $sucursal;
+            }
 
             $alerta = [
                 "Alerta" => "recargar",

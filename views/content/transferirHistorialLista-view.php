@@ -166,7 +166,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     const TransferirHistorialModals = (function() {
         'use strict';
         
-        console.log('📋 Inicializando módulo TransferirHistorialModals');
+        console.log(' Inicializando módulo TransferirHistorialModals');
 
         const API_URL = '<?php echo SERVER_URL; ?>ajax/transferirHistorialAjax.php';
         const API_URL_TRANSFER = '<?php echo SERVER_URL; ?>ajax/transferirAjax.php';
@@ -174,7 +174,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         const utils = {
             async ajax(params) {
                 try {
-                    console.log('📡 Enviando petición:', params);
+                    console.log(' Enviando petición:', params);
 
                     const response = await fetch(API_URL, {
                         method: 'POST',
@@ -189,11 +189,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     const data = await response.json();
-                    console.log('✅ Respuesta recibida:', data);
+                    console.log(' Respuesta recibida:', data);
                     return data;
 
                 } catch (error) {
-                    console.error('❌ Error AJAX:', error);
+                    console.error('  Error AJAX:', error);
                     throw error;
                 }
             },
@@ -282,7 +282,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
+                    console.error('  Error:', error);
                     Swal.fire('Error', 'No se pudo cargar el detalle', 'error');
                     utils.cerrar('modalDetalleTransferencia');
                 }
@@ -300,7 +300,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         const descarga = {
             async pdf(trId) {
-                console.log('🖨️ Descargando PDF:', trId);
+                console.log(' Descargando PDF:', trId);
 
                 Swal.fire({
                     title: 'Generando PDF...',
@@ -325,7 +325,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                 } catch (error) {
-                    console.error('❌ Error:', error);
+                    console.error('  Error:', error);
                     Swal.fire('Error', 'No se pudo generar el PDF', 'error');
                 }
             }
@@ -340,7 +340,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         const acciones = {
             async aceptar(trId) {
-                console.log('✅ Aceptando transferencia:', trId);
+                console.log(' Aceptando transferencia:', trId);
 
                 Swal.fire({
                     title: 'Confirmar',
@@ -394,7 +394,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
                             }
                         } catch (error) {
-                            console.error('❌ Error:', error);
+                            console.error('  Error:', error);
                             Swal.fire('Error', 'No se pudo aceptar la transferencia', 'error');
                         }
                     }
@@ -409,7 +409,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             aceptarTransferencia: acciones.aceptar
         };
         
-        console.log('✅ Módulo TransferirHistorialModals creado correctamente', publicAPI);
+        console.log(' Módulo TransferirHistorialModals creado correctamente', publicAPI);
         return publicAPI;
     })();
 </script>

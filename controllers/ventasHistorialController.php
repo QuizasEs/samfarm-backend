@@ -375,7 +375,7 @@ class ventasHistorialController extends ventasHistorialModel
             echo json_encode($response);
             exit();
         } catch (Exception $e) {
-            error_log("❌ Error en generar_pdf_nota_controller: " . $e->getMessage());
+            error_log("  Error en generar_pdf_nota_controller: " . $e->getMessage());
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',

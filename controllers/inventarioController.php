@@ -73,7 +73,7 @@ class inventarioController extends inventarioModel
         /* ===== RECALCULAR VALORADO ANTES DE MOSTRAR ===== */
         try {
             inventarioModel::recalcular_valorado_inventario_model();
-            error_log("✅ Valorado de inventario recalculado");
+            error_log(" Valorado de inventario recalculado");
         } catch (Exception $e) {
             error_log("⚠️ Error en recalcular_valorado_inventario_model: " . $e->getMessage());
         }
@@ -87,7 +87,7 @@ class inventarioController extends inventarioModel
 
             $total = self::contar_inventarios_model($filtros);
         } catch (PDOException $e) {
-            error_log("❌ ERROR SQL: " . $e->getMessage());
+            error_log("  ERROR SQL: " . $e->getMessage());
             return '<div class="error" style="padding:20px;color:red;">
                         <strong>Error en la consulta:</strong><br>' .
                 htmlspecialchars($e->getMessage()) .

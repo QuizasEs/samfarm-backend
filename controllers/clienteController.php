@@ -505,7 +505,7 @@ class clienteController extends clienteModel
                             ' . ($_SESSION['nombre_smp'] ?? 'Sistema') . '
                         </div>
                         <div class="info-item">
-                            <strong>📋 Total de Registros</strong>
+                            <strong> Total de Registros</strong>
                             ' . count($datos) . '
                         </div>
                         <div class="info-item">
@@ -557,7 +557,7 @@ class clienteController extends clienteModel
 
             // Fila de totales elegante
             echo '<tr class="total-row">
-                    <td colspan="8" style="text-align: right; padding-right: 20px;">📊 TOTALES GENERALES:</td>
+                    <td colspan="8" style="text-align: right; padding-right: 20px;"> TOTALES GENERALES:</td>
                     <td class="numero">' . number_format($total_compras, 0, ',', '.') . '</td>
                     <td class="moneda">Bs ' . number_format($total_monto, 2, ',', '.') . '</td>
                     <td colspan="2"></td>

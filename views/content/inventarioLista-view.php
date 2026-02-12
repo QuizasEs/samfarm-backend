@@ -199,7 +199,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 url += '&select4=' + encodeURIComponent(select4.value);
             }
 
-            console.log('📊 Generando Excel de inventario:', url);
+            console.log(' Generando Excel de inventario:', url);
 
             window.open(url, '_blank');
 
@@ -247,7 +247,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 url += '&select4=' + encodeURIComponent(select4.value);
             }
 
-            console.log('📄 Generando PDF de inventario:', url);
+            console.log(' Generando PDF de inventario:', url);
 
             window.open(url, '_blank');
 

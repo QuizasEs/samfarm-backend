@@ -41,7 +41,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
 
                             <div class="ventas-resumen-bloque">
                                 <span>Dinero recibido</span>
-                                <input type="number" id="input_dinero_recibido" placeholder="Dinero cancelado" required>
+                                <input type="number" id="input_dinero_recibido" placeholder="Dinero cancelado" >
                             </div>
 
                             <div class="resumen-totales">

@@ -262,7 +262,7 @@ class medicamentoController extends medicamentoModel
 
             error_log("Total registros encontrados: $total");
         } catch (PDOException $e) {
-            error_log("❌ ERROR SQL: " . $e->getMessage());
+            error_log("  ERROR SQL: " . $e->getMessage());
             return '<div class="error" style="padding:20px;color:red;">
                             <strong>Error en la consulta:</strong><br>' .
                 htmlspecialchars($e->getMessage()) .

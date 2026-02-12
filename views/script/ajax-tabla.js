@@ -91,7 +91,7 @@ function obtenerAjaxConfig(container) {
                     const tsHasta = new Date(hasta).getTime();
 
                     if (tsDesde > tsHasta) {
-                        // ❌ Rango inválido
+                        //   Rango inválido
                         fechaDesde.style.borderColor = '#ff9800';
                         fechaHasta.style.borderColor = '#ff9800';
                         fechaDesde.setCustomValidity('La fecha inicial debe ser menor o igual a la final');
@@ -100,7 +100,7 @@ function obtenerAjaxConfig(container) {
                         mostrarTooltip(fechaDesde, 'La fecha "Desde" debe ser anterior o igual a "Hasta"');
                         return false;
                     } else {
-                        // ✅ Rango válido
+                        //  Rango válido
                         fechaDesde.setCustomValidity('');
                         fechaHasta.setCustomValidity('');
                         fechaDesde.style.borderColor = '#4CAF50';

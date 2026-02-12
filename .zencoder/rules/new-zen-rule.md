@@ -18,11 +18,11 @@ Describe what this rule is for and when it should be used.
 
 ## Examples
 
-### ✅ Correct Usage
+###  Correct Usage
 
 // Example demonstrating the correct approach
 
-### ❌ Avoid This
+###   Avoid This
 
 // Example showing what to avoid
 

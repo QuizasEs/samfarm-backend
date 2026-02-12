@@ -394,7 +394,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         url += '&fecha_hasta=' + encodeURIComponent(fechaHasta.value);
                     }
 
-                    console.log('📥 Descargando Excel de proveedores:', url);
+                    console.log(' Descargando Excel de proveedores:', url);
 
                     window.open(url, '_blank');
 
@@ -452,7 +452,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 url += '&fecha_hasta=' + encodeURIComponent(fechaHasta.value);
             }
 
-            console.log('📄 Generando PDF de proveedores:', url);
+            console.log(' Generando PDF de proveedores:', url);
 
             window.open(url, '_blank');
 
