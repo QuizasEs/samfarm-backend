@@ -295,6 +295,107 @@
     });
 </script>
 
+<?php if (isset($_SESSION['id_smp']) && !empty($_SESSION['id_smp'])) { ?>
+    <!-- Session Timer Component -->
+    <style>
+        .session-timer-floating {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        body.dark .session-timer-floating {
+            background: #242526;
+            color: #e4e6eb;
+            border-color: #3e4042;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .session-timer-floating .timer-close {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #888;
+        }
+        .session-timer-floating .timer-close:hover {
+            background: rgba(0,0,0,0.1);
+            color: #333;
+        }
+        body.dark .session-timer-floating .timer-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .session-timer-floating .timer-icon {
+            font-size: 18px;
+            color: #1976D2;
+        }
+        body.dark .session-timer-floating .timer-icon {
+            color: #2196F3;
+        }
+        .session-timer-expired {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+        body.dark .session-timer-expired {
+            color: #ff5252;
+        }
+    </style>
+
+    <div id="sessionTimer" class="session-timer-floating">
+        <span class="timer-icon"><ion-icon name="time-outline"></ion-icon></span>
+        <div id="timerContent">
+            Sesión: <span id="timerCountdown">--:--</span>
+        </div>
+        <span class="timer-close" onclick="document.getElementById('sessionTimer').style.display='none'">&times;</span>
+    </div>
+
+    <script>
+        (function() {
+            // Obtener tiempo de vida de sesión de PHP (en segundos)
+            // session_cache_expire() retorna minutos, multiplicamos por 60
+            // Si no, usamos un valor por defecto seguro como 24 minutos (1440s)
+            let sessionTime = <?php echo session_cache_expire() * 60; ?>;
+            
+            // Si session_cache_expire retorna 0 o algo raro, default a 1440
+            if (sessionTime <= 0) sessionTime = 1440;
+
+            const countdownEl = document.getElementById('timerCountdown');
+            const timerContent = document.getElementById('timerContent');
+            
+            function updateTimer() {
+                if (sessionTime <= 0) {
+                    timerContent.innerHTML = '<span class="session-timer-expired">Sesión expirada. Recargue la página.</span>';
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                const minutes = Math.floor(sessionTime / 60);
+                const seconds = sessionTime % 60;
+                
+                countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                sessionTime--;
+            }
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        })();
+    </script>
+<?php } ?>
+
 <!-- script para modales -->
 <script>
     const ModalManager = (() => {

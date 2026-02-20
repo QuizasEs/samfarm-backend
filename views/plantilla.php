@@ -29,6 +29,7 @@
             echo $lc->forzar_cierre_sesion_controller();
             exit();
         }
+        
         include_once "inc/header.php";
 
         /* dividir cadenas por "/"" */
