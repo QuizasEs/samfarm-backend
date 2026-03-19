@@ -81,6 +81,7 @@ class ventaModel extends mainModel
         WHERE lm.su_id = :sucursal_id
           AND lm.lm_estado = 'activo'
           AND lm.lm_cant_actual_unidades > 0
+          AND lm.lm_precio_venta <= 900
           AND (
               m.med_nombre_quimico LIKE :termino
               OR m.med_codigo_barras LIKE :termino
@@ -162,6 +163,7 @@ class ventaModel extends mainModel
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
             LEFT JOIN laboratorios la ON la.la_id = m.la_id
             WHERE lm.lm_precio_venta IS NOT NULL AND lm.lm_precio_venta > 0
+            AND lm.lm_precio_venta <= 900
             GROUP BY m.med_id
             ORDER BY vendidos DESC
             LIMIT :limit
