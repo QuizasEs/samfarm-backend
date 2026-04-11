@@ -6,7 +6,6 @@
             $listaBlanca=[
                 "dashboard",
                 "categoriaLista",
-                "laboratorioLista",
                 "presentacionLista",
                 "usuarioLista",
                 "medicamentoRegistro",
@@ -17,8 +16,6 @@
                 "proveedorRegistro", 
                 "proveedorLista",
                 "proveedorActualizar",
-                "laboratorioRegistro",
-                "laboratorioActualizar", 
                 "compraRegistro",
                 "compraOrden",
                 "loteActualizar",
@@ -46,8 +43,7 @@
                 "cajaLista",
                 "cajaHistorialTotales",
                 "ajusteInventarioCompleto",
-                "script_bulk"
-
+                "ingresoMasivo",
             ];
 
             if(in_array($vistas,$listaBlanca)){

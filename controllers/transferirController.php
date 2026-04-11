@@ -22,11 +22,10 @@ class transferirController extends transferirModel
         }
 
         $busqueda = mainModel::limpiar_cadena($_POST['busqueda'] ?? '');
-        $laboratorio = mainModel::limpiar_cadena($_POST['laboratorio'] ?? '');
         $fecha_venc_max = mainModel::limpiar_cadena($_POST['fecha_venc_max'] ?? '');
 
         try {
-            $stmt = transferirModel::buscar_lotes_disponibles_model($su_origen, $busqueda, $laboratorio, $fecha_venc_max);
+            $stmt = transferirModel::buscar_lotes_disponibles_model($su_origen, $busqueda, $fecha_venc_max);
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return json_encode($datos, JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {

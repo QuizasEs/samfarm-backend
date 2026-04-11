@@ -48,15 +48,15 @@ class medicamentoController extends medicamentoModel
         $uso = mainModel::limpiar_cadena($_POST['Uso_reg']);
         $forma = mainModel::limpiar_cadena($_POST['Forma_reg']);
         $via = mainModel::limpiar_cadena($_POST['Via_reg']);
-        $laboratorio = mainModel::limpiar_cadena($_POST['Laboratorio_reg']);
+        $proveedor = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
 
         $uso = (int)$uso;
         $forma = (int)$forma;
         $via = (int)$via;
-        $laboratorio = (int)$laboratorio;
+        $proveedor = (int)$proveedor;
 
         /* verificamos que los campos requeridos no esten vacios */
-        if ($nombre == "" || $principio == "" || $accion == "" || $presentacion == "" || $uso == "" || $forma == "" || $via == "" || $laboratorio == "") {
+        if ($nombre == "" || $principio == "" || $accion == "" || $presentacion == "" || $uso == "" || $forma == "" || $via == "") {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
@@ -113,7 +113,7 @@ class medicamentoController extends medicamentoModel
 
 
         /* verificar valor de selects no negativo */
-        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0) {
+        if ($uso <= 0 || $forma <= 0 || $via <= 0) {
             $alerta = [
                 "Alerta" => "simple",
                 "Titulo" => "Ocurrió un error inesperado",
@@ -131,7 +131,7 @@ class medicamentoController extends medicamentoModel
             "Uso" => $uso,
             "Forma" => $forma,
             "Via" => $via,
-            "Laboratorio" => $laboratorio,
+            "Proveedor" => $proveedor,
             "Descripcion" => $descripcion,
             "CodigoBarras" => $codigoBarras
         ];
@@ -184,7 +184,6 @@ class medicamentoController extends medicamentoModel
         $whereParts = [];
 
         // Validar estados activos
-        $whereParts[] = "(la.la_estado = 1 OR la.la_estado IS NULL)";
         $whereParts[] = "(ff.ff_estado = 1 OR ff.ff_estado IS NULL)";
         $whereParts[] = "(vd.vd_estado = 1 OR vd.vd_estado IS NULL)";
         $whereParts[] = "(uf.uf_estado = 1 OR uf.uf_estado IS NULL)";
@@ -196,15 +195,12 @@ class medicamentoController extends medicamentoModel
                     m.med_principio_activo LIKE '%$busqueda%' OR
                     m.med_presentacion LIKE '%$busqueda%' OR
                     m.med_accion_farmacologica LIKE '%$busqueda%' OR
-                    m.med_codigo_barras LIKE '%$busqueda%' OR
-                    la.la_nombre_comercial LIKE '%$busqueda%'
+                    m.med_codigo_barras LIKE '%$busqueda%'
                 )";
         }
 
         // Filtros por selects
-        if ($f1 !== '' && is_numeric($f1)) {
-            $whereParts[] = "m.la_id = " . (int)$f1;
-        }
+        
 
         if ($f2 !== '' && is_numeric($f2)) {
             $whereParts[] = "m.vd_id = " . (int)$f2;
@@ -232,12 +228,10 @@ class medicamentoController extends medicamentoModel
                     m.med_codigo_barras,
                     m.med_creado_en,
                     m.med_actualizado_en,
-                    la.la_nombre_comercial AS laboratorio_nombre,
                     ff.ff_nombre AS forma_farmaceutica,
                     vd.vd_nombre AS via_administracion,
                     uf.uf_nombre AS uso_farmacologico
                 FROM medicamento AS m
-                LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
                 LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
                 LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
                 LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
@@ -280,7 +274,6 @@ class medicamentoController extends medicamentoModel
                                 <th>N°</th>
                                 <th>NOMBRE QUÍMICO</th>
                                 <th>PRINCIPIO ACTIVO</th>
-                                <th>LABORATORIO</th>
                                 <th>FORMA</th>
                                 <th>VÍA</th>
                                 <th>USO</th>
@@ -322,7 +315,7 @@ class medicamentoController extends medicamentoModel
                             <td>' . $contador . '</td>
                             <td><strong>' . htmlspecialchars($rows['med_nombre_quimico']) . '</strong></td>
                             <td>' . htmlspecialchars($rows['med_principio_activo']) . '</td>
-                            <td>' . htmlspecialchars($rows['laboratorio_nombre'] ?? 'Sin laboratorio') . '</td>
+                            
                             <td>' . htmlspecialchars($rows['forma_farmaceutica'] ?? 'Sin forma') . '</td>
                             <td>' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . '</td>
                             <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
@@ -414,11 +407,11 @@ class medicamentoController extends medicamentoModel
         $uso           = mainModel::limpiar_cadena($_POST['Uso_up']);
         $forma         = mainModel::limpiar_cadena($_POST['Forma_up']);
         $via           = mainModel::limpiar_cadena($_POST['Via_up']);
-        $laboratorio   = mainModel::limpiar_cadena($_POST['Laboratorio_up']);
+        $proveedor     = mainModel::limpiar_cadena($_POST['Proveedor_up']);
         /* verificamos que los campos obligatorios sean llenados correctamente */
         if (
             $nombre == "" || $principio == "" || $accion == "" || $presentacion == "" ||
-            $uso == "" || $forma == "" || $via == "" || $laboratorio == ""
+            $uso == "" || $forma == "" || $via == ""
         ) {
             echo json_encode([
                 "Alerta" => "simple",
@@ -472,10 +465,9 @@ class medicamentoController extends medicamentoModel
         $uso = (int)$uso;
         $forma = (int)$forma;
         $via = (int)$via;
-        $laboratorio = (int)$laboratorio;
 
         /* preguntamos si estan vacios */
-        if ($uso <= 0 || $forma <= 0 || $via <= 0 || $laboratorio <= 0) {
+        if ($uso <= 0 || $forma <= 0 || $via <= 0) {
             echo json_encode([
                 "Alerta" => "simple",
                 "Titulo" => "Error de validación",
@@ -508,7 +500,7 @@ class medicamentoController extends medicamentoModel
             "Uso"            => $uso,
             "Forma"          => $forma,
             "Via"            => $via,
-            "Laboratorio"    => $laboratorio,
+            "Proveedor"      => $proveedor,
             "Id"             => $id
         ];
         /* preguntamos si se actualizo correctamente los datos */

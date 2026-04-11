@@ -78,7 +78,7 @@ class loteController extends loteModel
             $whereParts[] = "(
                 m.med_nombre_quimico LIKE '%$busqueda%' OR
                 m.med_principio_activo LIKE '%$busqueda%' OR
-                p.pr_nombres LIKE '%$busqueda%' OR
+                p.pr_razon_social LIKE '%$busqueda%' OR
                 lm.lm_numero_lote LIKE '%$busqueda%'
             )";
         }
@@ -130,7 +130,7 @@ class loteController extends loteModel
                 lm.lm_numero_lote,
                 m.med_nombre_quimico,
                 m.med_principio_activo,
-                p.pr_nombres,
+                p.pr_razon_social,
                 s.su_nombre,
                 lm.lm_cant_caja AS lm_cajas_inicial,
                 lm.lm_total_unidades AS lm_unidades_inicial,
@@ -261,7 +261,7 @@ class loteController extends loteModel
                         <td>' . $contador . '</td>
                         <td><strong>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</strong></td>
                         <td>' . htmlspecialchars($rows['med_nombre_quimico']) . '<br><small>' . htmlspecialchars($rows['med_principio_activo']) . '</small></td>
-                        <td>' . htmlspecialchars($rows['pr_nombres'] ?? 'N/A') . '</td>' .
+                        <td>' . htmlspecialchars($rows['pr_razon_social'] ?? 'N/A') . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 10px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($rows['su_nombre']) . '</span></td>' : '') .
                     '<td>' . $rows['lm_cajas_inicial'] . '</td>
                         <td>' . number_format($rows['lm_unidades_inicial']) . '</td>
@@ -770,7 +770,7 @@ class loteController extends loteModel
                     lm.lm_numero_lote,
                     m.med_nombre_quimico,
                     m.med_principio_activo,
-                    p.pr_nombres,
+                    p.pr_razon_social,
                     s.su_nombre,
                     lm.lm_cant_caja AS lm_cajas_inicial,
                     lm.lm_total_unidades AS lm_unidades_inicial,
@@ -793,7 +793,7 @@ class loteController extends loteModel
                 $whereParts[] = "(
                     m.med_nombre_quimico LIKE '%{$filtros['busqueda']}%' OR
                     m.med_principio_activo LIKE '%{$filtros['busqueda']}%' OR
-                    p.pr_nombres LIKE '%{$filtros['busqueda']}%' OR
+                    p.pr_razon_social LIKE '%{$filtros['busqueda']}%' OR
                     lm.lm_numero_lote LIKE '%{$filtros['busqueda']}%'
                 )";
             }
@@ -898,7 +898,7 @@ class loteController extends loteModel
                     $cells = [
                         ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
                         ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 25), 'align' => 'L'],
-                        ['text' => substr($row['pr_nombres'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 15), 'align' => 'L'],
                         ['text' => substr($row['su_nombre'] ?? 'N/A', 0, 15), 'align' => 'L'],
                         ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
                         ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
@@ -911,7 +911,7 @@ class loteController extends loteModel
                     $cells = [
                         ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
                         ['text' => substr($row['med_nombre_químico'] ?? 'N/A', 0, 30), 'align' => 'L'],
-                        ['text' => substr($row['pr_nombres'] ?? 'N/A', 0, 20), 'align' => 'L'],
+                        ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
                         ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
                         ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],

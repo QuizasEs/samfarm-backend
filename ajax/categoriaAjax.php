@@ -157,45 +157,6 @@ if (isset($_POST['categoriaAjax'])) {
         exit();
     }
 
-    if ($valor === "listar_laboratorio") {
-        $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
-        $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 6;
-        $busqueda = isset($_POST['busqueda']) ? $_POST['busqueda'] : '';
-
-        header('Content-Type: text/html; charset=utf-8');
-        echo $ins_categoria->paginado_laboratorios_controller(
-            $pagina,
-            $registros,
-            'categoria-lista',
-            $busqueda
-        );
-        exit();
-    }
-
-    if ($valor == "agregar_laboratorio") {
-        header('Content-Type: application/json; charset=utf-8');
-        echo $ins_categoria->agregar_laboratorios_controller();
-        exit();
-    }
-
-    if ($valor == "obtener_laboratorio") {
-        header('Content-Type: application/json; charset=utf-8');
-        echo $ins_categoria->obtener_laboratorios_controller();
-        exit();
-    }
-
-    if ($valor == "actualizar_laboratorio") {
-        header('Content-Type: application/json; charset=utf-8');
-        echo $ins_categoria->actualizar_laboratorios_controller();
-        exit();
-    }
-
-    if ($valor == "cambiar_estado_laboratorio") {
-        header('Content-Type: application/json; charset=utf-8');
-        echo $ins_categoria->cambiar_estado_laboratorios_controller();
-        exit();
-    }
-
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         "Alerta" => "simple",

@@ -1,27 +1,17 @@
 <?php 
-/* indicamos que se envia esta petito via ajax */
+/* 
+modulo deshabilitado 
+la tabla laboratorios fue eliminada de la base de datos
+*/
 
 $peticionAjax = true;
 
-/* importar la configuracion general de la aplicacion (rutas, constantes, conexxiones, etc) */
+header('content-Type: application/json; charset=utf-8');
 
-
-header('content-Type: aplication/json; charset=uft-8');
-
-
-if(isset($_POST['LaboratorioAjax'])){
-
-    $valor=$_POST['LaboratorioAjax'];
-    
-    require_once "../controllers/proveedorController.php";
-    $ins_lab = new proveedorController();
-    if ($valor == "save"){
-        echo $ins_lab->agregar_laboratorio_controller();
-    }
-    if ($valor == "update"){
-        echo $ins_lab->actualizar_laboratorio_controller();
-        
-    }
-}
+echo json_encode([
+    'alerta' => 'error',
+    'titulo' => 'Modulo deshabilitado',
+    'mensaje' => 'La funcionalidad de laboratorios ya no esta disponible'
+]);
 
 ?>

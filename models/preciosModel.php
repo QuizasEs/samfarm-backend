@@ -51,15 +51,15 @@ class preciosModel extends mainModel
             SELECT 
                 m.med_id,
                 m.med_nombre_quimico,
-                la.la_nombre_comercial,
+                p.pr_razon_social AS proveedor,
                 ROUND(AVG(lm.lm_precio_compra), 2) AS precio_compra_promedio,
                 COUNT(DISTINCT lm.lm_id) AS total_lotes,
                 SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN 1 ELSE 0 END) AS lotes_activos,
                 SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN lm.lm_cant_actual_unidades ELSE 0 END) AS total_unidades_activas,
                 SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN lm.lm_cant_actual_unidades * lm.lm_precio_venta ELSE 0 END) AS total_valorado
             FROM medicamento m
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
             LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
             WHERE 1=1
         ";
 
@@ -72,7 +72,7 @@ class preciosModel extends mainModel
         }
 
         $sql .= "
-            GROUP BY m.med_id, m.med_nombre_quimico, la.la_nombre_comercial
+            GROUP BY m.med_id, m.med_nombre_quimico, p.pr_razon_social
             HAVING SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN 1 ELSE 0 END) > 0
             ORDER BY m.med_nombre_quimico ASC
         ";
@@ -102,7 +102,7 @@ class preciosModel extends mainModel
             SELECT
                 lm.lm_id,
                 lm.lm_numero_lote,
-                COALESCE(la.la_nombre_comercial, 'N/A') AS med_nombre_comercial,
+                COALESCE(p.pr_razon_social, 'N/A') AS proveedor,
                 su.su_nombre AS sucursal_nombre,
                 lm.lm_precio_compra,
                 lm.lm_precio_venta,
@@ -113,7 +113,7 @@ class preciosModel extends mainModel
                 lm.lm_estado
             FROM lote_medicamento lm
             LEFT JOIN medicamento m ON m.med_id = lm.med_id
-            LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
             LEFT JOIN sucursales su ON su.su_id = lm.su_id
             WHERE lm.med_id = :med_id
         ";

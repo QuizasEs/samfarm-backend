@@ -93,10 +93,11 @@ if ($datos->rowCount() == 1) {
                     </select>
                 </div>
                 <div class="form-bloque">
-                    <label for="">LABORATORIO*</label>
-                    <select class="select-style" name="Laboratorio_up">
-                        <?php foreach ($datos_select['laboratorios'] as $laboratorios) { ?>
-                            <option value="<?php echo $laboratorios['la_id'] ?>" <?php if ($campos['la_id'] == $laboratorios['la_id']) { ?> selected="" <?php } ?>><?php echo $laboratorios['la_nombre_comercial'] ?></option>
+                    <label for="">PROVEEDOR (LABORATORIO)*</label>
+                    <select class="select-style" name="Proveedor_up">
+                        <option value="">SELECCIONAR</option>
+                        <?php foreach ($datos_select['proveedores'] as $proveedor) { ?>
+                            <option value="<?php echo $proveedor['pr_id'] ?>" <?php if ($campos['pr_id'] == $proveedor['pr_id']) { ?> selected="" <?php } ?>><?php echo $proveedor['pr_razon_social'] ?></option>
                         <?php } ?>
                     </select>
                 </div>

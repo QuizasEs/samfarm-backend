@@ -85,14 +85,15 @@ $datos_select = $ins_med->datos_extras_controller();
                 </select>
             </div>
             <div class="form-bloque">
-                <label for="">LABORATORIO*</label>
-                <select class="select-style" name="Laboratorio_reg">
+                <label for="">PROVEEDOR (LABORATORIO)*</label>
+                <select class="select-style" name="Proveedor_reg">
                     <option value="">SELECCIONAR</option>
-                    <?php foreach($datos_select['laboratorios'] as $laboratorios) {?>
-                    <option value="<?php echo $laboratorios['la_id']?>"><?php echo $laboratorios['la_nombre_comercial']?></option>
+                    <?php foreach($datos_select['proveedores'] as $proveedor) {?>
+                    <option value="<?php echo $proveedor['pr_id']?>"><?php echo $proveedor['pr_razon_social']?></option>
                     <?php }?>
                 </select>
             </div>
+
 
         </div>
         <div class="form-buttons">

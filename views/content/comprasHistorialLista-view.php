@@ -131,23 +131,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="row">
                     <div class="col">
-                        <label>Número de Factura:</label>
-                        <p id="detalleNumeroFactura">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Fecha de Factura:</label>
-                        <p id="detalleFechaFactura">-</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
                         <label>Proveedor:</label>
                         <p id="detalleProveedor">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Laboratorio:</label>
-                        <p id="detalleLaboratorio">-</p>
                     </div>
                 </div>
 
@@ -324,10 +309,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                         document.getElementById('detalleNumeroCompra').textContent = data.numero_compra || 'N/A';
                         document.getElementById('detalleFechaCompra').textContent = data.fecha_compra || 'N/A';
-                        document.getElementById('detalleNumeroFactura').textContent = data.numero_factura || 'N/A';
-                        document.getElementById('detalleFechaFactura').textContent = data.fecha_factura || 'N/A';
                         document.getElementById('detalleProveedor').textContent = data.proveedor || 'N/A';
-                        document.getElementById('detalleLaboratorio').textContent = data.laboratorio || 'N/A';
                         document.getElementById('detalleSucursal').textContent = data.sucursal || 'N/A';
                         document.getElementById('detalleUsuario').textContent = data.usuario || 'N/A';
 

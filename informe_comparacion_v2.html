@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe de Comparación: samfarm_db.sql vs samfarm_db_v2.sql</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background: #007bff; color: white; }
+        .eliminado { background: #ffcccc; }
+        .agregado { background: #ccffcc; }
+        .mantenido { background: #fff3cd; }
+        .sin-cambios { background: #e2e3e5; }
+        .resumen { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .cambio { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Informe de Comparación de Base de Datos</h1>
+        <p><strong>Original:</strong> samfarm_db.sql</p>
+        <p><strong>Nueva:</strong> samfarm_db_v2.sql</p>
+        
+        <div class="resumen">
+            <h2>Resumen de Cambios</h2>
+            <ul>
+                <li><strong>Total tablas originales:</strong> 35</li>
+                <li><strong>Total tablas nuevas:</strong> 33</li>
+                <li><strong>Tablas eliminadas:</strong> 2</li>
+                <li><strong>Tablas modificadas:</strong> 2</li>
+            </ul>
+        </div>
+
+        <h2>1. Tablas Eliminadas</h2>
+        <table>
+            <tr>
+                <th>Tabla</th>
+                <th>Tipo de Cambio</th>
+                <th>Descripción</th>
+            </tr>
+            <tr class="eliminado">
+                <td>laboratorios</td>
+                <td>ELIMINADA</td>
+                <td>Tabla que almacenaba información de laboratorios/fabricantes</td>
+            </tr>
+            <tr class="eliminado">
+                <td>proveedores_laboratorio</td>
+                <td>ELIMINADA</td>
+                <td>Tabla pivote entre proveedores y laboratorios</td>
+            </tr>
+        </table>
+
+        <h2>2. Tablas Modificadas</h2>
+        
+        <h3>2.1 Tabla: compras</h3>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Tipo Original</th>
+                <th>Tipo Nuevo</th>
+                <th>Cambio</th>
+            </tr>
+            <tr class="eliminado">
+                <td>la_id</td>
+                <td>bigint(20) UNSIGNED</td>
+                <td>-</td>
+                <td>ELIMINADO - Referencia a laboratorios</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_id</td>
+                <td>bigint(20) UNSIGNED</td>
+                <td>bigint(20) UNSIGNED</td>
+                <td>MANTENIDO - Referencia a proveedores</td>
+            </tr>
+            <tr class="mantenido">
+                <td>co_id, co_numero, co_fecha, us_id, su_id, etc.</td>
+                <td>varios</td>
+                <td>varios</td>
+                <td>MANTENIDOS</td>
+            </tr>
+        </table>
+
+        <h3>2.2 Tabla: medicamento</h3>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Tipo Original</th>
+                <th>Tipo Nuevo</th>
+                <th>Cambio</th>
+            </tr>
+            <tr class="eliminado">
+                <td>la_id</td>
+                <td>bigint(20) UNSIGNED</td>
+                <td>-</td>
+                <td>ELIMINADO - Referencia a laboratorios</td>
+            </tr>
+            <tr class="mantenido">
+                <td>med_id, med_nombre_quimico, med_principio_activo, etc.</td>
+                <td>varios</td>
+                <td>varios</td>
+                <td>MANTENIDOS</td>
+            </tr>
+        </table>
+
+        <h3>2.3 Tabla: proveedores (CAMBIO DE ESTRUCTURA)</h3>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Tipo Original</th>
+                <th>Tipo Nuevo</th>
+                <th>Cambio</th>
+            </tr>
+            <tr class="eliminado">
+                <td>pr_nombres</td>
+                <td>varchar(120)</td>
+                <td>-</td>
+                <td>ELIMINADO</td>
+            </tr>
+            <tr class="eliminado">
+                <td>pr_apellido_paterno</td>
+                <td>varchar(80)</td>
+                <td>-</td>
+                <td>ELIMINADO</td>
+            </tr>
+            <tr class="eliminado">
+                <td>pr_apellido_materno</td>
+                <td>varchar(80)</td>
+                <td>-</td>
+                <td>ELIMINADO</td>
+            </tr>
+            <tr class="eliminado">
+                <td>pr_direccion</td>
+                <td>varchar(250)</td>
+                <td>-</td>
+                <td>ELIMINADO</td>
+            </tr>
+            <tr class="agregado">
+                <td>pr_razon_social</td>
+                <td>-</td>
+                <td>varchar(250)</td>
+                <td>AGREGADO</td>
+            </tr>
+            <tr class="agregado">
+                <td>pr_nombre_comercial</td>
+                <td>-</td>
+                <td>varchar(250)</td>
+                <td>AGREGADO</td>
+            </tr>
+            <tr class="agregado">
+                <td>pr_correo</td>
+                <td>-</td>
+                <td>varchar(200)</td>
+                <td>AGREGADO</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_telefono</td>
+                <td>varchar(30)</td>
+                <td>varchar(30)</td>
+                <td>MANTENIDO</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_nit</td>
+                <td>varchar(50)</td>
+                <td>varchar(50)</td>
+                <td>MANTENIDO</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_creado_en</td>
+                <td>datetime</td>
+                <td>datetime</td>
+                <td>MANTENIDO</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_actualizado_en</td>
+                <td>datetime</td>
+                <td>datetime</td>
+                <td>MANTENIDO</td>
+            </tr>
+            <tr class="mantenido">
+                <td>pr_estado</td>
+                <td>tinyint(1)</td>
+                <td>tinyint(1)</td>
+                <td>MANTENIDO</td>
+            </tr>
+        </table>
+
+        <h2>3. Foreign Keys Eliminadas</h2>
+        <table>
+            <tr>
+                <th>Tabla</th>
+                <th>Foreign Key</th>
+                <th>Referencia</th>
+            </tr>
+            <tr class="eliminado">
+                <td>compras</td>
+                <td>fk_compras_laboratorio</td>
+                <td>laboratorios(la_id)</td>
+            </tr>
+            <tr class="eliminado">
+                <td>medicamento</td>
+                <td>fk_medicamento_laboratorio</td>
+                <td>laboratorios(la_id)</td>
+            </tr>
+            <tr class="eliminado">
+                <td>proveedores_laboratorio</td>
+                <td>fk_pl_la</td>
+                <td>laboratorios(la_id)</td>
+            </tr>
+            <tr class="eliminado">
+                <td>proveedores_laboratorio</td>
+                <td>fk_pl_pr</td>
+                <td>proveedores(pr_id)</td>
+            </tr>
+        </table>
+
+        <h2>4. Indices Eliminados</h2>
+        <table>
+            <tr>
+                <th>Tabla</th>
+                <th>Índice</th>
+            </tr>
+            <tr class="eliminado">
+                <td>compras</td>
+                <td>fk_compras_laboratorios (la_id)</td>
+            </tr>
+            <tr class="eliminado">
+                <td>medicamento</td>
+                <td>fk_med_la (la_id)</td>
+            </tr>
+            <tr class="eliminado">
+                <td>laboratorios</td>
+                <td>ux_laboratorios_nombre</td>
+            </tr>
+            <tr class="eliminado">
+                <td>proveedores_laboratorio</td>
+                <td>ux_pl_pr_la</td>
+            </tr>
+        </table>
+
+        <h2>5. Resumen de Relaciones con Proveedores</h2>
+        <p>Las tablas que ahora se relacionan directamente con <strong>proveedores</strong>:</p>
+        <ul>
+            <li><strong>compras</strong> - a través de pr_id</li>
+            <li><strong>lote_medicamento</strong> - a través de pr_id</li>
+        </ul>
+
+        <h2>6. Notas Importantes</h2>
+        <ul>
+            <li>La tabla proveedores ahora funciona como proveedor Y laboratorio/fabricante</li>
+            <li>No se migran datos (como solicitaste)</li>
+            <li>Los datos existentes de laboratorios se perderán</li>
+            <li>Los datos de proveedores se mantienen pero sin nombres/apellidos (cambiados a razón social y nombre comercial)</li>
+        </ul>
+
+        <h2>7. Archivos Generados</h2>
+        <ul>
+            <li><strong>samfarm_db_v2.sql</strong> - Nueva estructura de base de datos completa</li>
+            <li><strong>samfarm_db_modificacion.sql</strong> - Script para aplicar cambios a base de datos real</li>
+        </ul>
+    </div>
+</body>
+</html>

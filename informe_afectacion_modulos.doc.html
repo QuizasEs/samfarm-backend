@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Informe Completo de Afectacion - Eliminacion Tabla Laboratorios</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px; }
+h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
+h3 { color: #7f8c8d; }
+table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 12px; }
+th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
+th { background-color: #3498db; color: white; }
+tr:nth-child(even) { background-color: #ecf0f1; }
+.critica { background-color: #e74c3c; color: white; font-weight: bold; }
+.alta { background-color: #e67e22; color: white; }
+.media { background-color: #f1c40f; color: black; }
+.baja { background-color: #27ae60; color: white; }
+.resumen { background-color: #ecf0f1; padding: 20px; border-radius: 10px; margin: 20px 0; }
+.nota { background-color: #fff9e6; border-left: 4px solid #f39c12; padding: 15px; margin: 20px 0; }
+pre { background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+.modulo { background-color: #8e44ad; color: white; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>INFORME COMPLETO DE AFECTACION</h1>
+<p><strong>Proyecto:</strong> SamFarm Backend</p>
+<p><strong>Fecha:</strong> 21/03/2026</p>
+<p><strong>Cambio:</strong> Eliminacion de la tabla laboratorios y migracion a tabla proveedores</p>
+
+<div class="nota">
+<strong>Contexto:</strong> Se elimino la tabla laboratorios de la base de datos samfarm_db_v2.sql. 
+La tabla proveedores debera cumplir la funcion de laboratorio sin afectar el funcionamiento actual de cada modulo.
+<br><br>
+<strong>Importante:</strong> Los modulo se organizan por funcionalidad (model + controller + ajax + views).
+</div>
+
+<h2>1. RESUMEN POR MODULO FUNCIONAL</h2>
+
+<table>
+<tr>
+<th>Modulo Funcional</th>
+<th>Archivos Afectados</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td class="modulo">MODULO LABORATORIO</td>
+<td>7 archivos</td>
+<td class="critica">CRITICO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO CATEGORIA</td>
+<td>4 archivos</td>
+<td class="critica">CRITICO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO MEDICAMENTO</td>
+<td>6 archivos</td>
+<td class="alta">ALTO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO INVENTARIO</td>
+<td>4 archivos</td>
+<td class="alta">ALTO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO COMPRA</td>
+<td>6 archivos</td>
+<td class="alta">ALTO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO TRANSFERIR</td>
+<td>3 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO VENTA</td>
+<td>2 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO DEVOLUCION</td>
+<td>2 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO MERMA</td>
+<td>2 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO PROVEEDOR</td>
+<td>2 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO PRECIOS</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO CAJA</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO CLIENTE</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO DASHBOARD</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO AJUSTE INVENTARIO</td>
+<td>3 archivos</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO LOTES</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+<tr>
+<td class="modulo">MODULO SCRIPT</td>
+<td>1 archivo</td>
+<td class="media">MEDIO</td>
+</tr>
+</table>
+
+<h2>2. DETALLE POR MODULO FUNCIONAL</h2>
+
+<h3>2.1 MODULO LABORATORIO (CRITICO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>ajax/laboratorioAjax.php</td>
+<td>Ajax</td>
+<td>Eliminar archivo completo</td>
+</tr>
+<tr>
+<td>views/content/laboratorioLista-view.php</td>
+<td>View</td>
+<td>Eliminar vista completa</td>
+</tr>
+<tr>
+<td>views/content/laboratorioRegistro-view.php</td>
+<td>View</td>
+<td>Eliminar vista completa</td>
+</tr>
+</table>
+
+<h3>2.2 MODULO CATEGORIA (CRITICO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/categoriaModel.php</td>
+<td>Model</td>
+<td>Eliminar 7 funciones de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/categoriaController.php</td>
+<td>Controller</td>
+<td>Eliminar 6 controladores de laboratorio</td>
+</tr>
+<tr>
+<td>ajax/categoriaAjax.php</td>
+<td>Ajax</td>
+<td>Eliminar 5 casos de laboratorio</td>
+</tr>
+<tr>
+<td>views/content/categoriaLista-view.php</td>
+<td>View</td>
+<td>Eliminar modal y script de laboratorio</td>
+</tr>
+</table>
+
+<h3>2.3 MODULO MEDICAMENTO (ALTO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/medicamentoModel.php</td>
+<td>Model</td>
+<td>Eliminar join y filtros de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/medicamentoController.php</td>
+<td>Controller</td>
+<td>Eliminar procesamiento de laboratorio</td>
+</tr>
+<tr>
+<td>ajax/medicamentoAjax.php</td>
+<td>Ajax</td>
+<td>Eliminar filtro laboratorio</td>
+</tr>
+<tr>
+<td>views/content/medicamentoLista-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+<tr>
+<td>views/content/medicamentoRegistro-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+<tr>
+<td>views/content/medicamentoActualizar-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+</table>
+
+<h3>2.4 MODULO INVENTARIO (ALTO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/inventarioModel.php</td>
+<td>Model</td>
+<td>Eliminar join y filtros de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/inventarioController.php</td>
+<td>Controller</td>
+<td>Eliminar filtros y columnas de laboratorio</td>
+</tr>
+<tr>
+<td>ajax/inventarioAjax.php</td>
+<td>Ajax</td>
+<td>Eliminar filtro laboratorio</td>
+</tr>
+<tr>
+<td>views/content/inventarioLista-view.php</td>
+<td>View</td>
+<td>Eliminar select y columna laboratorio</td>
+</tr>
+</table>
+
+<h3>2.5 MODULO COMPRA (ALTO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/compraHistorialModel.php</td>
+<td>Model</td>
+<td>Eliminar join y filtros de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/compraHistorialController.php</td>
+<td>Controller</td>
+<td>Eliminar filtros y columnas de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/compraController.php</td>
+<td>Controller</td>
+<td>Eliminar registro de laboratorio</td>
+</tr>
+<tr>
+<td>ajax/compraAjax.php</td>
+<td>Ajax</td>
+<td>Eliminar campo laboratorio</td>
+</tr>
+<tr>
+<td>views/content/compraRegistro-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+<tr>
+<td>views/content/compraOrden-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+</table>
+
+<h3>2.6 MODULO TRANSFERIR (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/transferirModel.php</td>
+<td>Model</td>
+<td>Eliminar join y filtro de laboratorio</td>
+</tr>
+<tr>
+<td>controllers/transferirController.php</td>
+<td>Controller</td>
+<td>Eliminar filtro laboratorio</td>
+</tr>
+<tr>
+<td>views/content/transferirLista-view.php</td>
+<td>View</td>
+<td>Eliminar filtro y columna laboratorio</td>
+</tr>
+</table>
+
+<h3>2.7 MODULO VENTA (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/ventaModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+<tr>
+<td>ajax/ventaAjax.php</td>
+<td>Ajax</td>
+<td>Sin cambios</td>
+</tr>
+</table>
+
+<h3>2.8 MODULO DEVOLUCION (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/devolucionModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+<tr>
+<td>controllers/devolucionController.php</td>
+<td>Controller</td>
+<td>Eliminar campo laboratorio</td>
+</tr>
+</table>
+
+<h3>2.9 MODULO MERMA (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/mermaModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+</table>
+
+<h3>2.10 MODULO PROVEEDOR (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/proveedorModel.php</td>
+<td>Model</td>
+<td>Cambiar join de laboratorios a proveedores</td>
+</tr>
+</table>
+
+<h3>2.11 MODULO PRECIOS (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/preciosModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+</table>
+
+<h3>2.12 MODULO CAJA (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>views/content/caja-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+</table>
+
+<h3>2.13 MODULO CLIENTE (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/clienteModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+<tr>
+<td>views/content/clienteLista-view.php</td>
+<td>View</td>
+<td>Eliminar columna laboratorio</td>
+</tr>
+</table>
+
+<h3>2.14 MODULO DASHBOARD (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>controllers/dashboardController.php</td>
+<td>Controller</td>
+<td>Eliminar conteo de laboratorios</td>
+</tr>
+</table>
+
+<h3>2.15 MODULO AJUSTE INVENTARIO (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/ajusteInventarioCompletoModel.php</td>
+<td>Model</td>
+<td>Cambiar consulta de laboratorios a proveedores</td>
+</tr>
+<tr>
+<td>controllers/ajusteInventarioCompletoController.php</td>
+<td>Controller</td>
+<td>Eliminar laboratorio_id</td>
+</tr>
+<tr>
+<td>views/content/ajusteInventarioCompleto-view.php</td>
+<td>View</td>
+<td>Eliminar select laboratorio</td>
+</tr>
+</table>
+
+<h3>2.16 MODULO LOTES (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/loteModel.php</td>
+<td>Model</td>
+<td>Eliminar join a laboratorios</td>
+</tr>
+</table>
+
+<h3>2.17 MODULO SCRIPT (MEDIO)</h3>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Tipo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>views/inc/script.php</td>
+<td>View</td>
+<td>Eliminar variables de laboratorio</td>
+</tr>
+<tr>
+<td>views/content/script_bulk-view.php</td>
+<td>View</td>
+<td>Eliminar campo laboratorio_id</td>
+</tr>
+</table>
+
+<h3>MODULOS SIN CAMBIOS</h3>
+<table>
+<tr>
+<th>Modulo</th>
+<th>Archivos</th>
+</tr>
+<tr>
+<td>MODULO SUCURSAL</td>
+<td>models/sucursalModel, controllers/sucursalController, ajax/sucursalAjax</td>
+</tr>
+<tr>
+<td>MODULO USUARIO</td>
+<td>models/userModel, controllers/userController, ajax/usuariosAjax</td>
+</tr>
+<tr>
+<td>MODULO LOGIN</td>
+<td>models/loginModel, controllers/loginController, ajax/loginAjax</td>
+</tr>
+<tr>
+<td>MODULO CAJA HISTORIAL</td>
+<td>models/cajaHistorialModel, controllers/cajaHistorialController, ajax/cajaHistorialAjax</td>
+</tr>
+<tr>
+<td>MODULO VENTA HISTORIAL</td>
+<td>models/ventasHistorialModel, controllers/ventasHistorialController, ajax/ventasHistorialAjax</td>
+</tr>
+<tr>
+<td>MODULO RECEPICONAR</td>
+<td>models/recepcionarModel, controllers/recepcionarController, ajax/recepcionarAjax</td>
+</tr>
+<tr>
+<td>MODULO NOTIFICACIONES</td>
+<td>models/notificacionesModel, controllers/notificacionesController, ajax/notificacionesAjax</td>
+</tr>
+</table>
+
+<h2>3. CAMBIOS EN MAIN Y VIEWS MODEL</h2>
+<table>
+<tr>
+<th>Archivo</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>models/mainModel.php</td>
+<td>Modificar consulta de selects globales</td>
+</tr>
+<tr>
+<td>models/viewsModel.php</td>
+<td>Eliminar rutas de laboratorio</td>
+</tr>
+</table>
+
+<h2>4. CAMBIOS REQUERIDOS EN BASE DE DATOS</h2>
+<table>
+<tr>
+<th>Accion</th>
+<th>Tabla</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_tipo (enum: proveedor, laboratorio, ambos)</td>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_logo (varchar 255)</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>medicamento</td>
+<td>Columna la_id (ya realizado)</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>compras</td>
+<td>Columna la_id (ya realizado)</td>
+</tr>
+</table>
+
+<h2>5. PROMPTS PARA CORRECIONES</h2>
+
+<div class="nota" style="background-color: #e74c3c; color: white; border-left: 4px solid #c0392b;">
+<strong>nota importante:</strong> al realizar las modificaciones se debe seguir el patron de programacion establecido en el proyecto. los comentarios deben ser en espanol, sensillos, en minusculas, sin acentos y sin emojis. los prompts modifican el modulo completo sin cambiar el enfoque del funcionamiento inicial.
+</div>
+
+<h3>5.1 MODULO LABORATORIO</h3>
+<pre>
+este modulo debe eliminarse completamente ya que la tabla laboratorios fue eliminada de la base de datos.
+
+archivos a modificar:
+- ajax/laboratorioAjax.php: eliminar todo el contenido
+- views/content/laboratorioLista-view.php: mostrar mensaje de funcionalidad no disponible
+- views/content/laboratorioRegistro-view.php: mostrar mensaje de funcionalidad no disponible
+
+importante: mantener el funcionamiento del resto del sistema sin cambios.
+</pre>
+
+<h3>5.2 MODULO CATEGORIA</h3>
+<pre>
+este modulo tiene funciones de laboratorio que deben eliminarse.
+
+archivos a modificar:
+- models/categoriaModel.php: eliminar funciones (listar_laboratorios, contar_laboratorios, agregar_laboratorios, obtener_laboratorios, actualizar_laboratorios, cambiar_estado_laboratorios, verificar_nombre_laboratorios)
+- controllers/categoriaController.php: eliminar controladores (paginado_laboratorios, agregar_laboratorios, obtener_laboratorios, actualizar_laboratorios, cambiar_estado_laboratorios)
+- ajax/categoriaAjax.php: eliminar casos (listar_laboratorio, agregar_laboratorio, obtener_laboratorio, actualizar_laboratorio, cambiar_estado_laboratorio)
+- views/content/categoriaLista-view.php: eliminar div tabla-laboratorio, modales de laboratorio, scripts de laboratorio
+
+importante: mantener las demas funciones de categoria sin cambios (categorias, presentaciones, lineas, formas farmaceuticas, vias de administracion, usos farmacologicos).
+</pre>
+
+<h3>5.3 MODULO MEDICAMENTO</h3>
+<pre>
+este modulo tiene referencias a laboratorio que deben eliminarse.
+
+archivos a modificar:
+- models/medicamentoModel.php: eliminar join a laboratorios, columnas de laboratorio, filtros por laboratorio
+- controllers/medicamentoController.php: eliminar procesamiento de campo laboratorio en registro y actualizacion
+- ajax/medicamentoAjax.php: eliminar filtro laboratorio
+- views/content/medicamentoLista-view.php: eliminar select de laboratorio
+- views/content/medicamentoRegistro-view.php: eliminar select de laboratorio
+- views/content/medicamentoActualizar-view.php: eliminar select de laboratorio
+
+importante: mantener todas las demas funcionalidades del modulo medicamento sin cambios.
+</pre>
+
+<h3>5.4 MODULO INVENTARIO</h3>
+<pre>
+este modulo tiene referencias a laboratorio que deben eliminarse.
+
+archivos a modificar:
+- models/inventarioModel.php: eliminar join a laboratorios, columnas de laboratorio, filtros por laboratorio
+- controllers/inventarioController.php: eliminar filtros y columnas de laboratorio
+- ajax/inventarioAjax.php: eliminar filtro laboratorio
+- views/content/inventarioLista-view.php: eliminar select y columna de laboratorio
+
+importante: mantener todas las demas funcionalidades del modulo inventario sin cambios.
+</pre>
+
+<h3>5.5 MODULO COMPRA</h3>
+<pre>
+este modulo tiene referencias a laboratorio que deben eliminarse.
+
+archivos a modificar:
+- models/compraHistorialModel.php: eliminar join a laboratorios, filtros y columnas de laboratorio
+- controllers/compraHistorialController.php: eliminar filtros y columnas de laboratorio
+- controllers/compraController.php: eliminar registro de laboratorio_id en compras
+- ajax/compraAjax.php: eliminar campo laboratorio
+- views/content/compraRegistro-view.php: eliminar select laboratorio
+- views/content/compraOrden-view.php: eliminar select laboratorio
+
+importante: mantener todas las demas funcionalidades del modulo compra sin cambios.
+</pre>
+
+<h3>5.6 MODULO TRANSFERIR</h3>
+<pre>
+este modulo tiene referencias a laboratorio que deben eliminarse.
+
+archivos a modificar:
+- models/transferirModel.php: eliminar join y filtro de laboratorio
+- controllers/transferirController.php: eliminar filtro laboratorio
+- views/content/transferirLista-view.php: eliminar filtro y columna laboratorio
+
+importante: mantener todas las demas funcionalidades del modulo transferir sin cambios.
+</pre>
+
+<h3>5.7 RESTO DE MODULOS</h3>
+<pre>
+los siguientes modulos requieren cambios menores:
+
+- modelo venta: eliminar join a laboratorios
+- modelo devolucion: eliminar join a laboratorios  
+- modelo merma: eliminar join a laboratorios
+- modelo proveedor: cambiar join de laboratorios a proveedores
+- modelo precios: eliminar join a laboratorios
+- modelo cliente: eliminar join a laboratorios
+- modelo lote: eliminar join a laboratorios
+- modelo ajusteInventarioCompleto: cambiar consulta de laboratorios a proveedores
+- controller dashboard: eliminar conteo de laboratorios
+- controller ajusteInventarioCompleto: eliminar laboratorio_id
+- view caja: eliminar select laboratorio
+- view clienteLista: eliminar columna laboratorio
+- view comprasHistorialLista: eliminar detalle laboratorio
+- view ajusteInventarioCompleto: eliminar select laboratorio
+- view script: eliminar variables de laboratorio
+- view script_bulk: eliminar campo laboratorio_id
+- mainModel: modificar consulta de selects globales
+- viewsModel: eliminar rutas de laboratorio
+
+cada modulo debe modificarse manteniendo su funcionamiento inicial intacto.
+</pre>
+
+<hr>
+<p style="text-align: center; color: #7f8c8d;">
+<em>Documento generado automaticamente para analisis de impacto</em>
+</p>
+
+</body>
+</html>

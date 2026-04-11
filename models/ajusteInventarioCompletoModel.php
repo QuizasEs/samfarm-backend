@@ -31,12 +31,13 @@ class ajusteInventarioCompletoModel extends mainModel
                 m.med_nombre_quimico,
                 m.med_principio_activo,
                 m.med_codigo_barras,
-                la.la_nombre_comercial,
+                p.pr_razon_social AS proveedor,
                 i.inv_total_unidades,
                 s.su_nombre,
                 s.su_id
             FROM medicamento m
-            LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
+            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             JOIN inventarios i ON m.med_id = i.med_id
             JOIN sucursales s ON i.su_id = s.su_id
             WHERE (m.med_nombre_quimico LIKE :termino OR m.med_principio_activo LIKE :termino OR m.med_codigo_barras LIKE :termino)
@@ -64,9 +65,10 @@ class ajusteInventarioCompletoModel extends mainModel
     protected static function obtener_medicamento_modelo($medicamento_id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT m.*, la.la_nombre_comercial 
+            SELECT m.*, p.pr_razon_social AS proveedor 
             FROM medicamento m
-            LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
+            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             WHERE m.med_id = :medicamento_id
         ");
         $sql->bindParam(":medicamento_id", $medicamento_id, PDO::PARAM_INT);
@@ -82,12 +84,13 @@ class ajusteInventarioCompletoModel extends mainModel
         $sql = mainModel::conectar()->prepare("
             SELECT 
                 m.*,
-                la.la_nombre_comercial,
+                p.pr_razon_social AS proveedor,
                 ff.ff_nombre as forma_farmaceutica_nombre,
                 uf.uf_nombre as uso_farmacologico_nombre,
                 vd.vd_nombre as via_administracion_nombre
             FROM medicamento m
-            LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
+            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
             LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
             LEFT JOIN via_de_administracion vd ON m.vd_id = vd.vd_id
@@ -135,14 +138,14 @@ class ajusteInventarioCompletoModel extends mainModel
     /**
      * Modelo para actualizar los datos del medicamento.
      */
-    protected static function actualizar_medicamento_modelo($medicamento_id, $nombre, $principio, $codigo, $laboratorio_id, $ff_id, $uf_id, $cant_caja, $cant_blister, $cant_unidad, $via_administracion)
+    protected static function actualizar_medicamento_modelo($medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id, $cant_caja, $cant_blister, $cant_unidad, $via_administracion)
     {
         $sql = mainModel::conectar()->prepare("
             UPDATE medicamento 
             SET med_nombre_quimico = :nombre, 
                 med_principio_activo = :principio, 
                 med_codigo_barras = :codigo, 
-                la_id = :laboratorio_id, 
+                pr_id = :proveedor_id, 
                 ff_id = :ff_id, 
                 uf_id = :uf_id,
                 vd_id = :via_administracion
@@ -152,7 +155,7 @@ class ajusteInventarioCompletoModel extends mainModel
         $sql->bindParam(":nombre", $nombre, PDO::PARAM_STR);
         $sql->bindParam(":principio", $principio, PDO::PARAM_STR);
         $sql->bindParam(":codigo", $codigo, PDO::PARAM_STR);
-        $sql->bindParam(":laboratorio_id", $laboratorio_id, PDO::PARAM_INT);
+        $sql->bindParam(":proveedor_id", $proveedor_id, PDO::PARAM_INT);
         $sql->bindParam(":ff_id", $ff_id, PDO::PARAM_INT);
         $sql->bindParam(":uf_id", $uf_id, PDO::PARAM_INT);
         $sql->bindParam(":via_administracion", $via_administracion, PDO::PARAM_INT);
@@ -250,11 +253,11 @@ class ajusteInventarioCompletoModel extends mainModel
     }
 
     /**
-     * Modelo para obtener laboratorios.
+     * Modelo para obtener proveedores.
      */
-    protected static function obtener_laboratorios_modelo()
+    protected static function obtener_proveedores_modelo()
     {
-        $sql = mainModel::conectar()->prepare("SELECT la_id, la_nombre_comercial FROM laboratorios WHERE la_estado = 1 ORDER BY la_nombre_comercial ASC");
+        $sql = mainModel::conectar()->prepare("SELECT pr_id, pr_razon_social FROM proveedores WHERE pr_estado = 1 ORDER BY pr_razon_social ASC");
         $sql->execute();
         return $sql;
     }

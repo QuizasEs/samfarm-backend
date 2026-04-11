@@ -413,7 +413,7 @@ class clienteModel extends mainModel
                     SELECT 
                         m.med_nombre_quimico,
                         m.med_version_comercial,
-                        l.la_nombre_comercial as laboratorio,
+                        p.pr_razon_social as proveedor,
                         ff.ff_nombre as forma_farmaceutica,
                         COUNT(dv.dv_id) as veces_comprado,
                         SUM(dv.dv_cantidad) as total_unidades,
@@ -422,7 +422,8 @@ class clienteModel extends mainModel
                     FROM detalle_venta dv
                     INNER JOIN ventas v ON dv.ve_id = v.ve_id
                     INNER JOIN medicamento m ON dv.med_id = m.med_id
-                    LEFT JOIN laboratorios l ON m.la_id = l.la_id
+                    LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
+                    LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
                     LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
                     WHERE v.cl_id = :cl_id
                     GROUP BY dv.med_id

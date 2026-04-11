@@ -97,6 +97,24 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <div id="grafico-movimientos" style="width: 100%; height: 400px; margin-top: 20px;"></div>
     </div>
 
+    <!-- Modal Detalle de Caja Historial -->
+    <div id="modalReferenciaCajaHistorial" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    <span>Detalle del Movimiento</span>
+                </div>
+                <a class="close" onclick="CajaHistorial.cerrarModalReferenciaCaja()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </a>
+            </div>
+            <div class="modal-group">
+                <div id="contenidoReferenciaCajaHistorial"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const CajaHistorial = (() => {
             return {
@@ -106,8 +124,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         return;
                     }
 
-                    const modal = document.getElementById('modalReferenciaMovimiento');
-                    const contenido = document.getElementById('contenidoReferenciaMovimiento');
+                    console.log('verReferencia llamado - tipo:', tipo, 'id:', id);
+
+                    const modal = document.getElementById('modalReferenciaCajaHistorial');
+                    const contenido = document.getElementById('contenidoReferenciaCajaHistorial');
                     
                     modal.style.display = 'flex';
 
@@ -137,8 +157,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 },
 
                 cerrarModalReferencia: function() {
-                    const modal = document.getElementById('modalReferenciaMovimiento');
-                    modal.style.display = 'none';
+                    const modal = document.getElementById('modalReferenciaCajaHistorial');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                },
+                
+                cerrarModalReferenciaCaja: function() {
+                    const modal = document.getElementById('modalReferenciaCajaHistorial');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
                 },
 
                 exportarMovimiento: async function(mc_id) {

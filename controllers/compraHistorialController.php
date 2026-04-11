@@ -64,10 +64,6 @@ class compraHistorialController extends compraHistorialModel
             $filtros['proveedor'] = (int)$f1;
         }
 
-        if ($f2 !== '' && is_numeric($f2)) {
-            $filtros['laboratorio'] = (int)$f2;
-        }
-
         if ($f4 !== '' && is_numeric($f4)) {
             $filtros['usuario'] = (int)$f4;
         }
@@ -108,11 +104,10 @@ class compraHistorialController extends compraHistorialModel
                             <th>N° COMPRA</th>
                             <th>FECHA COMPRA</th>
                             <th>PROVEEDOR</th>
-                            <th>LABORATORIO</th>' .
+                            ' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '
                             <th>LOTES</th>
-                            <th>FACTURA</th>
                             <th>TOTAL</th>
                             <th>ACCIONES</th>
                         </tr>
@@ -143,12 +138,11 @@ class compraHistorialController extends compraHistorialModel
                         <td>' . $contador . '</td>
                         <td><strong style="color:#1976D2;">' . htmlspecialchars($row['co_numero']) . '</strong></td>
                         <td>' . date('d/m/Y', strtotime($row['co_fecha'])) . '</td>
-                        <td>' . $proveedor_info . '</td>
-                        <td>' . htmlspecialchars($row['laboratorio'] ?? 'N/A') . '</td>' .
+                        <td>' . $proveedor_info . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal']) . '</span></td>' : '') .
                     '
                         <td style="text-align:center;">' . $lotes_badge . '</td>
-                        <td>' . htmlspecialchars($row['co_numero_factura'] ?? 'N/A') . '</td>
+                        
                         <td style="text-align:right;font-weight:bold;color:#2e7d32;">Bs. ' . number_format($row['co_total'], 2) . '</td>
                         <td class="">
                             <a href="javascript:void(0)" 
@@ -247,10 +241,7 @@ class compraHistorialController extends compraHistorialModel
             $response = [
                 'numero_compra' => $compra['co_numero'],
                 'fecha_compra' => date('d/m/Y', strtotime($compra['co_fecha'])),
-                'numero_factura' => $compra['co_numero_factura'] ?? 'N/A',
-                'fecha_factura' => $compra['co_fecha_factura'] ? date('d/m/Y', strtotime($compra['co_fecha_factura'])) : 'N/A',
                 'proveedor' => $proveedor_completo,
-                'laboratorio' => $compra['laboratorio'] ?? 'N/A',
                 'sucursal' => $compra['sucursal'],
                 'usuario' => $compra['usuario_nombre'],
                 'subtotal' => $compra['co_subtotal'],
@@ -433,10 +424,6 @@ class compraHistorialController extends compraHistorialModel
         if (isset($_GET['select1']) && $_GET['select1'] != '') {
             $filtros['proveedor'] = (int)$_GET['select1'];
         }
-        if (isset($_GET['select2']) && $_GET['select2'] != '') {
-            $filtros['laboratorio'] = (int)$_GET['select2'];
-        }
-
         try {
             $stmt = self::exportar_compras_pdf_model($filtros);
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -480,15 +467,13 @@ class compraHistorialController extends compraHistorialModel
                 ['text' => 'N°', 'width' => 10],
                 ['text' => 'N° COMPRA', 'width' => 25],
                 ['text' => 'FECHA', 'width' => 20],
-                ['text' => 'PROVEEDOR', 'width' => 35],
-                ['text' => 'LABORATORIO', 'width' => 30],
+                ['text' => 'PROVEEDOR', 'width' => 50],
                 ['text' => 'LOTES', 'width' => 15],
-                ['text' => 'N° FACTURA', 'width' => 25],
                 ['text' => 'TOTAL (Bs)', 'width' => 25]
             ];
 
             if ($rol_usuario == 1 && !isset($filtros['su_id'])) {
-                array_splice($headers, 5, 0, [['text' => 'SUCURSAL', 'width' => 25]]);
+                array_splice($headers, 4, 0, [['text' => 'SUCURSAL', 'width' => 25]]);
             }
 
             $total_general = 0;
@@ -508,15 +493,13 @@ class compraHistorialController extends compraHistorialModel
                     $contador,
                     $row['co_numero'],
                     $row['fecha_compra'],
-                    substr($row['proveedor'], 0, 25),
-                    substr($row['laboratorio'] ?? 'N/A', 0, 20),
+                    substr($row['proveedor'], 0, 35),
                     $row['lotes'],
-                    $row['co_numero_factura'] ?? 'N/A',
                     number_format($row['co_total'], 2)
                 ];
 
                 if ($rol_usuario == 1 && !isset($filtros['su_id'])) {
-                    array_splice($cells, 5, 0, [substr($row['sucursal'], 0, 20)]);
+                    array_splice($cells, 4, 0, [substr($row['sucursal'], 0, 20)]);
                 }
 
                 foreach ($cells as $cell) {
@@ -667,9 +650,6 @@ class compraHistorialController extends compraHistorialModel
 
         if (isset($_GET['select1']) && $_GET['select1'] != '') {
             $filtros['proveedor'] = (int)$_GET['select1'];
-        }
-        if (isset($_GET['select2']) && $_GET['select2'] != '') {
-            $filtros['laboratorio'] = (int)$_GET['select2'];
         }
         if (isset($_GET['select4']) && $_GET['select4'] != '') {
             $filtros['usuario'] = (int)$_GET['select4'];

@@ -28,16 +28,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <?php } ?>
 
                 <div class="form-fechas">
-                    <small>Laboratorio</small>
-                    <select class="select-filtro" name="laboratorio_filter_transfer" id="laboratorio_filter_transfer">
-                        <option value="">Todos</option>
-                        <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                            <option value="<?php echo $lab['la_id'] ?>"><?php echo $lab['la_nombre_comercial'] ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
                     <small>Vence hasta</small>
                     <input type="date" name="fecha_venc_max_transfer" id="fecha_venc_max_transfer">
                 </div>
@@ -232,7 +222,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             async function buscarLotes() {
                 const busqueda = document.getElementById('busqueda_transfer').value.trim();
-                const laboratorio = document.getElementById('laboratorio_filter_transfer').value;
                 const fechaVenc = document.getElementById('fecha_venc_max_transfer').value;
 
                 let suOrigen = SU_ACTUAL;
@@ -247,7 +236,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 formData.append('transferirAjax', 'buscar_lotes');
                 formData.append('su_origen', suOrigen);
                 formData.append('busqueda', busqueda);
-                formData.append('laboratorio', laboratorio);
                 formData.append('fecha_venc_max', fechaVenc);
 
                 try {
@@ -314,7 +302,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td>' + (index + 1) + '</td>';
                     html += '<td><strong>' + escapeHtml(lote.med_nombre_quimico) + '</strong><br><small>' + escapeHtml(lote.med_principio_activo) + '</small></td>';
                     html += '<td>' + escapeHtml(lote.lm_numero_lote) + '</td>';
-                    html += '<td>' + escapeHtml(lote.laboratorio || 'N/A') + '</td>';
                     html += '<td style="text-align:center;"><strong>' + lote.lm_cant_actual_cajas + '</strong></td>';
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + lote.lm_cant_actual_unidades + '</strong></td>';
                     html += '<td style="color: ' + colorVenc + ';">' + formatearFecha(lote.lm_fecha_vencimiento) + advertencia + '</td>';

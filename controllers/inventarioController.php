@@ -28,7 +28,7 @@ class inventarioController extends inventarioModel
         $url = mainModel::limpiar_cadena($url);
         $url = SERVER_URL . $url . '/';
         $busqueda = mainModel::limpiar_cadena($busqueda);
-        $f1 = mainModel::limpiar_cadena($f1); // Laboratorio
+        $f1 = mainModel::limpiar_cadena($f1); // Proveedor
         $f2 = mainModel::limpiar_cadena($f2); // Estado
         $f3 = mainModel::limpiar_cadena($f3); // Sucursal
         $f4 = mainModel::limpiar_cadena($f4); // Forma
@@ -53,10 +53,6 @@ class inventarioController extends inventarioModel
 
         if (!empty($busqueda)) {
             $filtros['busqueda'] = $busqueda;
-        }
-
-        if ($f1 !== '' && is_numeric($f1)) {
-            $filtros['laboratorio'] = (int)$f1;
         }
 
         if ($f2 !== '') {
@@ -107,8 +103,7 @@ class inventarioController extends inventarioModel
                         <thead>
                             <tr>
                                 <th>N°</th>
-                                <th>MEDICAMENTO</th>
-                                <th>LABORATORIO</th>' .
+                                <th>MEDICAMENTO</th>' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '<th>CAJAS</th>
                                 <th>UNIDADES</th>
@@ -159,8 +154,7 @@ class inventarioController extends inventarioModel
                             <td>
                                 <strong>' . htmlspecialchars($row['med_nombre_quimico']) . '</strong><br>
                                 <small style="color:#666;">' . htmlspecialchars($row['med_principio_activo']) . '</small>
-                            </td>
-                            <td>' . htmlspecialchars($row['laboratorio']) . '</td>' .
+                            </td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
                     '<td style="text-align:center;"><strong>' . number_format($row['inv_total_cajas']) . '</strong></td>
                             <td style="text-align:center;font-size:16px;"><strong style="color:#1976D2;">' . number_format($row['inv_total_unidades']) . '</strong></td>
@@ -269,7 +263,8 @@ class inventarioController extends inventarioModel
                     'precio' => $lote['lm_precio_venta'],
                     'vencimiento' => $lote['lm_fecha_vencimiento'],
                     'estado' => ucfirst($lote['lm_estado']),
-                    'dias_vencer' => $lote['dias_para_vencer']
+                    'dias_vencer' => $lote['dias_para_vencer'],
+                    'proveedor' => $lote['proveedor'] ?? 'Sin proveedor'
                 ];
             }, $lotes);
 
@@ -281,7 +276,7 @@ class inventarioController extends inventarioModel
             );
 
             $response = [
-                'laboratorio' => $inv['laboratorio'],
+                'proveedor' => $inv['proveedor'] ?? 'Sin proveedor',
                 'sucursal' => $inv['sucursal_nombre'],
                 'cajas' => $inv['inv_total_cajas'],
                 'unidades' => $inv['inv_total_unidades'],
@@ -395,7 +390,7 @@ class inventarioController extends inventarioModel
         }
 
         if ($f1 !== '' && is_numeric($f1)) {
-            $filtros['laboratorio'] = (int)$f1;
+            $filtros['proveedor'] = (int)$f1;
         }
 
         if ($f2 !== '') {
@@ -556,7 +551,7 @@ class inventarioController extends inventarioModel
         }
 
         if ($f1 !== '' && is_numeric($f1)) {
-            $filtros['laboratorio'] = (int)$f1;
+            $filtros['proveedor'] = (int)$f1;
         }
 
         if ($f2 !== '') {
@@ -627,7 +622,7 @@ class inventarioController extends inventarioModel
                     $cells = [
                         ['text' => ($index + 1), 'align' => 'C'],
                         ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 35), 'align' => 'L'],
-                        ['text' => substr($row['Laboratorio'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => substr($row['Proveedor'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => substr($row['Sucursal'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => $row['Cajas'], 'align' => 'C'],
                         ['text' => number_format($row['Unidades']), 'align' => 'C'],
@@ -638,7 +633,7 @@ class inventarioController extends inventarioModel
                     $cells = [
                         ['text' => ($index + 1), 'align' => 'C'],
                         ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 40), 'align' => 'L'],
-                        ['text' => substr($row['Laboratorio'] ?? 'N/A', 0, 20), 'align' => 'L'],
+                        ['text' => substr($row['Proveedor'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => $row['Cajas'], 'align' => 'C'],
                         ['text' => number_format($row['Unidades']), 'align' => 'C'],
                         ['text' => 'Bs. ' . number_format($row['Valorado (Bs)'], 2), 'align' => 'R'],

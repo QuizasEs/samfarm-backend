@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema — Plantilla Base</title>
+
+<script>
+(function(){
+  var t=localStorage.getItem('sf-theme')||'light';
+  var s=localStorage.getItem('sf-sidebar')||'expanded';
+  document.documentElement.setAttribute('data-theme',t);
+  document.documentElement.setAttribute('data-sidebar',s);
+})();
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<style>
+/* ══════════════════════════════════════════
+   VARIABLES LIGHT
+══════════════════════════════════════════ */
+:root,
+[data-theme="light"] {
+  --bg-primary:        #ffffff;
+  --bg-secondary:      #f1f1f1;
+  --hover:             #e4e4e4;
+  --text-primary:      #000000;
+  --text-secondary:    #333333;
+  --text-muted:        #666666;
+  --text-faint:        #999999;
+  --accent-primary:    #13386c;
+  --accent-secondary:  #293241;
+  --accent-light:      rgba(19,56,108,.08);
+  --accent-light2:     rgba(19,56,108,.04);
+  --border-light:      #dcdcdc;
+  --border-strong:     #bbbbbb;
+  --shadow-light:      rgba(0,0,0,.08);
+  --shadow-md:         rgba(0,0,0,.15);
+  --shadow-lg:         rgba(0,0,0,.22);
+  --btn-default:       #13386c;
+  --btn-default-hover: #1b4681;
+  --btn-success:       #1b9c1b;
+  --btn-success-hover: #2ab32a;
+  --btn-danger:        #f39e00;
+  --btn-danger-hover:  #f7af2b;
+  --btn-warning:       #da0101;
+  --btn-warning-hover: #eb2222;
+  --btn-success-pale:  rgba(27,156,27,.1);
+  --btn-danger-pale:   rgba(243,158,0,.1);
+  --btn-warning-pale:  rgba(218,1,1,.1);
+  --info:              #0077cc;
+  --info-pale:         rgba(0,119,204,.1);
+
+  /* Sidebar light — fondo derivado del accent, jerarquía clara */
+  --sidebar-bg:        #0e2240;
+  --sidebar-text:      rgba(255,255,255,.52);
+  --sidebar-text-h:    #ffffff;
+  --sidebar-item-h:    rgba(255,255,255,.09);
+  --sidebar-active-bg: #1a4f96;
+  --sidebar-border:    rgba(255,255,255,.09);
+  --sidebar-label:     rgba(255,255,255,.28);
+
+  --overlay: rgba(0,0,0,.45);
+}
+
+/* ══════════════════════════════════════════
+   VARIABLES DARK
+══════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg-primary:        #1e1e1e;
+  --bg-secondary:      #252526;
+  --hover:             #2a2a2b;
+  --text-primary:      #ffffff;
+  --text-secondary:    #cccccc;
+  --text-muted:        #999999;
+  --text-faint:        #666666;
+  --accent-primary:    #59FF2E;
+  --accent-secondary:  #5b8dbb;
+  --accent-light:      rgba(89,255,46,.1);
+  --accent-light2:     rgba(89,255,46,.05);
+  --border-light:      #3a3a3a;
+  --border-strong:     #505050;
+  --shadow-light:      rgba(0,0,0,.25);
+  --shadow-md:         rgba(0,0,0,.45);
+  --shadow-lg:         rgba(0,0,0,.6);
+  --btn-default:       #59FF2E;
+  --btn-default-hover: #6bff44;
+  --btn-success:       #1b9c1b;
+  --btn-success-hover: #2ab32a;
+  --btn-danger:        #f39e00;
+  --btn-danger-hover:  #f7af2b;
+  --btn-warning:       #f87171;
+  --btn-warning-hover: #f99999;
+  --btn-success-pale:  rgba(27,156,27,.15);
+  --btn-danger-pale:   rgba(243,158,0,.15);
+  --btn-warning-pale:  rgba(248,113,113,.15);
+  --info:              #38bdf8;
+  --info-pale:         rgba(56,189,248,.15);
+
+  /* Sidebar dark — negro puro, contraste máximo respecto al bg #1e1e1e */
+  --sidebar-bg:        #111111;
+  --sidebar-text:      rgba(255,255,255,.38);
+  --sidebar-text-h:    #ffffff;
+  --sidebar-item-h:    rgba(255,255,255,.07);
+  --sidebar-active-bg: #1a4070;
+  --sidebar-border:    rgba(255,255,255,.06);
+  --sidebar-label:     rgba(255,255,255,.2);
+
+  --overlay: rgba(0,0,0,.68);
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  font-family: "Ubuntu", sans-serif;
+}
+html {
+  height: 100%; background: var(--bg-secondary); color: var(--text-primary);
+  transition: background .3s ease, color .3s ease;
+}
+body {
+  display: flex; min-height: 100vh; font-size: 14px; line-height: 1.5;
+  background: var(--bg-secondary); overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+ion-icon { pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   LAYOUT TOKENS
+══════════════════════════════════════════ */
+:root {
+  --sw:   240px;
+  --swm:  62px;
+  --tbh:  54px;
+  --tr:   .22s ease;
+  --r:    7px;
+  --rlg:  11px;
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════ */
+.sidebar {
+  width: var(--sw);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 300;
+  transition: width var(--tr), transform var(--tr);
+  overflow: hidden;
+  border-right: 1px solid var(--sidebar-border);
+}
+[data-sidebar="collapsed"] .sidebar { width: var(--swm); }
+
+[data-sidebar="collapsed"] .sidebar .nl,
+[data-sidebar="collapsed"] .sidebar .ntxt,
+[data-sidebar="collapsed"] .sidebar .narr,
+[data-sidebar="collapsed"] .sidebar .ltxt,
+[data-sidebar="collapsed"] .sidebar .lsub,
+[data-sidebar="collapsed"] .sidebar .uinfo,
+[data-sidebar="collapsed"] .sidebar .nbdg,
+[data-sidebar="collapsed"] .sidebar .sub { display: none !important; }
+
+/* Logo */
+.slogo {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--sidebar-border);
+  display: flex; align-items: center; gap: 10px;
+  min-height: var(--tbh); flex-shrink: 0;
+}
+[data-sidebar="collapsed"] .slogo { justify-content: center; padding: 14px 0 12px; }
+.logo-ic {
+  width: 30px; height: 30px; flex-shrink: 0;
+  background: var(--btn-default);
+  border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px;
+}
+[data-theme="dark"] .logo-ic { color: #000; }
+.ltxt { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
+.lsub { font-size: 9.5px; color: var(--sidebar-label); font-weight: 500; letter-spacing: .5px; text-transform: uppercase; margin-top: 1px; }
+
+/* Nav scroll */
+.nscr { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 0; }
+.nscr::-webkit-scrollbar { width: 0; }
+.nsec { padding: 0 8px; margin-bottom: 2px; }
+[data-sidebar="collapsed"] .nsec { padding: 0 6px; }
+.nl { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sidebar-label); padding: 10px 6px 4px; white-space: nowrap; }
+
+/* Nav item */
+.ni {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 8px; border-radius: var(--r);
+  cursor: pointer; color: var(--sidebar-text);
+  font-size: 13.5px; font-weight: 400;
+  transition: background var(--tr), color var(--tr);
+  position: relative; user-select: none;
+  text-decoration: none; margin-bottom: 1px;
+}
+.ni:hover { background: var(--sidebar-item-h); color: var(--sidebar-text-h); }
+.ni.ac  { background: var(--sidebar-active-bg); color: #fff; }
+.ni.pac { color: var(--sidebar-text-h); }
+[data-sidebar="collapsed"] .ni { justify-content: center; padding: 10px 0; }
+.nic { font-size: 18px; flex-shrink: 0; width: 20px; display: flex; align-items: center; justify-content: center; color: inherit; }
+.ntxt { white-space: nowrap; flex: 1; }
+.narr { font-size: 13px; margin-left: auto; flex-shrink: 0; transition: transform var(--tr); color: var(--sidebar-label); }
+.ni.open .narr { transform: rotate(90deg); }
+.nbdg { font-size: 10px; font-weight: 700; background: var(--btn-warning); color: #fff; padding: 1px 6px; border-radius: 20px; margin-left: auto; flex-shrink: 0; }
+
+/* Submenu */
+.sub { overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+.sub.open { max-height: 400px; }
+.smi {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px 7px 36px; border-radius: var(--r);
+  color: var(--sidebar-text); font-size: 13px; font-weight: 400;
+  cursor: pointer; transition: background var(--tr), color var(--tr);
+  text-decoration: none; margin-bottom: 1px;
+}
+.smi:hover { background: var(--sidebar-item-h); color: var(--sidebar-text-h); }
+.smi.ac { color: var(--accent-primary); font-weight: 500; }
+.smd { width: 5px; height: 5px; border-radius: 50%; background: var(--sidebar-label); flex-shrink: 0; transition: background var(--tr); }
+.smi:hover .smd, .smi.ac .smd { background: currentColor; }
+
+/* Tooltip mini */
+[data-sidebar="collapsed"] .ni::after {
+  content: attr(data-tip);
+  position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+  background: var(--bg-primary); color: var(--text-primary);
+  font-size: 12px; font-weight: 500; padding: 5px 10px;
+  border-radius: var(--r); white-space: nowrap;
+  box-shadow: 0 2px 8px var(--shadow-md);
+  border: 1px solid var(--border-light);
+  opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 500;
+}
+[data-sidebar="collapsed"] .ni:hover::after { opacity: 1; }
+
+/* User footer */
+.susr {
+  padding: 10px 12px; border-top: 1px solid var(--sidebar-border);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+[data-sidebar="collapsed"] .susr { justify-content: center; padding: 10px 0; }
+.uav {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+  background: var(--btn-default);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+}
+[data-theme="dark"] .uav { color: #000; }
+.uinfo .un { font-size: 13px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uinfo .ur { font-size: 11px; color: var(--sidebar-label); }
+
+/* ══════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════ */
+.main {
+  margin-left: var(--sw);
+  flex: 1; min-height: 100vh;
+  display: flex; flex-direction: column;
+  transition: margin-left var(--tr);
+  background: var(--bg-secondary);
+}
+[data-sidebar="collapsed"] .main { margin-left: var(--swm); }
+
+/* ══════════════════════════════════════════
+   TOPBAR — con scroll hide/show
+══════════════════════════════════════════ */
+.topbar {
+  height: var(--tbh);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0 20px;
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 200;
+  transition: background .3s ease, border-color .3s ease,
+              transform .3s ease, box-shadow .3s ease;
+  box-shadow: 0 1px 3px var(--shadow-light);
+}
+/* Estado oculto por scroll */
+.topbar.hidden {
+  transform: translateY(-100%);
+  box-shadow: none;
+}
+/* Estado visible de vuelta (sombra más pronunciada al reaparecer) */
+.topbar.visible {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px var(--shadow-md);
+}
+
+/* Toggle sidebar — DENTRO del topbar */
+.sb-toggle {
+  width: 34px; height: 34px; border-radius: var(--r);
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 20px;
+  transition: background var(--tr), color var(--tr);
+  flex-shrink: 0;
+}
+.sb-toggle:hover { background: var(--hover); color: var(--text-primary); }
+
+.bc { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.bc .sep { color: var(--border-strong); font-size: 10px; }
+.bc .link { color: var(--text-muted); cursor: pointer; }
+.bc .link:hover { color: var(--accent-primary); }
+.bc .cur { color: var(--text-primary); font-weight: 500; }
+.tbr { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.ibtn {
+  width: 34px; height: 34px; border-radius: var(--r);
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 18px;
+  transition: background var(--tr), color var(--tr); position: relative;
+}
+.ibtn:hover { background: var(--hover); color: var(--text-primary); }
+.ndot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px; background: var(--btn-warning);
+  border-radius: 50%; border: 2px solid var(--bg-primary);
+}
+
+/* Mobile overlay */
+.sb-ov { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 299; }
+[data-sidebar="mobile-open"] .sb-ov { display: block; }
+[data-sidebar="mobile-open"] .sidebar { transform: translateX(0) !important; }
+
+/* ══════════════════════════════════════════
+   PAGE CONTENT
+══════════════════════════════════════════ */
+.pg { padding: 24px; flex: 1; }
+.ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+.ptit { font-size: 19px; font-weight: 700; color: var(--text-primary); }
+.psub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.stit { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; margin-top: 30px; padding-bottom: 7px; border-bottom: 1px solid var(--border-light); }
+.stit:first-child { margin-top: 0; }
+
+/* ══════════════════════════════════════════
+   TYPOGRAPHY
+══════════════════════════════════════════ */
+.td   { font-size: 34px; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+.th1  { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.th2  { font-size: 21px; font-weight: 700; color: var(--text-primary); }
+.th3  { font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.th4  { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.th5  { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.tb   { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+.tbs  { font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+.tc   { font-size: 12px; color: var(--text-muted); }
+.tol  { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); }
+.tmono { font-family: "Courier New", monospace; font-size: 12.5px; color: var(--accent-primary); background: var(--accent-light); padding: 2px 6px; border-radius: 4px; }
+.tlink { color: var(--accent-primary); cursor: pointer; text-decoration: none; }
+.tlink:hover { text-decoration: underline; }
+.tmut { color: var(--text-muted); }
+.tdan { color: var(--btn-warning); }
+.tsuc { color: var(--btn-success); }
+.twar { color: var(--btn-danger); }
+
+/* ══════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: "Ubuntu", sans-serif; font-weight: 500; font-size: 13.5px;
+  border: none; border-radius: var(--r); cursor: pointer;
+  white-space: nowrap; transition: background var(--tr), box-shadow var(--tr), opacity var(--tr);
+  padding: 0 16px; height: 36px;
+  text-decoration: none; user-select: none; position: relative;
+}
+.btn ion-icon { font-size: 15px; }
+.btn-xs { height: 26px; padding: 0 10px; font-size: 11.5px; border-radius: 5px; }
+.btn-xs ion-icon { font-size: 13px; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.btn-sm ion-icon { font-size: 14px; }
+.btn-lg { height: 44px; padding: 0 22px; font-size: 15px; border-radius: var(--rlg); }
+.btn-lg ion-icon { font-size: 17px; }
+.btn-ico { width: 36px; padding: 0; }
+.btn-ico.btn-sm { width: 30px; }
+.btn-ico.btn-lg { width: 44px; }
+.btn-full { width: 100%; }
+.btn-def  { background: var(--btn-default);  color: #fff; }
+.btn-def:hover { background: var(--btn-default-hover); }
+[data-theme="dark"] .btn-def { color: #000; }
+.btn-sec  { background: var(--bg-secondary); color: var(--text-primary); border: 1.5px solid var(--border-light); }
+.btn-sec:hover { background: var(--hover); border-color: var(--border-strong); }
+.btn-out  { background: transparent; color: var(--accent-primary); border: 1.5px solid var(--accent-primary); }
+.btn-out:hover { background: var(--accent-light); }
+.btn-gho  { background: transparent; color: var(--text-secondary); border: 1.5px solid transparent; }
+.btn-gho:hover { background: var(--hover); border-color: var(--border-light); }
+.btn-suc  { background: var(--btn-success);  color: #fff; }
+.btn-suc:hover { background: var(--btn-success-hover); }
+.btn-dan  { background: var(--btn-danger);   color: #fff; }
+.btn-dan:hover { background: var(--btn-danger-hover); }
+.btn-war  { background: var(--btn-warning);  color: #fff; }
+.btn-war:hover { background: var(--btn-warning-hover); }
+.btn-souc { background: transparent; color: var(--btn-success); border: 1.5px solid var(--btn-success); }
+.btn-souc:hover { background: var(--btn-success-pale); }
+.btn-douc { background: transparent; color: var(--btn-danger);  border: 1.5px solid var(--btn-danger); }
+.btn-douc:hover { background: var(--btn-danger-pale); }
+.btn-wouc { background: transparent; color: var(--btn-warning); border: 1.5px solid var(--btn-warning); }
+.btn-wouc:hover { background: var(--btn-warning-pale); }
+.btn.ld { pointer-events: none; opacity: .7; }
+.btn.ld .blt { visibility: hidden; }
+.btn.ld::after { content: ''; position: absolute; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+[data-theme="dark"] .btn-def.ld::after { border-color: rgba(0,0,0,.3); border-top-color: #000; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btngrp { display: inline-flex; }
+.btngrp .btn { border-radius: 0; margin-right: -1px; }
+.btngrp .btn:first-child { border-radius: var(--r) 0 0 var(--r); }
+.btngrp .btn:last-child  { border-radius: 0 var(--r) var(--r) 0; margin-right: 0; }
+
+/* ══════════════════════════════════════════
+   FORMS
+══════════════════════════════════════════ */
+.fg   { margin-bottom: 14px; }
+.fl   { display: block; font-size: 12.5px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+.fl .req { color: var(--btn-warning); margin-left: 2px; }
+.fh   { font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
+.ferr { font-size: 11.5px; color: var(--btn-warning); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.inp, .sel, .ta {
+  width: 100%; height: 36px; padding: 0 12px;
+  background: var(--bg-primary); border: 1.5px solid var(--border-light);
+  border-radius: var(--r);
+  font-family: "Ubuntu", sans-serif; font-size: 13.5px; color: var(--text-primary);
+  outline: none;
+  transition: border-color .3s ease, box-shadow .3s ease, background .3s ease;
+  appearance: none;
+}
+.inp:hover, .sel:hover { border-color: var(--border-strong); }
+.inp:focus, .sel:focus, .ta:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px var(--accent-light); }
+.inp::placeholder, .ta::placeholder { color: var(--text-faint); }
+.inp.err { border-color: var(--btn-warning); }
+.ta { height: auto; min-height: 88px; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+.sel { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+.inpw { position: relative; }
+.inpw .inp { padding-left: 38px; }
+.inpw .iil { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 16px; pointer-events: none; }
+.inpw .iir { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 16px; cursor: pointer; }
+.inpw.hr .inp { padding-right: 38px; }
+.inpg { display: flex; }
+.inpg .inp { border-radius: var(--r) 0 0 var(--r); flex: 1; }
+.inpg .iad { display: flex; align-items: center; padding: 0 12px; background: var(--bg-secondary); border: 1.5px solid var(--border-light); font-size: 13px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+.inpg .iad:last-child  { border-left: none; border-radius: 0 var(--r) var(--r) 0; }
+.inpg .iad:first-child { border-right: none; border-radius: var(--r) 0 0 var(--r); }
+.inpg .iad:first-child+.inp { border-radius: 0 var(--r) var(--r) 0; }
+.inpg .btn { border-radius: 0 var(--r) var(--r) 0; height: 36px; }
+.chkg { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 8px; cursor: pointer; }
+.chkg input { display: none; }
+.chkb { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--border-strong); border-radius: 4px; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; transition: all var(--tr); color: #fff; font-size: 11px; }
+.chkg input:checked ~ .chkb { background: var(--accent-primary); border-color: var(--accent-primary); }
+[data-theme="dark"] .chkg input:checked ~ .chkb { color: #000; }
+.radb { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--border-strong); border-radius: 50%; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; transition: all var(--tr); }
+.radb::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: transparent; transition: background var(--tr); }
+.chkg input:checked ~ .radb { border-color: var(--accent-primary); }
+.chkg input:checked ~ .radb::after { background: var(--accent-primary); }
+.chl { font-size: 13.5px; color: var(--text-secondary); }
+.chd { font-size: 12px; color: var(--text-faint); margin-top: 1px; }
+.swg { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sw  { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+.sw input { display: none; }
+.swt { position: absolute; inset: 0; background: var(--border-strong); border-radius: 20px; cursor: pointer; transition: background .3s ease; }
+.swt::after { content: ''; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: #fff; transition: transform var(--tr); box-shadow: 0 1px 3px var(--shadow-md); }
+.sw input:checked ~ .swt { background: var(--accent-primary); }
+.sw input:checked ~ .swt::after { transform: translateX(17px); }
+.rng { width: 100%; appearance: none; height: 4px; border-radius: 2px; background: var(--border-light); outline: none; cursor: pointer; }
+.rng::-webkit-slider-thumb { appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--accent-primary); border: 2px solid var(--bg-primary); box-shadow: 0 1px 3px var(--shadow-md); }
+.fr  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fr3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.fdrop { border: 2px dashed var(--border-light); border-radius: var(--rlg); padding: 26px 20px; text-align: center; cursor: pointer; transition: border-color var(--tr), background var(--tr); background: var(--bg-secondary); }
+.fdrop:hover { border-color: var(--accent-primary); background: var(--accent-light2); }
+.fdrop ion-icon { font-size: 28px; color: var(--text-faint); margin-bottom: 7px; }
+.fdt { font-size: 13.5px; font-weight: 500; color: var(--text-secondary); }
+.fdh { font-size: 12px; color: var(--text-faint); margin-top: 3px; }
+
+/* ══════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════ */
+.card { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--rlg); box-shadow: 0 1px 3px var(--shadow-light); overflow: hidden; transition: background .3s ease, border-color .3s ease; }
+.card.hov:hover { box-shadow: 0 3px 10px var(--shadow-md); }
+.ch { padding: 14px 18px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ct { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.cs { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.cb { padding: 18px; }
+.cf { padding: 12px 18px; border-top: 1px solid var(--border-light); background: var(--bg-secondary); display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.statc { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--rlg); padding: 16px; box-shadow: 0 1px 3px var(--shadow-light); display: flex; align-items: flex-start; gap: 12px; }
+.siw { width: 42px; height: 42px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+.siw.bl { background: var(--accent-light);      color: var(--accent-primary); }
+.siw.gr { background: var(--btn-success-pale);  color: var(--btn-success); }
+.siw.rd { background: var(--btn-danger-pale);   color: var(--btn-danger); }
+.siw.ww { background: var(--btn-warning-pale);  color: var(--btn-warning); }
+.sv { font-size: 21px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.sl { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.str { font-size: 11px; font-weight: 500; margin-top: 5px; display: flex; align-items: center; gap: 3px; }
+.str.up { color: var(--btn-success); }
+.str.dn { color: var(--btn-warning); }
+
+/* ══════════════════════════════════════════
+   ALERTS
+══════════════════════════════════════════ */
+.alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--r); border: 1px solid transparent; margin-bottom: 10px; }
+.alert ion-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.altt { font-weight: 700; font-size: 13px; color: var(--text-primary); }
+.altx { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+.altc { margin-left: auto; cursor: pointer; opacity: .55; flex-shrink: 0; font-size: 16px; color: var(--text-muted); }
+.altc:hover { opacity: 1; }
+.alinf { background: var(--info-pale);         border-color: var(--info); }
+.alinf > ion-icon { color: var(--info); }
+.alsuc { background: var(--btn-success-pale);  border-color: var(--btn-success); }
+.alsuc > ion-icon { color: var(--btn-success); }
+.aldan { background: var(--btn-danger-pale);   border-color: var(--btn-danger); }
+.aldan > ion-icon { color: var(--btn-danger); }
+.alwar { background: var(--btn-warning-pale);  border-color: var(--btn-warning); }
+.alwar > ion-icon { color: var(--btn-warning); }
+
+/* ══════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════ */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.bdt  { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.bsm  { padding: 1px 7px; font-size: 10px; }
+.blg  { padding: 4px 12px; font-size: 12px; }
+.bdef { background: var(--accent-light);      color: var(--accent-primary); }
+.bgr  { background: var(--btn-success-pale);  color: var(--btn-success); }
+.bdan { background: var(--btn-danger-pale);   color: var(--btn-danger); }
+.bwar { background: var(--btn-warning-pale);  color: var(--btn-warning); }
+.binf { background: var(--info-pale);         color: var(--info); }
+.bgry { background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border-light); }
+.bout { background: transparent; border: 1.5px solid var(--accent-primary); color: var(--accent-primary); }
+
+/* ══════════════════════════════════════════
+   TABLES — 3 variaciones
+══════════════════════════════════════════ */
+.tw { overflow-x: auto; }
+
+/* Tabla 1 — Normal */
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg-secondary); }
+th { padding: 10px 14px; text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); border-bottom: 1.5px solid var(--border-light); white-space: nowrap; }
+th.srt { cursor: pointer; user-select: none; }
+th.srt:hover { color: var(--text-secondary); }
+th.sa::after { content: ' ↑'; color: var(--accent-primary); }
+th.sd::after { content: ' ↓'; color: var(--accent-primary); }
+td { padding: 11px 14px; font-size: 13.5px; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); transition: background .15s ease; word-break: break-word; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg-secondary); }
+tr.tr-click { cursor: pointer; }
+tr.tr-click:hover td { background: var(--accent-light2); }
+tr.tr-cart { cursor: pointer; }
+tr.tr-cart:hover td { background: var(--btn-success-pale); }
+.tdp  { color: var(--text-primary); font-weight: 500; }
+.tdm  { font-family: "Courier New", monospace; font-size: 12.5px; color: var(--accent-primary); }
+.tdmu { color: var(--text-faint); }
+.tda  { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+/* Botones de acción en tabla: nunca reducir por debajo de su contenido */
+.tda .btn { flex-shrink: 0; min-width: fit-content; white-space: nowrap; }
+
+/* Tabla 2 — Compacta con detalle expandido (pocas columnas, más info) */
+.table-detail table { table-layout: fixed; }
+.table-detail th { padding: 10px 16px; }
+.table-detail td { padding: 14px 16px; vertical-align: top; }
+.table-detail tr:hover td { background: var(--bg-secondary); }
+tr.tr-click { cursor: pointer; }
+tr.tr-click:hover td { background: var(--accent-light2); }
+tr.tr-cart { cursor: pointer; }
+tr.tr-cart:hover td { background: var(--btn-success-pale); }
+.td-main  { font-size: 14px; font-weight: 500; color: var(--text-primary); line-height: 1.2; }
+.td-sub   { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.td-meta  { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.td-meta ion-icon { font-size: 13px; }
+
+/* Tabla 3 — Emergente / popup search result */
+.table-popup-wrap {
+  position: relative;
+  overflow: visible;
+}
+.table-popup-trigger {
+  position: relative;
+}
+.table-popup {
+  position: fixed;
+  width: 520px;
+  max-width: calc(100vw - 16px);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--rlg);
+  box-shadow: 0 8px 28px var(--shadow-lg);
+  z-index: 700;
+  overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity var(--tr), transform var(--tr);
+  max-height: 320px;
+  display: flex; flex-direction: column;
+}
+.table-popup.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.tp-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-secondary); flex-shrink: 0;
+}
+.tp-label { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); }
+.tp-close { cursor: pointer; color: var(--text-faint); font-size: 16px; }
+.tp-close:hover { color: var(--text-primary); }
+.tp-scroll { overflow-y: auto; flex: 1; }
+.tp-scroll table td { padding: 9px 14px; font-size: 13px; }
+.tp-empty { padding: 24px; text-align: center; color: var(--text-faint); font-size: 13px; }
+
+/* Pagination */
+.pag { display: flex; align-items: center; gap: 4px; padding: 12px 18px; border-top: 1px solid var(--border-light); flex-wrap: wrap; }
+.pginf { font-size: 12.5px; color: var(--text-muted); }
+.pb { min-width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: var(--r); border: 1.5px solid var(--border-light); background: var(--bg-primary); color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--tr); }
+.pb:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.pb.ac  { background: var(--accent-primary); border-color: var(--accent-primary); color: #fff; }
+[data-theme="dark"] .pb.ac { color: #000; }
+.pb.dis { opacity: .4; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+.tabs { display: flex; border-bottom: 2px solid var(--border-light); margin-bottom: 18px; overflow-x: auto; }
+.tabs::-webkit-scrollbar { height: 0; }
+.tab { padding: 9px 16px; font-size: 13.5px; font-weight: 500; color: var(--text-muted); cursor: pointer; border: none; background: none; border-bottom: 2.5px solid transparent; margin-bottom: -2px; transition: all var(--tr); white-space: nowrap; font-family: "Ubuntu", sans-serif; display: flex; align-items: center; gap: 5px; }
+.tab:hover { color: var(--text-primary); }
+.tab.ac { color: var(--accent-primary); border-bottom-color: var(--accent-primary); font-weight: 700; }
+.tbc { font-size: 10px; background: var(--bg-secondary); color: var(--text-muted); padding: 1px 6px; border-radius: 20px; font-weight: 700; border: 1px solid var(--border-light); }
+.tab.ac .tbc { background: var(--accent-light); color: var(--accent-primary); border-color: var(--accent-light); }
+.tabsp { display: flex; gap: 3px; margin-bottom: 18px; background: var(--bg-secondary); padding: 4px; border-radius: var(--r); border: 1px solid var(--border-light); width: fit-content; }
+.tabp { padding: 5px 14px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-radius: var(--r); transition: all var(--tr); border: none; background: none; font-family: "Ubuntu", sans-serif; }
+.tabp:hover { color: var(--text-primary); }
+.tabp.ac { background: var(--bg-primary); color: var(--text-primary); box-shadow: 0 1px 3px var(--shadow-light); border: 1px solid var(--border-light); font-weight: 700; }
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+.mov { position: fixed; inset: 0; background: var(--overlay); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity var(--tr); }
+.mov.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--bg-primary); border-radius: var(--rlg); box-shadow: 0 8px 32px var(--shadow-lg); border: 1px solid var(--border-light); width: 100%; max-width: 520px; transform: scale(.96) translateY(8px); transition: transform var(--tr); max-height: 90vh; display: flex; flex-direction: column; }
+.mov.open .modal { transform: scale(1) translateY(0); }
+.msm { max-width: 400px; }
+.mlg { max-width: 720px; }
+.mxl { max-width: 960px; }
+.mh { padding: 16px 20px 14px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-shrink: 0; }
+.mt { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.ms { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.mcl { width: 28px; height: 28px; border-radius: var(--r); border: none; background: var(--bg-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 17px; transition: all var(--tr); }
+.mcl:hover { background: var(--btn-warning-pale); color: var(--btn-warning); }
+.mb  { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.mf  { padding: 12px 20px; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-shrink: 0; background: var(--bg-secondary); }
+.mci { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px; }
+.mci.dan { background: var(--btn-danger-pale);  color: var(--btn-danger); }
+.mci.war { background: var(--btn-warning-pale); color: var(--btn-warning); }
+
+/* ══════════════════════════════════════════
+   DROPDOWN — sin overflow:hidden en el contenedor
+══════════════════════════════════════════ */
+.dd  { position: relative; display: inline-flex; }
+
+/* CRÍTICO: el dropdown menu usa position fixed para no ser recortado por contenedores */
+.ddm {
+  position: fixed;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--rlg);
+  box-shadow: 0 6px 24px var(--shadow-lg);
+  min-width: 175px;
+  padding: 4px;
+  z-index: 800;
+  display: none;
+  animation: ddIn .15s ease;
+}
+.ddm.open { display: block; }
+@keyframes ddIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+.ddi { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: var(--r); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: background var(--tr); font-weight: 400; }
+.ddi:hover { background: var(--hover); color: var(--text-primary); }
+.ddi.dng { color: var(--btn-warning); }
+.ddi.dng:hover { background: var(--btn-warning-pale); }
+.ddi ion-icon { font-size: 15px; color: var(--text-faint); }
+.ddi.dng ion-icon { color: var(--btn-warning); }
+.ddiv  { height: 1px; background: var(--border-light); margin: 4px 0; }
+.ddlbl { font-size: 9.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--text-faint); padding: 6px 10px 3px; }
+
+/* ══════════════════════════════════════════
+   PROGRESS & LOADING
+══════════════════════════════════════════ */
+.pgb { height: 6px; background: var(--bg-secondary); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-light); }
+.pgf { height: 100%; border-radius: 20px; background: var(--accent-primary); transition: width .4s ease; }
+.pgf.suc { background: var(--btn-success); }
+.pgf.dan { background: var(--btn-danger); }
+.pgf.war { background: var(--btn-warning); }
+.pgf.str { background-image: repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(255,255,255,.2) 6px,rgba(255,255,255,.2) 12px); animation: stripes 1s linear infinite; }
+@keyframes stripes { from { background-position: 0; } to { background-position: 24px; } }
+.spin { width: 22px; height: 22px; border: 2.5px solid var(--border-light); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin .7s linear infinite; }
+.spin-sm { width: 16px; height: 16px; border-width: 2px; }
+.spin-lg { width: 34px; height: 34px; border-width: 3px; }
+.skel { background: var(--bg-secondary); border-radius: var(--r); position: relative; overflow: hidden; }
+.skel::after { content: ''; position: absolute; inset: 0; background: var(--border-light); opacity: .5; transform: translateX(-100%); animation: skela 1.5s infinite; }
+@keyframes skela { to { transform: translateX(100%); } }
+.skelt { height: 14px; border-radius: 4px; margin-bottom: 7px; }
+.skelh { height: 20px; border-radius: 4px; margin-bottom: 8px; }
+
+/* ══════════════════════════════════════════
+   STEPS
+══════════════════════════════════════════ */
+.steps { display: flex; margin-bottom: 22px; }
+.step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: 50%; width: 100%; height: 2px; background: var(--border-light); }
+.step.done::after, .step.active::after { background: var(--accent-primary); }
+.stpc { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border-light); background: var(--bg-primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-faint); position: relative; z-index: 1; transition: all var(--tr); }
+.step.done .stpc   { background: var(--accent-primary); border-color: var(--accent-primary); color: #fff; }
+[data-theme="dark"] .step.done .stpc { color: #000; }
+.step.active .stpc { border-color: var(--accent-primary); color: var(--accent-primary); box-shadow: 0 0 0 4px var(--accent-light); }
+.stpl { font-size: 11px; font-weight: 500; color: var(--text-faint); margin-top: 7px; text-align: center; }
+.step.active .stpl, .step.done .stpl { color: var(--text-secondary); }
+
+/* ══════════════════════════════════════════
+   AVATARS
+══════════════════════════════════════════ */
+.av { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.av-xs { width: 24px; height: 24px; font-size: 9px; }
+.av-sm { width: 30px; height: 30px; font-size: 11px; }
+.av-md { width: 38px; height: 38px; font-size: 13px; }
+.av-lg { width: 50px; height: 50px; font-size: 17px; }
+.av-xl { width: 68px; height: 68px; font-size: 22px; }
+.av-sq { border-radius: var(--r); }
+.av-def { background: var(--accent-light);     color: var(--accent-primary); }
+.av-gr  { background: var(--btn-success-pale); color: var(--btn-success); }
+.av-rd  { background: var(--btn-danger-pale);  color: var(--btn-danger); }
+.av-wa  { background: var(--btn-warning-pale); color: var(--btn-warning); }
+.avg { display: flex; }
+.avg .av { border: 2px solid var(--bg-primary); margin-left: -8px; }
+.avg .av:first-child { margin-left: 0; }
+
+/* ══════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════ */
+.empty { text-align: center; padding: 50px 24px; display: flex; flex-direction: column; align-items: center; }
+.empi { font-size: 44px; color: var(--text-faint); margin-bottom: 12px; }
+.empt { font-size: 15px; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px; }
+.empx { font-size: 13px; color: var(--text-faint); max-width: 300px; line-height: 1.5; margin-bottom: 16px; }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+.tctx { position: fixed; bottom: 20px; right: 20px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-radius: var(--rlg); background: var(--bg-primary); border: 1px solid var(--border-light); box-shadow: 0 4px 16px var(--shadow-md); min-width: 260px; max-width: 350px; pointer-events: all; animation: slin .2s ease; }
+.toast ion-icon { font-size: 17px; flex-shrink: 0; }
+.tmsg { font-size: 13px; flex: 1; color: var(--text-primary); }
+.tclz { cursor: pointer; color: var(--text-faint); font-size: 15px; flex-shrink: 0; }
+.tsuc ion-icon { color: var(--btn-success); }
+.tdan ion-icon { color: var(--btn-danger); }
+.twar ion-icon { color: var(--btn-warning); }
+.tinf ion-icon { color: var(--info); }
+@keyframes slin { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ══════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════ */
+.div  { height: 1px; background: var(--border-light); margin: 16px 0; }
+.divt { display: flex; align-items: center; gap: 10px; color: var(--text-faint); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin: 16px 0; }
+.divt::before, .divt::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+.grid2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.gauto { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 14px; }
+.flx   { display: flex; }
+.flxc  { display: flex; align-items: center; }
+.flxb  { display: flex; align-items: center; justify-content: space-between; }
+.flxe  { display: flex; align-items: center; justify-content: flex-end; }
+.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}.g14{gap:14px}.g16{gap:16px}.g20{gap:20px}
+.f1 { flex: 1; }
+.fwrap { flex-wrap: wrap; }
+.mb4{margin-bottom:4px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb14{margin-bottom:14px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}.mb24{margin-bottom:24px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.wfull { width: 100%; }
+.txctr { text-align: center; }
+kbd { font-family: "Courier New", monospace; font-size: 11px; font-weight: 600; background: var(--bg-secondary); border: 1px solid var(--border-light); border-bottom: 2px solid var(--border-strong); border-radius: 4px; padding: 2px 6px; color: var(--text-secondary); }
+pre  { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: var(--rlg); padding: 14px; overflow-x: auto; font-family: "Courier New", monospace; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); }
+.litem { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+.litem:last-child { border-bottom: none; }
+.fbr   { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+
+[data-tip] { position: relative; }
+[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--accent-secondary); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: var(--r); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 400; }
+[data-tip]:hover::after { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+
+/* Base: evitar desbordamiento en cualquier resolución */
+body, .main, .pg { max-width: 100%; overflow-x: hidden; }
+.card, .statc { min-width: 0; }
+img, table, pre, .tw { max-width: 100%; }
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  :root { --sw: 220px; }
+  .grid4 { grid-template-columns: repeat(2,1fr); }
+}
+
+/* Tablet portrait / mobile grande (≤ 768px) */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+    box-shadow: 4px 0 20px var(--shadow-md);
+  }
+  [data-sidebar="mobile-open"] .sidebar { transform: translateX(0); }
+  [data-sidebar="mobile-open"] .sb-ov   { display: block; }
+  .main { margin-left: 0 !important; }
+
+  .grid3, .grid4 { grid-template-columns: repeat(2,1fr); }
+  .fr3 { grid-template-columns: 1fr; }
+  .fr  { grid-template-columns: 1fr; }
+  .pg  { padding: 14px; }
+  .table-popup { width: 92vw; left: 0 !important; }
+
+  .topbar { padding: 0 12px; gap: 8px; }
+  .bc .link { display: none; }
+  .bc .sep  { display: none; }
+}
+
+/* Smartphones normales (≤ 560px) */
+@media (max-width: 560px) {
+  .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+  .pg { padding: 10px; }
+  .topbar { padding: 0 10px; gap: 6px; }
+
+  /* Page header: vertical */
+  .ph { flex-direction: column; gap: 8px; }
+  .ph > div.flx { flex-direction: column; width: 100%; }
+  .ph > div.flx .btn { width: 100%; justify-content: center; }
+
+  /* Ocultar buscar del topbar */
+  .tbr .ibtn:nth-child(1) { display: none; }
+
+  /* Toasts: full ancho */
+  .tctx { left: 10px; right: 10px; bottom: 10px; }
+  .toast { min-width: unset; max-width: 100%; width: 100%; }
+
+  /* Paginación */
+  .pag { gap: 2px; padding: 10px 12px; flex-wrap: wrap; }
+  .pginf { font-size: 11px; width: 100%; margin-bottom: 6px; }
+  .pb { min-width: 28px; height: 28px; font-size: 12px; }
+
+  /* Tablas con scroll horizontal — la tabla NO se achica, hace scroll */
+  .tw { -webkit-overflow-scrolling: touch; display: block; }
+  .tw table { min-width: 480px; }
+  /* Columna de acciones: siempre mostrar contenido completo */
+  .tda { flex-wrap: nowrap; }
+  .tda .btn { flex-shrink: 0; min-width: fit-content; }
+  /* Tabla detalle: acciones en columna separada siempre visibles */
+  .table-detail .tda { flex-direction: row; flex-wrap: nowrap; }
+
+  /* Filtros apilados */
+  .fbr { flex-direction: column; align-items: stretch; gap: 6px; }
+  .fbr .sel { width: 100%; }
+  .fbr .btn { width: 100%; justify-content: center; }
+
+  /* Tabs scroll */
+  .tabs { overflow-x: auto; }
+  .tab  { padding: 8px 12px; font-size: 13px; flex-shrink: 0; }
+
+  /* Steps sin etiquetas */
+  .stpl { display: none; }
+
+  /* Dropdown: no salir de pantalla */
+  .ddm { max-width: calc(100vw - 16px) !important; }
+
+  /* Cards más compactas */
+  .cb { padding: 14px; }
+  .ch { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .ch > div.flx, .ch > div { width: 100%; }
+  .cf { padding: 10px 14px; }
+
+  /* Stat cards */
+  .statc { padding: 12px; gap: 10px; }
+  .sv { font-size: 18px; }
+
+  /* Botones en stat cards header */
+  .ch .inpw { width: 100%; }
+  .ch .inpw .inp { width: 100% !important; }
+}
+
+/* Smartphones delgados (≤ 400px) */
+@media (max-width: 400px) {
+  body { font-size: 13px; }
+  .pg { padding: 8px; }
+  .topbar { padding: 0 8px; gap: 4px; }
+  .ptit { font-size: 16px; }
+  .psub { font-size: 12px; }
+
+  /* Breadcrumb oculto */
+  .bc { display: none; }
+
+  /* Botones topbar: mínimos */
+  .tbr .ibtn:nth-child(1),
+  .tbr .ibtn:nth-child(2) { display: none; }
+
+  /* Inputs y botones más pequeños */
+  .btn    { height: 34px; padding: 0 12px; font-size: 13px; }
+  .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+  .btn-lg { height: 40px; font-size: 14px; }
+  .inp, .sel { height: 34px; font-size: 13px; }
+
+  /* Modales: sheet desde abajo */
+  .mov { padding: 0; align-items: flex-end; }
+  .modal, .modal.msm, .modal.mlg {
+    max-width: 100%;
+    border-radius: var(--rlg) var(--rlg) 0 0;
+    max-height: 92vh;
+  }
+
+  /* Steps: circulo más chico */
+  .stpc { width: 24px; height: 24px; font-size: 11px; }
+
+  /* Tabla detalle: ocultar columnas medias */
+  .table-detail th:nth-child(n+3):nth-last-child(n+2),
+  .table-detail td:nth-child(n+3):nth-last-child(n+2) { display: none; }
+
+  /* Textos en tarjetas */
+  .ct { font-size: 13px; }
+  .cb { padding: 12px; }
+  .ch { padding: 10px 12px; }
+}
+
+/* Pantallas muy pequeñas (< 360px, ej: Galaxy Fold) */
+@media (max-width: 320px) {
+  .pg { padding: 6px; }
+  body { font-size: 12px; }
+  .btn    { height: 32px; padding: 0 10px; font-size: 12px; }
+  .btn-sm { height: 26px; padding: 0 8px;  font-size: 11px; }
+  .inp, .sel { height: 32px; font-size: 12px; }
+  .th1 { font-size: 20px; }
+  .th2 { font-size: 17px; }
+  .th3 { font-size: 15px; }
+  .topbar { height: 48px; }
+  :root { --tbh: 48px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sb-ov" onclick="App.closeMobile()"></div>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="slogo">
+    <div class="logo-ic"><ion-icon name="medkit"></ion-icon></div>
+    <div><div class="ltxt">SamFarm</div><div class="lsub">Standard</div></div>
+  </div>
+
+  <div class="nscr">
+    <div class="nsec">
+      <div class="nl">Principal</div>
+      <a class="ni ac" data-tip="Inicio"><ion-icon class="nic" name="home-outline"></ion-icon><span class="ntxt">Inicio</span></a>
+      <a class="ni" data-tip="Sucursales"><ion-icon class="nic" name="storefront-outline"></ion-icon><span class="ntxt">Sucursales</span></a>
+      <a class="ni" data-tip="Usuarios"><ion-icon class="nic" name="people-outline"></ion-icon><span class="ntxt">Usuarios</span></a>
+      <a class="ni" data-tip="Clientes"><ion-icon class="nic" name="person-outline"></ion-icon><span class="ntxt">Clientes</span></a>
+    </div>
+    <div class="nsec">
+      <div class="nl">Inventario</div>
+      <div class="ni pac open" id="nip" data-tip="Productos" onclick="App.toggleSub('sp',this)">
+        <ion-icon class="nic" name="cube-outline"></ion-icon>
+        <span class="ntxt">Productos</span>
+        <ion-icon class="narr" name="chevron-forward"></ion-icon>
+      </div>
+      <div class="sub open" id="sp">
+        <a class="smi ac"><div class="smd"></div>Catálogo</a>
+        <a class="smi"><div class="smd"></div>Lotes</a>
+        <a class="smi"><div class="smd"></div>Mermas</a>
+      </div>
+      <div class="ni" id="nii" data-tip="Inventario" onclick="App.toggleSub('si',this)">
+        <ion-icon class="nic" name="layers-outline"></ion-icon>
+        <span class="ntxt">Inventario</span>
+        <ion-icon class="narr" name="chevron-forward"></ion-icon>
+      </div>
+      <div class="sub" id="si">
+        <a class="smi"><div class="smd"></div>Por sucursal</a>
+        <a class="smi"><div class="smd"></div>Transferencias</a>
+        <a class="smi"><div class="smd"></div>Ajustes</a>
+      </div>
+      <a class="ni" data-tip="Proveedores"><ion-icon class="nic" name="business-outline"></ion-icon><span class="ntxt">Proveedores</span></a>
+    </div>
+    <div class="nsec">
+      <div class="nl">Operaciones</div>
+      <a class="ni" data-tip="Cajas"><ion-icon class="nic" name="cash-outline"></ion-icon><span class="ntxt">Cajas</span><span class="nbdg">3</span></a>
+      <a class="ni" data-tip="Ventas"><ion-icon class="nic" name="cart-outline"></ion-icon><span class="ntxt">Ventas</span></a>
+      <a class="ni" data-tip="Compras"><ion-icon class="nic" name="bag-add-outline"></ion-icon><span class="ntxt">Compras</span></a>
+    </div>
+    <div class="nsec">
+      <div class="nl">Finanzas</div>
+      <div class="ni" id="nif" data-tip="Finanzas" onclick="App.toggleSub('sf',this)">
+        <ion-icon class="nic" name="wallet-outline"></ion-icon>
+        <span class="ntxt">Finanzas</span>
+        <ion-icon class="narr" name="chevron-forward"></ion-icon>
+      </div>
+      <div class="sub" id="sf">
+        <a class="smi"><div class="smd"></div>Facturas</a>
+        <a class="smi"><div class="smd"></div>Pagos</a>
+        <a class="smi"><div class="smd"></div>Contabilidad</a>
+      </div>
+      <a class="ni" data-tip="Reportes"><ion-icon class="nic" name="bar-chart-outline"></ion-icon><span class="ntxt">Reportes</span></a>
+      <a class="ni" data-tip="Auditoría"><ion-icon class="nic" name="shield-checkmark-outline"></ion-icon><span class="ntxt">Auditoría</span></a>
+      <a class="ni" data-tip="Configuración"><ion-icon class="nic" name="settings-outline"></ion-icon><span class="ntxt">Configuración</span></a>
+    </div>
+  </div>
+
+  <div class="susr">
+    <div class="uav">MS</div>
+    <div class="uinfo"><div class="un">Mayk S.</div><div class="ur">Administrador</div></div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR — botón toggle DENTRO del navbar -->
+  <header class="topbar" id="topbar">
+    <button class="sb-toggle" id="sbBtn" onclick="App.toggleSidebar()" data-tip="Colapsar menú">
+      <ion-icon name="menu-outline" id="sbIcon"></ion-icon>
+    </button>
+    <nav class="bc">
+      <span class="link">Sistema</span>
+      <ion-icon class="sep" name="chevron-forward" style="font-size:10px"></ion-icon>
+      <span class="cur">Librería de Componentes</span>
+    </nav>
+    <div class="tbr">
+      <button class="ibtn" data-tip="Buscar"><ion-icon name="search-outline"></ion-icon></button>
+      <button class="ibtn" onclick="App.showToast('Sin notificaciones nuevas','suc')">
+        <ion-icon name="notifications-outline"></ion-icon><span class="ndot"></span>
+      </button>
+      <button class="ibtn" id="thbtn" onclick="App.toggleTheme()" data-tip="Cambiar tema">
+        <ion-icon name="moon-outline" id="thico"></ion-icon>
+      </button>
+      <div class="av av-sm av-def" style="cursor:pointer;font-size:11px;font-weight:700">MS</div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <div class="pg">
+
+    <div class="ph">
+      <div><div class="ptit">Librería de Componentes</div><div class="psub">Plantilla base — SamFarm System</div></div>
+      <div class="flx g8">
+        <button class="btn btn-sec btn-sm" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon>Confirmar</button>
+        <button class="btn btn-def" onclick="App.showM('mf')"><ion-icon name="add-outline"></ion-icon>Modal Formulario</button>
+      </div>
+    </div>
+
+    <!-- TIPOGRAFÍA -->
+    <div class="stit">Tipografía</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="td mb8">Display — 34px 700</div>
+        <div class="th1 mb8">Heading 1 — 26px 700</div>
+        <div class="th2 mb8">Heading 2 — 21px 700</div>
+        <div class="th3 mb8">Heading 3 — 17px 700</div>
+        <div class="th4 mb8">Heading 4 — 15px 700</div>
+        <div class="tb mb8">Body — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+        <div class="tbs mb8">Body Small — Texto secundario compacto para descripciones y notas.</div>
+        <div class="tc mb8">Caption — 12px. Texto auxiliar para etiquetas.</div>
+        <div class="tol mb12">Overline — 10px uppercase 700</div>
+        <div class="flx fwrap g8">
+          <code class="tmono">código mono</code>
+          <span class="tlink">enlace</span>
+          <span class="tmut">silenciado</span>
+          <span class="tdan">danger</span>
+          <span class="tsuc">success</span>
+          <span class="twar">warning</span>
+          <kbd>Ctrl</kbd> + <kbd>K</kbd>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="stit">Botones</div>
+    <div class="card mb16">
+      <div class="ch"><span class="ct">Variantes, tamaños y estados</span></div>
+      <div class="cb">
+        <div class="flx fwrap g8 mb14">
+          <button class="btn btn-def"><ion-icon name="add-outline"></ion-icon>Default</button>
+          <button class="btn btn-sec">Secondary</button>
+          <button class="btn btn-out">Outline</button>
+          <button class="btn btn-gho">Ghost</button>
+          <button class="btn btn-suc"><ion-icon name="checkmark-outline"></ion-icon>Success</button>
+          <button class="btn btn-dan">Danger</button>
+          <button class="btn btn-war"><ion-icon name="trash-outline"></ion-icon>Warning</button>
+        </div>
+        <div class="flx fwrap g8 mb14">
+          <button class="btn btn-souc">Success Outline</button>
+          <button class="btn btn-douc">Danger Outline</button>
+          <button class="btn btn-wouc">Warning Outline</button>
+        </div>
+        <div class="flx fwrap g8 mb14">
+          <button class="btn btn-def btn-xs">XSmall</button>
+          <button class="btn btn-def btn-sm">Small</button>
+          <button class="btn btn-def">Default</button>
+          <button class="btn btn-def btn-lg">Large</button>
+        </div>
+        <div class="flx fwrap g8 mb14">
+          <button class="btn btn-def btn-ico btn-sm" data-tip="Agregar"><ion-icon name="add-outline"></ion-icon></button>
+          <button class="btn btn-sec btn-ico" data-tip="Editar"><ion-icon name="pencil-outline"></ion-icon></button>
+          <button class="btn btn-war btn-ico" data-tip="Eliminar"><ion-icon name="trash-outline"></ion-icon></button>
+          <button class="btn btn-gho btn-ico" data-tip="Descargar"><ion-icon name="download-outline"></ion-icon></button>
+          <div class="btngrp">
+            <button class="btn btn-sec btn-sm">Izquierda</button>
+            <button class="btn btn-sec btn-sm">Centro</button>
+            <button class="btn btn-sec btn-sm">Derecha</button>
+          </div>
+        </div>
+        <div class="flx g8">
+          <button class="btn btn-def ld"><span class="blt">Guardando...</span></button>
+          <button class="btn btn-def" style="opacity:.45;cursor:not-allowed" disabled>Deshabilitado</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMULARIOS -->
+    <div class="stit">Formularios</div>
+    <div class="card mb16">
+      <div class="ch"><span class="ct">Campos de entrada</span></div>
+      <div class="cb">
+        <div class="fr mb14">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Texto simple<span class="req">*</span></label><input class="inp" placeholder="Ej: Juan Pérez"><div class="fh">Nombre completo del usuario.</div></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Con error</label><input class="inp err" value="dato inválido"><div class="ferr"><ion-icon name="alert-circle-outline"></ion-icon>Este campo no es válido.</div></div>
+        </div>
+        <div class="fr mb14">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Con ícono izquierda</label><div class="inpw"><ion-icon class="iil" name="search-outline"></ion-icon><input class="inp" placeholder="Buscar..."></div></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Con ícono derecha</label><div class="inpw hr"><input class="inp" type="password" value="secret123"><ion-icon class="iir" name="eye-outline"></ion-icon></div></div>
+        </div>
+        <div class="fr mb14">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Con prefijo</label><div class="inpg"><span class="iad">Bs.</span><input class="inp" placeholder="0.00"></div></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Con botón</label><div class="inpg"><input class="inp" placeholder="Buscar proveedor..."><button class="btn btn-def"><ion-icon name="search-outline"></ion-icon></button></div></div>
+        </div>
+        <div class="fr mb14">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Selector</label><select class="sel"><option value="">Seleccionar</option><option>SUCURSAL SASUKE 1</option><option>SUCURSAL SASUKE 2</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Fecha</label><input class="inp" type="date"></div>
+        </div>
+        <div class="fg mb14"><label class="fl">Área de texto</label><textarea class="ta" placeholder="Escribe aquí..."></textarea></div>
+        <div class="fr mb14">
+          <div>
+            <label class="fl">Checkboxes</label>
+            <label class="chkg"><input type="checkbox" checked><span class="chkb"><ion-icon name="checkmark" style="font-size:11px"></ion-icon></span><div><div class="chl">Opción activa</div><div class="chd">Descripción breve</div></div></label>
+            <label class="chkg"><input type="checkbox"><span class="chkb"><ion-icon name="checkmark" style="font-size:11px"></ion-icon></span><div class="chl">Opción inactiva</div></label>
+          </div>
+          <div>
+            <label class="fl">Radio buttons</label>
+            <label class="chkg"><input type="radio" name="r1" checked><span class="radb"></span><div class="chl">Administrador</div></label>
+            <label class="chkg"><input type="radio" name="r1"><span class="radb"></span><div class="chl">Vendedor</div></label>
+            <label class="chkg"><input type="radio" name="r1"><span class="radb"></span><div class="chl">Solo lectura</div></label>
+          </div>
+        </div>
+        <div class="mb14">
+          <label class="fl mb8">Switches</label>
+          <div class="swg mb10" style="max-width:300px"><div><div class="chl">Notificaciones</div><div class="chd">Alertas por correo</div></div><label class="sw"><input type="checkbox" checked><span class="swt"></span></label></div>
+          <div class="swg" style="max-width:300px"><div><div class="chl">Acceso externo</div><div class="chd">Permitir VPN</div></div><label class="sw"><input type="checkbox"><span class="swt"></span></label></div>
+        </div>
+        <div class="fg mb14"><label class="fl">Rango: <span id="rv">60</span>%</label><input class="rng" type="range" min="0" max="100" value="60" oninput="document.getElementById('rv').textContent=this.value"></div>
+        <div class="fdrop"><ion-icon name="cloud-upload-outline"></ion-icon><div class="fdt">Arrastra archivos aquí</div><div class="fdh">o <span class="tlink">selecciona un archivo</span> — PNG, JPG, PDF hasta 10 MB</div></div>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="stit">Alertas</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="alert alinf"><ion-icon name="information-circle-outline"></ion-icon><div><div class="altt">Información</div><div class="altx">Mantenimiento programado el domingo a las 02:00 AM.</div></div><ion-icon name="close-outline" class="altc" onclick="this.closest('.alert').remove()"></ion-icon></div>
+        <div class="alert alsuc"><ion-icon name="checkmark-circle-outline"></ion-icon><div><div class="altt">Éxito</div><div class="altx">Los datos han sido guardados correctamente en el sistema.</div></div><ion-icon name="close-outline" class="altc" onclick="this.closest('.alert').remove()"></ion-icon></div>
+        <div class="alert aldan"><ion-icon name="warning-outline"></ion-icon><div><div class="altt">Advertencia</div><div class="altx">8 productos tienen fecha de vencimiento en los próximos 30 días.</div></div><ion-icon name="close-outline" class="altc" onclick="this.closest('.alert').remove()"></ion-icon></div>
+        <div class="alert alwar" style="margin-bottom:0"><ion-icon name="alert-circle-outline"></ion-icon><div><div class="altt">Error</div><div class="altx">No se pudo conectar con el servidor. Verifique la conexión VPN.</div></div><ion-icon name="close-outline" class="altc" onclick="this.closest('.alert').remove()"></ion-icon></div>
+      </div>
+    </div>
+
+    <!-- BADGES -->
+    <div class="stit">Badges</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="flx fwrap g8 mb10">
+          <span class="badge bdef">Default</span>
+          <span class="badge bgr"><span class="bdt"></span>Activo</span>
+          <span class="badge bdan">Danger</span>
+          <span class="badge bwar"><span class="bdt"></span>Error</span>
+          <span class="badge binf">Info</span>
+          <span class="badge bgry">Neutro</span>
+          <span class="badge bout">Outline</span>
+        </div>
+        <div class="flx fwrap g8">
+          <span class="badge bgr bsm">Pequeño</span>
+          <span class="badge bdef">Normal</span>
+          <span class="badge bwar blg">Grande</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stit">Tarjetas de estadísticas</div>
+    <div class="grid4 mb16">
+      <div class="statc"><div class="siw bl"><ion-icon name="storefront-outline"></ion-icon></div><div><div class="sv">3</div><div class="sl">Sucursales</div><div class="str up"><ion-icon name="trending-up-outline"></ion-icon>+1 este mes</div></div></div>
+      <div class="statc"><div class="siw gr"><ion-icon name="cash-outline"></ion-icon></div><div><div class="sv">Bs 4,820</div><div class="sl">Ventas hoy</div><div class="str up"><ion-icon name="arrow-up-outline"></ion-icon>+12%</div></div></div>
+      <div class="statc"><div class="siw rd"><ion-icon name="time-outline"></ion-icon></div><div><div class="sv">48</div><div class="sl">Lotes x vencer</div><div class="str dn"><ion-icon name="alert-outline"></ion-icon>Revisar</div></div></div>
+      <div class="statc"><div class="siw ww"><ion-icon name="people-outline"></ion-icon></div><div><div class="sv">10</div><div class="sl">Usuarios activos</div><div class="str up"><ion-icon name="arrow-up-outline"></ion-icon>+2</div></div></div>
+    </div>
+
+    <!-- TABLAS — 3 variaciones -->
+    <div class="stit">Tablas — 3 variaciones</div>
+
+    <!-- Tabla 1: Normal -->
+    <div class="card mb16">
+      <div class="ch">
+        <div><span class="ct">Tabla 1 — Normal</span><div class="cs">Columnas estándar, vista densa</div></div>
+        <div class="flx g8">
+          <div class="inpw"><ion-icon class="iil" name="search-outline"></ion-icon><input class="inp" style="width:180px" placeholder="Buscar..."></div>
+          <button class="btn btn-def btn-sm"><ion-icon name="add-outline"></ion-icon>Nuevo</button>
+        </div>
+      </div>
+      <div class="fbr" style="padding:10px 18px 0">
+        <select class="sel" style="width:130px;height:30px"><option>Todos</option><option>Activo</option><option>Inactivo</option></select>
+        <button class="btn btn-gho btn-sm"><ion-icon name="download-outline"></ion-icon>Exportar</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th class="srt sa">ID</th>
+            <th>Razón Social</th>
+            <th class="srt">NIT/CI</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tr-click" data-row-type="prov" data-row-json='{"id":"75190","name":"DELTA S.A.","nit":"1","email":"—","estado":"Activo","tel":"—","dir":"La Paz, Bolivia"}'>
+              <td class="tdm">75190</td><td class="tdp">DELTA S.A.</td><td>1</td><td class="tdmu">—</td>
+              <td><span class="badge bgr"><span class="bdt"></span>Activo</span></td>
+              <td onclick="event.stopPropagation()"><div class="tda"><button class="btn btn-gho btn-ico btn-sm" data-tip="Editar"><ion-icon name="pencil-outline"></ion-icon></button><button class="btn btn-war btn-ico btn-sm" data-tip="Eliminar" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon></button></div></td>
+            </tr>
+            <tr class="tr-click" data-row-type="prov" data-row-json='{"id":"79704","name":"IFA S.A.","nit":"1","email":"info@ifa.com","estado":"Activo","tel":"+591 2 2441800","dir":"La Paz, Bolivia"}'>
+              <td class="tdm">79704</td><td class="tdp">IFA S.A.</td><td>1</td><td>info@ifa.com</td>
+              <td><span class="badge bgr"><span class="bdt"></span>Activo</span></td>
+              <td onclick="event.stopPropagation()"><div class="tda"><button class="btn btn-gho btn-ico btn-sm" data-tip="Editar"><ion-icon name="pencil-outline"></ion-icon></button><button class="btn btn-war btn-ico btn-sm" data-tip="Eliminar" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon></button></div></td>
+            </tr>
+            <tr class="tr-click" data-row-type="prov" data-row-json='{"id":"33527","name":"3M CHILE S.A.","nit":"1","email":"—","estado":"Inactivo","tel":"—","dir":"El Alto, Bolivia"}'>
+              <td class="tdm">33527</td><td class="tdp">3M CHILE S.A.</td><td>1</td><td class="tdmu">—</td>
+              <td><span class="badge bgry">Inactivo</span></td>
+              <td onclick="event.stopPropagation()"><div class="tda"><button class="btn btn-gho btn-ico btn-sm" data-tip="Editar"><ion-icon name="pencil-outline"></ion-icon></button><button class="btn btn-war btn-ico btn-sm" data-tip="Eliminar" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <span class="pginf">Página 1 de 24 — 360 registros</span>
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <div class="pb dis"><ion-icon name="chevron-back" style="font-size:11px"></ion-icon></div>
+          <div class="pb ac">1</div><div class="pb">2</div><div class="pb">3</div>
+          <span style="padding:0 2px;color:var(--text-faint);align-self:center">…</span>
+          <div class="pb">24</div>
+          <div class="pb"><ion-icon name="chevron-forward" style="font-size:11px"></ion-icon></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla 2: Compacta con detalle -->
+    <div class="card mb16">
+      <div class="ch">
+        <div><span class="ct">Tabla 2 — Compacta con detalle</span><div class="cs">Menos columnas, información expandida por fila</div></div>
+        <button class="btn btn-def btn-sm"><ion-icon name="add-outline"></ion-icon>Nuevo</button>
+      </div>
+      <div class="tw table-detail">
+        <table>
+          <thead><tr>
+            <th style="width:55%">Medicamento</th>
+            <th style="width:20%">Proveedor</th>
+            <th style="width:15%">Stock</th>
+            <th style="width:10%">Acciones</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tr-click" data-row-type="lote" data-row-json='{"cod":"MED-001","nom":"PARACETAMOL 500 MG x 100 TABLETAS","lote":"L-2024-0892","vence":"01/10/2026","cat":"Analgesico","suc":"SASUKE 2","prov":"DELTA S.A.","stock":"220 u.","estado":"Disponible","precio":"Bs. 14.00"}'>
+              <td>
+                <div class="td-main">PARACETAMOL 500 MG × 100 TABLETAS</div>
+                <div class="td-sub">Lote: L-2024-0892 · Vence: 01/10/2026</div>
+                <div class="td-meta">
+                  <span class="badge bdef bsm">Analgésico</span>
+                  <span class="badge bgry bsm"><ion-icon name="location-outline"></ion-icon>SASUKE 2</span>
+                </div>
+              </td>
+              <td><div class="td-main">DELTA S.A.</div><div class="td-sub">ID: 75190</div></td>
+              <td><div class="td-main">220 u.</div><div class="td-sub" style="color:var(--btn-success)">Disponible</div></td>
+              <td onclick="event.stopPropagation()">
+                <div class="tda" style="flex-direction:column;align-items:stretch;gap:5px">
+                  <button class="btn btn-gho btn-sm"><ion-icon name="pencil-outline"></ion-icon>Editar</button>
+                  <button class="btn btn-war btn-sm" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon>Eliminar</button>
+                </div>
+              </td>
+            </tr>
+            <tr class="tr-click" data-row-type="lote" data-row-json='{"cod":"MED-002","nom":"IBUPROFENO 400 MG x 50 CAPSULAS","lote":"L-2023-0344","vence":"01/12/2025","cat":"Antiinflamatorio","suc":"SASUKE 1","prov":"IFA S.A.","stock":"8 u.","estado":"Stock bajo","precio":"Bs. 22.50"}'>
+              <td>
+                <div class="td-main">IBUPROFENO 400 MG × 50 CÁPSULAS</div>
+                <div class="td-sub">Lote: L-2023-0344 · Vence: 01/12/2025</div>
+                <div class="td-meta">
+                  <span class="badge bdan bsm">Vencimiento próximo</span>
+                  <span class="badge bgry bsm"><ion-icon name="location-outline"></ion-icon>SASUKE 1</span>
+                </div>
+              </td>
+              <td><div class="td-main">IFA S.A.</div><div class="td-sub">ID: 79704</div></td>
+              <td><div class="td-main">8 u.</div><div class="td-sub" style="color:var(--btn-danger)">Stock bajo</div></td>
+              <td onclick="event.stopPropagation()">
+                <div class="tda" style="flex-direction:column;align-items:stretch;gap:5px">
+                  <button class="btn btn-gho btn-sm"><ion-icon name="pencil-outline"></ion-icon>Editar</button>
+                  <button class="btn btn-war btn-sm" onclick="App.showM('mc')"><ion-icon name="trash-outline"></ion-icon>Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla 3: Emergente -->
+    <div class="card mb16">
+      <div class="ch"><span class="ct">Tabla 3 — Emergente (popup)</span><div class="cs">Escribe en el buscador para ver la tabla de resultados</div></div>
+      <div class="cb" style="overflow:visible;position:relative">
+        <div class="flxb mb14">
+          <p class="tbs">Útil para búsqueda de registros. La tabla aparece al enfocar el campo. Haz clic en una fila para agregar al carrito.</p>
+          <button class="btn btn-def btn-sm" onclick="App.openCart()" style="flex-shrink:0;margin-left:12px"><ion-icon name="cart-outline"></ion-icon>Ver carrito <span id="cart-badge" style="background:rgba(255,255,255,.25);padding:1px 6px;border-radius:20px;font-size:10px;margin-left:2px">0</span></button>
+        </div>
+        <div class="table-popup-wrap">
+          <div class="table-popup-trigger">
+            <label class="fl">Buscar medicamento</label>
+            <div class="inpw">
+              <ion-icon class="iil" name="search-outline"></ion-icon>
+              <input class="inp" id="popupSearch" placeholder="Escribe el nombre del medicamento..." autocomplete="off"
+                onfocus="App.openPopup()" oninput="App.filterPopup(this.value)">
+            </div>
+          </div>
+          <div class="table-popup" id="tablePopup">
+            <div class="tp-header">
+              <span class="tp-label">Resultados de búsqueda</span>
+              <ion-icon name="close-outline" class="tp-close" onclick="App.closePopup()"></ion-icon>
+            </div>
+            <div class="tp-scroll">
+              <table id="popupTable">
+                <thead><tr><th>Código</th><th>Descripción</th><th>Stock</th><th>Precio</th><th></th></tr></thead>
+                <tbody id="popupBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="stit">Tabs</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="tabs mb16">
+          <button class="tab ac"><ion-icon name="list-outline"></ion-icon>General<span class="tbc">12</span></button>
+          <button class="tab"><ion-icon name="cube-outline"></ion-icon>Inventario<span class="tbc">4</span></button>
+          <button class="tab">Ventas</button>
+          <button class="tab">Configuración</button>
+        </div>
+        <div class="tabsp">
+          <button class="tabp ac">Diario</button>
+          <button class="tabp">Semanal</button>
+          <button class="tabp">Mensual</button>
+          <button class="tabp">Anual</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESO & LOADING -->
+    <div class="stit">Progreso & Loading</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="mb14"><div class="flxb mb4"><span class="tc">Stock disponible</span><span class="tc">75%</span></div><div class="pgb"><div class="pgf" style="width:75%"></div></div></div>
+        <div class="mb14"><div class="flxb mb4"><span class="tc">Ventas objetivo</span><span class="tc">45%</span></div><div class="pgb"><div class="pgf dan" style="width:45%"></div></div></div>
+        <div class="mb20"><div class="flxb mb4"><span class="tc">Lotes vencidos</span><span class="tc">12%</span></div><div class="pgb"><div class="pgf str war" style="width:12%"></div></div></div>
+        <div class="flx g16 fwrap mb16">
+          <div class="flxc g8"><div class="spin spin-sm"></div><span class="tc">Small</span></div>
+          <div class="flxc g8"><div class="spin"></div><span class="tc">Default</span></div>
+          <div class="flxc g8"><div class="spin spin-lg"></div><span class="tc">Large</span></div>
+        </div>
+        <div>
+          <div class="skel skelh mb8" style="width:40%"></div>
+          <div class="skel skelt" style="width:100%"></div>
+          <div class="skel skelt" style="width:80%"></div>
+          <div class="skel skelt" style="width:55%;margin-bottom:0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASOS -->
+    <div class="stit">Indicador de pasos</div>
+    <div class="card mb16">
+      <div class="cb">
+        <div class="steps">
+          <div class="step done"><div class="stpc"><ion-icon name="checkmark" style="font-size:12px;color:#fff"></ion-icon></div><div class="stpl">Análisis</div></div>
+          <div class="step done"><div class="stpc"><ion-icon name="checkmark" style="font-size:12px;color:#fff"></ion-icon></div><div class="stpl">Diseño</div></div>
+          <div class="step active"><div class="stpc">3</div><div class="stpl">Desarrollo</div></div>
+          <div class="step"><div class="stpc">4</div><div class="stpl">Pruebas</div></div>
+          <div class="step"><div class="stpc">5</div><div class="stpl">Despliegue</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVATARES, DROPDOWN (sin overflow:hidden), MISC -->
+    <div class="stit">Avatares, Dropdown, Misceláneos</div>
+    <!-- CRÍTICO: sin overflow:hidden en este contenedor para que los dropdowns no se recorten -->
+    <div class="card mb16" style="overflow:visible">
+      <div class="ch"><span class="ct">Avatares y Grupos</span></div>
+      <div class="cb" style="overflow:visible">
+        <div class="flx fwrap g12 flxc mb20">
+          <div class="av av-xs av-def">MS</div>
+          <div class="av av-sm av-gr">JR</div>
+          <div class="av av-md av-rd">KL</div>
+          <div class="av av-lg av-wa">AB</div>
+          <div class="av av-xl av-def"><ion-icon name="person-outline" style="font-size:26px"></ion-icon></div>
+          <div class="av av-md av-sq av-gr"><ion-icon name="storefront-outline" style="font-size:18px"></ion-icon></div>
+          <div class="avg">
+            <div class="av av-sm av-def">A</div>
+            <div class="av av-sm av-gr">B</div>
+            <div class="av av-sm av-rd">C</div>
+            <div class="av av-sm av-wa" style="font-size:9px;font-weight:700">+5</div>
+          </div>
+        </div>
+
+        <div class="div"></div>
+        <div class="th5 mb12">Dropdowns</div>
+        <div class="flx g12 fwrap flxc mb20" style="position:relative;z-index:10">
+          <!-- Dropdown 1 -->
+          <div class="dd" id="dd1">
+            <button class="btn btn-sec" onclick="App.toggleDd(event,'dd1')">Acciones <ion-icon name="chevron-down-outline" style="font-size:12px"></ion-icon></button>
+            <div class="ddm" id="ddm1">
+              <div class="ddlbl">Opciones</div>
+              <div class="ddi"><ion-icon name="pencil-outline"></ion-icon>Editar</div>
+              <div class="ddi"><ion-icon name="copy-outline"></ion-icon>Duplicar</div>
+              <div class="ddi"><ion-icon name="download-outline"></ion-icon>Exportar</div>
+              <div class="ddiv"></div>
+              <div class="ddi dng"><ion-icon name="trash-outline"></ion-icon>Eliminar</div>
+            </div>
+          </div>
+          <!-- Dropdown 2 -->
+          <div class="dd" id="dd2">
+            <button class="btn btn-gho btn-ico" onclick="App.toggleDd(event,'dd2')"><ion-icon name="ellipsis-vertical-outline"></ion-icon></button>
+            <div class="ddm" id="ddm2">
+              <div class="ddi"><ion-icon name="eye-outline"></ion-icon>Ver detalle</div>
+              <div class="ddi"><ion-icon name="create-outline"></ion-icon>Editar</div>
+              <div class="ddiv"></div>
+              <div class="ddi dng"><ion-icon name="close-outline"></ion-icon>Desactivar</div>
+            </div>
+          </div>
+          <!-- Dropdown 3 — más items -->
+          <div class="dd" id="dd3">
+            <button class="btn btn-def btn-sm" onclick="App.toggleDd(event,'dd3')"><ion-icon name="filter-outline"></ion-icon>Filtrar por <ion-icon name="chevron-down-outline" style="font-size:11px"></ion-icon></button>
+            <div class="ddm" id="ddm3">
+              <div class="ddlbl">Período</div>
+              <div class="ddi"><ion-icon name="today-outline"></ion-icon>Hoy</div>
+              <div class="ddi"><ion-icon name="calendar-outline"></ion-icon>Esta semana</div>
+              <div class="ddi"><ion-icon name="calendar-clear-outline"></ion-icon>Este mes</div>
+              <div class="ddiv"></div>
+              <div class="ddlbl">Estado</div>
+              <div class="ddi"><ion-icon name="checkmark-circle-outline"></ion-icon>Activos</div>
+              <div class="ddi"><ion-icon name="time-outline"></ion-icon>Pendientes</div>
+              <div class="ddi"><ion-icon name="close-circle-outline"></ion-icon>Inactivos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="div"></div>
+        <div class="th5 mb12">Lista de items</div>
+        <div class="litem"><div class="av av-sm av-def">MS</div><div class="f1"><div class="th5">Mayk Sasuke</div><div class="tc">Administrador — SASUKE 2</div></div><span class="badge bgr"><span class="bdt"></span>Online</span></div>
+        <div class="litem"><div class="av av-sm av-gr">MK</div><div class="f1"><div class="th5">Maquina 01 Central</div><div class="tc">Vendedor — CENTRAL</div></div><span class="badge bgry">Offline</span></div>
+        <div class="litem" style="border:none"><div class="av av-sm av-rd">TR</div><div class="f1"><div class="th5">Trabajador Sistemas</div><div class="tc">Administrador</div></div><span class="badge bgr"><span class="bdt"></span>Online</span></div>
+
+        <div class="divt">Estado vacío</div>
+        <div class="empty">
+          <ion-icon class="empi" name="file-tray-outline"></ion-icon>
+          <div class="empt">Sin resultados</div>
+          <div class="empx">No se encontraron registros que coincidan con los criterios de búsqueda.</div>
+          <button class="btn btn-def btn-sm"><ion-icon name="add-outline"></ion-icon>Agregar primero</button>
+        </div>
+
+        <div class="divt">Bloque de código</div>
+        <pre>SELECT * FROM medicamento
+WHERE TRIM(UPPER(med_nombre_quimico))
+LIKE '%PARACETAMOL%'
+ORDER BY med_creado_en DESC LIMIT 20;</pre>
+      </div>
+    </div>
+
+    <!-- TARJETAS -->
+    <div class="stit">Tarjetas</div>
+    <div class="grid3 mb16">
+      <div class="card hov">
+        <div class="ch"><span class="ct">Card básica</span><span class="badge bdef">Nuevo</span></div>
+        <div class="cb"><p class="tbs">Tarjeta con header, body y footer. Hover activado con clase <code class="tmono">.hov</code>.</p></div>
+        <div class="cf"><button class="btn btn-gho btn-sm">Cancelar</button><button class="btn btn-def btn-sm">Confirmar</button></div>
+      </div>
+      <div class="card">
+        <div class="cb txctr" style="padding:22px">
+          <div class="av av-lg av-def" style="margin:0 auto 12px"><ion-icon name="storefront-outline" style="font-size:24px"></ion-icon></div>
+          <div class="th4 mb4">SUCURSAL SASUKE 2</div>
+          <div class="tc mb12">Zona San Roque — El Alto</div>
+          <div class="flx g8" style="justify-content:center"><span class="badge bgr"><span class="bdt"></span>Activa</span><span class="badge bdef">2 usuarios</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Toasts</span></div>
+        <div class="cb">
+          <div class="flx fwrap g8">
+            <button class="btn btn-suc btn-sm" onclick="App.showToast('Registro guardado.','suc')"><ion-icon name="checkmark-circle-outline"></ion-icon>Success</button>
+            <button class="btn btn-dan btn-sm" onclick="App.showToast('Error de conexión.','dan')"><ion-icon name="alert-circle-outline"></ion-icon>Danger</button>
+            <button class="btn btn-war btn-sm" onclick="App.showToast('Lotes por vencer.','war')"><ion-icon name="warning-outline"></ion-icon>Warning</button>
+            <button class="btn btn-sec btn-sm" onclick="App.showToast('Procesando...','inf')"><ion-icon name="information-circle-outline"></ion-icon>Info</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pg -->
+</div><!-- /main -->
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="mov" id="mc">
+  <div class="modal msm">
+    <div class="mb" style="text-align:center;padding:26px 26px 18px">
+      <div class="mci dan"><ion-icon name="trash-outline"></ion-icon></div>
+      <div class="th3 mb8">¿Eliminar registro?</div>
+      <p class="tbs tmut">Esta acción no se puede deshacer. El registro será eliminado permanentemente.</p>
+    </div>
+    <div class="mf" style="justify-content:center;padding-bottom:22px;gap:10px">
+      <button class="btn btn-gho" onclick="App.closeM('mc')">Cancelar</button>
+      <button class="btn btn-war" onclick="App.closeM('mc');App.showToast('Registro eliminado.','suc')"><ion-icon name="trash-outline"></ion-icon>Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORMULARIO -->
+<div class="mov" id="mf">
+  <div class="modal">
+    <div class="mh">
+      <div><div class="mt">Nuevo proveedor</div><div class="ms">Complete los datos del proveedor</div></div>
+      <button class="mcl" onclick="App.closeM('mf')"><ion-icon name="close-outline"></ion-icon></button>
+    </div>
+    <div class="mb">
+      <div class="fr">
+        <div class="fg"><label class="fl">NIT/CI<span class="req">*</span></label><input class="inp" placeholder="Número de identificación"></div>
+        <div class="fg"><label class="fl">Razón social<span class="req">*</span></label><input class="inp" placeholder="Nombre de la empresa"></div>
+      </div>
+      <div class="fg"><label class="fl">Correo electrónico</label><div class="inpw"><ion-icon class="iil" name="mail-outline"></ion-icon><input class="inp" placeholder="correo@proveedor.com"></div></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Teléfono</label><input class="inp" placeholder="591-12345678"></div>
+        <div class="fg"><label class="fl">Estado</label><select class="sel"><option>Activo</option><option>Inactivo</option></select></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Observaciones</label><textarea class="ta" placeholder="Notas adicionales..." style="min-height:64px"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gho" onclick="App.closeM('mf')">Cancelar</button>
+      <button class="btn btn-def" onclick="App.closeM('mf');App.showToast('Proveedor creado.','suc')"><ion-icon name="save-outline"></ion-icon>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="tctx" id="tctx"></div>
+
+<script>
+/* SamFarm UI — App module
+   Todas las funciones son privadas; solo la API publica esta en window.App
+   Las funciones se ejecutan UNICAMENTE cuando son invocadas externamente
+*/
+(function(global) {
+  "use strict";
+
+  /* ── ESTADO INTERNO ─────────────────────── */
+  var _cart = [];
+
+  var _popupData = [
+    { cod:"MED-001", nom:"PARACETAMOL 500 MG x 100 TAB",    stock:"220", precio:14.00 },
+    { cod:"MED-002", nom:"IBUPROFENO 400 MG x 50 CAP",      stock:"8",   precio:22.50 },
+    { cod:"MED-003", nom:"AMOXICILINA 500 MG x 21 CAP",     stock:"45",  precio:38.00 },
+    { cod:"MED-004", nom:"OMEPRAZOL 20 MG x 28 CAP",        stock:"132", precio:18.50 },
+    { cod:"MED-005", nom:"LORATADINA 10 MG x 10 TAB",       stock:"90",  precio:9.00  },
+    { cod:"MED-006", nom:"METFORMINA 850 MG x 60 TAB",      stock:"54",  precio:28.00 },
+    { cod:"MED-007", nom:"AZITROMICINA 500 MG x 3 TAB",     stock:"18",  precio:42.00 }
+  ];
+
+  var _toastIcons = {
+    suc:"checkmark-circle-outline",
+    dan:"alert-circle-outline",
+    war:"warning-outline",
+    inf:"information-circle-outline"
+  };
+
+  /* ── TEMA ───────────────────────────────── */
+  function toggleTheme() {
+    var cur  = document.documentElement.getAttribute("data-theme");
+    var next = cur === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("sf-theme", next);
+    var ic = document.getElementById("thico");
+    if (ic) ic.setAttribute("name", next === "dark" ? "sunny-outline" : "moon-outline");
+  }
+
+  /* ── SIDEBAR ────────────────────────────── */
+  function toggleSidebar() {
+    if (global.innerWidth <= 768) {
+      var cur = document.documentElement.getAttribute("data-sidebar");
+      document.documentElement.setAttribute("data-sidebar",
+        cur === "mobile-open" ? "expanded" : "mobile-open");
+      return;
+    }
+    var cur  = document.documentElement.getAttribute("data-sidebar");
+    var next = cur === "collapsed" ? "expanded" : "collapsed";
+    document.documentElement.setAttribute("data-sidebar", next);
+    localStorage.setItem("sf-sidebar", next);
+    if (next === "collapsed") {
+      document.querySelectorAll(".sub.open").forEach(function(s) { s.classList.remove("open"); });
+      document.querySelectorAll(".ni.open").forEach(function(i)  { i.classList.remove("open"); });
+    }
+  }
+
+  function closeMobile() {
+    document.documentElement.setAttribute("data-sidebar", "expanded");
+    localStorage.setItem("sf-sidebar", "expanded");
+  }
+
+  function toggleSub(id, item) {
+    if (document.documentElement.getAttribute("data-sidebar") === "collapsed") return;
+    var sm = document.getElementById(id);
+    if (!sm) return;
+    var open = sm.classList.contains("open");
+    sm.classList.toggle("open", !open);
+    item.classList.toggle("open", !open);
+  }
+
+  /* ── TOPBAR SCROLL ──────────────────────── */
+  function _initScroll() {
+    var tb = document.getElementById("topbar");
+    if (!tb) return;
+    var lastY = 0;
+    var THRESH = 60;
+    function handler() {
+      var y = global.pageYOffset || document.documentElement.scrollTop || 0;
+      if (y <= 0) {
+        tb.classList.remove("hidden", "visible");
+      } else if (y > lastY && y > THRESH) {
+        tb.classList.add("hidden");
+        tb.classList.remove("visible");
+      } else if (y < lastY) {
+        tb.classList.remove("hidden");
+        tb.classList.add("visible");
+      }
+      lastY = y;
+    }
+    global.addEventListener("scroll", handler, { passive: true });
+    document.addEventListener("scroll", handler, { passive: true });
+  }
+
+  /* ── DROPDOWNS ──────────────────────────── */
+  function _closeAllDd() {
+    document.querySelectorAll(".ddm.open").forEach(function(m) { m.classList.remove("open"); });
+  }
+
+  function toggleDd(e, id) {
+    e.stopPropagation();
+    var btn  = e.currentTarget;
+    var menu = document.getElementById("ddm" + id.replace("dd", ""));
+    if (!menu) return;
+    var wasOpen = menu.classList.contains("open");
+    _closeAllDd();
+    if (wasOpen) return;
+    menu.style.top  = "-9999px";
+    menu.style.left = "-9999px";
+    menu.classList.add("open");
+    var M  = 8;
+    var vw = global.innerWidth;
+    var vh = global.innerHeight;
+    var bR = btn.getBoundingClientRect();
+    var mW = menu.offsetWidth  || 180;
+    var mH = menu.offsetHeight || 160;
+    var top  = bR.bottom + 4;
+    if (top + mH > vh - M && bR.top - mH - 4 >= M) top = bR.top - mH - 4;
+    top = Math.max(M, Math.min(top, vh - mH - M));
+    var left;
+    if (vw - bR.left - mW - M >= 0)  left = bR.left;
+    else if (bR.right - mW - M >= 0) left = bR.right - mW;
+    else                              left = bR.left + bR.width / 2 - mW / 2;
+    left = Math.max(M, Math.min(left, vw - mW - M));
+    menu.style.top      = top  + "px";
+    menu.style.left     = left + "px";
+    menu.style.minWidth = Math.max(mW, bR.width) + "px";
+  }
+
+  /* ── MODALES ────────────────────────────── */
+  function showM(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.add("open"); document.body.style.overflow = "hidden"; }
+  }
+
+  function closeM(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove("open"); document.body.style.overflow = ""; }
+  }
+
+  /* ── TOASTS ─────────────────────────────── */
+  function showToast(msg, type) {
+    type = type || "inf";
+    var c = document.getElementById("tctx");
+    if (!c) return;
+    var el = document.createElement("div");
+    el.className = "toast t" + type;
+    el.innerHTML =
+      '<ion-icon name="' + (_toastIcons[type] || _toastIcons.inf) + '"></ion-icon>' +
+      '<span class="tmsg">' + msg + '</span>' +
+      '<ion-icon name="close-outline" class="tclz"></ion-icon>';
+    el.querySelector(".tclz").addEventListener("click", function() { el.remove(); });
+    c.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 4000);
+  }
+
+  /* ── DETALLE FILA — Tabla 1 ─────────────── */
+  function showRowDetail(d) {
+    function set(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+    set("mrd-title", "Proveedor #" + d.id);
+    set("mrd-id",    "Estado: " + d.estado);
+    set("mrd-name",  d.name);
+    set("mrd-nit",   d.nit);
+    set("mrd-email", d.email);
+    set("mrd-tel",   d.tel);
+    set("mrd-dir",   d.dir);
+    showM("m-row-detail");
+  }
+
+  /* ── DETALLE LOTE — Tabla 2 ─────────────── */
+  function showLoteDetail(d) {
+    function set(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
+    set("mld-cod",    "Codigo: " + d.cod);
+    set("mld-nom",    d.nom);
+    set("mld-lote",   d.lote);
+    set("mld-vence",  d.vence);
+    set("mld-prov",   d.prov);
+    set("mld-precio", d.precio);
+    set("mld-stock",  d.stock);
+    set("mld-suc",    d.suc);
+    var b = document.getElementById("mld-badges");
+    if (b) b.innerHTML =
+      '<span class="badge bdef">' + d.cat + '</span> ' +
+      '<span class="badge bgry">' + d.suc + '</span>';
+    showM("m-lote-detail");
+  }
+
+  /* ── CARRITO ─────────────────────────────── */
+  function _renderCart() {
+    var count = _cart.reduce(function(a,i){ return a + i.qty; }, 0);
+    var total = _cart.reduce(function(a,i){ return a + i.precio * i.qty; }, 0);
+    var badge = document.getElementById("cart-badge");
+    var cc    = document.getElementById("cart-count");
+    var ct    = document.getElementById("cart-total");
+    var empty = document.getElementById("cart-empty");
+    var wrap  = document.getElementById("cart-table-wrap");
+    var body  = document.getElementById("cart-body");
+    if (badge) badge.textContent = count;
+    if (cc)    cc.textContent    = count + " producto" + (count !== 1 ? "s" : "") + " agregado" + (count !== 1 ? "s" : "");
+    if (ct)    ct.textContent    = "Bs. " + total.toFixed(2);
+    if (!_cart.length) {
+      if (empty) empty.style.display = "flex";
+      if (wrap)  wrap.style.display  = "none";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+    if (wrap)  wrap.style.display  = "block";
+    if (!body) return;
+    var html = "";
+    for (var k = 0; k < _cart.length; k++) {
+      var item = _cart[k];
+      var sub  = (item.precio * item.qty).toFixed(2);
+      html +=
+        "<tr>" +
+        "<td class='tdm'>" + item.cod + "</td>" +
+        "<td class='tdp'>" + item.nom + "</td>" +
+        "<td>Bs. " + item.precio.toFixed(2) + "</td>" +
+        "<td><div class='flx g4 flxc'>" +
+          "<button class='btn btn-gho btn-ico btn-xs' data-cod='" + item.cod + "' data-delta='-1'><ion-icon name='remove-outline'></ion-icon></button>" +
+          "<span style='min-width:22px;text-align:center;font-weight:700'>" + item.qty + "</span>" +
+          "<button class='btn btn-gho btn-ico btn-xs' data-cod='" + item.cod + "' data-delta='1'><ion-icon name='add-outline'></ion-icon></button>" +
+        "</div></td>" +
+        "<td style='font-weight:600;color:var(--btn-success)'>Bs. " + sub + "</td>" +
+        "<td><button class='btn btn-war btn-ico btn-xs' data-remove='" + item.cod + "'><ion-icon name='trash-outline'></ion-icon></button></td>" +
+        "</tr>";
+    }
+    body.innerHTML = html;
+    // Attach events via delegation instead of inline onclick
+    body.querySelectorAll("[data-delta]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        _changeQty(btn.getAttribute("data-cod"), parseInt(btn.getAttribute("data-delta")));
+      });
+    });
+    body.querySelectorAll("[data-remove]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        _removeFromCart(btn.getAttribute("data-remove"));
+      });
+    });
+  }
+
+  function addToCart(cod, nom, precio) {
+    var existing = null;
+    for (var k = 0; k < _cart.length; k++) {
+      if (_cart[k].cod === cod) { existing = _cart[k]; break; }
+    }
+    if (existing) { existing.qty++; }
+    else { _cart.push({ cod: cod, nom: nom, precio: parseFloat(precio), qty: 1 }); }
+    _renderCart();
+    closePopup();
+    var inp = document.getElementById("popupSearch");
+    if (inp) inp.value = "";
+    showToast(nom.substring(0, 28) + "... agregado", "suc");
+  }
+
+  function _removeFromCart(cod) {
+    _cart = _cart.filter(function(i) { return i.cod !== cod; });
+    _renderCart();
+  }
+
+  function _changeQty(cod, delta) {
+    for (var k = 0; k < _cart.length; k++) {
+      if (_cart[k].cod === cod) {
+        _cart[k].qty += delta;
+        if (_cart[k].qty <= 0) { _removeFromCart(cod); return; }
+        _renderCart();
+        return;
+      }
+    }
+  }
+
+  function openCart() { showM("m-cart"); }
+
+  /* ── POPUP TABLE ─────────────────────────── */
+  function openPopup() {
+    var input = document.getElementById("popupSearch");
+    var popup = document.getElementById("tablePopup");
+    if (!input || !popup) return;
+    _renderPopupRows(_popupData);
+    _positionPopup(input, popup);
+    popup.classList.add("open");
+  }
+
+  function closePopup() {
+    var popup = document.getElementById("tablePopup");
+    if (popup) popup.classList.remove("open");
+  }
+
+  function filterPopup(q) {
+    var filtered = _popupData.filter(function(r) {
+      return r.nom.toLowerCase().indexOf(q.toLowerCase()) > -1 ||
+             r.cod.toLowerCase().indexOf(q.toLowerCase()) > -1;
+    });
+    _renderPopupRows(filtered);
+  }
+
+  function _positionPopup(input, popup) {
+    var rect = input.getBoundingClientRect();
+    var pw   = Math.min(520, global.innerWidth - 16);
+    var left = rect.left;
+    if (left + pw > global.innerWidth - 8) left = global.innerWidth - pw - 8;
+    if (left < 8) left = 8;
+    var top  = rect.bottom + 4;
+    if (top + 320 > global.innerHeight - 8) top = rect.top - 320 - 4;
+    if (top < 8) top = 8;
+    popup.style.left  = left + "px";
+    popup.style.top   = top  + "px";
+    popup.style.width = pw   + "px";
+  }
+
+  function _renderPopupRows(data) {
+    var body = document.getElementById("popupBody");
+    if (!body) return;
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="5" class="tp-empty">Sin resultados</td></tr>';
+      return;
+    }
+    var html = "";
+    for (var k = 0; k < data.length; k++) {
+      var r = data[k];
+      html +=
+        "<tr class='tr-cart' data-popup-cod='" + r.cod + "' data-popup-nom='" + r.nom + "' data-popup-precio='" + r.precio + "'>" +
+        "<td class='tdm'>" + r.cod + "</td>" +
+        "<td class='tdp'>" + r.nom + "</td>" +
+        "<td>" + r.stock + " u.</td>" +
+        "<td>Bs. " + r.precio.toFixed(2) + "</td>" +
+        "<td><button class='btn btn-def btn-xs'>Agregar</button></td>" +
+        "</tr>";
+    }
+    body.innerHTML = html;
+    body.querySelectorAll("tr[data-popup-cod]").forEach(function(tr) {
+      tr.addEventListener("click", function() {
+        addToCart(
+          tr.getAttribute("data-popup-cod"),
+          tr.getAttribute("data-popup-nom"),
+          tr.getAttribute("data-popup-precio")
+        );
+      });
+    });
+  }
+
+  /* ── TABS ────────────────────────────────── */
+  function _initTabs() {
+    document.querySelectorAll(".tabs").forEach(function(tabs) {
+      tabs.querySelectorAll(".tab").forEach(function(tab) {
+        tab.addEventListener("click", function() {
+          tabs.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("ac"); });
+          tab.classList.add("ac");
+        });
+      });
+    });
+    document.querySelectorAll(".tabsp").forEach(function(tabs) {
+      tabs.querySelectorAll(".tabp").forEach(function(tab) {
+        tab.addEventListener("click", function() {
+          tabs.querySelectorAll(".tabp").forEach(function(t) { t.classList.remove("ac"); });
+          tab.classList.add("ac");
+        });
+      });
+    });
+  }
+
+  /* ── TABLE ROW CLICK ─────────────────────── */
+  function _initTableRows() {
+    document.querySelectorAll("tr[data-row-json]").forEach(function(tr) {
+      tr.style.cursor = "pointer";
+      tr.addEventListener("click", function(e) {
+        if (e.target.closest("button") || e.target.closest(".td-actions")) return;
+        try {
+          var d    = JSON.parse(tr.getAttribute("data-row-json"));
+          var type = tr.getAttribute("data-row-type");
+          if (type === "lote") showLoteDetail(d);
+          else                 showRowDetail(d);
+        } catch(err) { console.warn("Row parse error:", err); }
+      });
+    });
+  }
+
+  /* ── ALERTAS: cerrar ─────────────────────── */
+  function _initAlerts() {
+    document.querySelectorAll(".altc").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var alert = btn.closest(".alert");
+        if (alert) alert.remove();
+      });
+    });
+  }
+
+  /* ── INIT (se llama solo cuando DOM listo) ── */
+  function init() {
+    // Sincronizar icono de tema
+    var t  = localStorage.getItem("sf-theme") || "light";
+    var ic = document.getElementById("thico");
+    if (ic) ic.setAttribute("name", t === "dark" ? "sunny-outline" : "moon-outline");
+
+    _initScroll();
+    _initTabs();
+    _initTableRows();
+    _initAlerts();
+
+    // Cerrar dropdowns al click fuera
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".dd")) _closeAllDd();
+      if (!e.target.closest(".table-popup-wrap")) closePopup();
+    });
+    global.addEventListener("scroll", _closeAllDd, { passive: true });
+  }
+
+  /* ── API PUBLICA ─────────────────────────── */
+  global.App = {
+    toggleTheme:    toggleTheme,
+    toggleSidebar:  toggleSidebar,
+    closeMobile:    closeMobile,
+    toggleSub:      toggleSub,
+    toggleDd:       toggleDd,
+    showM:          showM,
+    closeM:         closeM,
+    showToast:      showToast,
+    showRowDetail:  showRowDetail,
+    showLoteDetail: showLoteDetail,
+    addToCart:      addToCart,
+    openCart:       openCart,
+    openPopup:      openPopup,
+    closePopup:     closePopup,
+    filterPopup:    filterPopup,
+    init:           init
+  };
+
+})(window);
+
+document.addEventListener("DOMContentLoaded", function() { App.init(); });
+</script>
+
+<!-- ── MODAL DETALLE REGISTRO (Tabla 1) ── -->
+<div class="mov" id="m-row-detail">
+  <div class="modal msm">
+    <div class="mh">
+      <div><div class="mt" id="mrd-title">Detalle del Proveedor</div><div class="ms" id="mrd-id"></div></div>
+      <button class="mcl" onclick="App.closeM('m-row-detail')"><ion-icon name="close-outline"></ion-icon></button>
+    </div>
+    <div class="mb">
+      <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Razón Social</div><div class="th5" id="mrd-name"></div></div></div>
+      <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">NIT / CI</div><div class="th5" id="mrd-nit"></div></div></div>
+      <div class="litem"><ion-icon name="mail-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Correo</div><div class="th5" id="mrd-email"></div></div></div>
+      <div class="litem"><ion-icon name="call-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Teléfono</div><div class="th5" id="mrd-tel"></div></div></div>
+      <div class="litem" style="border:none"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Dirección</div><div class="th5" id="mrd-dir"></div></div></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gho" onclick="App.closeM('m-row-detail')">Cerrar</button>
+      <button class="btn btn-gho"><ion-icon name="pencil-outline"></ion-icon>Editar</button>
+      <button class="btn btn-def"><ion-icon name="open-outline"></ion-icon>Ver completo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL DETALLE LOTE (Tabla 2) ── -->
+<div class="mov" id="m-lote-detail">
+  <div class="modal">
+    <div class="mh">
+      <div><div class="mt">Detalle del Medicamento</div><div class="ms" id="mld-cod"></div></div>
+      <button class="mcl" onclick="App.closeM('m-lote-detail')"><ion-icon name="close-outline"></ion-icon></button>
+    </div>
+    <div class="mb">
+      <div class="fg" style="margin-bottom:16px">
+        <div class="th4 mb4" id="mld-nom"></div>
+        <div class="flx fwrap g8" id="mld-badges"></div>
+      </div>
+      <div class="fr">
+        <div><div class="tc mb4">Número de lote</div><div class="th5" id="mld-lote"></div></div>
+        <div><div class="tc mb4">Fecha de vencimiento</div><div class="th5" id="mld-vence" style="color:var(--btn-danger)"></div></div>
+        <div><div class="tc mb4">Proveedor</div><div class="th5" id="mld-prov"></div></div>
+        <div><div class="tc mb4">Precio unitario</div><div class="th5" id="mld-precio" style="color:var(--btn-success)"></div></div>
+      </div>
+      <div class="div"></div>
+      <div class="fr">
+        <div><div class="tc mb4">Stock disponible</div><div class="th3" id="mld-stock" style="color:var(--accent-primary)"></div></div>
+        <div><div class="tc mb4">Sucursal</div><div class="th5" id="mld-suc"></div></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-gho" onclick="App.closeM('m-lote-detail')">Cerrar</button>
+      <button class="btn btn-gho"><ion-icon name="pencil-outline"></ion-icon>Editar</button>
+      <button class="btn btn-dan"><ion-icon name="swap-horizontal-outline"></ion-icon>Transferir</button>
+      <button class="btn btn-def"><ion-icon name="open-outline"></ion-icon>Ver historial</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CARRITO DE VENTA ── -->
+<div class="mov" id="m-cart">
+  <div class="modal mlg">
+    <div class="mh">
+      <div><div class="mt">Carrito de Venta</div><div class="ms" id="cart-count">0 productos agregados</div></div>
+      <button class="mcl" onclick="App.closeM('m-cart')"><ion-icon name="close-outline"></ion-icon></button>
+    </div>
+    <div class="mb">
+      <div id="cart-empty" class="empty" style="padding:30px 24px">
+        <ion-icon class="empi" name="cart-outline"></ion-icon>
+        <div class="empt">Carrito vacío</div>
+        <div class="empx">Busca medicamentos en la tabla emergente y haz clic para agregarlos aquí.</div>
+      </div>
+      <div class="tw" id="cart-table-wrap" style="display:none">
+        <table>
+          <thead><tr><th>Código</th><th>Descripción</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead>
+          <tbody id="cart-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:space-between">
+      <div class="th4" style="color:var(--btn-success)">Total: <span id="cart-total">Bs. 0.00</span></div>
+      <div class="flx g8">
+        <button class="btn btn-gho" onclick="App.closeM('m-cart')">Cancelar</button>
+        <button class="btn btn-def" onclick="App.closeM('m-cart');App.showToast('Venta registrada exitosamente.','suc')"><ion-icon name="checkmark-outline"></ion-icon>Confirmar venta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

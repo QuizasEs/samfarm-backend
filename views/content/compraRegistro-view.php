@@ -25,28 +25,15 @@ if (!isset($_SESSION['id_smp'])) {
         </div>
 
         <div class="form-group">
-            <div class="form-bloque">
-                <label for="">Proveedor*</label>
-                <select class="select-style" name="Proveedor_reg">
-                    <option value="">Seleccionar</option>
-                    <?php foreach ($datos_select['proveedores'] as $pro) { ?>
-                        <option value="<?php echo $pro['pr_id'] ?>"><?php echo $pro['pr_nombres'] ?></option>
-                    <?php } ?>
-                </select>
-            </div>
-            <div class="form-bloque">
-                <label for="">numero de factura*</label>
-                <input type="text" name="Numero_factura_reg" placeholder="Nombres"
-                    pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+&#39;]{3,100}" maxlength="100"
-                    required="">
-            </div>
-            <div class="form-bloque">
-                <label for="">Fecha de factura*</label>
-                <input type="date" name="Fecha_factura_reg"
-                    maxlength="100"
-                    required="">
-            </div>
-
+         <div class="form-bloque">
+                 <label for="">Proveedor*</label>
+                 <select class="select-style" name="Proveedor_reg">
+                     <option value="">Seleccionar</option>
+                     <?php foreach ($datos_select['proveedores'] as $pro) { ?>
+                         <option value="<?php echo $pro['pr_id'] ?>"><?php echo $pro['pr_razon_social'] ?></option>
+                     <?php } ?>
+                 </select>
+             </div>
         </div>
         <!-- seccion para busqueda de medicamentos -->
         <div class="form-title">
@@ -73,17 +60,6 @@ if (!isset($_SESSION['id_smp'])) {
                     <?php foreach ($datos_select['via_administracion'] as $via) { ?>
 
                         <option value="<?php echo $via['vd_id'] ?>"><?php echo $via['vd_nombre'] ?></option>
-                    <?php } ?>
-
-                </select>
-            </div>
-            <div class="form-bloque-search">
-                <label for="">laboratorio</label>
-                <select name="Laboratorio_reg" id="">
-                    <option value="">Seleccionar</option>
-                    <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-
-                        <option value="<?php echo $lab['la_id'] ?>"><?php echo $lab['la_nombre_comercial'] ?></option>
                     <?php } ?>
 
                 </select>

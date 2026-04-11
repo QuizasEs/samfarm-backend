@@ -46,7 +46,7 @@ class dashboardController extends mainModel
         $sql = "SELECT 
                     (SELECT COUNT(*) FROM via_de_administracion WHERE vd_estado = 1) +
                     (SELECT COUNT(*) FROM forma_farmaceutica WHERE ff_estado = 1) +
-                    (SELECT COUNT(*) FROM laboratorios WHERE la_estado = 1)
+                    (SELECT COUNT(*) FROM proveedores WHERE pr_estado = 1)
                     as total";
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute();

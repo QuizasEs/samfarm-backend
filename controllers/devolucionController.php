@@ -58,7 +58,6 @@ class devolucionController extends devolucionModel
                 'principio_activo' => $item['med_principio_activo'],
                 'presentacion' => $item['med_presentacion'],
                 'forma' => $item['forma_farmaceutica'],
-                'laboratorio' => $item['laboratorio'],
                 'lote' => $item['lm_numero_lote'],
                 'cantidad' => $item['dv_cantidad'],
                 'unidad' => $item['dv_unidad'],

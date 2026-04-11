@@ -264,20 +264,16 @@ class mainModel
         $sql_vd = self::conectar()->prepare("
                 SELECT * FROM via_de_administracion WHERE vd_estado = 1 ORDER BY vd_nombre ASC
             ");
-        $sql_la = self::conectar()->prepare("
-                SELECT * FROM laboratorios WHERE la_estado =1 ORDER BY la_nombre_comercial ASC   
-            ");
         $sql_su = self::conectar()->prepare("
                 SELECT * FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC
             ");
-        $sql_pr = self::conectar()->prepare("SELECT * FROM proveedores WHERE pr_estado = 1 ORDER BY pr_nombres ASC");
+        $sql_pr = self::conectar()->prepare("SELECT pr_id, pr_razon_social, pr_telefono, pr_nit, pr_estado FROM proveedores WHERE pr_estado = 1 ORDER BY pr_razon_social ASC");
         $sql_caja = self::conectar()->prepare("SELECT * FROM `usuarios` WHERE ro_id != 1 ORDER BY us_nombres ASC");
 
         /* ejecutamos todas las consultas */
         $sql_uf->execute();
         $sql_ff->execute();
         $sql_vd->execute();
-        $sql_la->execute();
         $sql_su->execute();
         $sql_pr->execute();
         $sql_caja->execute();
@@ -286,9 +282,8 @@ class mainModel
             'uso_farmacologico' => $sql_uf->fetchAll(),
             'forma_farmaceutica' => $sql_ff->fetchAll(),
             'via_administracion' => $sql_vd->fetchAll(),
-            'laboratorios' => $sql_la->fetchAll(),
-            'sucursales' => $sql_su->fetchAll(),
             'proveedores' => $sql_pr->fetchAll(),
+            'sucursales' => $sql_su->fetchAll(),
             'caja' => $sql_caja->fetchAll()
         ];
     }

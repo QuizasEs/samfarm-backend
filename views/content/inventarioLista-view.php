@@ -19,13 +19,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         <form class="filtro-dinamico">
             <div class="filtro-dinamico-search">
 
-                <!-- Select 1: Laboratorio -->
+                <!-- Select 1: Proveedor -->
                 <div class="form-fechas">
-                    <small>Laboratorios</small>
+                    <small>Proveedores</small>
                     <select class="select-filtro" name="select1">
-                        <option value="">Todos los laboratorios</option>
-                        <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                            <option value="<?php echo $lab['la_id'] ?>"><?php echo $lab['la_nombre_comercial'] ?></option>
+                        <option value="">Todos los proveedores</option>
+                        <?php foreach ($datos_select['proveedores'] as $prov) { ?>
+                            <option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option>
                         <?php } ?>
                     </select>
                 </div>
@@ -454,7 +454,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 <div class="row">
                     <div class="col">
-                        <label>Laboratorio:</label>
+                        <label>Línea:</label>
                         <p id="detalleLaboral">-</p>
                     </div>
                     <div class="col">

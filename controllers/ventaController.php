@@ -70,9 +70,6 @@ class ventaController extends ventaModel
 
         $filtros_limpios = [];
 
-        if (!empty($filtros['linea'])) {
-            $filtros_limpios['linea'] = (int)mainModel::limpiar_cadena($filtros['linea']);
-        }
         if (!empty($filtros['presentacion'])) {
             $filtros_limpios['presentacion'] = (int)mainModel::limpiar_cadena($filtros['presentacion']);
         }
@@ -81,6 +78,9 @@ class ventaController extends ventaModel
         }
         if (!empty($filtros['via'])) {
             $filtros_limpios['via'] = (int)mainModel::limpiar_cadena($filtros['via']);
+        }
+        if (!empty($filtros['proveedor'])) {
+            $filtros_limpios['proveedor'] = (int)mainModel::limpiar_cadena($filtros['proveedor']);
         }
 
         $rows = self::buscar_medicamento_model($termino, $sucursal_id, $filtros_limpios);

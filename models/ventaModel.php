@@ -68,8 +68,12 @@ class ventaModel extends mainModel
             m.med_nombre_quimico AS nombre,
             COALESCE(m.med_version_comercial, '') AS version_comercial,
             COALESCE(ff.ff_nombre, '') AS presentacion,
-            COALESCE(la.la_nombre_comercial, '') AS linea,
+            COALESCE(p.pr_razon_social, '') AS proveedor,
+            COALESCE(uf.uf_nombre, '') AS funcion,
+            COALESCE(vd.vd_nombre, '') AS via,
+            m.med_codigo_barras,
             lm.lm_precio_venta AS precio_venta,
+            lm.lm_precio_compra AS precio_compra,
             lm.lm_cant_actual_unidades AS stock,
             lm.lm_cant_blister,
             lm.lm_cant_unidad,
@@ -77,7 +81,9 @@ class ventaModel extends mainModel
         FROM lote_medicamento lm
         INNER JOIN medicamento m ON m.med_id = lm.med_id
         LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-        LEFT JOIN laboratorios la ON la.la_id = m.la_id
+        LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+        LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
+        LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
         WHERE lm.su_id = :sucursal_id
           AND lm.lm_estado = 'activo'
           AND lm.lm_cant_actual_unidades > 0
@@ -96,9 +102,9 @@ class ventaModel extends mainModel
         ];
 
         // Aplicar filtros opcionales
-        if (!empty($filtros['linea'])) {
-            $sql .= " AND m.la_id = :la_id";
-            $params[":la_id"] = (int)$filtros['linea'];
+        if (!empty($filtros['proveedor'])) {
+            $sql .= " AND lm.pr_id = :pr_id";
+            $params[":pr_id"] = (int)$filtros['proveedor'];
         }
         if (!empty($filtros['presentacion'])) {
             $sql .= " AND m.ff_id = :ff_id";
@@ -113,10 +119,10 @@ class ventaModel extends mainModel
             $params[":vd_id"] = (int)$filtros['via'];
         }
 
-        // Ordenar: nombre, laboratorio, precio (más barato primero), vencimiento
-        $sql .= " ORDER BY 
+        // Ordenar: nombre, proveedor, precio (más barato primero), vencimiento
+        $sql .= " ORDER BY
                 m.med_nombre_quimico ASC,
-                la.la_nombre_comercial ASC,
+                p.pr_razon_social ASC,
                 lm.lm_precio_venta ASC,
                 lm.lm_fecha_vencimiento ASC
               LIMIT 50";
@@ -143,11 +149,16 @@ class ventaModel extends mainModel
             SELECT
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
+                m.med_codigo_barras,
                 lm.lm_id AS lote_id,
                 lm.lm_numero_lote AS lote,
+                lm.lm_fecha_vencimiento AS fecha_vencimiento,
                 COALESCE(ff.ff_nombre, '') AS presentacion,
-                COALESCE(la.la_nombre_comercial, '') AS linea,
+                COALESCE(p.pr_razon_social, '') AS proveedor,
+                COALESCE(uf.uf_nombre, '') AS funcion,
+                COALESCE(vd.vd_nombre, '') AS via,
                 lm.lm_precio_venta AS precio_venta,
+                lm.lm_precio_compra AS precio_compra,
                 COALESCE(SUM(dv.dv_cantidad), 0) AS vendidos,
                 lm.lm_cant_actual_unidades AS stock,
                 lm.lm_cant_blister,
@@ -161,7 +172,9 @@ class ventaModel extends mainModel
                 WHERE lm2.med_id = m.med_id AND lm2.su_id = :sucursal_id2 AND lm2.lm_estado = 'activo'
             )
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+            LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
+            LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
             WHERE lm.lm_precio_venta IS NOT NULL AND lm.lm_precio_venta > 0
             AND lm.lm_precio_venta <= 900
             GROUP BY m.med_id

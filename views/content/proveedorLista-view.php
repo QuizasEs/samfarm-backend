@@ -121,15 +121,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <p id="detalleTelefono">-</p>
                     </div>
                     <div class="col">
-                        <label>Estado:</label>
-                        <p id="detalleEstado">-</p>
+                        <label>Correo:</label>
+                        <p id="detalleCorreo">-</p>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <label>Dirección:</label>
-                        <p id="detalleDireccion">-</p>
+                        <label>Nombre Comercial:</label>
+                        <p id="detalleNombreComercial">-</p>
                     </div>
                     <div class="col">
                         <label>Fecha de Registro:</label>
@@ -182,7 +182,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <tr>
                                     <th>N° Compra</th>
                                     <th>Fecha</th>
-                                    <th>Laboratorio</th>
+                                    <th>Proveedor</th>
                                     <th>Total</th>
                                     <th>Items</th>
                                     <th>N° Factura</th>
@@ -205,7 +205,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <tr>
                                     <th>Medicamento</th>
                                     <th>Veces Comprado</th>
-                                    <th>Laboratorio</th>
+                                    <th>Proveedor</th>
                                     <th>Última Compra</th>
                                 </tr>
                             </thead>
@@ -264,12 +264,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <input type="text" name="Telefono_pr" id="registroTelefono" pattern="[0-9]{6,30}" maxlength="30">
                             </div>
                         </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_pr" id="registroCorreo" maxlength="200">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Dirección</label>
+                                <label>Nombre Comercial</label>
                                 <input type="text" name="Direccion_pr" id="registroDireccion" maxlength="250">
                             </div>
                         </div>
@@ -324,12 +330,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <input type="text" name="Telefono_pr_up" id="edicionTelefono" pattern="[0-9]{6,30}" maxlength="30">
                             </div>
                         </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label>Correo</label>
+                                <input type="email" name="Correo_pr_up" id="edicionCorreo" maxlength="200">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label>Dirección</label>
+                                <label>Nombre Comercial</label>
                                 <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250">
                             </div>
                         </div>
@@ -511,63 +523,103 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             const detalle = {
                 async abrir(prId, nombre) {
-                    document.getElementById('modalDetalleProveedorNombre').textContent = nombre;
-                    document.getElementById('modalDetallePrId').value = prId;
+                    // Obtener referencias a los elementos del modal
+                    const modalNombre = document.getElementById('modalDetalleProveedorNombre');
+                    const modalPrId = document.getElementById('modalDetallePrId');
+                    const tablaCompras = document.getElementById('tablaUltimasCompras');
+                    const tablaMedicamentos = document.getElementById('tablaTopMedicamentos');
+                    
+                    // Verificar que los elementos existan
+                    if (!modalNombre || !tablaCompras || !tablaMedicamentos) {
+                        console.error('Elementos del modal no encontrados');
+                        return;
+                    }
+                    
+                    modalNombre.textContent = nombre;
+                    if (modalPrId) modalPrId.value = prId;
+                    
+                    // Mostrar mensaje de carga
+                    tablaCompras.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+                    tablaMedicamentos.innerHTML = '<tr><td colspan="4" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+
                     utils.abrir('modalDetalleProveedor');
 
-                    document.getElementById('tablaUltimasCompras').innerHTML =
-                        '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+                    try {
+                        const data = await utils.ajax({
+                            proveedoresAjax: 'detalle',
+                            pr_id: prId
+                        });
 
-                    document.getElementById('tablaTopMedicamentos').innerHTML =
-                        '<tr><td colspan="4" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+                        // Verificar si la respuesta es un error
+                        if (data.error) {
+                            console.error('Error del servidor:', data.error);
+                            return;
+                        }
 
-                    const data = await utils.ajax({
-                        proveedoresAjax: 'detalle',
-                        pr_id: prId
-                    });
+                        // Función helper para safely set textContent
+                        const setText = (id, value) => {
+                            const el = document.getElementById(id);
+                            if (el) el.textContent = value || '-';
+                        };
 
-                    document.getElementById('detalleNombreCompleto').textContent = data.nombre_completo || '-';
-                    document.getElementById('detalleNit').textContent = data.nit || '-';
-                    document.getElementById('detalleTelefono').textContent = data.telefono || '-';
-                    document.getElementById('detalleDireccion').textContent = data.direccion || '-';
-                    document.getElementById('detalleFechaRegistro').textContent = data.fecha_registro;
-                    document.getElementById('detalleEstado').textContent = data.estado;
+                        // Actualizar campos básicos
+                        setText('detalleNombreCompleto', data.nombre_completo);
+                        setText('detalleNit', data.nit);
+                        setText('detalleTelefono', data.telefono);
+                        setText('detalleCorreo', data.correo);
+                        setText('detalleNombreComercial', data.direccion);
+                        setText('detalleFechaRegistro', data.fecha_registro);
+                        setText('detalleEstado', data.estado);
+                        setText('detalleTotalCompras', utils.formatearNumero(data.total_compras || 0));
+                        setText('detalleMontoTotal', utils.formatearMoneda(data.monto_total || 0));
+                        setText('detalleTotalLotes', utils.formatearNumero(data.total_lotes || 0));
+                        setText('detallePromedio', utils.formatearMoneda(data.promedio || 0));
+                        setText('detalleUltimaCompra', data.ultima_compra);
+                        setText('detalleAntiguedad', (data.antiguedad || 0) + ' días');
 
-                    document.getElementById('detalleTotalCompras').textContent = utils.formatearNumero(data.total_compras);
-                    document.getElementById('detalleMontoTotal').textContent = utils.formatearMoneda(data.monto_total);
-                    document.getElementById('detalleTotalLotes').textContent = utils.formatearNumero(data.total_lotes);
-                    document.getElementById('detallePromedio').textContent = utils.formatearMoneda(data.promedio);
-                    document.getElementById('detalleUltimaCompra').textContent = data.ultima_compra;
-                    document.getElementById('detalleAntiguedad').textContent = data.antiguedad + ' días';
+                        const compras = data.ultimas_compras ?? [];
+                        const top = data.top_medicamentos ?? [];
 
-                    const compras = data.ultimas_compras ?? [];
-                    const top = data.top_medicamentos ?? [];
+                        // Actualizar tabla de compras
+                        if (tablaCompras) {
+                            tablaCompras.innerHTML =
+                                compras.length ?
+                                compras.map(c => `
+                                    <tr>
+                                        <td>${c.co_numero || '-'}</td>
+                                        <td>${utils.formatearFecha(c.co_fecha)}</td>
+                                        <td>${c.proveedor || '-'}</td>
+                                        <td>${utils.formatearMoneda(c.co_total)}</td>
+                                        <td>${utils.formatearNumero(c.total_items)}</td>
+                                        <td>${c.co_numero_factura || '-'}</td>
+                                    </tr>
+                                `).join('') :
+                                '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin compras</td></tr>';
+                        }
 
-                    document.getElementById('tablaUltimasCompras').innerHTML =
-                        compras.length ?
-                        compras.map(c => `
-                            <tr>
-                                <td>${c.co_numero}</td>
-                                <td>${utils.formatearFecha(c.co_fecha)}</td>
-                                <td>${c.laboratorio || '-'}</td>
-                                <td>${utils.formatearMoneda(c.co_total)}</td>
-                                <td>${utils.formatearNumero(c.total_items)}</td>
-                                <td>${c.co_numero_factura || '-'}</td>
-                            </tr>
-                        `).join('') :
-                        '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin compras</td></tr>';
-
-                    document.getElementById('tablaTopMedicamentos').innerHTML =
-                        top.length ?
-                        top.map(m => `
-                            <tr>
-                                <td>${m.med_nombre_quimico}</td>
-                                <td>${utils.formatearNumero(m.veces_comprado)}</td>
-                                <td>${m.laboratorio || '-'}</td>
-                                <td>${utils.formatearFecha(m.ultima_compra)}</td>
-                            </tr>
-                        `).join('') :
-                        '<tr><td colspan="4" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin medicamentos</td></tr>';
+                        // Actualizar tabla de medicamentos
+                        if (tablaMedicamentos) {
+                            tablaMedicamentos.innerHTML =
+                                top.length ?
+                                top.map(m => `
+                                    <tr>
+                                        <td>${m.med_nombre_quimico || '-'}</td>
+                                        <td>${utils.formatearNumero(m.veces_comprado)}</td>
+                                        <td>${m.proveedor || '-'}</td>
+                                        <td>${utils.formatearFecha(m.ultima_compra)}</td>
+                                    </tr>
+                                `).join('') :
+                                '<tr><td colspan="4" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin medicamentos</td></tr>';
+                        }
+                    } catch (error) {
+                        console.error('Error en detalle.abrir:', error);
+                        if (tablaCompras) {
+                            tablaCompras.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;"><ion-icon name="alert-circle-outline"></ion-icon> Error de conexión</td></tr>';
+                        }
+                        if (tablaMedicamentos) {
+                            tablaMedicamentos.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;"><ion-icon name="alert-circle-outline"></ion-icon> Error de conexión</td></tr>';
+                        }
+                    }
                 }
             };
 
@@ -592,10 +644,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     });
 
                     document.getElementById('edicionPrId').value = data.pr_id;
-                    document.getElementById('edicionNombres').value = data.pr_nombres || '';
+                    document.getElementById('edicionNombres').value = data.pr_razon_social || '';
                     document.getElementById('edicionNit').value = data.pr_nit || '';
                     document.getElementById('edicionTelefono').value = data.pr_telefono || '';
-                    document.getElementById('edicionDireccion').value = data.pr_direccion || '';
+                    document.getElementById('edicionCorreo').value = data.pr_correo || '';
+                    document.getElementById('edicionDireccion').value = data.pr_nombre_comercial || '';
                 },
                 cerrar() {
                     utils.cerrar('modalEdicionProveedor');

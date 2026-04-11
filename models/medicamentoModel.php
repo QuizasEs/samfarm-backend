@@ -18,7 +18,7 @@ class medicamentoModel extends mainModel
                 uf_id,
                 ff_id,
                 vd_id,
-                la_id,
+                pr_id,
                 med_descripcion,
                 med_codigo_barras
             ) VALUES (
@@ -29,7 +29,7 @@ class medicamentoModel extends mainModel
                 :Uso,
                 :Forma,
                 :Via,
-                :Laboratorio,
+                :Proveedor,
                 :Descripcion,
                 :CodigoBarras
             )
@@ -41,7 +41,7 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Uso", $datos['Uso']);
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
-        $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
+        $sql->bindParam(":Proveedor", $datos['Proveedor']);
         $sql->bindParam(":Descripcion", $datos['Descripcion']);
         $sql->bindParam(":CodigoBarras", $datos['CodigoBarras']);
 
@@ -61,7 +61,7 @@ class medicamentoModel extends mainModel
                 uf_id = :Uso,
                 ff_id = :Forma,
                 vd_id = :Via,
-                la_id = :Laboratorio,
+                pr_id = :Proveedor,
                 med_codigo_barras = :CodigoBarras
             WHERE med_id = :Id
         ");
@@ -74,7 +74,7 @@ class medicamentoModel extends mainModel
         $sql->bindParam(":Uso", $datos['Uso']);
         $sql->bindParam(":Forma", $datos['Forma']);
         $sql->bindParam(":Via", $datos['Via']);
-        $sql->bindParam(":Laboratorio", $datos['Laboratorio']);
+        $sql->bindParam(":Proveedor", $datos['Proveedor']);
         $sql->bindParam(":CodigoBarras", $datos['CodigoBarras']);
         $sql->bindParam(":Id", $datos['Id']);
 
@@ -93,12 +93,10 @@ class medicamentoModel extends mainModel
                     m.med_codigo_barras,
                     m.med_creado_en,
                     m.med_actualizado_en,
-                    COALESCE(la.la_nombre_comercial, 'Sin laboratorio') AS laboratorio,
                     COALESCE(ff.ff_nombre, 'Sin forma') AS forma_farmaceutica,
                     COALESCE(vd.vd_nombre, 'Sin vía') AS via_administracion,
                     COALESCE(uf.uf_nombre, 'Sin uso') AS uso_farmacologico
                 FROM medicamento m
-                LEFT JOIN laboratorios la ON la.la_id = m.la_id
                 LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
                 LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
                 LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
@@ -117,12 +115,6 @@ class medicamentoModel extends mainModel
                     m.med_codigo_barras LIKE :busqueda
                 )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-
-        // Filtro por laboratorio
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = (int)$filtros['laboratorio'];
         }
 
         // Filtro por vía
@@ -165,7 +157,6 @@ class medicamentoModel extends mainModel
         $sql = "
                 SELECT COUNT(*) as total
                 FROM medicamento m
-                LEFT JOIN laboratorios la ON la.la_id = m.la_id
                 LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
                 LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
                 LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
@@ -184,12 +175,6 @@ class medicamentoModel extends mainModel
                     m.med_codigo_barras LIKE :busqueda
                 )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-
-        // Filtro por laboratorio
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = (int)$filtros['laboratorio'];
         }
 
         // Filtro por vía

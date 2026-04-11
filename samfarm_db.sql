@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-12-2025 a las 09:53:35
--- Versión del servidor: 10.4.27-MariaDB
--- Versión de PHP: 7.4.33
+-- Tiempo de generación: 25-03-2026 a las 07:55:12
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -37,7 +37,6 @@ CREATE TABLE `balance_precios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Registro histórico de cambios de precios de venta en el balance';
 
 
-
 CREATE TABLE `caja` (
   `caja_id` bigint(20) UNSIGNED NOT NULL,
   `su_id` bigint(20) UNSIGNED NOT NULL,
@@ -67,13 +66,16 @@ CREATE TABLE `clientes` (
   `cl_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Estructura de tabla para la tabla `compras`
+--
 
 CREATE TABLE `compras` (
   `co_id` bigint(20) UNSIGNED NOT NULL,
   `co_numero` varchar(80) NOT NULL,
   `co_fecha` datetime NOT NULL DEFAULT current_timestamp(),
-  `la_id` bigint(20) UNSIGNED DEFAULT NULL,
   `us_id` bigint(20) UNSIGNED NOT NULL,
   `su_id` bigint(20) UNSIGNED NOT NULL,
   `pr_id` bigint(20) UNSIGNED DEFAULT NULL,
@@ -163,7 +165,11 @@ CREATE TABLE `detalle_transferencia` (
   `dt_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Detalle de items en cada transferencia';
 
+-- --------------------------------------------------------
 
+--
+-- Estructura de tabla para la tabla `detalle_venta`
+--
 
 CREATE TABLE `detalle_venta` (
   `dv_id` bigint(20) UNSIGNED NOT NULL,
@@ -210,6 +216,8 @@ CREATE TABLE `factura` (
   `fa_creado_en` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
+
 CREATE TABLE `facturacion_electronica` (
   `fe_id` bigint(20) UNSIGNED NOT NULL,
   `fa_id` bigint(20) UNSIGNED NOT NULL,
@@ -219,9 +227,15 @@ CREATE TABLE `facturacion_electronica` (
   `fe_ticket` varchar(255) DEFAULT NULL,
   `fe_fecha_envio` datetime DEFAULT NULL,
   `fe_payload` longtext DEFAULT NULL,
-  `fe_creado_en` datetime NOT NULL DEFAULT current_timestamp()
+  `fe_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
+  `fe_tipo_emision` tinyint(4) DEFAULT 1 COMMENT '1=en linea, 2=contingencia'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `forma_farmaceutica`
+--
 
 CREATE TABLE `forma_farmaceutica` (
   `ff_id` bigint(20) UNSIGNED NOT NULL,
@@ -242,6 +256,7 @@ CREATE TABLE `historial_lote` (
   `hl_descripcion` text DEFAULT NULL,
   `hl_fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 
 CREATE TABLE `informes` (
@@ -290,17 +305,6 @@ CREATE TABLE `inventarios` (
 
 
 
-CREATE TABLE `laboratorios` (
-  `la_id` bigint(20) UNSIGNED NOT NULL,
-  `la_nombre_comercial` varchar(250) NOT NULL,
-  `la_logo` varchar(255) DEFAULT NULL,
-  `la_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
-  `la_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `la_estado` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
-
 CREATE TABLE `lote_medicamento` (
   `lm_id` bigint(20) UNSIGNED NOT NULL,
   `med_id` bigint(20) UNSIGNED NOT NULL,
@@ -341,11 +345,10 @@ CREATE TABLE `medicamento` (
   `uf_id` bigint(20) UNSIGNED DEFAULT NULL,
   `ff_id` bigint(20) UNSIGNED DEFAULT NULL,
   `vd_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `la_id` bigint(20) UNSIGNED DEFAULT NULL,
   `su_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `us_id` bigint(20) UNSIGNED DEFAULT NULL
+  `us_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `pr_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 
 CREATE TABLE `merma` (
@@ -389,7 +392,6 @@ CREATE TABLE `movimiento_inventario` (
   `mi_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `mi_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 
 
@@ -439,31 +441,17 @@ CREATE TABLE `peticiones` (
 
 CREATE TABLE `proveedores` (
   `pr_id` bigint(20) UNSIGNED NOT NULL,
-  `pr_nombres` varchar(120) NOT NULL,
-  `pr_apellido_paterno` varchar(80) DEFAULT NULL,
-  `pr_apellido_materno` varchar(80) DEFAULT NULL,
+  `pr_razon_social` varchar(250) DEFAULT NULL,
+  `pr_nombre_comercial` varchar(250) DEFAULT NULL,
   `pr_telefono` varchar(30) DEFAULT NULL,
+  `pr_correo` varchar(200) DEFAULT NULL,
   `pr_nit` varchar(50) DEFAULT NULL,
-  `pr_direccion` varchar(250) DEFAULT NULL,
   `pr_creado_en` datetime NOT NULL DEFAULT current_timestamp(),
   `pr_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `pr_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
-
-CREATE TABLE `proveedores_laboratorio` (
-  `pl_id` bigint(20) UNSIGNED NOT NULL,
-  `pr_id` bigint(20) UNSIGNED NOT NULL,
-  `la_id` bigint(20) UNSIGNED NOT NULL,
-  `pl_fecha_creado` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `roles`
---
 
 CREATE TABLE `roles` (
   `ro_id` bigint(20) UNSIGNED NOT NULL,
@@ -482,6 +470,70 @@ INSERT INTO `roles` (`ro_id`, `ro_nombre`, `ro_descripcion`, `ro_creado_en`, `ro
 (1, 'admin', 'Administrador del sistema con todos los permisos', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1),
 (2, 'gerente', 'Gerente de sucursal', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1),
 (3, 'vendedor', 'Usuario de caja / ventas', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `siat_actividades`
+--
+
+CREATE TABLE `siat_actividades` (
+  `id` int(11) NOT NULL,
+  `codigo_caeb` varchar(20) NOT NULL,
+  `descripcion` varchar(300) NOT NULL,
+  `tipo_actividad` tinyint(4) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `siat_configuracion`
+--
+
+CREATE TABLE `siat_configuracion` (
+  `sc_id` bigint(20) UNSIGNED NOT NULL,
+  `su_id` bigint(20) UNSIGNED NOT NULL,
+  `sc_token` text DEFAULT NULL,
+  `sc_cuis` varchar(200) DEFAULT NULL,
+  `sc_cuis_expira` datetime DEFAULT NULL,
+  `sc_cufd` varchar(500) DEFAULT NULL,
+  `sc_cufd_control` varchar(200) DEFAULT NULL,
+  `sc_cufd_expira` datetime DEFAULT NULL,
+  `sc_punto_venta` int(11) DEFAULT 0,
+  `sc_actualizado` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `siat_configuracion`
+--
+
+INSERT INTO `siat_configuracion` (`sc_id`, `su_id`, `sc_token`, `sc_cuis`, `sc_cuis_expira`, `sc_cufd`, `sc_cufd_control`, `sc_cufd_expira`, `sc_punto_venta`, `sc_actualizado`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0, '2026-03-24 01:07:31');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `siat_leyendas`
+--
+
+CREATE TABLE `siat_leyendas` (
+  `id` int(11) NOT NULL,
+  `codigo_actividad` varchar(20) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `siat_productos`
+--
+
+CREATE TABLE `siat_productos` (
+  `id` int(11) NOT NULL,
+  `codigo_producto` varchar(20) NOT NULL,
+  `descripcion` varchar(300) NOT NULL,
+  `codigo_actividad` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -505,7 +557,6 @@ CREATE TABLE `sucursales` (
 
 INSERT INTO `sucursales` (`su_id`, `su_nombre`, `su_direccion`, `su_telefono`, `su_creado_en`, `su_actualizado_en`, `su_estado`) VALUES
 (1, 'Sucursal Central', 'Av. Principal 123, Ciudad', '+591-2-1234567', '2025-11-06 10:17:03', '2025-11-06 10:17:03', 1);
-
 
 -- --------------------------------------------------------
 
@@ -533,7 +584,11 @@ CREATE TABLE `transferencias` (
   `tr_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Registro padre de transferencias entre sucursales';
 
+-- --------------------------------------------------------
 
+--
+-- Estructura de tabla para la tabla `uso_farmacologico`
+--
 
 CREATE TABLE `uso_farmacologico` (
   `uf_id` bigint(20) UNSIGNED NOT NULL,
@@ -543,7 +598,6 @@ CREATE TABLE `uso_farmacologico` (
   `uf_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `uf_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 
 CREATE TABLE `usuarios` (
@@ -574,7 +628,11 @@ INSERT INTO `usuarios` (`us_id`, `us_nombres`, `us_apellido_paterno`, `us_apelli
 (1, 'admin', 'admin', 'admin', '000000000', '111111111', 'admin@admin.com', 'admin calle admin', 'admin', 'dlo5ZmZvbmRjME41dGlDY01tTGcrUT09', NULL, NULL, '2025-11-06 10:17:03', '2025-12-04 12:41:09', 1, 1, 1),
 (2, 'usuario', 'usuario', 'usuario', '1235497866656', '122565165464', 'usuario@usuario.usuario', 'usuariousuario', 'usuario', 'Q0oxTTdMNktnMzhoQjBDOXFJWXI1Zz09', NULL, NULL, '2025-11-20 21:30:31', '2025-12-12 19:29:57', 1, 1, 1);
 
+-- --------------------------------------------------------
 
+--
+-- Estructura de tabla para la tabla `ventas`
+--
 
 CREATE TABLE `ventas` (
   `ve_id` bigint(20) UNSIGNED NOT NULL,
@@ -588,12 +646,13 @@ CREATE TABLE `ventas` (
   `ve_impuesto` decimal(14,2) NOT NULL DEFAULT 0.00,
   `ve_total` decimal(14,2) NOT NULL DEFAULT 0.00,
   `ve_actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `ve_metodo_pago` varchar(20) NOT NULL DEFAULT '''efectivo''',
-  `ve_tipo_documento` varchar(20) DEFAULT '''nota de venta''',
-  `ve_estado_documento` varchar(20) DEFAULT '''emitida''',
+  `ve_metodo_pago` varchar(20) NOT NULL DEFAULT 'efectivo',
+  `ve_tipo_documento` varchar(20) DEFAULT 'nota de venta',
+  `ve_estado_documento` varchar(20) DEFAULT 'emitida',
   `ve_numero_control` varchar(100) DEFAULT NULL,
   `ve_estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 
 CREATE TABLE `via_de_administracion` (
@@ -632,7 +691,6 @@ ALTER TABLE `clientes`
 --
 ALTER TABLE `compras`
   ADD PRIMARY KEY (`co_id`),
-  ADD KEY `fk_compras_laboratorios` (`la_id`),
   ADD KEY `fk_compras_proveedores` (`pr_id`),
   ADD KEY `fk_compras_sucursales` (`su_id`),
   ADD KEY `fk_compras_usuarios` (`us_id`);
@@ -747,13 +805,6 @@ ALTER TABLE `inventarios`
   ADD KEY `ix_inv_med` (`med_id`);
 
 --
--- Indices de la tabla `laboratorios`
---
-ALTER TABLE `laboratorios`
-  ADD PRIMARY KEY (`la_id`),
-  ADD UNIQUE KEY `ux_laboratorios_nombre` (`la_nombre_comercial`);
-
---
 -- Indices de la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
@@ -773,7 +824,6 @@ ALTER TABLE `medicamento`
   ADD KEY `fk_med_uf` (`uf_id`),
   ADD KEY `fk_med_ff` (`ff_id`),
   ADD KEY `fk_med_vd` (`vd_id`),
-  ADD KEY `fk_med_la` (`la_id`),
   ADD KEY `fk_med_su` (`su_id`),
   ADD KEY `fk_med_us` (`us_id`);
 
@@ -840,20 +890,36 @@ ALTER TABLE `proveedores`
   ADD KEY `ix_proveedores_nit` (`pr_nit`);
 
 --
--- Indices de la tabla `proveedores_laboratorio`
---
-ALTER TABLE `proveedores_laboratorio`
-  ADD PRIMARY KEY (`pl_id`),
-  ADD UNIQUE KEY `ux_pl_pr_la` (`pr_id`,`la_id`),
-  ADD KEY `fk_pl_pr` (`pr_id`),
-  ADD KEY `fk_pl_la` (`la_id`);
-
---
 -- Indices de la tabla `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`ro_id`),
   ADD UNIQUE KEY `ux_roles_nombre` (`ro_nombre`);
+
+--
+-- Indices de la tabla `siat_actividades`
+--
+ALTER TABLE `siat_actividades`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `siat_configuracion`
+--
+ALTER TABLE `siat_configuracion`
+  ADD PRIMARY KEY (`sc_id`),
+  ADD KEY `su_id` (`su_id`);
+
+--
+-- Indices de la tabla `siat_leyendas`
+--
+ALTER TABLE `siat_leyendas`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `siat_productos`
+--
+ALTER TABLE `siat_productos`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `sucursales`
@@ -917,13 +983,13 @@ ALTER TABLE `via_de_administracion`
 -- AUTO_INCREMENT de la tabla `balance_precios`
 --
 ALTER TABLE `balance_precios`
-  MODIFY `bp_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `bp_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `caja`
 --
 ALTER TABLE `caja`
-  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `caja_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `clientes`
@@ -935,7 +1001,7 @@ ALTER TABLE `clientes`
 -- AUTO_INCREMENT de la tabla `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `co_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `configuracion_empresa`
@@ -947,7 +1013,7 @@ ALTER TABLE `configuracion_empresa`
 -- AUTO_INCREMENT de la tabla `detalle_compra`
 --
 ALTER TABLE `detalle_compra`
-  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `dc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_peticion`
@@ -965,19 +1031,19 @@ ALTER TABLE `detalle_transferencia`
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `dv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `devoluciones`
 --
 ALTER TABLE `devoluciones`
-  MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `dev_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
 --
 ALTER TABLE `factura`
-  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `fa_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de la tabla `facturacion_electronica`
@@ -989,73 +1055,67 @@ ALTER TABLE `facturacion_electronica`
 -- AUTO_INCREMENT de la tabla `forma_farmaceutica`
 --
 ALTER TABLE `forma_farmaceutica`
-  MODIFY `ff_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ff_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `historial_lote`
 --
 ALTER TABLE `historial_lote`
-  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `hl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT de la tabla `informes`
 --
 ALTER TABLE `informes`
-  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `inf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
 
 --
 -- AUTO_INCREMENT de la tabla `informes_compra`
 --
 ALTER TABLE `informes_compra`
-  MODIFY `ic_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `ic_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
-
---
--- AUTO_INCREMENT de la tabla `laboratorios`
---
-ALTER TABLE `laboratorios`
-  MODIFY `la_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `inv_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT de la tabla `lote_medicamento`
 --
 ALTER TABLE `lote_medicamento`
-  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `lm_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de la tabla `medicamento`
 --
 ALTER TABLE `medicamento`
-  MODIFY `med_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `med_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `merma`
 --
 ALTER TABLE `merma`
-  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `me_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento_caja`
 --
 ALTER TABLE `movimiento_caja`
-  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `mc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT de la tabla `movimiento_inventario`
 --
 ALTER TABLE `movimiento_inventario`
-  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+  MODIFY `mi_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=143;
 
 --
 -- AUTO_INCREMENT de la tabla `notificaciones`
 --
 ALTER TABLE `notificaciones`
-  MODIFY `not_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=193;
+  MODIFY `not_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2686;
 
 --
 -- AUTO_INCREMENT de la tabla `peticiones`
@@ -1067,19 +1127,37 @@ ALTER TABLE `peticiones`
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
-  MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
--- AUTO_INCREMENT de la tabla `proveedores_laboratorio`
---
-ALTER TABLE `proveedores_laboratorio`
-  MODIFY `pl_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `pr_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
   MODIFY `ro_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `siat_actividades`
+--
+ALTER TABLE `siat_actividades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `siat_configuracion`
+--
+ALTER TABLE `siat_configuracion`
+  MODIFY `sc_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `siat_leyendas`
+--
+ALTER TABLE `siat_leyendas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `siat_productos`
+--
+ALTER TABLE `siat_productos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `sucursales`
@@ -1097,7 +1175,7 @@ ALTER TABLE `transferencias`
 -- AUTO_INCREMENT de la tabla `uso_farmacologico`
 --
 ALTER TABLE `uso_farmacologico`
-  MODIFY `uf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `uf_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -1109,13 +1187,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `ve_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT de la tabla `via_de_administracion`
 --
 ALTER TABLE `via_de_administracion`
-  MODIFY `vd_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `vd_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Restricciones para tablas volcadas
@@ -1139,7 +1217,6 @@ ALTER TABLE `caja`
 -- Filtros para la tabla `compras`
 --
 ALTER TABLE `compras`
-  ADD CONSTRAINT `fk_compras_laboratorio` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_compras_proveedor` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_compras_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_compras_usuario` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1235,7 +1312,6 @@ ALTER TABLE `lote_medicamento`
 --
 ALTER TABLE `medicamento`
   ADD CONSTRAINT `fk_medicamento_forma` FOREIGN KEY (`ff_id`) REFERENCES `forma_farmaceutica` (`ff_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_medicamento_laboratorio` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_medicamento_sucursal` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_medicamento_uso` FOREIGN KEY (`uf_id`) REFERENCES `uso_farmacologico` (`uf_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_medicamento_usuario` FOREIGN KEY (`us_id`) REFERENCES `usuarios` (`us_id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1283,11 +1359,10 @@ ALTER TABLE `peticiones`
   ADD CONSTRAINT `fk_pe_us_solicitante` FOREIGN KEY (`us_solicitante_id`) REFERENCES `usuarios` (`us_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `proveedores_laboratorio`
+-- Filtros para la tabla `siat_configuracion`
 --
-ALTER TABLE `proveedores_laboratorio`
-  ADD CONSTRAINT `fk_pl_la` FOREIGN KEY (`la_id`) REFERENCES `laboratorios` (`la_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_pl_pr` FOREIGN KEY (`pr_id`) REFERENCES `proveedores` (`pr_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `siat_configuracion`
+  ADD CONSTRAINT `siat_configuracion_ibfk_1` FOREIGN KEY (`su_id`) REFERENCES `sucursales` (`su_id`);
 
 --
 -- Filtros para la tabla `transferencias`

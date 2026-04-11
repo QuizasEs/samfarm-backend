@@ -87,7 +87,7 @@ class proveedorController extends proveedorModel
                             <th>PROVEEDOR/RAZON SOCIAL</th>
                             <th>NIT</th>
                             <th>TELÉFONO</th>
-                            <th>DIRECCIÓN</th>
+                            <th>NOMBRE COMERCIAL</th>
                             <th>FECHA REGISTRO</th>
                             <th>TOTAL COMPRAS</th>
                             <th>ÚLTIMA COMPRA</th>
@@ -103,7 +103,7 @@ class proveedorController extends proveedorModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $row) {
-                $nombre_completo = $row['pr_nombres'] ?? '';
+                $nombre_completo = $row['pr_razon_social'] ?? '';
 
                 $estado_html = $row['pr_estado'] == 1
                     ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
@@ -118,9 +118,9 @@ class proveedorController extends proveedorModel
                     $ultima_compra .= '<br><small style="color:orange;"><ion-icon name="alert-outline"></ion-icon> Hace ' . $dias_ultima . ' días</small>';
                 }
 
-                $direccion = $row['pr_direccion'] ?? '-';
-                if (strlen($direccion) > 30) {
-                    $direccion = substr($direccion, 0, 30) . '...';
+                $nombre_comercial = $row['pr_nombre_comercial'] ?? '-';
+                if (strlen($nombre_comercial) > 30) {
+                    $nombre_comercial = substr($nombre_comercial, 0, 30) . '...';
                 }
 
                 $tabla .= '
@@ -129,7 +129,7 @@ class proveedorController extends proveedorModel
                         <td><strong>' . htmlspecialchars($nombre_completo) . '</strong></td>
                         <td>' . htmlspecialchars($row['pr_nit'] ?? '-') . '</td>
                         <td>' . htmlspecialchars($row['pr_telefono'] ?? '-') . '</td>
-                        <td>' . htmlspecialchars($direccion) . '</td>
+                        <td>' . htmlspecialchars($nombre_comercial) . '</td>
                         <td>' . date('d/m/Y', strtotime($row['pr_creado_en'])) . '</td>
                         <td style="text-align:center;"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . '</strong></td>
                         <td>' . $ultima_compra . '</td>
@@ -191,7 +191,7 @@ class proveedorController extends proveedorModel
             $topMedicamentosStmt = self::top_medicamentos_proveedor_model($pr_id, 5);
             $topMedicamentos = $topMedicamentosStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $nombre_completo = $proveedor['pr_nombres'] ?? '';
+            $nombre_completo = $proveedor['pr_razon_social'] ?? '';
 
             $promedio = $proveedor['total_compras'] > 0
                 ? $proveedor['monto_total_compras'] / $proveedor['total_compras']
@@ -201,7 +201,8 @@ class proveedorController extends proveedorModel
                 'nombre_completo' => $nombre_completo,
                 'nit' => $proveedor['pr_nit'] ?? '-',
                 'telefono' => $proveedor['pr_telefono'] ?? '-',
-                'direccion' => $proveedor['pr_direccion'] ?? '-',
+                'correo' => $proveedor['pr_correo'] ?? '-',
+                'direccion' => $proveedor['pr_nombre_comercial'] ?? '-',
                 'fecha_registro' => date('d/m/Y', strtotime($proveedor['pr_creado_en'])),
                 'estado' => $proveedor['pr_estado'] == 1 ? 'Activo' : 'Inactivo',
                 'total_compras' => (int)$proveedor['total_compras'],
@@ -217,7 +218,7 @@ class proveedorController extends proveedorModel
             return json_encode($response, JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
             error_log("Error en detalle_proveedor_controller: " . $e->getMessage());
-            return json_encode(['error' => 'Error al cargar detalle']);
+            return json_encode(['error' => 'Error al cargar detalle: ' . $e->getMessage()]);
         }
     }
 
@@ -304,6 +305,7 @@ class proveedorController extends proveedorModel
         $nombres = mainModel::limpiar_cadena($_POST['Nombres_pr'] ?? '');
         $nit = mainModel::limpiar_cadena($_POST['Nit_pr'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_pr'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_pr'] ?? '');
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_pr'] ?? '');
         /* verificar que los campos ablgatorios no esten vacios */
         if (empty($nombres) || empty($nit)) {
@@ -366,6 +368,7 @@ class proveedorController extends proveedorModel
             'nombres' => $nombres,
             'nit' => $nit,
             'telefono' => $telefono,
+            'correo' => $correo,
             'direccion' => $direccion
         ];
 
@@ -430,6 +433,7 @@ class proveedorController extends proveedorModel
         $nombres = mainModel::limpiar_cadena($_POST['Nombres_pr_up'] ?? '');
         $nit = mainModel::limpiar_cadena($_POST['Nit_pr_up'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_pr_up'] ?? '');
+        $correo = mainModel::limpiar_cadena($_POST['Correo_pr_up'] ?? '');
         $direccion = mainModel::limpiar_cadena($_POST['Direccion_pr_up'] ?? '');
 
         if (empty($pr_id) || empty($nombres) || empty($nit)) {
@@ -506,6 +510,7 @@ class proveedorController extends proveedorModel
             'nombres' => $nombres,
             'nit' => $nit,
             'telefono' => $telefono,
+            'correo' => $correo,
             'direccion' => $direccion
         ];
 
@@ -599,7 +604,8 @@ class proveedorController extends proveedorModel
                 ['text' => 'PROVEEDOR', 'width' => 40],
                 ['text' => 'NIT', 'width' => 25],
                 ['text' => 'TELÉFONO', 'width' => 20],
-                ['text' => 'DIRECCIÓN', 'width' => 50],
+                ['text' => 'CORREO', 'width' => 30],
+                ['text' => 'NOMBRE COMERCIAL', 'width' => 35],
                 ['text' => 'FECHA REGISTRO', 'width' => 25],
                 ['text' => 'TOTAL COMPRAS', 'width' => 25],
                 ['text' => 'ÚLTIMA COMPRA', 'width' => 25],
@@ -612,10 +618,11 @@ class proveedorController extends proveedorModel
             foreach ($datos as $index => $row) {
                 $cells = [
                     ['text' => ($index + 1), 'align' => 'C'],
-                    ['text' => substr($row['Nombres'] ?? 'N/A', 0, 30), 'align' => 'L'],
+                    ['text' => substr($row['Proveedor'] ?? 'N/A', 0, 30), 'align' => 'L'],
                     ['text' => $row['NIT'] ?? 'N/A', 'align' => 'C'],
                     ['text' => $row['Teléfono'] ?? 'N/A', 'align' => 'C'],
-                    ['text' => substr($row['Dirección'] ?? 'N/A', 0, 35), 'align' => 'L'],
+                    ['text' => $row['Correo'] ?? '-', 'align' => 'L'],
+                    ['text' => $row['Nombre Comercial'] ?? '-', 'align' => 'L'],
                     ['text' => date('d/m/Y', strtotime($row['Fecha Registro'])), 'align' => 'C'],
                     ['text' => 'Bs. ' . number_format($row['Total Compras'], 2), 'align' => 'R'],
                     ['text' => $row['Última Compra'] ? date('d/m/Y', strtotime($row['Última Compra'])) : 'Nunca', 'align' => 'C'],

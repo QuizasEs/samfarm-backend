@@ -37,16 +37,15 @@ class loteModel extends mainModel
                 ff.ff_nombre AS forma_farmaceutica,
                 uf.uf_nombre AS uso_farmacologico,
                 vd.vd_nombre AS via_administracion,
-                la.la_nombre_comercial AS laboratorio_nombre,
-                p.pr_nombres AS proveedor_nombres,
-                p.pr_apellido_paterno AS proveedor_apellido,
+                pr.pr_razon_social AS proveedor_nombre,
+                p.pr_razon_social AS proveedor_contacto_nombres,
                 s.su_nombre AS sucursal_nombre
             FROM lote_medicamento lm
             LEFT JOIN medicamento m ON lm.med_id = m.med_id
             LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
             LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
             LEFT JOIN via_de_administracion vd ON m.vd_id = vd.vd_id
-            LEFT JOIN laboratorios la ON m.la_id = la.la_id
+            LEFT JOIN proveedores pr ON lm.pr_id = pr.pr_id
             LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             LEFT JOIN sucursales s ON lm.su_id = s.su_id
             WHERE lm.lm_id = :ID
@@ -58,29 +57,37 @@ class loteModel extends mainModel
         return $sql;
     }
 
-    protected static function actualizar_lote_model($datos)
+    public static function actualizar_lote_model($datos)
     {
+        // Construir consulta dinámica basada en los campos proporcionados
+        $setClauses = [];
+
+        foreach ($datos as $key => $value) {
+            if ($key !== 'ID') { // ID es para el WHERE, no para SET
+                $setClauses[] = "$key = :$key";
+            }
+        }
+
+        if (empty($setClauses)) {
+            return false; // No hay campos para actualizar
+        }
+
+        $setClause = implode(", ", $setClauses);
+
         $sql = self::conectar()->prepare("
             UPDATE lote_medicamento
             SET
-                lm_cant_caja = :lm_cant_caja,
-                lm_cant_blister = :lm_cant_blister,
-                lm_cant_unidad = :lm_cant_unidad,
-                lm_precio_compra = :lm_precio_compra,
-                lm_precio_venta = :lm_precio_venta,
-                lm_fecha_vencimiento = :lm_fecha_vencimiento,
-                lm_actualizado_en = NOW(),
-                lm_origen_id = :lm_origen_id
+                $setClause,
+                lm_actualizado_en = NOW()
             WHERE lm_id = :ID
         ");
 
-        $sql->bindParam(":lm_cant_caja", $datos['lm_cant_caja']);
-        $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
-        $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
-        $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);
-        $sql->bindParam(":lm_precio_venta", $datos['lm_precio_venta']);
-        $sql->bindParam(":lm_fecha_vencimiento", $datos['lm_fecha_vencimiento']);
-        $sql->bindParam(":lm_origen_id", $datos['lm_origen_id']);
+        // Bind parameters individually to avoid reference issues
+        foreach ($datos as $key => $value) {
+            if ($key !== 'ID') {
+                $sql->bindParam(":$key", $datos[$key]);
+            }
+        }
         $sql->bindParam(":ID", $datos['ID']);
 
         $sql->execute();

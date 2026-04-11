@@ -4,7 +4,7 @@ require_once "mainModel.php";
 class transferirModel extends mainModel
 {
 
-    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $laboratorio, $fecha_venc_max, $mostrar_todos = false)
+    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $fecha_venc_max, $mostrar_todos = false)
     {
         $sql = "
                     SELECT
@@ -29,11 +29,9 @@ class transferirModel extends mainModel
                         m.med_nombre_quimico,
                         m.med_principio_activo,
                         m.med_presentacion,
-                        la.la_nombre_comercial AS laboratorio,
-                        pr.pr_nombres AS proveedor
+                        pr.pr_razon_social AS proveedor
                     FROM lote_medicamento lm
                     INNER JOIN medicamento m ON m.med_id = lm.med_id
-                    LEFT JOIN laboratorios la ON la.la_id = m.la_id
                     LEFT JOIN proveedores pr ON pr.pr_id = lm.pr_id
                     WHERE lm.su_id = :su_id
                     AND lm.lm_estado = 'activo'
@@ -45,11 +43,6 @@ class transferirModel extends mainModel
         if ($busqueda) {
             $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR lm.lm_numero_lote LIKE :busqueda)";
             $params[':busqueda'] = "%{$busqueda}%";
-        }
-
-        if ($laboratorio) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = $laboratorio;
         }
 
         if ($fecha_venc_max) {

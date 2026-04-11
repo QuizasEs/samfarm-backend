@@ -93,7 +93,7 @@ if (isset($_POST['inventarioAjax'])) {
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
         $busqueda = isset($_POST['busqueda']) ? $_POST['busqueda'] : '';
 
-        $laboratorio = isset($_POST['select1']) ? $_POST['select1'] : '';
+        $proveedor = isset($_POST['select1']) ? $_POST['select1'] : '';
         $estado = isset($_POST['select2']) ? $_POST['select2'] : '';
         $sucursal = isset($_POST['select3']) ? $_POST['select3'] : '';
         $forma = isset($_POST['select4']) ? $_POST['select4'] : '';
@@ -103,7 +103,7 @@ if (isset($_POST['inventarioAjax'])) {
             $registros,
             'inventario-lista',
             $busqueda,
-            $laboratorio,
+            $proveedor,
             $estado,
             $sucursal,
             $forma

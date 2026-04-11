@@ -10,12 +10,11 @@ class compraModel extends mainModel
         $db = mainModel::conectar();
         $sql = $db->prepare("
             INSERT INTO compras
-                (co_numero, co_fecha, la_id, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
+                (co_numero, co_fecha, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
             VALUES
-                (:co_numero, NOW(), :la_id, :us_id, :su_id, :pr_id, :co_subtotal, :co_impuesto, :co_total, :co_numero_factura, :co_fecha_factura, :co_razon_social)
+                (:co_numero, NOW(), :us_id, :su_id, :pr_id, :co_subtotal, :co_impuesto, :co_total, :co_numero_factura, :co_fecha_factura, :co_razon_social)
         ");
         $sql->bindParam(":co_numero", $datos['co_numero']);
-        $sql->bindParam(":la_id", $datos['la_id']);
         $sql->bindParam(":us_id", $datos['us_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
         $sql->bindParam(":pr_id", $datos['pr_id']);

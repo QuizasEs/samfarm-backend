@@ -29,24 +29,35 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
 
         <script>
+            function actualizarProveedor() {
+                const proveedorFiltro = document.getElementById('Proveedor_filtro');
+                const proveedorHidden = document.getElementById('Proveedor_reg');
+
+                // Actualizar el campo oculto
+                proveedorHidden.value = proveedorFiltro.value;
+            }
+
+            // Función de compatibilidad
             function actualizarRazonSocial() {
-                const proveedorSelect = document.getElementById('Proveedor_reg');
-                const razonSocialInput = document.getElementById('razon_reg');
-
-                const proveedorOption = proveedorSelect.options[proveedorSelect.selectedIndex];
-                const proveedorNombre = proveedorOption.text || '';
-                const proveedorNit = proveedorOption.getAttribute('data-nit') || '';
-
-                let razonSocial = proveedorNombre;
-                if (proveedorNit) {
-                    razonSocial = proveedorNombre + ' - NIT: ' + proveedorNit;
-                }
-
-                razonSocialInput.value = razonSocial;
+                actualizarProveedor();
             }
 
             document.querySelector('.FormularioAjax').addEventListener('submit', function(e) {
                 e.preventDefault();
+
+                // Obtener valor del proveedor directamente del filtro
+                const proveedorFiltro = document.getElementById('Proveedor_filtro');
+                const proveedorHidden = document.getElementById('Proveedor_reg');
+                
+                if (proveedorFiltro && proveedorHidden) {
+                    proveedorHidden.value = proveedorFiltro.value;
+                }
+
+                // Validar que se haya seleccionado un proveedor
+                if (!proveedorFiltro || !proveedorFiltro.value) {
+                    Swal.fire('Error', 'Debe seleccionar un proveedor', 'error');
+                    return;
+                }
 
                 const lotes = ModalManager.obtenerLotes();
                 const totales = ModalManager.obtenerTotales();
@@ -83,57 +94,24 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <label for="numero_compra">numero de compra*</label>
                 <input type="text" name="Numero_compra_reg" id="numero_compra" readonly>
             </div>
-            <div class="form-bloque">
-                <label for="razon_reg">razon social*</label>
-                <input type="text" name="razon_reg" id="razon_reg" placeholder="Se obtiene del proveedor seleccionado" readonly style="cursor: not-allowed;">
-            </div>
-            <div class="form-bloque">
-                <label for="Proveedor_reg">Proveedor*</label>
-                <select class="select-style" name="Proveedor_reg" id="Proveedor_reg" required onchange="actualizarRazonSocial()">
-                    <option value="">Seleccionar</option>
-                    <?php foreach ($datos_select['proveedores'] as $pro) { ?>
-                        <option value="<?php echo $pro['pr_id']; ?>" data-nit="<?php echo $pro['pr_nit']; ?>"><?php echo $pro['pr_nombres']; ?></option>
-                    <?php } ?>
-                </select>
-            </div>
-            <div class="form-bloque">
-                <label for="Laboratorio_factura_reg">Laboratorio*</label>
-                <select class="select-style" name="Laboratorio_factura_reg" id="Laboratorio_factura_reg" required>
-                    <option value="">Seleccionar</option>
-                    <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                        <option value="<?php echo $lab['la_id']; ?>"><?php echo $lab['la_nombre_comercial']; ?></option>
-                    <?php } ?>
-                </select>
-            </div>
+            <input type="hidden" name="Proveedor_reg" id="Proveedor_reg" value="">
         </div>
 
-
-        <!-- DATOS DE FACTURA -->
-        <div class="form-title">
-            <h3>datos de factura</h3>
-        </div>
-        <div class="form-group">
-            <div class="form-bloque">
-                <label for="Fecha_factura_reg">Fecha de factura*</label>
-                <input type="date" name="Fecha_factura_reg" id="Fecha_factura_reg" maxlength="100" required>
-            </div>
-            <div class="form-bloque">
-                <label for="Numero_factura_reg">numero de factura*</label>
-                <input type="number" name="Numero_factura_reg" id="Numero_factura_reg" placeholder="Numero de factura" required>
-            </div>
-            <div class="form-bloque">
-                <label for="impuestos_reg">Impuestos %*</label>
-                <small>de 0% a 100%</small>
-                <input type="number" name="impuestos_reg" id="impuestos_reg" min="0" max="100" step="0.01"
-                    placeholder="0" oninput="validarPorcentaje(this)">
-            </div>
-        </div>
 
         <!-- FILTRAR MEDICAMENTO -->
         <div class="form-title">
             <h3>filtrar por medicamento</h3>
         </div>
         <div class="form-search">
+            <div class="form-bloque-search">
+                <label for="Proveedor_filtro">proveedor</label>
+                <select name="Proveedor_filtro" id="Proveedor_filtro" class="select-filtro" onchange="actualizarProveedor()">
+                    <option value="">Todos</option>
+                    <?php foreach ($datos_select['proveedores'] as $pro) { ?>
+                        <option value="<?php echo $pro['pr_id']; ?>" data-nit="<?php echo $pro['pr_nit']; ?>"><?php echo $pro['pr_razon_social']; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
             <div class="form-bloque-search">
                 <label for="Form_reg">forma farmaceutica</label>
                 <select name="Form_reg" id="Form_reg" class="select-filtro">
@@ -149,15 +127,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <option value="">Seleccionar</option>
                     <?php foreach ($datos_select['via_administracion'] as $via) { ?>
                         <option value="<?php echo $via['vd_id']; ?>"><?php echo $via['vd_nombre']; ?></option>
-                    <?php } ?>
-                </select>
-            </div>
-            <div class="form-bloque-search">
-                <label for="Laboratorio_reg">laboratorio</label>
-                <select name="Laboratorio_reg" id="Laboratorio_reg" class="select-filtro">
-                    <option value="">Seleccionar</option>
-                    <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                        <option value="<?php echo $lab['la_id']; ?>"><?php echo $lab['la_nombre_comercial']; ?></option>
                     <?php } ?>
                 </select>
             </div>
@@ -257,10 +226,18 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad" class="required">Paquetes o Cajas</label>
+                                <label for="cantidad" class="required">Cantidad por caja</label>
                                 <input type="number" name="Cantidad_reg" id="cantidad" min="1" required>
                             </div>
                         </div>
+                        <div class="col">
+                            <div class="modal-bloque">
+                                <label for="cantidad_unidades" class="required">Cantidad unitaria para venta</label>
+                                <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" value="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
                                 <label for="fecha_vencimiento" class="required">Vencimiento</label>
@@ -271,30 +248,13 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="row">
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="cantidad">Unidades de empaque por caja</label>
-                                <small>Blister, sobres, sachets, etc.</small>
-                                <input type="number" name="Cantidad_blister_reg" id="cantidad_blister" min="1" placeholder="si aplica">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="fecha_vencimiento">Unidades individuales por empaque</label>
-                                <small>Unidades por blister, sobre, sachet, etc.</small>
-                                <input type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" placeholder="si aplica">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="precio_compra" class="required">Precio Compra por caja</label>
+                                <label for="precio_compra" class="required">Precio Costo</label>
                                 <input type="number" name="Precio_compra_reg" id="precio_compra" step="0.01" min="0.01" required>
                             </div>
                         </div>
                         <div class="col">
                             <div class="modal-bloque">
-                                <label for="precio_venta_reg" class="required">Precio Venta por unidad</label>
+                                <label for="precio_venta_reg" class="required">Precio Venta</label>
                                 <input type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" required>
                             </div>
                         </div>

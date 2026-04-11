@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Informe Completo de Afectacion - Eliminacion Tabla Laboratorios</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px; }
+h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
+h3 { color: #7f8c8d; }
+table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 12px; }
+th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
+th { background-color: #3498db; color: white; }
+tr:nth-child(even) { background-color: #ecf0f1; }
+.critica { background-color: #e74c3c; color: white; font-weight: bold; }
+.alta { background-color: #e67e22; color: white; }
+.media { background-color: #f1c40f; color: black; }
+.baja { background-color: #27ae60; color: white; }
+.resumen { background-color: #ecf0f1; padding: 20px; border-radius: 10px; margin: 20px 0; }
+.nota { background-color: #fff9e6; border-left: 4px solid #f39c12; padding: 15px; margin: 20px 0; }
+.tipo-model { background-color: #9b59b6; color: white; }
+.tipo-controller { background-color: #3498db; color: white; }
+.tipo-ajax { background-color: #1abc9c; color: white; }
+.tipo-view { background-color: #e67e22; color: white; }
+</style>
+</head>
+<body>
+
+<h1>INFORME COMPLETO DE AFECTACION</h1>
+<p><strong>Proyecto:</strong> SamFarm Backend</p>
+<p><strong>Fecha:</strong> 21/03/2026</p>
+<p><strong>Cambio:</strong> Eliminacion de la tabla laboratorios y migracion a tabla proveedores</p>
+
+<div class="nota">
+<strong>Contexto:</strong> Se eliminó la tabla laboratorios de la base de datos samfarm_db_v2.sql. 
+La tabla proveedores deberá cumplir la funcion de laboratorio sin afectar el funcionamiento actual de cada modulo.
+</div>
+
+<h2>1. MODELOS AFECTADOS (15 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>models/categoriaModel.php</td>
+<td>ELIMINAR</td>
+<td>7 funciones: listar_laboratorios_model(), contar_laboratorios_model(), agregar_laboratorios_model(), obtener_laboratorios_model(), actualizar_laboratorios_model(), cambiar_estado_laboratorios_model(), verificar_nombre_laboratorios_existe_model()</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>models/mainModel.php</td>
+<td>MODIFICAR</td>
+<td>Cambiar consulta de laboratorios a proveedores. Agregar filtro pr_tipo = 'laboratorio'</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>models/ajusteInventarioCompletoModel.php</td>
+<td>MODIFICAR</td>
+<td>obtener_laboratorios_modelo() - cambiar tabla laboratorios a proveedores</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>models/inventarioModel.php</td>
+<td>ELIMINAR</td>
+<td>6 consultas con JOIN a laboratorios, columna laboratorio, filtros por la_id</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>models/medicamentoModel.php</td>
+<td>ELIMINAR</td>
+<td>4 consultas con JOIN a laboratorios, filtros por la_id</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>models/compraHistorialModel.php</td>
+<td>ELIMINAR</td>
+<td>8 consultas con JOIN a laboratorios, filtros por la_id en compras</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>models/ventaModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con LEFT JOIN laboratorios</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>models/transferirModel.php</td>
+<td>ELIMINAR</td>
+<td>JOIN a laboratorios y filtro por laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>models/proveedorModel.php</td>
+<td>MODIFICAR</td>
+<td>Cambiar JOIN de laboratorios a proveedores con filtro</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>models/devolucionModel.php</td>
+<td>ELIMINAR</td>
+<td>JOIN a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>11</td>
+<td>models/mermaModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con JOIN a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>12</td>
+<td>models/preciosModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con JOIN a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>13</td>
+<td>models/loteModel.php</td>
+<td>ELIMINAR</td>
+<td>JOIN a laboratorios (laboratorio_nombre)</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>14</td>
+<td>models/clienteModel.php</td>
+<td>ELIMINAR</td>
+<td>JOIN a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>15</td>
+<td>models/viewsModel.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar rutas: laboratorioLista, laboratorioRegistro, laboratorioActualizar</td>
+<td class="media">MEDIA</td>
+</tr>
+</table>
+
+<h2>2. CONTROLADORES AFECTADOS (11 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>controllers/categoriaController.php</td>
+<td>ELIMINAR</td>
+<td>6 controladores: paginado_laboratorios_controller(), agregar_laboratorios_controller(), obtener_laboratorios_controller(), actualizar_laboratorios_controller(), cambiar_estado_laboratorios_controller()</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>controllers/medicamentoController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar procesamiento de campo laboratorio en registro y actualizacion</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>controllers/inventarioController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtros por laboratorio y columnas</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>controllers/compraController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar registro de laboratorio_id en compras (la_id)</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>controllers/compraHistorialController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtros por laboratorio y mostrar columna laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>controllers/transferirController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtro por laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>controllers/devolucionController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar campo laboratorio en respuesta</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>controllers/dashboardController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar conteo de laboratorios para estadisticas</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>controllers/ajusteInventarioCompletoController.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar laboratorio_id en ajustes, cambiar consulta de listas</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>controllers/userController.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias a laboratorio</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>11</td>
+<td>controllers/loginController.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias a laboratorio</td>
+<td class="baja">NINGUNO</td>
+</tr>
+</table>
+
+<h2>3. AJAX AFECTADOS (8 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>ajax/laboratorioAjax.php</td>
+<td>ELIMINAR</td>
+<td>Archivo completo de laboratorio - save, update</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ajax/categoriaAjax.php</td>
+<td>ELIMINAR</td>
+<td>5 casos: listar_laboratorio, agregar_laboratorio, obtener_laboratorio, actualizar_laboratorio, cambiar_estado_laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ajax/medicamentoAjax.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtro laboratorio (select1)</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ajax/inventarioAjax.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtro laboratorio (select1)</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ajax/compraAjax.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar campo laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ajax/compraHistorialAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias a laboratorio</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ajax/ventaAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias a laboratorio</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ajax/proveedoresAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias a laboratorio</td>
+<td class="baja">NINGUNO</td>
+</tr>
+</table>
+
+<h2>4. VISTAS AFECTADAS (17 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>views/content/laboratorioLista-view.php</td>
+<td>ELIMINAR</td>
+<td>Vista completa de lista de laboratorios</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>views/content/laboratorioRegistro-view.php</td>
+<td>ELIMINAR</td>
+<td>Vista completa de registro de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>views/content/categoriaLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar modal de gestion de laboratorios (lineas 928-1201)</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>views/content/inventarioLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select filtro laboratorio y columna</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>views/content/medicamentoLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select filtro laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>views/content/medicamentoRegistro-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>views/content/medicamentoActualizar-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>views/content/compraRegistro-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>views/content/compraOrden-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>views/content/transferirLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar filtro y columna laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>11</td>
+<td>views/content/caja-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select filtro laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>12</td>
+<td>views/content/proveedorLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar columna laboratorio en compras y medicamentos</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>13</td>
+<td>views/content/clienteLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar columna laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>14</td>
+<td>views/content/comprasHistorialLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar detalle laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>15</td>
+<td>views/content/ajusteInventarioCompleto-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar select laboratorio en formulario</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>16</td>
+<td>views/content/script_bulk-view.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar campo laboratorio_id</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>17</td>
+<td>views/inc/script.php</td>
+<td>MODIFICAR</td>
+<td>Eliminar variables y funciones de laboratorio (busqueda, filtros, exportaciones)</td>
+<td class="alta">ALTA</td>
+</tr>
+</table>
+
+<h2>5. RESUMEN TOTAL</h2>
+
+<div class="resumen">
+<table>
+<tr>
+<th>Tipo de Archivo</th>
+<th>Total</th>
+<th>Critica</th>
+<th>Alta</th>
+<th>Media</th>
+<th>Ninguno</th>
+</tr>
+<tr>
+<td>Models</td>
+<td>15</td>
+<td>3</td>
+<td>6</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Controllers</td>
+<td>11</td>
+<td>1</td>
+<td>5</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Ajax</td>
+<td>8</td>
+<td>2</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Views</td>
+<td>17</td>
+<td>3</td>
+<td>7</td>
+<td>7</td>
+<td>0</td>
+</tr>
+<tr style="font-weight: bold; background-color: #3498db; color: white;">
+<td>TOTAL</td>
+<td>51</td>
+<td>9</td>
+<td>20</td>
+<td>17</td>
+<td>5</td>
+</tr>
+</table>
+</div>
+
+<h2>6. CAMBIOS REQUERIDOS EN BASE DE DATOS</h2>
+
+<table>
+<tr>
+<th>Accion</th>
+<th>Tabla</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_tipo (enum: 'proveedor', 'laboratorio', 'ambos')</td>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_logo (varchar 255) para imagen de laboratorio</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>medicamento</td>
+<td>Columna la_id (ya realizado en script)</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>compras</td>
+<td>Columna la_id (ya realizado en script)</td>
+</tr>
+</table>
+
+<h2>7. PRIORIDAD DE IMPLEMENTACION</h2>
+
+<ol>
+<li><strong>CRITICA (9 archivos):</strong> Sistemas de gestion de laboratorios - comenzar aqui</li>
+<li><strong>ALTA (20 archivos):</strong> Queries con JOIN y filtros que fallaran</li>
+<li><strong>MEDIA (17 archivos):</strong> Ajustes en controladores y vistas</li>
+<li><strong>NINGUNO (5 archivos):</strong> Sin cambios necesarios</li>
+</ol>
+
+<h2>8. PROMPTS PARA CORRECIONES (FORMATO IA)</h2>
+
+<div class="nota" style="background-color: #e74c3c; color: white; border-left: 4px solid #c0392b;">
+<strong>nota importante para todos los prompts:</strong> al realizar las modificaciones se debe seguir el patron de programacion establecido en el proyecto. los comentarios deben ser en espanol, sensillos, en minusculas, sin acentos y sin emojis.
+</div>
+
+<p>utiliza estos prompts para continuar con las correcciones modulo por modulo:</p>
+
+<h3>8.1 models/categoriaModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/categoriaModel.php:
+1. elimina la funcion protected static function listar_laboratorios_model()
+2. elimina la funcion protected static function contar_laboratorios_model()
+3. elimina la funcion protected static function agregar_laboratorios_model()
+4. elimina la funcion protected static function obtener_laboratorios_model()
+5. elimina la funcion protected static function actualizar_laboratorios_model()
+6. elimina la funcion protected static function cambiar_estado_laboratorios_model()
+7. elimina la funcion protected static function verificar_nombre_laboratorios_existe_model()
+
+estas funciones ya no son necesarias porque la tabla laboratorios fue eliminada de la base de datos.
+importante: utiliza el patron de programacion del proyecto, comentarios breves en espanol, en minusculas, sin acentos y sin emojis.
+</pre>
+
+<h3>8.2 models/mainModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/mainModel.php:
+1. busca la consulta que obtiene laboratorios (linea ~267)
+2. cambia la tabla "laboratorios" por "proveedores"
+3. agrega filtro para obtener solo registros tipo laboratorio: WHERE pr_tipo IN ('laboratorio', 'ambos') OR pr_tipo IS NULL
+4. cambia el alias de la_id a pr_id y la_nombre_comercial a pr_nombres
+
+esto es necesario porque ahora los laboratorios se manejaran desde la tabla proveedores.
+importante: utiliza el patron de programacion del proyecto, comentarios breves en espanol, en minusculas, sin acentos y sin emojis.
+</pre>
+
+<h3>8.3 models/ajusteInventarioCompletoModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/ajusteInventarioCompletoModel.php:
+1. modifica la funcion obtener_laboratorios_modelo() para consultar la tabla proveedores
+2. cambia el SELECT de "laboratorios" a "proveedores"
+3. agrega filtro WHERE pr_tipo IN ('laboratorio', 'ambos') OR pr_tipo IS NULL
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+importante: utiliza el patron de programacion del proyecto, comentarios breves en espanol, en minusculas, sin acentos y sin emojis.
+</pre>
+
+<h3>8.4 models/inventarioModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/inventarioModel.php:
+1. elimina todas las referencias a "LEFT JOIN laboratorios la ON la.la_id = m.la_id"
+2. elimina la columna "laboratorio" de los selects
+3. elimina los filtros por "laboratorio" o "la_id"
+4. elimina la referencia a "la.la_nombre_comercial"
+
+esto es necesario porque la columna la_id fue eliminada de la tabla medicamento.
+importante: utiliza el patron de programacion del proyecto, comentarios breves en espanol, en minusculas, sin acentos y sin emojis.
+</pre>
+
+<h3>8.5 ajax/laboratorioAjax.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en ajax/laboratorioAjax.php:
+1. elimina todo el contenido del archivo
+2. o redirecciona a una pagina de error ya que el modulo de laboratorio fue eliminado
+
+este archivo ya no es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.6 ajax/categoriaAjax.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en ajax/categoriaAjax.php:
+1. elimina el caso "listar_laboratorio"
+2. elimina el caso "agregar_laboratorio"
+3. elimina el caso "obtener_laboratorio"
+4. elimina el caso "actualizar_laboratorio"
+5. elimina el caso "cambiar_estado_laboratorio"
+
+estos casos ya no son necesarios porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.7 controllers/categoriaController.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en controllers/categoriaController.php:
+1. elimina la funcion public function paginado_laboratorios_controller()
+2. elimina la funcion public function agregar_laboratorios_controller()
+3. elimina la funcion public function obtener_laboratorios_controller()
+4. elimina la funcion public function actualizar_laboratorios_controller()
+5. elimina la funcion public function cambiar_estado_laboratorios_controller()
+
+estos controladores ya no son necesarios porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.8 views/content/laboratorioLista-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/laboratorioLista-view.php:
+1. muestra un mensaje indicando que esta funcionalidad ya no esta disponible
+2. o redirecciona a otra pagina del sistema
+
+esta vista ya no es necesaria porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.9 views/content/laboratorioRegistro-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/laboratorioRegistro-view.php:
+1. muestra un mensaje indicando que esta funcionalidad ya no esta disponible
+2. o redirecciona a otra pagina del sistema
+
+esta vista ya no es necesaria porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.10 views/content/categoriaLista-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/categoriaLista-view.php:
+1. elimina el div con id="tabla-laboratorio" (lineas ~928-1065)
+2. elimina el modal de agregar laboratorio (form con nombre_laboratorio)
+3. elimina el modal de editar laboratorio
+4. elimina el script de javascript relacionado con laboratorio
+
+el modulo de gestion de laboratorio fue eliminado de la base de datos.
+</pre>
+
+<h3>8.11 views/inc/script.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/inc/script.php:
+1. elimina la variable "laboratorio" del querySelector (linea ~193)
+2. elimina la condicion de busqueda por laboratorio (linea ~197)
+3. elimina "laboratorio: laboratorio" del objeto de datos (linea ~213)
+4. elimina la referencia a "linea" como laboratorio (linea ~1633)
+5. elimina "detalleLaboral" (linea ~2367)
+6. elimina el filtro de laboratorio en la exportacion a excel
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.12 models/medicamentoModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/medicamentoModel.php:
+1. elimina todos los "LEFT JOIN laboratorios la ON la.la_id = m.la_id"
+2. elimina "COALESCE(la.la_nombre_comercial, 'Sin laboratorio') AS laboratorio"
+3. elimina el filtro "AND m.la_id = :laboratorio"
+4. elimina la variable $filtros['laboratorio']
+
+esto es necesario porque la columna la_id fue eliminada de la tabla medicamento.
+</pre>
+
+<h3>8.13 models/compraHistorialModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/compraHistorialModel.php:
+1. elimina todos los "LEFT JOIN laboratorios l ON c.la_id = l.la_id"
+2. elimina "l.la_nombre_comercial AS laboratorio"
+3. elimina los filtros por "c.la_id" o "laboratorio"
+4. elimina la subconsulta "(SELECT la_id FROM compras WHERE co_id = ic.co_id)"
+
+esto es necesario porque la columna la_id fue eliminada de la tabla compras.
+</pre>
+
+<h3>8.14 models/ventaModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/ventaModel.php:
+1. elimina "LEFT JOIN laboratorios la ON la.la_id = m.la_id"
+2. elimina referencias a laboratorio en los selects
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.15 models/transferirModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/transferirModel.php:
+1. elimina "LEFT JOIN laboratorios la ON la.la_id = m.la_id"
+2. elimina "la.la_nombre_comercial AS laboratorio"
+3. elimina el filtro "if ($laboratorio)" y su contenido
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.16 models/proveedorModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/proveedorModel.php:
+1. cambia los JOIN de "laboratorios" a "proveedores"
+2. cambia "la.la_nombre_comercial AS laboratorio" a "p.pr_nombres AS proveedor_lab"
+3. adapta las consultas para usar la tabla proveedores con filtro pr_tipo
+
+esto es necesario porque ahora los laboratorios se gestionan desde proveedores.
+</pre>
+
+<h3>8.17 controllers/medicamentoController.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en controllers/medicamentoController.php:
+1. elimina la variable $laboratorio en registro (linea ~51)
+2. elimina la validacion de campo laboratorio requerido
+3. elimina el envio de laboratorio al modelo
+4. elimina la columna laboratorio_nombre en el listado
+5. realiza los mismos cambios para la funcion de actualizacion
+
+esto es necesario porque la columna la_id fue eliminada de medicamento.
+</pre>
+
+<h3>8.18 controllers/inventarioController.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en controllers/inventarioController.php:
+1. elimina el filtro por laboratorio ($filtros['laboratorio'])
+2. elimina la columna laboratorio en la respuesta
+3. adapta las consultas sin referencia a laboratorio
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.19 controllers/compraController.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en controllers/compraController.php:
+1. elimina el campo laboratorio_id del formulario de registro
+2. elimina la validacion de laboratorio_id requerido
+3. elimina el envio de la_id al modelo
+
+esto es necesario porque la columna la_id fue eliminada de compras.
+</pre>
+
+<h3>8.20 views/content/inventarioLista-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/inventarioLista-view.php:
+1. elimina el select de filtro "Todos los laboratorios"
+2. elimina el foreach que carga los laboratorios
+3. elimina la columna que muestra el laboratorio
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.21 views/content/medicamentoLista-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/medicamentoLista-view.php:
+1. elimina el select de filtro laboratorio
+2. elimina el foreach que carga los laboratorios
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.22 views/content/compraRegistro-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/compraRegistro-view.php:
+1. elimina el select de laboratorio
+2. elimina el label de laboratorio
+3. elimina el foreach que carga los laboratorios
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.23 views/content/transferirLista-view.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en views/content/transferirLista-view.php:
+1. elimina el select de filtro laboratorio
+2. elimina la columna que muestra el laboratorio en la tabla
+3. elimina las variables javascript relacionadas con laboratorio
+4. elimina el append del formData con laboratorio
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.24 models/viewsModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en models/viewsModel.php:
+1. elimina "laboratorioLista" del array de vistas
+2. elimina "laboratorioRegistro" del array de vistas
+3. elimina "laboratorioActualizar" del array de vistas
+
+estas rutas ya no existen porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.25 controllers/dashboardController.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en controllers/dashboardController.php:
+1. elimina el subquery que cuenta laboratorios: "(SELECT COUNT(*) FROM laboratorios WHERE la_estado = 1)"
+2. actualiza el conteo total de catalogos
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<h3>8.26 models/devolucionModel.php, mermaModel.php, preciosModel.php, loteModel.php, clienteModel.php</h3>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+realiza las siguientes modificaciones en estos archivos:
+1. models/devolucionModel.php: elimina LEFT JOIN laboratorios y COALESCE(la.la_nombre_comercial)
+2. models/mermaModel.php: elimina los 2 JOIN a laboratorios
+3. models/preciosModel.php: elimina los 2 JOIN a laboratorios
+4. models/loteModel.php: elimina JOIN a laboratorios y laboratorio_nombre
+5. models/clienteModel.php: elimina JOIN a laboratorios
+
+esto es necesario porque la tabla laboratorios fue eliminada.
+</pre>
+
+<hr>
+<p style="text-align: center; color: #7f8c8d;">
+<em>Documento generado automaticamente para analisis de impacto</em>
+</p>
+
+</body>
+</html>

@@ -23,12 +23,10 @@ class compraController extends compraModel
                 m.med_presentacion,
                 m.med_descripcion,
                 m.med_codigo_barras,
-                la.la_nombre_comercial AS laboratorio,
                 ff.ff_nombre AS forma,
                 vd.vd_nombre AS via,
                 uf.uf_nombre AS uso
             FROM medicamento AS m
-            LEFT JOIN laboratorios AS la ON m.la_id = la.la_id
             LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
             LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
             LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
@@ -37,6 +35,10 @@ class compraController extends compraModel
 
 
         /* aplicamos filtros de manera dinamica solo si existe el filtro */
+        /* filtramos por proveedor */
+        if (!empty($filtros['proveedor'])) {
+            $sql .= " AND m.pr_id = " . intval($filtros['proveedor']);
+        }
         /* filtramos por categorias */
         if (!empty($filtros['forma'])) {
             $sql .= " AND m.ff_id = " . intval($filtros['forma']);
@@ -44,9 +46,7 @@ class compraController extends compraModel
         if (!empty($filtros['via'])) {
             $sql .= " AND m.vd_id = " . intval($filtros['via']);
         }
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = " . intval($filtros['laboratorio']);
-        }
+
         if (!empty($filtros['uso'])) {
             $sql .= " AND m.uf_id = " . intval($filtros['uso']);
         }
@@ -56,7 +56,6 @@ class compraController extends compraModel
             $sql .= "
                 AND (
                     m.med_nombre_quimico LIKE '$busqueda' OR
-                    la.la_nombre_comercial LIKE '$busqueda' OR
                     m.med_presentacion LIKE '$busqueda' OR
                     m.med_descripcion LIKE '$busqueda' OR
                     m.med_codigo_barras LIKE '$busqueda'
@@ -75,10 +74,10 @@ class compraController extends compraModel
         /* validamos y limpiamos cadena entrante */
         $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
         $proveedor_id = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
-        $laboratorio_id = mainModel::limpiar_cadena($_POST['Laboratorio_factura_reg']);
-        $fecha_factura = mainModel::limpiar_cadena($_POST['Fecha_factura_reg']);
-        $numero_factura = mainModel::limpiar_cadena($_POST['Numero_factura_reg']);
-        $impuesto = mainModel::limpiar_cadena($_POST['impuestos_reg'] ?? 0);
+        // Datos de factura eliminados del formulario, se usan valores por defecto
+        $fecha_factura = null;
+        $numero_factura = null;
+        $impuesto = 0;
         $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
         $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp']);
 
@@ -88,55 +87,75 @@ class compraController extends compraModel
         $lotes = json_decode($lotes_json, true);
         $totales = json_decode($totales_json, true);
 
-        /* obtener datos del proveedor para construir razón social */
-        $conexion = mainModel::conectar();
-        $stmt_proveedor = $conexion->prepare("SELECT pr_nombres, pr_nit FROM proveedores WHERE pr_id = :pr_id");
-        $stmt_proveedor->bindParam(':pr_id', $proveedor_id);
-        $stmt_proveedor->execute();
-        $proveedor = $stmt_proveedor->fetch(PDO::FETCH_ASSOC);
+          /* validamos los campos obligatorios */
+          if (empty($numero_compra)) {
+              $alerta = [
+                  'Alerta' => 'simple',
+                  'Titulo' => 'Campos faltantes',
+                  'texto' => 'Debe completar todos los campos obligatorios.',
+                  'Tipo' => 'error'
+              ];
+              echo json_encode($alerta);
+              exit();
+          }
 
-        if (!$proveedor) {
-            $alerta = [
-                'Alerta' => 'simple',
-                'Titulo' => 'Proveedor no válido',
-                'texto' => 'El proveedor seleccionado no existe.',
-                'Tipo' => 'error'
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
+            /* verificar que el proveedor_id sea un número válido si se proporciona y no es un valor que indique "ningún proveedor" */
+            if (!empty($proveedor_id) && $proveedor_id !== '0' && $proveedor_id !== 0) {
+                if (!is_numeric($proveedor_id) || intval($proveedor_id) <= 0) {
+                    $alerta = [
+                        'Alerta' => 'simple',
+                        'Titulo' => 'Proveedor inválido',
+                        'texto' => 'Debe seleccionar un proveedor válido.',
+                        'Tipo' => 'error'
+                    ];
+                    echo json_encode($alerta);
+                    exit();
+                }
 
-        $razon_social = $proveedor['pr_nombres'];
-        if (!empty($proveedor['pr_nit'])) {
-            $razon_social .= ' - NIT: ' . $proveedor['pr_nit'];
-        }
+                /* convertir a entero para la consulta */
+                $proveedor_id = intval($proveedor_id);
 
-        /* validamos los campos obligatorios */
-        if (
-            empty($numero_compra) || empty($proveedor_id) ||
-            empty($laboratorio_id) || empty($fecha_factura) || empty($numero_factura)
-        ) {
-            $alerta = [
-                'Alerta' => 'simple',
-                'Titulo' => 'Campos faltantes',
-                'texto' => 'Por favor completa todos los campos obligatorios.',
-                'Tipo' => 'error'
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
+                /* obtener datos del proveedor para construir razón social */
+                $conexion = mainModel::conectar();
+                $stmt_proveedor = $conexion->prepare("SELECT pr_razon_social, pr_nit FROM proveedores WHERE pr_id = :pr_id");
+                $stmt_proveedor->bindParam(':pr_id', $proveedor_id);
+                $stmt_proveedor->execute();
+                $proveedor = $stmt_proveedor->fetch(PDO::FETCH_ASSOC);
 
-        /* validamos el formato del número de factura */
-        if (mainModel::verificar_datos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,#°ºª()\-\/+']{3,100}", $numero_factura)) {
-            $alerta = [
-                'Alerta' => 'simple',
-                'Titulo' => 'Formato inválido',
-                'texto' => 'El NÚMERO DE FACTURA no cumple con el formato requerido (3-100 caracteres alfanuméricos).',
-                'Tipo' => 'error'
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
+                if (!$proveedor) {
+                    $alerta = [
+                        'Alerta' => 'simple',
+                        'Titulo' => 'Proveedor no válido',
+                        'texto' => 'El proveedor seleccionado no existe.',
+                        'Tipo' => 'error'
+                    ];
+                    echo json_encode($alerta);
+                    exit();
+                }
+
+                $razon_social = $proveedor['pr_razon_social'];
+                if (!empty($proveedor['pr_nit'])) {
+                    $razon_social .= ' - NIT: ' . $proveedor['pr_nit'];
+                }
+            } else {
+                /* Si no se selecciona proveedor válido, obtener el primer proveedor disponible */
+                $conexion = mainModel::conectar();
+                $sql_predeterminado = $conexion->prepare("SELECT pr_id, pr_razon_social, pr_nit FROM proveedores ORDER BY pr_id ASC LIMIT 1");
+                $sql_predeterminado->execute();
+                $proveedor_predeterminado = $sql_predeterminado->fetch(PDO::FETCH_ASSOC);
+                
+                if ($proveedor_predeterminado) {
+                    $proveedor_id = $proveedor_predeterminado['pr_id'];
+                    $razon_social = $proveedor_predeterminado['pr_razon_social'];
+                    if (!empty($proveedor_predeterminado['pr_nit'])) {
+                        $razon_social .= ' - NIT: ' . $proveedor_predeterminado['pr_nit'];
+                    }
+                } else {
+                    /* Si no hay proveedores en la base de datos, usar un ID predeterminado (asumiendo que existe al menos uno) */
+                    $proveedor_id = 1;
+                    $razon_social = 'Compra directa';
+                }
+            }
 
         /* verificamos que los lotes existan en la lista */
         if (empty($lotes) || !is_array($lotes) || count($lotes) === 0) {
@@ -165,7 +184,6 @@ class compraController extends compraModel
         /* preparamos datos para el registro de compra */
         $datos_compra = [
             "co_numero" => $numero_compra,
-            "la_id" => $laboratorio_id,
             "us_id" => $usuario_id,
             "su_id" => $sucursal_id,
             "pr_id" => $proveedor_id,
@@ -383,7 +401,6 @@ class compraController extends compraModel
             "compra_id" => $compra_id,
             "numero_compra" => $numero_compra,
             "proveedor_id" => $proveedor_id,
-            "laboratorio_id" => $laboratorio_id,
             "sucursal_id" => $sucursal_id,
             "fecha_factura" => $fecha_factura,
             "numero_factura" => $numero_factura,

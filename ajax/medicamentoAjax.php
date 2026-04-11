@@ -37,7 +37,6 @@ if (isset($_POST['MedicamentoAjax'])) {
         exit();
     }
 
-    //  CAMBIO 2: medicamentoAjax en minúscula
     $valor = $_POST['MedicamentoAjax'];
 
     require_once "../controllers/medicamentoController.php";
@@ -57,6 +56,7 @@ if (isset($_POST['MedicamentoAjax'])) {
         $busqueda = isset($_POST['busqueda']) ? $ins_med->limpiar_cadena($_POST['busqueda']) : '';
 
         $laboratorio = isset($_POST['select1']) ? $ins_med->limpiar_cadena($_POST['select1']) : '';
+        $laboratorio = ''; // Laboratorio deshabilitado
         $via = isset($_POST['select2']) ? $ins_med->limpiar_cadena($_POST['select2']) : '';
         $forma = isset($_POST['select3']) ? $ins_med->limpiar_cadena($_POST['select3']) : '';
         $uso = isset($_POST['select4']) ? $ins_med->limpiar_cadena($_POST['select4']) : '';

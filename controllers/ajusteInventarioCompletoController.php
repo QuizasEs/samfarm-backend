@@ -67,7 +67,7 @@ class ajusteInventarioCompletoController extends ajusteInventarioCompletoModel
         $nombre = mainModel::limpiar_cadena($_POST['nombre'] ?? '');
         $principio = mainModel::limpiar_cadena($_POST['principio'] ?? '');
         $codigo = mainModel::limpiar_cadena($_POST['codigo'] ?? '');
-        $laboratorio_id = mainModel::limpiar_cadena($_POST['laboratorio_id'] ?? 0);
+        $proveedor_id = mainModel::limpiar_cadena($_POST['proveedor_id'] ?? 0);
         $ff_id = mainModel::limpiar_cadena($_POST['ff_id'] ?? 0);
         $uf_id = mainModel::limpiar_cadena($_POST['uf_id'] ?? 0);
         $via_administracion = mainModel::limpiar_cadena($_POST['via_administracion'] ?? '');
@@ -79,7 +79,7 @@ class ajusteInventarioCompletoController extends ajusteInventarioCompletoModel
         }
 
         $actualizacion = ajusteInventarioCompletoModel::actualizar_medicamento_modelo(
-            $medicamento_id, $nombre, $principio, $codigo, $laboratorio_id, $ff_id, $uf_id,
+            $medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id,
             0, 0, 0, $via_administracion
         );
 
@@ -156,13 +156,13 @@ class ajusteInventarioCompletoController extends ajusteInventarioCompletoModel
      * Controlador para obtener listas de datos para los selects.
      */
     public function obtener_listas_controlador() {
-        $laboratorios = ajusteInventarioCompletoModel::obtener_laboratorios_modelo()->fetchAll(PDO::FETCH_ASSOC);
+        $proveedores = ajusteInventarioCompletoModel::obtener_proveedores_modelo()->fetchAll(PDO::FETCH_ASSOC);
         $formas = ajusteInventarioCompletoModel::obtener_formas_modelo()->fetchAll(PDO::FETCH_ASSOC);
         $usos = ajusteInventarioCompletoModel::obtener_usos_modelo()->fetchAll(PDO::FETCH_ASSOC);
         $vias = ajusteInventarioCompletoModel::obtener_vias_modelo()->fetchAll(PDO::FETCH_ASSOC);
 
         return json_encode([
-            "laboratorios" => $laboratorios,
+            "proveedores" => $proveedores,
             "formas" => $formas,
             "usos" => $usos,
             "vias" => $vias

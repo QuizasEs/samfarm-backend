@@ -79,14 +79,14 @@ class devolucionModel extends mainModel
                     m.med_principio_activo,
                     m.med_presentacion,
                     COALESCE(ff.ff_nombre, '') AS forma_farmaceutica,
-                    COALESCE(la.la_nombre_comercial, '') AS laboratorio,
+                    COALESCE(p.pr_razon_social, '') AS proveedor,
                     lm.lm_numero_lote,
                     lm.lm_cant_actual_unidades
                 FROM detalle_venta dv
                 INNER JOIN medicamento m ON m.med_id = dv.med_id
                 LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-                LEFT JOIN laboratorios la ON la.la_id = m.la_id
                 LEFT JOIN lote_medicamento lm ON lm.lm_id = dv.lm_id
+                LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
                 WHERE dv.ve_id = :ve_id
                 ORDER BY dv.dv_id ASC
             ";

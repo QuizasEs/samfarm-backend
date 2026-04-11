@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Informe Completo de Afectacion - Eliminacion Tabla Laboratorios</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px; }
+h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+h2 { color: #34495e; margin-top: 30px; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
+h3 { color: #7f8c8d; }
+table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 12px; }
+th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
+th { background-color: #3498db; color: white; }
+tr:nth-child(even) { background-color: #ecf0f1; }
+.critica { background-color: #e74c3c; color: white; font-weight: bold; }
+.alta { background-color: #e67e22; color: white; }
+.media { background-color: #f1c40f; color: black; }
+.baja { background-color: #27ae60; color: white; }
+.resumen { background-color: #ecf0f1; padding: 20px; border-radius: 10px; margin: 20px 0; }
+.nota { background-color: #fff9e6; border-left: 4px solid #f39c12; padding: 15px; margin: 20px 0; }
+.tipo-model { background-color: #9b59b6; color: white; }
+.tipo-controller { background-color: #3498db; color: white; }
+.tipo-ajax { background-color: #1abc9c; color: white; }
+.tipo-view { background-color: #e67e22; color: white; }
+pre { background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>INFORME COMPLETO DE AFECTACION</h1>
+<p><strong>Proyecto:</strong> SamFarm Backend</p>
+<p><strong>Fecha:</strong> 21/03/2026</p>
+<p><strong>Cambio:</strong> Eliminacion de la tabla laboratorios y migracion a tabla proveedores</p>
+
+<div class="nota">
+<strong>Contexto:</strong> Se elimino la tabla laboratorios de la base de datos samfarm_db_v2.sql. 
+La tabla proveedores debera cumplir la funcion de laboratorio sin afectar el funcionamiento actual de cada modulo.
+</div>
+
+<h2>1. RESUMEN TOTAL POR MODULO</h2>
+
+<table>
+<tr>
+<th>Modulo</th>
+<th>Total Archivos</th>
+<th>Critica</th>
+<th>Alta</th>
+<th>Media</th>
+<th>Ninguno</th>
+</tr>
+<tr>
+<td>Models</td>
+<td>15</td>
+<td>3</td>
+<td>6</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Controllers</td>
+<td>11</td>
+<td>1</td>
+<td>5</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Ajax</td>
+<td>8</td>
+<td>2</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Views</td>
+<td>17</td>
+<td>3</td>
+<td>7</td>
+<td>7</td>
+<td>0</td>
+</tr>
+<tr style="font-weight: bold; background-color: #3498db; color: white;">
+<td>TOTAL</td>
+<td>51</td>
+<td>9</td>
+<td>20</td>
+<td>17</td>
+<td>5</td>
+</tr>
+</table>
+
+<h2>2. MODULO MODELS (15 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>models/categoriaModel.php</td>
+<td>ELIMINAR</td>
+<td>7 funciones de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>models/mainModel.php</td>
+<td>MODIFICAR</td>
+<td>Consulta de selects globales</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>models/ajusteInventarioCompletoModel.php</td>
+<td>MODIFICAR</td>
+<td>Funcion obtener laboratorios</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>models/inventarioModel.php</td>
+<td>ELIMINAR</td>
+<td>6 consultas con join a laboratorios</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>models/medicamentoModel.php</td>
+<td>ELIMINAR</td>
+<td>4 consultas con join a laboratorios</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>models/compraHistorialModel.php</td>
+<td>ELIMINAR</td>
+<td>8 consultas con join a laboratorios</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>models/ventaModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con left join laboratorios</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>models/transferirModel.php</td>
+<td>ELIMINAR</td>
+<td>Join y filtro por laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>models/proveedorModel.php</td>
+<td>MODIFICAR</td>
+<td>Cambiar join de laboratorios a proveedores</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>models/devolucionModel.php</td>
+<td>ELIMINAR</td>
+<td>Join a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>11</td>
+<td>models/mermaModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con join a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>12</td>
+<td>models/preciosModel.php</td>
+<td>ELIMINAR</td>
+<td>2 consultas con join a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>13</td>
+<td>models/loteModel.php</td>
+<td>ELIMINAR</td>
+<td>Join a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>14</td>
+<td>models/clienteModel.php</td>
+<td>ELIMINAR</td>
+<td>Join a laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>15</td>
+<td>models/viewsModel.php</td>
+<td>MODIFICAR</td>
+<td>Rutas de laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+</table>
+
+<h2>3. MODULO CONTROLLERS (11 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>controllers/categoriaController.php</td>
+<td>ELIMINAR</td>
+<td>6 controladores de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>controllers/medicamentoController.php</td>
+<td>MODIFICAR</td>
+<td>Procesamiento de campo laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>controllers/inventarioController.php</td>
+<td>MODIFICAR</td>
+<td>Filtros y columnas de laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>controllers/compraController.php</td>
+<td>MODIFICAR</td>
+<td>Registro de laboratorio en compras</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>controllers/compraHistorialController.php</td>
+<td>MODIFICAR</td>
+<td>Filtros y mostrar laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>controllers/transferirController.php</td>
+<td>MODIFICAR</td>
+<td>Filtro por laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>controllers/devolucionController.php</td>
+<td>MODIFICAR</td>
+<td>Campo laboratorio en respuesta</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>controllers/dashboardController.php</td>
+<td>MODIFICAR</td>
+<td>Conteo de laboratorios</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>controllers/ajusteInventarioCompletoController.php</td>
+<td>MODIFICAR</td>
+<td>Laboratorio en ajustes</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>controllers/userController.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>11</td>
+<td>controllers/loginController.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias</td>
+<td class="baja">NINGUNO</td>
+</tr>
+</table>
+
+<h2>4. MODULO AJAX (8 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>ajax/laboratorioAjax.php</td>
+<td>ELIMINAR</td>
+<td>Archivo completo de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ajax/categoriaAjax.php</td>
+<td>ELIMINAR</td>
+<td>5 casos de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ajax/medicamentoAjax.php</td>
+<td>MODIFICAR</td>
+<td>Filtro laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ajax/inventarioAjax.php</td>
+<td>MODIFICAR</td>
+<td>Filtro laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ajax/compraAjax.php</td>
+<td>MODIFICAR</td>
+<td>Campo laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ajax/compraHistorialAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ajax/ventaAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias</td>
+<td class="baja">NINGUNO</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ajax/proveedoresAjax.php</td>
+<td>SIN CAMBIO</td>
+<td>Sin referencias</td>
+<td class="baja">NINGUNO</td>
+</tr>
+</table>
+
+<h2>5. MODULO VIEWS (17 archivos)</h2>
+
+<table>
+<tr>
+<th>#</th>
+<th>Archivo</th>
+<th>Tipo Cambio</th>
+<th>Descripcion del Cambio</th>
+<th>Nivel</th>
+</tr>
+<tr>
+<td>1</td>
+<td>views/content/laboratorioLista-view.php</td>
+<td>ELIMINAR</td>
+<td>Vista completa</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>2</td>
+<td>views/content/laboratorioRegistro-view.php</td>
+<td>ELIMINAR</td>
+<td>Vista completa</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>3</td>
+<td>views/content/categoriaLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Modal de laboratorio</td>
+<td class="critica">CRITICA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>views/content/inventarioLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Select y columna laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>5</td>
+<td>views/content/medicamentoLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>6</td>
+<td>views/content/medicamentoRegistro-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>7</td>
+<td>views/content/medicamentoActualizar-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>views/content/compraRegistro-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>9</td>
+<td>views/content/compraOrden-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>10</td>
+<td>views/content/transferirLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Filtro y columna laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+<tr>
+<td>11</td>
+<td>views/content/caja-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>12</td>
+<td>views/content/proveedorLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Columna laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>13</td>
+<td>views/content/clienteLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Columna laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>14</td>
+<td>views/content/comprasHistorialLista-view.php</td>
+<td>MODIFICAR</td>
+<td>Detalle laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>15</td>
+<td>views/content/ajusteInventarioCompleto-view.php</td>
+<td>MODIFICAR</td>
+<td>Select laboratorio</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>16</td>
+<td>views/content/script_bulk-view.php</td>
+<td>MODIFICAR</td>
+<td>Campo laboratorio_id</td>
+<td class="media">MEDIA</td>
+</tr>
+<tr>
+<td>17</td>
+<td>views/inc/script.php</td>
+<td>MODIFICAR</td>
+<td>Variables de laboratorio</td>
+<td class="alta">ALTA</td>
+</tr>
+</table>
+
+<h2>6. CAMBIOS REQUERIDOS EN BASE DE DATOS</h2>
+
+<table>
+<tr>
+<th>Accion</th>
+<th>Tabla</th>
+<th>Cambio</th>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_tipo (enum: 'proveedor', 'laboratorio', 'ambos')</td>
+</tr>
+<tr>
+<td>AGREGAR</td>
+<td>proveedores</td>
+<td>Columna pr_logo (varchar 255)</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>medicamento</td>
+<td>Columna la_id (ya realizado)</td>
+</tr>
+<tr>
+<td>ELIMINAR</td>
+<td>compras</td>
+<td>Columna la_id (ya realizado)</td>
+</tr>
+</table>
+
+<h2>7. PRIORIDAD DE IMPLEMENTACION</h2>
+
+<ol>
+<li><strong>CRITICA (9 archivos):</strong> Sistemas de gestion de laboratorios</li>
+<li><strong>ALTA (20 archivos):</strong> Queries con join que fallaran</li>
+<li><strong>MEDIA (17 archivos):</strong> Ajustes en controladores y vistas</li>
+<li><strong>NINGUNO (5 archivos):</strong> Sin cambios necesarios</li>
+</ol>
+
+<h2>8. PROMPTS PARA CORRECIONES</h2>
+
+<div class="nota" style="background-color: #e74c3c; color: white; border-left: 4px solid #c0392b;">
+<strong>nota importante:</strong> al realizar las modificaciones se debe seguir el patron de programacion establecido en el proyecto. los comentarios deben ser en espanol, sensillos, en minusculas, sin acentos y sin emojis. los prompts modifican el modulo completo sin cambiar el enfoque del funcionamiento inicial.
+</div>
+
+<h3>8.1 MODULO MODELS - GENERAL</h3>
+<pre>
+realiza las siguientes modificaciones en el modulo models:
+
+1. en models/categoriaModel.php:
+   - elimina las funciones: listar_laboratorios_model, contar_laboratorios_model, agregar_laboratorios_model, obtener_laboratorios_model, actualizar_laboratorios_model, cambiar_estado_laboratorios_model, verificar_nombre_laboratorios_existe_model
+
+2. en models/mainModel.php:
+   - modifica la consulta de laboratorios para usar proveedores con filtro pr_tipo
+
+3. en models/ajusteInventarioCompletoModel.php:
+   - modifica obtener_laboratorios_modelo() para usar proveedores
+
+4. en models/inventarioModel.php, models/medicamentoModel.php, models/compraHistorialModel.php, models/ventaModel.php, models/transferirModel.php:
+   - elimina todos los join a laboratorios
+   - elimina las columnas de laboratorio
+   - elimina los filtros por laboratorio
+
+5. en models/proveedorModel.php:
+   - adapta los join para usar proveedores en vez de laboratorios
+
+6. en models/devolucionModel.php, models/mermaModel.php, models/preciosModel.php, models/loteModel.php, models/clienteModel.php:
+   - elimina los join a laboratorios
+
+7. en models/viewsModel.php:
+   - elimina las rutas: laboratorioLista, laboratorioRegistro, laboratorioActualizar
+
+importante: mantener el funcionamiento de cada modulo sin cambios en su logica de negocio.
+</pre>
+
+<h3>8.2 MODULO CONTROLLERS - GENERAL</h3>
+<pre>
+realiza las siguientes modificaciones en el modulo controllers:
+
+1. en controllers/categoriaController.php:
+   - elimina los controladores: paginado_laboratorios, agregar_laboratorios, obtener_laboratorios, actualizar_laboratorios, cambiar_estado_laboratorios
+
+2. en controllers/medicamentoController.php:
+   - elimina el procesamiento del campo laboratorio en registro y actualizacion
+   - elimina el envio de laboratorio al modelo
+
+3. en controllers/inventarioController.php:
+   - elimina los filtros por laboratorio
+   - elimina las columnas de laboratorio
+
+4. en controllers/compraController.php:
+   - elimina el registro de laboratorio_id en compras
+
+5. en controllers/compraHistorialController.php:
+   - elimina los filtros y columnas de laboratorio
+
+6. en controllers/transferirController.php:
+   - elimina el filtro por laboratorio
+
+7. en controllers/devolucionController.php:
+   - elimina el campo laboratorio en respuesta
+
+8. en controllers/dashboardController.php:
+   - elimina el conteo de laboratorios
+
+9. en controllers/ajusteInventarioCompletoController.php:
+   - elimina el laboratorio_id en ajustes
+
+importante: mantener el funcionamiento de cada controlador sin cambios en su logica de negocio.
+</pre>
+
+<h3>8.3 MODULO AJAX - GENERAL</h3>
+<pre>
+realiza las siguientes modificaciones en el modulo ajax:
+
+1. en ajax/laboratorioAjax.php:
+   - elimina todo el contenido del archivo
+
+2. en ajax/categoriaAjax.php:
+   - elimina los casos: listar_laboratorio, agregar_laboratorio, obtener_laboratorio, actualizar_laboratorio, cambiar_estado_laboratorio
+
+3. en ajax/medicamentoAjax.php:
+   - elimina el filtro de laboratorio
+
+4. en ajax/inventarioAjax.php:
+   - elimina el filtro de laboratorio
+
+5. en ajax/compraAjax.php:
+   - elimina el campo laboratorio
+
+importante: mantener el funcionamiento de cada ajax sin cambios en su logica de negocio.
+</pre>
+
+<h3>8.4 MODULO VIEWS - GENERAL</h3>
+<pre>
+realiza las siguientes modificaciones en el modulo views:
+
+1. en views/content/laboratorioLista-view.php:
+   - muestra mensaje de funcionalidad no disponible o redirecciona
+
+2. en views/content/laboratorioRegistro-view.php:
+   - muestra mensaje de funcionalidad no disponible o redirecciona
+
+3. en views/content/categoriaLista-view.php:
+   - elimina el div tabla-laboratorio
+   - elimina los modales de agregar y editar laboratorio
+   - elimina el script de javascript relacionado
+
+4. en views/content/inventarioLista-view.php:
+   - elimina el select de filtro laboratorio
+   - elimina la columna laboratorio
+
+5. en views/content/medicamentoLista-view.php, views/content/medicamentoRegistro-view.php, views/content/medicamentoActualizar-view.php:
+   - elimina el select de laboratorio
+
+6. en views/content/compraRegistro-view.php, views/content/compraOrden-view.php:
+   - elimina el select de laboratorio
+
+7. en views/content/transferirLista-view.php:
+   - elimina el filtro y columna de laboratorio
+
+8. en views/content/caja-view.php:
+   - elimina el select de laboratorio
+
+9. en views/content/proveedorLista-view.php, views/content/clienteLista-view.php:
+   - elimina la columna laboratorio
+
+10. en views/content/comprasHistorialLista-view.php:
+    - elimina el detalle laboratorio
+
+11. en views/content/ajusteInventarioCompleto-view.php:
+    - elimina el select laboratorio
+
+12. en views/content/script_bulk-view.php:
+    - elimina el campo laboratorio_id
+
+13. en views/inc/script.php:
+    - elimina las variables y funciones de laboratorio
+
+importante: mantener el funcionamiento de cada vista sin cambios en su logica de presentacion.
+</pre>
+
+<hr>
+<p style="text-align: center; color: #7f8c8d;">
+<em>Documento generado automaticamente para analisis de impacto</em>
+</p>
+
+</body>
+</html>

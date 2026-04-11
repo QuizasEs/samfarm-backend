@@ -182,7 +182,7 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
             })
             .then(listas => {
                 console.log('Listas recibidas:', listas);
-                const laboratorios = listas.laboratorios || [];
+                const proveedores = listas.proveedores || [];
                 const formas = listas.formas || [];
                 const usos = listas.usos || [];
                 const vias = listas.vias || [];
@@ -217,10 +217,10 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
                                     <input type="text" id="codigo" value="${medicamento.med_codigo_barras || ''}">
                                 </div>
                                 <div class="form-bloque">
-                                    <label for="laboratorio_id">Laboratorio</label>
-                                    <select id="laboratorio_id">
-                                        <option value="0">Sin Laboratorio</option>
-                                        ${laboratorios.map(lab => `<option value="${lab.la_id}" ${lab.la_id == medicamento.la_id ? 'selected' : ''}>${lab.la_nombre_comercial}</option>`).join('')}
+                                    <label for="proveedor_id">Proveedor</label>
+                                    <select id="proveedor_id">
+                                        <option value="0">Sin Proveedor</option>
+                                        ${proveedores.map(prov => `<option value="${prov.pr_id}" ${prov.pr_id == medicamento.pr_id ? 'selected' : ''}>${prov.pr_razon_social}</option>`).join('')}
                                     </select>
                                 </div>
                             </div>
@@ -342,7 +342,7 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
             formData.append('nombre', document.getElementById('nombre').value);
             formData.append('principio', document.getElementById('principio').value);
             formData.append('codigo', document.getElementById('codigo').value);
-            formData.append('laboratorio_id', document.getElementById('laboratorio_id').value);
+            formData.append('proveedor_id', document.getElementById('proveedor_id').value);
             formData.append('ff_id', document.getElementById('ff_id').value);
             formData.append('uf_id', document.getElementById('uf_id').value);
             formData.append('via_administracion', document.getElementById('via_administracion').value);

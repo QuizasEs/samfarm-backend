@@ -20,7 +20,6 @@ class inventarioModel extends mainModel
                         m.med_nombre_quimico,
                         m.med_principio_activo,
                         m.med_presentacion,
-                        COALESCE(la.la_nombre_comercial, 'Sin laboratorio') AS laboratorio,
                         COALESCE(ff.ff_nombre, '') AS forma_farmaceutica,
                         s.su_nombre AS sucursal_nombre,
                         
@@ -52,7 +51,6 @@ class inventarioModel extends mainModel
                     FROM inventarios i
                     INNER JOIN medicamento m ON m.med_id = i.med_id
                     INNER JOIN sucursales s ON s.su_id = i.su_id
-                    LEFT JOIN laboratorios la ON la.la_id = m.la_id
                     LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
                     WHERE 1=1
                 ";
@@ -70,16 +68,9 @@ class inventarioModel extends mainModel
             $sql .= " AND (
                         m.med_nombre_quimico LIKE :busqueda OR
                         m.med_principio_activo LIKE :busqueda OR
-                        m.med_codigo_barras LIKE :busqueda OR
-                        la.la_nombre_comercial LIKE :busqueda
+                        m.med_codigo_barras LIKE :busqueda
                     )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-
-        // Filtro por laboratorio
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = (int)$filtros['laboratorio'];
         }
 
         // Filtro por estado de stock
@@ -167,8 +158,9 @@ class inventarioModel extends mainModel
                         FROM inventarios i
                         INNER JOIN medicamento m ON m.med_id = i.med_id
                         INNER JOIN sucursales s ON s.su_id = i.su_id
-                        LEFT JOIN laboratorios la ON la.la_id = m.la_id
                         LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                        LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo'
+                        LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
                         WHERE 1=1
                     ";
 
@@ -183,15 +175,9 @@ class inventarioModel extends mainModel
             $sql .= " AND (
                             m.med_nombre_quimico LIKE :busqueda OR
                             m.med_principio_activo LIKE :busqueda OR
-                            m.med_codigo_barras LIKE :busqueda OR
-                            la.la_nombre_comercial LIKE :busqueda
+                            m.med_codigo_barras LIKE :busqueda
                         )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = (int)$filtros['laboratorio'];
         }
 
         if (!empty($filtros['estado'])) {
@@ -259,15 +245,24 @@ class inventarioModel extends mainModel
                 m.med_presentacion,
                 m.med_codigo_barras,
                 m.med_accion_farmacologica,
-                la.la_nombre_comercial AS laboratorio,
                 ff.ff_nombre AS forma_farmaceutica,
                 uf.uf_nombre AS uso_farmacologico,
                 vd.vd_nombre AS via_administracion,
-                s.su_nombre AS sucursal_nombre
+                s.su_nombre AS sucursal_nombre,
+                -- Obtener proveedor desde los lotes activos
+                (
+                    SELECT COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor')
+                    FROM lote_medicamento lm
+                    INNER JOIN proveedores p ON p.pr_id = lm.pr_id
+                    WHERE lm.med_id = i.med_id 
+                    AND lm.su_id = i.su_id
+                    AND lm.lm_estado = 'activo'
+                    AND lm.pr_id IS NOT NULL
+                    LIMIT 1
+                ) AS proveedor
             FROM inventarios i
             INNER JOIN medicamento m ON m.med_id = i.med_id
             INNER JOIN sucursales s ON s.su_id = i.su_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
             LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
             LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
@@ -288,21 +283,23 @@ class inventarioModel extends mainModel
     {
         $sql = "
             SELECT 
-                lm_id,
-                lm_numero_lote,
-                lm_cant_actual_cajas,
-                lm_cant_actual_unidades,
-                lm_precio_compra,
-                lm_precio_venta,
-                lm_fecha_ingreso,
-                lm_fecha_vencimiento,
-                lm_estado,
-                DATEDIFF(lm_fecha_vencimiento, CURDATE()) AS dias_para_vencer
-            FROM lote_medicamento
-            WHERE med_id = :med_id 
-            AND su_id = :su_id 
-            AND lm_estado IN ('activo', 'terminado')
-            ORDER BY lm_fecha_vencimiento ASC
+                lm.lm_id,
+                lm.lm_numero_lote,
+                lm.lm_cant_actual_cajas,
+                lm.lm_cant_actual_unidades,
+                lm.lm_precio_compra,
+                lm.lm_precio_venta,
+                lm.lm_fecha_ingreso,
+                lm.lm_fecha_vencimiento,
+                lm.lm_estado,
+                DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_para_vencer,
+                COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor') AS proveedor
+            FROM lote_medicamento lm
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+            WHERE lm.med_id = :med_id 
+            AND lm.su_id = :su_id 
+            AND lm.lm_estado IN ('activo', 'terminado')
+            ORDER BY lm.lm_fecha_vencimiento ASC
         ";
 
         $stmt = mainModel::conectar()->prepare($sql);
@@ -366,7 +363,7 @@ class inventarioModel extends mainModel
                 s.su_nombre AS 'Sucursal',
                 m.med_nombre_quimico AS 'Medicamento',
                 m.med_principio_activo AS 'Principio Activo',
-                la.la_nombre_comercial AS 'Laboratorio',
+                p.pr_razon_social AS 'Proveedor',
                 ff.ff_nombre AS 'Forma',
                 i.inv_total_cajas AS 'Cajas',
                 i.inv_total_unidades AS 'Unidades',
@@ -385,7 +382,8 @@ class inventarioModel extends mainModel
             FROM inventarios i
             INNER JOIN medicamento m ON m.med_id = i.med_id
             INNER JOIN sucursales s ON s.su_id = i.su_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
+            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo'
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
             WHERE 1=1
         ";
@@ -404,15 +402,15 @@ class inventarioModel extends mainModel
                         m.med_nombre_quimico LIKE :busqueda OR
                         m.med_principio_activo LIKE :busqueda OR
                         m.med_codigo_barras LIKE :busqueda OR
-                        la.la_nombre_comercial LIKE :busqueda
+                        p.pr_razon_social LIKE :busqueda
                     )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
-        // Filtro por laboratorio
-        if (!empty($filtros['laboratorio'])) {
-            $sql .= " AND m.la_id = :laboratorio";
-            $params[':laboratorio'] = (int)$filtros['laboratorio'];
+        // Filtro por proveedor
+        if (!empty($filtros['proveedor'])) {
+            $sql .= " AND p.pr_id = :proveedor";
+            $params[':proveedor'] = (int)$filtros['proveedor'];
         }
 
         // Filtro por estado de stock
@@ -460,6 +458,12 @@ class inventarioModel extends mainModel
             $params[':forma'] = (int)$filtros['forma'];
         }
 
+        // Filtro por proveedor
+        if (!empty($filtros['proveedor'])) {
+            $sql .= " AND p.pr_id = :proveedor";
+            $params[':proveedor'] = (int)$filtros['proveedor'];
+        }
+
         $sql .= " ORDER BY s.su_nombre, m.med_nombre_quimico";
 
         $conexion = mainModel::conectar();
@@ -503,7 +507,7 @@ class inventarioModel extends mainModel
         $sql = "
             SELECT 
                 m.med_nombre_quimico,
-                la.la_nombre_comercial,
+                p.pr_razon_social AS proveedor,
                 SUM(dv.dv_cantidad) AS unidades_vendidas,
                 ROUND(SUM(dv.dv_subtotal), 2) AS ingresos_totales,
                 ROUND(SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS costo_ventas,
@@ -513,7 +517,7 @@ class inventarioModel extends mainModel
             INNER JOIN ventas v ON v.ve_id = dv.ve_id
             INNER JOIN medicamento m ON m.med_id = dv.med_id
             INNER JOIN lote_medicamento lm ON lm.lm_id = dv.lm_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
+            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
             WHERE v.ve_estado = 1
               AND v.ve_fecha_emision >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
         ";
@@ -522,7 +526,7 @@ class inventarioModel extends mainModel
             $sql .= " AND v.su_id = :su_id";
         }
 
-        $sql .= " GROUP BY m.med_nombre_quimico, la.la_nombre_comercial
+        $sql .= " GROUP BY m.med_nombre_quimico
                  ORDER BY margen_bruto_bs DESC
                  LIMIT 10";
 

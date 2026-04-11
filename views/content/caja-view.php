@@ -147,10 +147,10 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                         </div>
 
                         <div class="caja-filtro-content">
-                            <select class="select-filtro" id="filtro_linea">
-                                <option value="">Linea</option>
-                                <?php foreach ($datos_select['laboratorios'] as $lab) { ?>
-                                    <option value="<?php echo $lab['la_id'] ?>"><?php echo $lab['la_nombre_comercial'] ?></option>
+                            <select class="select-filtro" id="filtro_proveedor">
+                                <option value="">Proveedor</option>
+                                <?php foreach ($datos_select['proveedores'] as $prov) { ?>
+                                    <option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option>
                                 <?php } ?>
                             </select>
 

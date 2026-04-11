@@ -52,7 +52,6 @@ if (isset($_POST['compraAjax'])) {
             'termino' => $_POST['termino'] ?? '',
             'forma' => $_POST['forma'] ?? '',
             'via' => $_POST['via'] ?? '',
-            'laboratorio' => $_POST['laboratorio'] ?? '',
             'uso' => $_POST['uso'] ?? ''
         ];
         $resultados = $ins_compra->buscar_medicamento_controller($filtros);

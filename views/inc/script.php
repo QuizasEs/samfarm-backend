@@ -173,7 +173,7 @@
             }
 
 
-            const filterSelects = document.querySelectorAll('select[name="Form_reg"], select[name="Via_reg"], select[name="Laboratorio_reg"], select[name="Uso_reg"]');
+            const filterSelects = document.querySelectorAll('select[name="Form_reg"], select[name="Via_reg"], select[name="Laboratorio_reg"], select[name="Uso_reg"], select[name="Proveedor_filtro"]');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function() {
                     if (currentTimeout) clearTimeout(currentTimeout);
@@ -192,9 +192,10 @@
             const via = document.querySelector('select[name="Via_reg"]')?.value || '';
             const laboratorio = document.querySelector('select[name="Laboratorio_reg"]')?.value || '';
             const uso = document.querySelector('select[name="Uso_reg"]')?.value || '';
+            const proveedor = document.querySelector('select[name="Proveedor_filtro"]')?.value || '';
 
 
-            if (!termino && !forma && !via && !laboratorio && !uso) {
+            if (!termino && !forma && !via && !laboratorio && !uso && !proveedor) {
                 if (hasSearched) {
                     resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Ingrese algún criterio de búsqueda</td></tr>';
                 }
@@ -211,7 +212,8 @@
                     forma: forma,
                     via: via,
                     laboratorio: laboratorio,
-                    uso: uso
+                    uso: uso,
+                    proveedor: proveedor
                 };
 
 
@@ -243,19 +245,14 @@
             }
 
             resultados.innerHTML = data.map((item, index) => `
-        <tr>
+        <tr class="fila-seleccionable" onclick="handleSelectItem(${item.med_id}, '${escapeHtml(item.nombre || '')}')" style="cursor:pointer;">
             <td>${index + 1}</td>
             <td>${escapeHtml(item.nombre || 'N/A')}</td>
             <td>${escapeHtml(item.med_presentacion || 'N/A')}</td>
             <td>${escapeHtml(item.med_descripcion || 'N/A')}</td>
             <td>${escapeHtml(item.med_codigo_barras || 'N/A')}</td>
             <td>
-                <button type="button" class="btn success" 
-                        data-id="${item.med_id}"
-                        data-nombre="${escapeHtml(item.nombre)}"
-                        onclick="handleSelectItem(this)">
-                    Seleccionar
-                </button>
+                <span style="color: #27ae60; font-size: 12px;">Click para agregar</span>
             </td>
         </tr>
     `).join('');
@@ -273,22 +270,13 @@
 
         function formatCurrency(amount) {
             const num = parseFloat(amount) || 0;
-            return `$${num.toFixed(2)}`;
+            return `${num.toFixed(2)}`;
         }
 
         return {
             init
         };
     })();
-
-    function handleSelectItem(button) {
-        const id = button.getAttribute('data-id');
-        const nombre = button.getAttribute('data-nombre');
-        console.log({
-            id,
-            nombre
-        });
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
         SearchManager.init();
@@ -445,15 +433,17 @@
         function limpiarCampos() {
             [
                 "cantidad",
+                "cantidad_unidades",
                 "fecha_vencimiento",
                 "precio_compra",
-                "precio_venta_reg",
-                "cantidad_blister",
-                "cantidad_unidades"
+                "precio_venta_reg"
             ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = "";
             });
+            // Reset cantidad_unidades to 1
+            const cantUni = document.getElementById("cantidad_unidades");
+            if (cantUni) cantUni.value = 1;
 
             const check = document.getElementById("cb5");
             if (check) check.checked = false;
@@ -482,11 +472,10 @@
         function validarCampos() {
             const numero = document.getElementById("numero_lote").value.trim();
             const cantidad = parseInt(document.getElementById("cantidad").value);
+            const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 1;
             const vencimiento = document.getElementById("fecha_vencimiento").value;
             const precioCompra = parseFloat(document.getElementById("precio_compra").value);
             const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
-            const cantidadBlister = parseInt(document.getElementById("cantidad_blister").value) || 0;
-            const cantidadUnidades = parseInt(document.getElementById("cantidad_unidades").value) || 0;
             const activar = document.getElementById("cb5").checked ? 1 : 0;
 
             if (!numero) {
@@ -522,7 +511,7 @@
             return {
                 numero,
                 cantidad,
-                cantidad_blister: cantidadBlister,
+                cantidad_blister: 1,
                 cantidad_unidades: cantidadUnidades,
                 vencimiento,
                 precioCompra,
@@ -659,12 +648,27 @@
         };
     })();
 
-    /** 🌐 Vinculación externa */
-    function handleSelectItem(button) {
-        ModalManager.abrirModal(
-            button.getAttribute("data-id"),
-            button.getAttribute("data-nombre")
-        );
+    /** 🌐 Vinculación externa - maneja tanto botón como parámetros directos */
+    function handleSelectItem(param1, param2) {
+        // Si param1 es un número, es la nueva forma (id, nombre)
+        // Si param1 es un elemento, es la forma antigua (button)
+        if (typeof param1 === 'number' || (!isNaN(parseInt(param1)))) {
+            // Nueva forma: handleSelectItem(id, nombre)
+            const id = param1;
+            const nombre = param2;
+            if (typeof ModalManager !== 'undefined' && ModalManager.abrirModal) {
+                ModalManager.abrirModal(id, nombre);
+            } else if (typeof abrirModal === 'function') {
+                abrirModal(id, nombre);
+            }
+        } else {
+            // Forma antigua: handleSelectItem(button)
+            const button = param1;
+            ModalManager.abrirModal(
+                button.getAttribute("data-id"),
+                button.getAttribute("data-nombre")
+            );
+        }
     }
 
     function cerrarModal() {
@@ -774,6 +778,13 @@
 
         if (form) {
             form.addEventListener('submit', function(e) {
+                // Actualizar campo de proveedor
+                const proveedorFiltro = document.getElementById('Proveedor_filtro');
+                const proveedorHidden = document.getElementById('Proveedor_reg');
+                if (proveedorFiltro && proveedorHidden) {
+                    proveedorHidden.value = proveedorFiltro.value;
+                }
+
                 // Validar que haya lotes agregados
                 const lotes = ModalManager.obtenerLotes();
 
@@ -1129,10 +1140,120 @@
         const dineroHidden = ensureHidden('dinero_recibido_venta', 'dinero_recibido_venta');
 
         const medSearch = $('#med_search');
-        const filtro_linea = $('#filtro_linea');
+        const medicamentosCache = {};
+        let tooltipTimeout = null;
+        let tooltipItem = null;
+
+function mostrarTooltip(e, it, element) {
+             let tooltip = document.querySelector('.med-tooltip');
+             if (!tooltip) {
+                 tooltip = document.createElement('div');
+                 tooltip.className = 'med-tooltip';
+                 tooltip.style.cssText = `
+                     display: none;
+                     position: fixed;
+                     top: 20px;
+                     right: 20px;
+                     z-index: 2000;
+                     width: 320px;
+                     pointer-events: none;
+                     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+                     opacity: 0;
+                     transform: translateY(-10px);
+                 `;
+                 document.body.appendChild(tooltip);
+             }
+
+             tooltipItem = it;
+
+             const nombre = escapeHtml(it.nombre || '');
+             const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
+             const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
+             const funcion = escapeHtml(it.funcion || 'Sin función');
+             const via = escapeHtml(it.via || 'Sin vía');
+             const stock = Number(it.stock || 0);
+             const precioVenta = formatMoney(it.precio_venta || 0);
+             const precioCompra = formatMoney(it.precio_compra || 0);
+             const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
+             const precioCaja = formatMoney((it.precio_venta || 0) * unidadesPorCaja);
+             const vencimiento = it.fecha_vencimiento ? it.fecha_vencimiento.split('-').reverse().join('/') : 'N/A';
+             const codigoBarras = escapeHtml(it.med_codigo_barras || 'N/A');
+             
+             const stockLabel = stock <= 0 ? 'Sin Stock' : (stock <= 10 ? 'Bajo Stock' : 'Disponible');
+             const stockBgColor = stock <= 0 ? '#da0101' : (stock <= 10 ? '#f39e00' : '#1b9c1b');
+
+             tooltip.innerHTML = `
+                 <div class="tooltip-header" style="background: #13386c; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+                     <span style="font-weight: 600; font-size: 0.95em;">${nombre}</span>
+                     <span style="background: ${stockBgColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 600;">${stockLabel}</span>
+                 </div>
+                 <div class="tooltip-content" style="padding: 12px; background: #ffffff; border: 1px solid #dcdcdc; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.85em; color: #333333;">
+                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
+                         <span style="color: #666666;"><strong>Proveedor:</strong></span>
+                         <span style="color: #333333;">${proveedor}</span>
+                     </div>
+                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
+                         <span style="color: #666666;"><strong>Presentación:</strong></span>
+                         <span style="color: #333333;">${presentacion}</span>
+                     </div>
+                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
+                         <span style="color: #666666;"><strong>Función:</strong></span>
+                         <span style="color: #333333;">${funcion}</span>
+                     </div>
+                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85em;">
+                         <span style="color: #666666;"><strong>Vía:</strong></span>
+                         <span style="color: #333333;">${via}</span>
+                     </div>
+                     <div style="background: #f1f1f1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                             <span style="color: #13386c; font-weight: 600;">PRECIO VENTA</span>
+                             <span style="color: #13386c; font-weight: 700; font-size: 1.1em;">Bs ${precioVenta}</span>
+                         </div>
+                         <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666;">
+                             <span>Caja (${unidadesPorCaja} uni):</span>
+                             <span style="font-weight: 500;">Bs ${precioCaja}</span>
+                         </div>
+                          <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666; margin-top: 2px;">
+                              <span>Precio Compra:</span>
+                              <span>Bs ${precioCompra}</span>
+                          </div>
+                     </div>
+                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: ${stock <= 0 ? '#ffebee' : stock <= 10 ? '#fff3e0' : '#e8f5e9'}; border-radius: 6px; margin-bottom: 8px;">
+                         <span style="color: ${stock <= 0 ? '#da0101' : stock <= 10 ? '#f39e00' : '#1b9c1b'}; font-weight: 600;">STOCK</span>
+                         <span style="color: ${stock <= 0 ? '#da0101' : stock <= 10 ? '#f39e00' : '#1b9c1b'}; font-weight: 700;">${stock} uni</span>
+                     </div>
+                     <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666; padding-top: 6px; border-top: 1px solid #dcdcdc;">
+                         <span><strong>Vence:</strong> ${vencimiento}</span>
+                         <span>${codigoBarras}</span>
+                     </div>
+                 </div>
+             `;
+
+             tooltip.style.display = 'block';
+             requestAnimationFrame(() => {
+                 tooltip.style.opacity = '1';
+                 tooltip.style.transform = 'translateY(0)';
+             });
+        }
+
+        function ocultarTooltip() {
+            const tooltip = document.querySelector('.med-tooltip');
+            if (tooltip) {
+                tooltip.style.opacity = '0';
+                tooltip.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (tooltip.style.opacity === '0') {
+                        tooltip.style.display = 'none';
+                    }
+                }, 300);
+            }
+            tooltipItem = null;
+        }
+
         const filtro_presentacion = $('#filtro_presentacion');
         const filtro_funcion = $('#filtro_funcion');
         const filtro_via = $('#filtro_via');
+        const filtro_proveedor = $('#filtro_proveedor');
 
         let resultsContainer = $('#med_search_results');
         if (!resultsContainer && medSearch) {
@@ -1207,7 +1328,7 @@
                         nombreDisplay += '<br><small style="color: #666;">' +
                             '<ion-icon name="barcode-outline"></ion-icon> ' +
                             escapeHtml(it.lote) +
-                            (it.linea ? ' | ' + escapeHtml(it.linea) : '') +
+                            (it.proveedor ? ' | ' + escapeHtml(it.proveedor) : '')
                             '</small>';
                     }
 
@@ -1574,7 +1695,7 @@
                     lote: m.lote || null,
                     nombre: m.nombre,
                     presentacion: m.presentacion || '',
-                    linea: m.linea || '',
+                    proveedor: m.proveedor || '',
                     precio: parseFloat(m.precio) || 0,
                     cantidad: 1,
                     stock: m.stock != null ? Number(m.stock) : null,
@@ -1593,13 +1714,26 @@
                 return;
             }
 
+            const cacheKey = JSON.stringify({
+                term,
+                presentacion: filtro_presentacion ? filtro_presentacion.value : null,
+                funcion: filtro_funcion ? filtro_funcion.value : null,
+                via: filtro_via ? filtro_via.value : null,
+                proveedor: filtro_proveedor ? filtro_proveedor.value : null
+            });
+
+            if (medicamentosCache[cacheKey]) {
+                renderResults(medicamentosCache[cacheKey]);
+                return;
+            }
+
             const body = new URLSearchParams();
             body.append('ventaAjax', 'buscar');
             body.append('termino', term);
-            if (filtro_linea && filtro_linea.value) body.append('linea', filtro_linea.value);
             if (filtro_presentacion && filtro_presentacion.value) body.append('presentacion', filtro_presentacion.value);
             if (filtro_funcion && filtro_funcion.value) body.append('funcion', filtro_funcion.value);
             if (filtro_via && filtro_via.value) body.append('via', filtro_via.value);
+            if (filtro_proveedor && filtro_proveedor.value) body.append('proveedor', filtro_proveedor.value);
 
             fetch(URL_MED, {
                 method: 'POST',
@@ -1608,6 +1742,7 @@
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
+                medicamentosCache[cacheKey] = json || [];
                 renderResults(json || []);
             }).catch(err => {
                 if (resultsContainer) {
@@ -1626,11 +1761,12 @@
                 return;
             }
 
-            resultsContainer.innerHTML = items.map(it => {
+            resultsContainer.innerHTML = '';
+            items.forEach(it => {
                 const nombre = escapeHtml(it.nombre || '');
                 const lote = escapeHtml(it.lm_numero_lote || '');
                 const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
-                const linea = escapeHtml(it.linea || 'Sin laboratorio');
+                const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
                 const precio = formatMoney(it.precio_venta || 0);
                 const stock = Number(it.stock || 0);
                 const blister = Number(it.lm_cant_blister || 1);
@@ -1644,7 +1780,6 @@
                     const vence = new Date(it.fecha_vencimiento);
                     const diff = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
 
-                    // Formatear fecha de vencimiento para mostrar
                     const dia = String(vence.getDate()).padStart(2, '0');
                     const mes = String(vence.getMonth() + 1).padStart(2, '0');
                     const anio = vence.getFullYear();
@@ -1665,20 +1800,12 @@
 
                 const sinStock = stock <= 0 ? 'sin-stock' : '';
 
-                return `<div class="search-results-item ${sinStock}" 
-                data-id="${it.med_id}" 
-                data-lote-id="${it.lm_id || ''}"
-                data-lote="${lote}"
-                data-nombre="${nombre}" 
-                data-presentacion="${presentacion}" 
-                data-linea="${linea}"
-                data-precio="${it.precio_venta || 0}"
-                data-stock="${stock}"
-                data-unidades-por-caja="${unidadesPorCaja}">
-                
+                const itemEl = document.createElement('div');
+                itemEl.className = `search-results-item ${sinStock}`;
+                itemEl.innerHTML = `
                 <div class="search-result-name">
                     <strong>${nombre}</strong>
-                    <span style="font-size: 0.85em; color: #666; margin-left: 8px;">(${linea})</span>
+                    <span style="font-size: 0.85em; color: #666; margin-left: 8px;">(${proveedor})</span>
                 </div>
                 
                 <div class="search-result-details" style="font-size: 0.9em; color: #555;">
@@ -1686,38 +1813,49 @@
                     <span style="margin: 0 6px;">•</span>
                     <span>${presentacion}</span>
                     <span style="margin: 0 6px;">•</span>
-                    <span><ion-icon name="pricetag-outline"></ion-icon> Bs. ${precio}</span>
+                    <span style="color: #00a2d3; text-decoration:underline; font-size: 18px; font-weight: bold; "><ion-icon name="pricetag-outline"></ion-icon> Bs. ${precio}</span>
                     <span style="margin: 0 6px;">•</span>
                     ${stockText}
                     ${fechaVencimientoDisplay ? '<span style="margin: 0 6px;">•</span><span><ion-icon name="calendar-outline"></ion-icon> Vence: ' + fechaVencimientoDisplay + '</span>' : ''}
                     ${diasVenc ? '<span style="margin: 0 6px;">•</span>' + diasVenc : ''}
                 </div>
-            </div>`;
-            }).join('');
+                `;
 
-            resultsContainer.style.display = 'block';
-
-            resultsContainer.querySelectorAll('.search-results-item:not(.no-results)').forEach(el => {
-                el.addEventListener('click', () => {
-                    const stock = Number(el.dataset.stock || 0);
-
+                itemEl.addEventListener('click', () => {
                     addItem({
-                        med_id: el.dataset.id,
-                        lote_id: el.dataset.loteId || null,
-                        lote: el.dataset.lote || null,
-                        nombre: el.dataset.nombre,
-                        presentacion: el.dataset.presentacion,
-                        linea: el.dataset.linea,
-                        precio: parseFloat(el.dataset.precio || 0),
+                        med_id: it.med_id,
+                        lote_id: it.lm_id || null,
+                        lote: it.lm_numero_lote || null,
+                        nombre: it.nombre,
+                        presentacion: it.presentacion,
+                        proveedor: it.proveedor,
+                        precio: parseFloat(it.precio_venta || 0),
                         stock: stock,
-                        unidades_por_caja: parseInt(el.dataset.unidadesPorCaja || 1)
+                        unidades_por_caja: unidadesPorCaja
                     });
-
                     resultsContainer.innerHTML = '';
                     resultsContainer.style.display = 'none';
                     if (medSearch) medSearch.value = '';
+                    ocultarTooltip();
                 });
+
+                itemEl.addEventListener('mouseenter', (e) => {
+                    clearTimeout(tooltipTimeout);
+                    tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, itemEl), 3000);
+                });
+                itemEl.addEventListener('mousemove', (e) => {
+                    clearTimeout(tooltipTimeout);
+                    tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, itemEl), 3000);
+                });
+                itemEl.addEventListener('mouseleave', () => {
+                    clearTimeout(tooltipTimeout);
+                    ocultarTooltip();
+                });
+
+                resultsContainer.appendChild(itemEl);
             });
+
+            resultsContainer.style.display = 'block';
         }
 
         if (medSearch) {
@@ -1733,7 +1871,7 @@
                     return;
                 }
 
-                debounce = setTimeout(() => doSearch(term), 250);
+                debounce = setTimeout(() => doSearch(term), 200);
             });
 
             medSearch.addEventListener('focus', function() {
@@ -1743,7 +1881,7 @@
             });
         }
 
-        [filtro_linea, filtro_presentacion, filtro_funcion, filtro_via].forEach(sel => {
+        [filtro_presentacion, filtro_funcion, filtro_via, filtro_proveedor].forEach(sel => {
             if (sel) sel.addEventListener('change', () => {
                 if (medSearch && medSearch.value) doSearch(medSearch.value);
             });
@@ -1763,16 +1901,20 @@
             }).then(r => r.json()).then(json => {
                 if (!tablaMasVendidos) return;
 
-                tablaMasVendidos.innerHTML = (json || []).map((it, i) => {
+                tablaMasVendidos.innerHTML = '';
+                (json || []).forEach((it, i) => {
                     const stock = Number(it.stock || 0);
                     const stockClass = stock <= 0 ? 'sin-stock' : '';
                     const stockText = stock > 0 ? `(Stock: ${stock})` : '<span style="color: red;">(Sin stock)</span>';
 
-                    return `<tr data-id="${it.med_id}" class="${stockClass}">
+                    const tr = document.createElement('tr');
+                    tr.className = stockClass;
+                    tr.dataset.id = it.med_id;
+                    tr.innerHTML = `
                     <td>${i + 1}</td>
                     <td>
                         <strong>${escapeHtml(it.nombre)}</strong><br>
-                        <small style="color: #666;">Lote: ${it.lote || 'N/A'} | ${it.linea || 'Sin lab'}</small>
+                        <small style="color: #666;">Lote: ${it.lote || 'N/A'} | ${it.proveedor || 'Sin proveedor'}</small>
                     </td>
                     <td>Bs. ${formatMoney(it.precio_venta)} ${stockText}</td>
                     <td>
@@ -1783,15 +1925,30 @@
                            data-lote-id="${it.lote_id}"
                            data-lote="${it.lote}"
                            data-presentacion="${it.presentacion}"
-                           data-linea="${it.linea}"
+                           data-proveedor="${it.proveedor}"
                            data-precio="${it.precio_venta}"
                            data-stock="${stock}"
                            data-unidades-por-caja="${Number(it.lm_cant_blister || 1) * Number(it.lm_cant_unidad || 1)}">
                             agregar
                         </button>
                     </td>
-                </tr>`;
-                }).join('');
+                    `;
+
+                    tr.addEventListener('mouseenter', (e) => {
+                        clearTimeout(tooltipTimeout);
+                        tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
+                    });
+                    tr.addEventListener('mousemove', (e) => {
+                        clearTimeout(tooltipTimeout);
+                        tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
+                    });
+                    tr.addEventListener('mouseleave', () => {
+                        clearTimeout(tooltipTimeout);
+                        ocultarTooltip();
+                    });
+
+                    tablaMasVendidos.appendChild(tr);
+                });
             });
 
             // Attach event listener to the table for dynamic buttons
@@ -1808,16 +1965,24 @@
                             lote: el.dataset.lote || null,
                             nombre: el.dataset.nombre,
                             presentacion: el.dataset.presentacion || '',
-                            linea: el.dataset.linea || '',
+                            proveedor: el.dataset.proveedor || '',
                             precio: parseFloat(el.dataset.precio || 0),
                             stock: stock,
                             unidades_por_caja: parseInt(el.dataset.unidadesPorCaja || 1)
                         });
+                        ocultarTooltip();
                     }
                 });
                 tablaMasVendidos.dataset.hasListener = 'true';
             }
         }
+
+        // Limpiar cache cada 5 minutos
+        setInterval(() => {
+            for (const key in medicamentosCache) {
+                delete medicamentosCache[key];
+            }
+        }, 300000);
 
         if (inputDinero) inputDinero.addEventListener('input', updateTotals);
 
@@ -2364,7 +2529,7 @@
                         throw new Error(data.error);
                     }
 
-                    document.getElementById('detalleLaboral').textContent = data.laboratorio || 'N/A';
+                    document.getElementById('detalleLaboral').textContent = data.proveedor || 'N/A';
                     document.getElementById('detalleSucursal').textContent = data.sucursal || 'N/A';
                     document.getElementById('detalleCajas').textContent = utils.formatearNumero(data.cajas);
                     document.getElementById('detalleUnidades').textContent = utils.formatearNumero(data.unidades);

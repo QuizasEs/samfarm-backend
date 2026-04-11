@@ -70,7 +70,8 @@ if (isset($_POST['ventaAjax'])) {
             'linea' => $_POST['linea'] ?? null,
             'presentacion' => $_POST['presentacion'] ?? null,
             'funcion' => $_POST['funcion'] ?? null,
-            'via' => $_POST['via'] ?? null
+            'via' => $_POST['via'] ?? null,
+            'proveedor' => $_POST['proveedor'] ?? null
         ];
         echo $ins_venta->buscar_medicamento_controller($termino, $filtros);
         exit();

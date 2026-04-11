@@ -131,13 +131,13 @@ class mermaModel extends mainModel
                 s.su_nombre,
                 u.us_nombres,
                 u.us_apellido_paterno,
-                la.la_nombre_comercial AS laboratorio
+                p.pr_razon_social AS proveedor
             FROM merma m
             INNER JOIN medicamento med ON med.med_id = m.med_id
             INNER JOIN lote_medicamento lm ON lm.lm_id = m.lm_id
             INNER JOIN sucursales s ON s.su_id = m.su_id
             INNER JOIN usuarios u ON u.us_id = m.us_id
-            LEFT JOIN laboratorios la ON la.la_id = med.la_id
+            LEFT JOIN proveedores p ON p.pr_id = med.pr_id
             WHERE 1=1
         ";
 
@@ -244,13 +244,13 @@ class mermaModel extends mainModel
                 s.su_nombre,
                 u.us_nombres,
                 u.us_apellido_paterno,
-                la.la_nombre_comercial AS laboratorio
+                p.pr_razon_social AS proveedor
             FROM merma m
             INNER JOIN medicamento med ON med.med_id = m.med_id
             INNER JOIN lote_medicamento lm ON lm.lm_id = m.lm_id
             INNER JOIN sucursales s ON s.su_id = m.su_id
             INNER JOIN usuarios u ON u.us_id = m.us_id
-            LEFT JOIN laboratorios la ON la.la_id = med.la_id
+            LEFT JOIN proveedores p ON p.pr_id = med.pr_id
             WHERE m.me_id = :me_id
             LIMIT 1
         ";

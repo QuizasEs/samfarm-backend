@@ -705,7 +705,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             <td>${index + 1}</td>
                             <td><strong>${med.med_nombre_quimico}</strong></td>
                             
-                            <td>${med.laboratorio || '-'}</td>
+                            <td>${med.proveedor || '-'}</td>
                             <td>${med.forma_farmaceutica || '-'}</td>
                             <td style="text-align:center;"><strong style="color:#1976D2;">${med.veces_comprado}</strong></td>
                             <td style="text-align:center;"><strong>${med.total_unidades}</strong></td>

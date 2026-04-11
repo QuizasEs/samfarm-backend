@@ -9,10 +9,11 @@ class proveedorModel extends mainModel
         $sql = "
                     SELECT
                         p.pr_id,
-                        p.pr_nombres,
+                        p.pr_razon_social,
                         p.pr_nit,
                         p.pr_telefono,
-                        p.pr_direccion,
+                        p.pr_correo,
+                        p.pr_nombre_comercial,
                         p.pr_creado_en,
                         p.pr_estado,
 
@@ -33,9 +34,11 @@ class proveedorModel extends mainModel
 
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
-                p.pr_nombres LIKE :busqueda OR
+                p.pr_razon_social LIKE :busqueda OR
                 p.pr_nit LIKE :busqueda OR
-                p.pr_telefono LIKE :busqueda
+                p.pr_telefono LIKE :busqueda OR
+                p.pr_correo LIKE :busqueda OR
+                p.pr_nombre_comercial LIKE :busqueda
             )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -82,7 +85,7 @@ class proveedorModel extends mainModel
             }
         }
 
-        $sql .= " ORDER BY p.pr_nombres ASC";
+        $sql .= " ORDER BY p.pr_razon_social ASC";
         $sql .= " LIMIT :inicio, :registros";
 
         $conexion = mainModel::conectar();
@@ -112,7 +115,7 @@ class proveedorModel extends mainModel
 
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
-                        p.pr_nombres LIKE :busqueda OR
+                        p.pr_razon_social LIKE :busqueda OR
                         p.pr_nit LIKE :busqueda OR
                         p.pr_telefono LIKE :busqueda
                     )";
@@ -154,7 +157,15 @@ class proveedorModel extends mainModel
     {
         $sql = "
             SELECT 
-                p.*,
+                p.pr_id,
+                p.pr_razon_social,
+                p.pr_nombre_comercial,
+                p.pr_nit,
+                p.pr_telefono,
+                p.pr_correo,
+                p.pr_estado,
+                p.pr_creado_en,
+                p.pr_actualizado_en,
                 COALESCE(COUNT(DISTINCT c.co_id), 0) AS total_compras,
                 COALESCE(SUM(c.co_total), 0) AS monto_total_compras,
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
@@ -183,10 +194,10 @@ class proveedorModel extends mainModel
                 c.co_fecha,
                 c.co_total,
                 c.co_numero_factura,
-                la.la_nombre_comercial AS laboratorio,
+                p.pr_razon_social AS proveedor,
                 COUNT(dc.dc_id) AS total_items
             FROM compras c
-            LEFT JOIN laboratorios la ON la.la_id = c.la_id
+            LEFT JOIN proveedores p ON p.pr_id = c.pr_id
             LEFT JOIN detalle_compra dc ON dc.co_id = c.co_id
             WHERE c.pr_id = :pr_id AND c.co_estado = 1
             GROUP BY c.co_id
@@ -207,13 +218,11 @@ class proveedorModel extends mainModel
             SELECT 
                 m.med_id,
                 m.med_nombre_quimico,
-                la.la_nombre_comercial AS laboratorio,
                 COUNT(dc.dc_id) AS veces_comprado,
                 MAX(c.co_fecha) AS ultima_compra
             FROM detalle_compra dc
             INNER JOIN compras c ON c.co_id = dc.co_id
             INNER JOIN medicamento m ON m.med_id = dc.med_id
-            LEFT JOIN laboratorios la ON la.la_id = m.la_id
             WHERE c.pr_id = :pr_id AND c.co_estado = 1
             GROUP BY m.med_id
             ORDER BY veces_comprado DESC
@@ -231,10 +240,11 @@ class proveedorModel extends mainModel
     {
         $sql = "
             SELECT
-                p.pr_nombres AS 'Proveedor',
+                p.pr_razon_social AS 'Proveedor',
                 p.pr_nit AS 'NIT',
                 p.pr_telefono AS 'Teléfono',
-                p.pr_direccion AS 'Dirección',
+                p.pr_correo AS 'Correo',
+                p.pr_nombre_comercial AS 'Nombre Comercial',
                 DATE_FORMAT(p.pr_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
                 COALESCE(COUNT(DISTINCT c.co_id), 0) AS 'Total Compras',
                 COALESCE(SUM(c.co_total), 0) AS 'Monto Total (Bs)',
@@ -257,9 +267,11 @@ class proveedorModel extends mainModel
 
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
-                        p.pr_nombres LIKE :busqueda OR
+                        p.pr_razon_social LIKE :busqueda OR
                         p.pr_nit LIKE :busqueda OR
-                        p.pr_telefono LIKE :busqueda
+                        p.pr_telefono LIKE :busqueda OR
+                        p.pr_correo LIKE :busqueda OR
+                        p.pr_nombre_comercial LIKE :busqueda
                     )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -282,7 +294,7 @@ class proveedorModel extends mainModel
             $params[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
 
-        $sql .= " GROUP BY p.pr_id ORDER BY p.pr_nombres ASC";
+        $sql .= " GROUP BY p.pr_id ORDER BY p.pr_razon_social ASC";
 
         $stmt = mainModel::conectar()->prepare($sql);
 
@@ -300,15 +312,17 @@ class proveedorModel extends mainModel
     {
         $sql = "
             INSERT INTO proveedores (
-                pr_nombres,
+                pr_razon_social,
                 pr_nit,
                 pr_telefono,
-                pr_direccion,
+                pr_correo,
+                pr_nombre_comercial,
                 pr_estado
             ) VALUES (
                 :nombres,
                 :nit,
                 :telefono,
+                :correo,
                 :direccion,
                 1
             )
@@ -318,6 +332,7 @@ class proveedorModel extends mainModel
         $stmt->bindParam(':nombres', $datos['nombres']);
         $stmt->bindParam(':nit', $datos['nit']);
         $stmt->bindParam(':telefono', $datos['telefono']);
+        $stmt->bindParam(':correo', $datos['correo']);
         $stmt->bindParam(':direccion', $datos['direccion']);
         $stmt->execute();
         return $stmt;
@@ -351,10 +366,11 @@ class proveedorModel extends mainModel
     {
         $sql = "
             UPDATE proveedores SET
-                pr_nombres = :nombres,
+                pr_razon_social = :nombres,
                 pr_nit = :nit,
                 pr_telefono = :telefono,
-                pr_direccion = :direccion,
+                pr_correo = :correo,
+                pr_nombre_comercial = :direccion,
                 pr_actualizado_en = NOW()
             WHERE pr_id = :pr_id
         ";
@@ -363,6 +379,7 @@ class proveedorModel extends mainModel
         $stmt->bindParam(':nombres', $datos['nombres']);
         $stmt->bindParam(':nit', $datos['nit']);
         $stmt->bindParam(':telefono', $datos['telefono']);
+        $stmt->bindParam(':correo', $datos['correo']);
         $stmt->bindParam(':direccion', $datos['direccion']);
         $stmt->bindParam(':pr_id', $datos['pr_id'], PDO::PARAM_INT);
         $stmt->execute();

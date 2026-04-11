@@ -148,10 +148,10 @@ class cajaHistorialController extends cajaHistorialModel
                             <a href="javascript:void(0)" 
                             class="btn default" 
                             title="Ver referencia"
-                            onclick="CajaHistorial.verReferencia(\'' . $row['mc_referencia_tipo'] . '\', ' . $row['mc_referencia_id'] . ')">
+                            onclick="CajaHistorial.verReferencia(\'' . ($row['mc_referencia_tipo'] ?? 'venta') . '\', ' . ($row['mc_referencia_id'] ?? 0) . ')">
                                 <ion-icon name="open-outline"></ion-icon> Detalles
-                            </a>
-                            <a href="javascript:void(0)" class="btn primary" title="Exportar PDF" onclick="window.open(\'' . SERVER_URL . 'ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' . $row['mc_id'] . '\', \'_blank\')">
+                            </a>' .
+                            '<a href="javascript:void(0)" class="btn primary" title="Exportar PDF" onclick="window.open(\'' . SERVER_URL . 'ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' . $row['mc_id'] . '\', \'_blank\')">
                                 <ion-icon name="document-text-outline"></ion-icon> PDF
                             </a>
                         </td>
@@ -609,6 +609,8 @@ class cajaHistorialController extends cajaHistorialModel
         $tipo = isset($_POST['tipo']) ? mainModel::limpiar_cadena($_POST['tipo']) : '';
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
+        error_log("referencia - tipo: '$tipo', id: $id");
+
         if (empty($tipo) || $id <= 0) {
             echo json_encode(['error' => 'Datos inválidos']);
             return;
@@ -619,12 +621,11 @@ class cajaHistorialController extends cajaHistorialModel
 
             switch (strtolower($tipo)) {
                 case 'venta':
-                    $stmt = self::obtener_detalle_venta_model($id);
-                    $venta = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $venta = self::obtener_detalle_venta_model($id);
                     if ($venta) {
                         $html = $this->generar_html_referencia_venta($venta);
                     } else {
-                        $html = '<p style="color: #f44336; text-align: center;">No se encontró la venta</p>';
+                        $html = '<p style="color: #f44336; text-align: center;">No se encontró la venta o error en la consulta</p>';
                     }
                     break;
 
@@ -661,17 +662,17 @@ class cajaHistorialController extends cajaHistorialModel
         $html .= '<div class="row"><h3><ion-icon name="receipt-outline"></ion-icon> Información de Venta</h3></div>';
 
         $html .= '<div class="row">';
-        $html .= '<div class="col"><label>Número de Venta:</label><p>' . htmlspecialchars($venta['v_numero'] ?? 'N/A') . '</p></div>';
-        $html .= '<div class="col"><label>Fecha:</label><p>' . (isset($venta['v_fecha']) ? date('d/m/Y H:i', strtotime($venta['v_fecha'])) : 'N/A') . '</p></div>';
+        $html .= '<div class="col"><label>Número de Venta:</label><p>' . htmlspecialchars($venta['ve_numero_documento'] ?? 'N/A') . '</p></div>';
+        $html .= '<div class="col"><label>Fecha:</label><p>' . (isset($venta['ve_fecha_emision']) ? date('d/m/Y H:i', strtotime($venta['ve_fecha_emision'])) : 'N/A') . '</p></div>';
         $html .= '</div>';
 
         $html .= '<div class="row">';
         $html .= '<div class="col"><label>Cliente:</label><p>' . htmlspecialchars($venta['cliente_nombre'] ?? 'Mostrador') . '</p></div>';
-        $html .= '<div class="col"><label>Total:</label><p><strong style="color: #4CAF50; font-size: 16px;">Bs. ' . number_format($venta['v_total'] ?? 0, 2) . '</strong></p></div>';
+        $html .= '<div class="col"><label>Total:</label><p><strong style="color: #4CAF50; font-size: 16px;">Bs. ' . number_format($venta['ve_total'] ?? 0, 2) . '</strong></p></div>';
         $html .= '</div>';
 
-        if (isset($venta['v_observacion']) && !empty($venta['v_observacion'])) {
-            $html .= '<div class="row"><label>Observación:</label><p>' . htmlspecialchars($venta['v_observacion']) . '</p></div>';
+        if (isset($venta['ve_metodo_pago']) && !empty($venta['ve_metodo_pago'])) {
+            $html .= '<div class="row"><label>Método de Pago:</label><p>' . htmlspecialchars($venta['ve_metodo_pago']) . '</p></div>';
         }
 
         $html .= '</div>';
@@ -683,13 +684,31 @@ class cajaHistorialController extends cajaHistorialModel
     {
         try {
             $conexion = mainModel::conectar();
-            $sql = "SELECT v.*, c.cliente_nombre FROM ventas v
-                    LEFT JOIN clientes c ON v.cliente_id = c.cliente_id
-                    WHERE v.v_id = :v_id LIMIT 1";
+            
+            // Primero intentar por ve_id
+            $sql = "SELECT v.*, CONCAT(c.cl_nombres, ' ', COALESCE(c.cl_apellido_paterno, ''), ' ', COALESCE(c.cl_apellido_materno, '')) AS cliente_nombre 
+                    FROM ventas v
+                    LEFT JOIN clientes c ON v.cl_id = c.cl_id
+                    WHERE v.ve_id = :v_id LIMIT 1";
             $stmt = $conexion->prepare($sql);
             $stmt->bindParam(':v_id', $v_id, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt;
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Si no encuentra, intentar por numero de documento
+            if (!$result) {
+                $sql2 = "SELECT v.*, CONCAT(c.cl_nombres, ' ', COALESCE(c.cl_apellido_paterno, ''), ' ', COALESCE(c.cl_apellido_materno, '')) AS cliente_nombre 
+                        FROM ventas v
+                        LEFT JOIN clientes c ON v.cl_id = c.cl_id
+                        WHERE v.ve_numero_documento = :v_id LIMIT 1";
+                $stmt2 = $conexion->prepare($sql2);
+                $stmt2->bindParam(':v_id', $v_id, PDO::PARAM_STR);
+                $stmt2->execute();
+                $result = $stmt2->fetch(PDO::FETCH_ASSOC);
+            }
+            
+            error_log("SQL venta consulta - ID: $v_id, Resultado: " . ($result ? "encontrado" : "null"));
+            return $result ?: null;
         } catch (PDOException $e) {
             error_log("Error en obtener_detalle_venta_model: " . $e->getMessage());
             return null;
