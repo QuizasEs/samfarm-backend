@@ -1,52 +1,45 @@
-    <!---------------------------------------------Cabecera--------------------------------------------------->
-    <header>
-        <nav id="navbar">
-            <div class="hamburguesa">
-                <ion-icon name="menu"></ion-icon>
-            </div>
-            <div class="nav-container">
-                <div class="nav-title">
-                    <h3>BIENVENIDO <?php echo $_SESSION['nombre_smp']; ?></h3>
+<header class="topbar" id="topbar">
+
+    <button class="sb-toggle" id="sbBtn" onclick="App.toggleSidebar()" data-tip="Colapsar menú">
+        <ion-icon name="menu-outline" id="sbIcon"></ion-icon>
+    </button>
+
+    <div class="bc">
+        <a href="<?php echo SERVER_URL ?>dashboard/" class="link">Inicio</a>
+        <span class="sep">/</span>
+        <span class="cur">Dashboard</span>
+    </div>
+
+    <div class="tbr">
+        <div class="ibtn" id="thico">
+            <ion-icon name="moon-outline"></ion-icon>
+        </div>
+
+        <div class="notificacion-container">
+            <button class="notificacion ibtn" id="notificacionBtn">
+                <ion-icon name="notifications-outline"></ion-icon>
+                <span class="ndot" id="notificacionBadge"></span>
+            </button>
+            <div class="notificacion-modal" id="notificacionModal">
+                <div class="notificacion-header">
+                    <h3>Notificaciones</h3>
+                    <button class="modal-close" id="notificacionModalClose">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
                 </div>
-                <div class="nav-content">
-
-                    <!-----------------------Modo Oscuro--------------------------------->
-                    <div>
-                        <label class="switch">
-                            <input type="checkbox" id="darkModeToggleInput">
-                            <span class="slider round"></span>
-                        </label>
+                <div class="notificacion-list" id="notificacionList">
+                    <div style="text-align: center; padding: 20px; color: var(--text-faint);">
+                        Cargando notificaciones...
                     </div>
-                    <!-----------------------Mensage notificaciones--------------------------------->
-
-                    <div class="notificacion-container">
-                        <button class="notificacion" id="notificacionBtn">
-                            <ion-icon name="notifications-outline"></ion-icon>
-                            <span class="notificacion-badge" id="notificacionBadge" style="display: none;"></span>
-                        </button>
-                        <div class="notificacion-modal" id="notificacionModal">
-                            <div class="notificacion-header">
-                                <h3>Notificaciones</h3>
-                                <button class="modal-close" id="notificacionModalClose">
-                                    <ion-icon name="close-outline"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="notificacion-list" id="notificacionList">
-                                <div style="text-align: center; padding: 20px; color: #999;">
-                                    Cargando notificaciones...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="user">
-                        <button class="btn-exit-system" type="submit" title="Salir">
-                            <ion-icon name="walk"></ion-icon>
-                        </button>
-                    </div>
-
                 </div>
-
             </div>
-        </nav>
-    </header>
+        </div>
+
+        <div class="user">
+            <button class="btn-exit-system ibtn" type="submit" title="Salir">
+                <ion-icon name="log-out-outline"></ion-icon>
+            </button>
+        </div>
+    </div>
+
+</header>

@@ -37,44 +37,6 @@
     }, true);
 </script>
 
-<script>
-    //funcionamiento del despligue de los sub links
-    document.querySelectorAll(".sidebar .menu-item").forEach(item => {
-        item.addEventListener("click", () => {
-            const parent = item.closest(".link");
-
-            // Cerrar todos los demás
-            document.querySelectorAll(".sidebar .link").forEach(link => {
-                if (link !== parent) link.classList.remove("open");
-            });
-
-            // Alternar el actual
-            parent.classList.toggle("open");
-        });
-    });
-</script>
-<script>
-    //funcionamiento del boton hamburguesa
-    const hamburguesa = document.querySelector('.hamburguesa');
-    const sidebar = document.querySelector('.sidebar');
-
-    hamburguesa.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-
-        // Forzar el estado visible en móviles cuando se quita 'collapsed'
-        if (!sidebar.classList.contains('collapsed')) {
-            sidebar.style.transform = 'translateX(0)';
-            sidebar.style.width = '250px';
-            sidebar.style.padding = '10px 2px';
-        } else {
-            sidebar.style.transform = '';
-            sidebar.style.width = '';
-            sidebar.style.padding = '';
-            sidebar.style.border = '';
-        }
-    });
-</script>
-
 <script type="text/javascript">
     //crafica de ingresos y egresos 
     // Initialize the echarts instance based on the prepared dom
@@ -294,7 +256,7 @@
             color: #333;
             padding: 10px 15px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 9999;
             font-family: Arial, sans-serif;
             font-size: 13px;
@@ -304,12 +266,14 @@
             border: 1px solid #ddd;
             transition: all 0.3s ease;
         }
+
         body.dark .session-timer-floating {
             background: #242526;
             color: #e4e6eb;
             border-color: #3e4042;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
+
         .session-timer-floating .timer-close {
             cursor: pointer;
             font-weight: bold;
@@ -319,25 +283,31 @@
             border-radius: 4px;
             color: #888;
         }
+
         .session-timer-floating .timer-close:hover {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0, 0, 0, 0.1);
             color: #333;
         }
+
         body.dark .session-timer-floating .timer-close:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
+
         .session-timer-floating .timer-icon {
             font-size: 18px;
             color: #1976D2;
         }
+
         body.dark .session-timer-floating .timer-icon {
             color: #2196F3;
         }
+
         .session-timer-expired {
             color: #d32f2f;
             font-weight: 600;
         }
+
         body.dark .session-timer-expired {
             color: #ff5252;
         }
@@ -357,13 +327,13 @@
             // session_cache_expire() retorna minutos, multiplicamos por 60
             // Si no, usamos un valor por defecto seguro como 24 minutos (1440s)
             let sessionTime = <?php echo session_cache_expire() * 60; ?>;
-            
+
             // Si session_cache_expire retorna 0 o algo raro, default a 1440
             if (sessionTime <= 0) sessionTime = 1440;
 
             const countdownEl = document.getElementById('timerCountdown');
             const timerContent = document.getElementById('timerContent');
-            
+
             function updateTimer() {
                 if (sessionTime <= 0) {
                     timerContent.innerHTML = '<span class="session-timer-expired">Sesión expirada. Recargue la página.</span>';
@@ -373,7 +343,7 @@
 
                 const minutes = Math.floor(sessionTime / 60);
                 const seconds = sessionTime % 60;
-                
+
                 countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 sessionTime--;
             }
@@ -1144,12 +1114,12 @@
         let tooltipTimeout = null;
         let tooltipItem = null;
 
-function mostrarTooltip(e, it, element) {
-             let tooltip = document.querySelector('.med-tooltip');
-             if (!tooltip) {
-                 tooltip = document.createElement('div');
-                 tooltip.className = 'med-tooltip';
-                 tooltip.style.cssText = `
+        function mostrarTooltip(e, it, element) {
+            let tooltip = document.querySelector('.med-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'med-tooltip';
+                tooltip.style.cssText = `
                      display: none;
                      position: fixed;
                      top: 20px;
@@ -1161,28 +1131,28 @@ function mostrarTooltip(e, it, element) {
                      opacity: 0;
                      transform: translateY(-10px);
                  `;
-                 document.body.appendChild(tooltip);
-             }
+                document.body.appendChild(tooltip);
+            }
 
-             tooltipItem = it;
+            tooltipItem = it;
 
-             const nombre = escapeHtml(it.nombre || '');
-             const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
-             const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
-             const funcion = escapeHtml(it.funcion || 'Sin función');
-             const via = escapeHtml(it.via || 'Sin vía');
-             const stock = Number(it.stock || 0);
-             const precioVenta = formatMoney(it.precio_venta || 0);
-             const precioCompra = formatMoney(it.precio_compra || 0);
-             const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
-             const precioCaja = formatMoney((it.precio_venta || 0) * unidadesPorCaja);
-             const vencimiento = it.fecha_vencimiento ? it.fecha_vencimiento.split('-').reverse().join('/') : 'N/A';
-             const codigoBarras = escapeHtml(it.med_codigo_barras || 'N/A');
-             
-             const stockLabel = stock <= 0 ? 'Sin Stock' : (stock <= 10 ? 'Bajo Stock' : 'Disponible');
-             const stockBgColor = stock <= 0 ? '#da0101' : (stock <= 10 ? '#f39e00' : '#1b9c1b');
+            const nombre = escapeHtml(it.nombre || '');
+            const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
+            const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
+            const funcion = escapeHtml(it.funcion || 'Sin función');
+            const via = escapeHtml(it.via || 'Sin vía');
+            const stock = Number(it.stock || 0);
+            const precioVenta = formatMoney(it.precio_venta || 0);
+            const precioCompra = formatMoney(it.precio_compra || 0);
+            const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
+            const precioCaja = formatMoney((it.precio_venta || 0) * unidadesPorCaja);
+            const vencimiento = it.fecha_vencimiento ? it.fecha_vencimiento.split('-').reverse().join('/') : 'N/A';
+            const codigoBarras = escapeHtml(it.med_codigo_barras || 'N/A');
 
-             tooltip.innerHTML = `
+            const stockLabel = stock <= 0 ? 'Sin Stock' : (stock <= 10 ? 'Bajo Stock' : 'Disponible');
+            const stockBgColor = stock <= 0 ? '#da0101' : (stock <= 10 ? '#f39e00' : '#1b9c1b');
+
+            tooltip.innerHTML = `
                  <div class="tooltip-header" style="background: #13386c; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
                      <span style="font-weight: 600; font-size: 0.95em;">${nombre}</span>
                      <span style="background: ${stockBgColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 600;">${stockLabel}</span>
@@ -1229,11 +1199,11 @@ function mostrarTooltip(e, it, element) {
                  </div>
              `;
 
-             tooltip.style.display = 'block';
-             requestAnimationFrame(() => {
-                 tooltip.style.opacity = '1';
-                 tooltip.style.transform = 'translateY(0)';
-             });
+            tooltip.style.display = 'block';
+            requestAnimationFrame(() => {
+                tooltip.style.opacity = '1';
+                tooltip.style.transform = 'translateY(0)';
+            });
         }
 
         function ocultarTooltip() {
@@ -1329,7 +1299,7 @@ function mostrarTooltip(e, it, element) {
                             '<ion-icon name="barcode-outline"></ion-icon> ' +
                             escapeHtml(it.lote) +
                             (it.proveedor ? ' | ' + escapeHtml(it.proveedor) : '')
-                            '</small>';
+                        '</small>';
                     }
 
                     // Calcular cajas y unidades restantes
@@ -1459,7 +1429,7 @@ function mostrarTooltip(e, it, element) {
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
-            
+
             let nuevasUnidades = unidadesActuales + delta;
 
             // Validar límites de unidades (0 a unidadesPorCaja-1)
@@ -1496,7 +1466,7 @@ function mostrarTooltip(e, it, element) {
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
-            
+
             let nuevasCajas = cajasActuales + delta;
 
             // Validar que no sea negativo
@@ -1511,7 +1481,7 @@ function mostrarTooltip(e, it, element) {
                 // Calcular cuántas cajas completas y unidades restantes se pueden agregar
                 const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
                 const unidadesRestantes = item.stock % unidadesPorCaja;
-                
+
                 // Mostrar alerta con información detallada
                 Swal.fire({
                     title: 'Sin stock suficiente',
@@ -1536,7 +1506,7 @@ function mostrarTooltip(e, it, element) {
             const item = cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
-            
+
             // Validar rango de unidades
             if (val < 0) val = 0;
             if (val >= unidadesPorCaja) val = unidadesPorCaja - 1;
@@ -1567,7 +1537,7 @@ function mostrarTooltip(e, it, element) {
             const item = cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
-            
+
             // Validar que no sea negativo
             if (val < 0) val = 0;
 
@@ -1578,7 +1548,7 @@ function mostrarTooltip(e, it, element) {
                 // Calcular cuántas cajas completas y unidades restantes se pueden agregar
                 const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
                 const unidadesRestantes = item.stock % unidadesPorCaja;
-                
+
                 // Mostrar alerta con información detallada
                 Swal.fire({
                     title: 'Sin stock suficiente',
@@ -3312,3 +3282,5 @@ function mostrarTooltip(e, it, element) {
 </script>
 <script src="<?php echo SERVER_URL; ?>views/script/ajax-tabla.js"></script>
 <script src="<?php echo SERVER_URL; ?>views/script/notificaciones.js"></script>
+
+<script src="<?php echo SERVER_URL; ?>views/script/script-base.js"></script>

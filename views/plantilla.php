@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-server-url="<?php echo SERVER_URL; ?>ajax/notificacionesAjax.php">
+<html lang="es" data-theme="light" data-sidebar="expanded" data-server-url="<?php echo SERVER_URL; ?>ajax/notificacionesAjax.php">
 
 <?php include "inc/head.php"; ?>
 
-<body class="darkmode">
+<body>
     <?php
     $peticionAjax = false;
     require_once __DIR__ . "/../controllers/viewsController.php";
@@ -29,16 +29,20 @@
             echo $lc->forzar_cierre_sesion_controller();
             exit();
         }
-        
-        include_once "inc/header.php";
+
+
 
         /* dividir cadenas por "/"" */
         $pagina = explode("/", $_GET['views']);
 
     ?>
-        <main>
-            <!---------------------------------------------sidebar--------------------------------------------------->
-            <?php include_once "inc/sidebar.php"; ?>
+        <!---------------------------------------------sidebar--------------------------------------------------->
+        <div class="sb-ov" onclick="App.closeMobile()"></div>
+        <?php include_once "inc/sidebar.php"; ?>
+
+        <div class="main">
+            <!-- include de navbar o topbar -->
+            <?php include_once "inc/header.php"; ?>
             <!---------------------------------------------Cuerpo principal--------------------------------------------------->
             <?php
             if ($_SESSION['rol_smp'] == 1) {
@@ -47,20 +51,20 @@
                 $ins_usuario = new userController();
             }
             ?>
-            <div class="main-content">
+            <div class="pg">
                 <!--------------------------------------------- contenido de platillas y vistas--------------------------------------------------->
                 <?php include_once $vistas; ?>
             </div>
-        </main>
+        </div>
 
         <!---------------- -----------------------------Script--------------------------------------------------->
         <?php
         include_once "inc/logOut.php";
         include_once "inc/script.php";
-        include_once "inc/footer.php";
         ?>
     <?php
     } // CIERRE DEL BLOQUE ELSE
     ?>
 </body>
+
 </html>
