@@ -1,37 +1,83 @@
 let notificacionesTimeout = null;
+let notificacionesCache = null;
+let lastSync = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
 document.addEventListener('DOMContentLoaded', function() {
     const notificacionBtn = document.getElementById('notificacionBtn');
     const notificacionModal = document.getElementById('notificacionModal');
     const notificacionModalClose = document.getElementById('notificacionModalClose');
 
-    if (notificacionBtn) {
+    if (notificacionBtn && notificacionModal) {
         notificacionBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             notificacionModal.classList.toggle('active');
             if (notificacionModal.classList.contains('active')) {
-                cargarNotificaciones();
+                mostrarNotificacionesDesdeCache();
+                sincronizarNotificaciones(); // Refrescar en background si es necesario
             }
         });
     }
 
-    if (notificacionModalClose) {
+    if (notificacionModalClose && notificacionModal) {
         notificacionModalClose.addEventListener('click', function() {
             notificacionModal.classList.remove('active');
         });
     }
 
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.notificacion-container')) {
+        if (notificacionModal && !e.target.closest('.notificacion-container')) {
             notificacionModal.classList.remove('active');
         }
     });
 
-    cargarNotificaciones();
-    setInterval(cargarNotificaciones, 30000);
+    // Inicializar desde cache
+    cargarDesdeCache();
+    actualizarBadge();
+
+    // Sincronización periódica
+    setInterval(sincronizarNotificaciones, SYNC_INTERVAL);
 });
 
-function cargarNotificaciones() {
+function cargarDesdeCache() {
+    try {
+        const cached = localStorage.getItem('samfarm_notificaciones');
+        if (cached) {
+            const data = JSON.parse(cached);
+            notificacionesCache = data.notificaciones || [];
+            lastSync = data.timestamp || 0;
+        }
+    } catch (error) {
+        console.error('Error cargando cache:', error);
+        notificacionesCache = [];
+    }
+}
+
+function guardarEnCache(notificaciones) {
+    try {
+        const data = {
+            notificaciones: notificaciones,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('samfarm_notificaciones', JSON.stringify(data));
+        notificacionesCache = notificaciones;
+        lastSync = Date.now();
+    } catch (error) {
+        console.error('Error guardando cache:', error);
+    }
+}
+
+function sincronizarNotificaciones() {
+    const now = Date.now();
+    if (now - lastSync < CACHE_DURATION) {
+        return; // No sincronizar si es reciente
+    }
+
+    cargarNotificaciones(true); // true para indicar que es sincronización en background
+}
+
+function cargarNotificaciones(isSync = false) {
     const formData = new FormData();
     formData.append('accion', 'obtener');
 
@@ -44,7 +90,10 @@ function cargarNotificaciones() {
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
-            mostrarNotificaciones(data.notificaciones);
+            guardarEnCache(data.notificaciones);
+            if (!isSync) {
+                mostrarNotificaciones(data.notificaciones);
+            }
             actualizarBadge(data.notificaciones);
         }
     })
@@ -53,8 +102,18 @@ function cargarNotificaciones() {
     });
 }
 
+function mostrarNotificacionesDesdeCache() {
+    if (notificacionesCache) {
+        mostrarNotificaciones(notificacionesCache);
+    } else {
+        // Si no hay cache, cargar
+        cargarNotificaciones();
+    }
+}
+
 function mostrarNotificaciones(notificaciones) {
     const lista = document.getElementById('notificacionList');
+    if (!lista) return;
 
     if (!notificaciones || notificaciones.length === 0) {
         lista.innerHTML = `
@@ -128,11 +187,13 @@ function mostrarNotificaciones(notificaciones) {
     });
 }
 
-function actualizarBadge(notificaciones) {
+function actualizarBadge(notificaciones = null) {
+    const notifs = notificaciones || notificacionesCache || [];
     const badge = document.getElementById('notificacionBadge');
+    if (!badge) return;
 
-    if (notificaciones.length > 0) {
-        badge.style.display = 'flex';
+    if (notifs.length > 0) {
+        badge.style.display = 'block';
     } else {
         badge.style.display = 'none';
     }
@@ -152,11 +213,20 @@ function marcarComoLeida(id) {
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
+            // Actualizar cache local
+            if (notificacionesCache) {
+                const index = notificacionesCache.findIndex(n => n.id == id);
+                if (index !== -1) {
+                    notificacionesCache[index].leida = true;
+                    guardarEnCache(notificacionesCache);
+                }
+            }
             const item = document.querySelector(`[data-id="${id}"]`);
             if (item) {
                 item.classList.remove('no-leida');
             }
-            cargarNotificaciones();
+            actualizarBadge(notificacionesCache);
+            actualizarBadge(notificacionesCache);
         }
     })
     .catch(error => {
@@ -178,13 +248,18 @@ function descartarNotificacion(id) {
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
+            // Remover del cache
+            if (notificacionesCache) {
+                notificacionesCache = notificacionesCache.filter(n => n.id != id);
+                guardarEnCache(notificacionesCache);
+            }
             // Remove the item from the list
             const item = document.querySelector(`.notificacion-item[data-id="${id}"]`);
             if (item) {
                 item.remove();
             }
             // Update badge
-            actualizarBadge({ length: document.querySelectorAll('.notificacion-item').length });
+            actualizarBadge(notificacionesCache);
         } else {
             console.error('Error descartando notificación:', data.mensaje);
         }

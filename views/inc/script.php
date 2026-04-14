@@ -1069,197 +1069,98 @@
     })();
 </script>
 
-<!-- script que manea ja busqueda de medicamentos lista de compras y envio por post -->
+<!-- script que maneja la busqueda de medicamentos lista de compras y envio por post -->
 <script>
-    // Script corregido para ventas con gestión mejorada de carrito
-    (function() {
-        const formVenta = document.getElementById('form-venta-caja');
-        if (!formVenta) {
-            return;
+    // clase para manejar el carrito de caja
+    class CajaManager {
+        constructor() {
+            // inicializa propiedades
+            this.formVenta = document.getElementById('form-venta-caja');
+            if (!this.formVenta) return;
+
+            this.URL_MED = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
+            this.cart = [];
+            this.debounce = null;
+            this.medicamentosCache = {};
+            this.tooltipTimeout = null;
+
+            // elementos del dom
+            this.itemsHidden = this.ensureHidden('venta_items_json', 'venta_items_json');
+            this.subtotalHidden = this.ensureHidden('subtotal_venta', 'subtotal_venta');
+            this.totalHidden = this.ensureHidden('total_venta', 'total_venta');
+            this.cambioHidden = this.ensureHidden('cambio_venta', 'cambio_venta');
+            this.dineroHidden = this.ensureHidden('dinero_recibido_venta', 'dinero_recibido_venta');
+
+            this.medSearch = this.formVenta.querySelector('.med_search');
+            this.filtro_presentacion = this.$( '#filtro_presentacion');
+            this.filtro_funcion = this.$( '#filtro_funcion');
+            this.filtro_via = this.$( '#filtro_via');
+            this.filtro_proveedor = this.$( '#filtro_proveedor');
+
+            this.resultsContainer = this.$( '#med_search_results');
+            if (!this.resultsContainer && this.medSearch) {
+                this.resultsContainer = document.createElement('div');
+                this.resultsContainer.id = 'med_search_results';
+                this.resultsContainer.className = 'search-results-dropdown';
+                this.resultsContainer.style.cssText = `
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                max-height: 300px;
+                overflow-y: auto;
+                background: white;
+                border: 1px solid #ddd;
+                border-top: none;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            `;
+                this.medSearch.parentElement.style.position = 'relative';
+                this.medSearch.parentElement.appendChild(this.resultsContainer);
+            }
+
+            this.tablaBody = this.$( '#tabla_items_venta');
+            this.tablaMasVendidos = this.$( '#tabla_mas_vendidos');
+            this.inputDinero = this.$( '#input_dinero_recibido');
+            this.subtotalText = this.$( '#subtotal_texto');
+            this.totalText = this.$( '#total_texto');
+            this.cambioText = this.$( '#cambio_texto');
+
+            // inicializa eventos
+            this.init();
         }
 
-
-        const URL_MED = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
-        let cart = [];
-        let debounce = null;
-
-        function $(s) {
-            return formVenta.querySelector(s);
+        // metodo para seleccionar elementos dentro del formulario
+        $(s) {
+            return this.formVenta.querySelector(s);
         }
 
-        function $all(s) {
-            return Array.from(formVenta.querySelectorAll(s));
+        // metodo para seleccionar multiples elementos
+        $all(s) {
+            return Array.from(this.formVenta.querySelectorAll(s));
         }
 
-        function ensureHidden(name, id) {
-            let el = formVenta.querySelector('input[name="' + name + '"]');
+        // metodo para asegurar campos ocultos
+        ensureHidden(name, id) {
+            let el = this.formVenta.querySelector('input[name="' + name + '"]');
             if (!el) {
                 el = document.createElement('input');
                 el.type = 'hidden';
                 el.name = name;
                 if (id) el.id = id;
-                formVenta.appendChild(el);
+                this.formVenta.appendChild(el);
             }
             return el;
         }
 
-        const itemsHidden = ensureHidden('venta_items_json', 'venta_items_json');
-        const subtotalHidden = ensureHidden('subtotal_venta', 'subtotal_venta');
-        const totalHidden = ensureHidden('total_venta', 'total_venta');
-        const cambioHidden = ensureHidden('cambio_venta', 'cambio_venta');
-        const dineroHidden = ensureHidden('dinero_recibido_venta', 'dinero_recibido_venta');
-
-        const medSearch = $('#med_search');
-        const medicamentosCache = {};
-        let tooltipTimeout = null;
-        let tooltipItem = null;
-
-        function mostrarTooltip(e, it, element) {
-            let tooltip = document.querySelector('.med-tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.className = 'med-tooltip';
-                tooltip.style.cssText = `
-                     display: none;
-                     position: fixed;
-                     top: 20px;
-                     right: 20px;
-                     z-index: 2000;
-                     width: 320px;
-                     pointer-events: none;
-                     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-                     opacity: 0;
-                     transform: translateY(-10px);
-                 `;
-                document.body.appendChild(tooltip);
-            }
-
-            tooltipItem = it;
-
-            const nombre = escapeHtml(it.nombre || '');
-            const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
-            const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
-            const funcion = escapeHtml(it.funcion || 'Sin función');
-            const via = escapeHtml(it.via || 'Sin vía');
-            const stock = Number(it.stock || 0);
-            const precioVenta = formatMoney(it.precio_venta || 0);
-            const precioCompra = formatMoney(it.precio_compra || 0);
-            const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
-            const precioCaja = formatMoney((it.precio_venta || 0) * unidadesPorCaja);
-            const vencimiento = it.fecha_vencimiento ? it.fecha_vencimiento.split('-').reverse().join('/') : 'N/A';
-            const codigoBarras = escapeHtml(it.med_codigo_barras || 'N/A');
-
-            const stockLabel = stock <= 0 ? 'Sin Stock' : (stock <= 10 ? 'Bajo Stock' : 'Disponible');
-            const stockBgColor = stock <= 0 ? '#da0101' : (stock <= 10 ? '#f39e00' : '#1b9c1b');
-
-            tooltip.innerHTML = `
-                 <div class="tooltip-header" style="background: #13386c; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
-                     <span style="font-weight: 600; font-size: 0.95em;">${nombre}</span>
-                     <span style="background: ${stockBgColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 600;">${stockLabel}</span>
-                 </div>
-                 <div class="tooltip-content" style="padding: 12px; background: #ffffff; border: 1px solid #dcdcdc; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.85em; color: #333333;">
-                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
-                         <span style="color: #666666;"><strong>Proveedor:</strong></span>
-                         <span style="color: #333333;">${proveedor}</span>
-                     </div>
-                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
-                         <span style="color: #666666;"><strong>Presentación:</strong></span>
-                         <span style="color: #333333;">${presentacion}</span>
-                     </div>
-                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em;">
-                         <span style="color: #666666;"><strong>Función:</strong></span>
-                         <span style="color: #333333;">${funcion}</span>
-                     </div>
-                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85em;">
-                         <span style="color: #666666;"><strong>Vía:</strong></span>
-                         <span style="color: #333333;">${via}</span>
-                     </div>
-                     <div style="background: #f1f1f1; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                             <span style="color: #13386c; font-weight: 600;">PRECIO VENTA</span>
-                             <span style="color: #13386c; font-weight: 700; font-size: 1.1em;">Bs ${precioVenta}</span>
-                         </div>
-                         <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666;">
-                             <span>Caja (${unidadesPorCaja} uni):</span>
-                             <span style="font-weight: 500;">Bs ${precioCaja}</span>
-                         </div>
-                          <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666; margin-top: 2px;">
-                              <span>Precio Compra:</span>
-                              <span>Bs ${precioCompra}</span>
-                          </div>
-                     </div>
-                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: ${stock <= 0 ? '#ffebee' : stock <= 10 ? '#fff3e0' : '#e8f5e9'}; border-radius: 6px; margin-bottom: 8px;">
-                         <span style="color: ${stock <= 0 ? '#da0101' : stock <= 10 ? '#f39e00' : '#1b9c1b'}; font-weight: 600;">STOCK</span>
-                         <span style="color: ${stock <= 0 ? '#da0101' : stock <= 10 ? '#f39e00' : '#1b9c1b'}; font-weight: 700;">${stock} uni</span>
-                     </div>
-                     <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666666; padding-top: 6px; border-top: 1px solid #dcdcdc;">
-                         <span><strong>Vence:</strong> ${vencimiento}</span>
-                         <span>${codigoBarras}</span>
-                     </div>
-                 </div>
-             `;
-
-            tooltip.style.display = 'block';
-            requestAnimationFrame(() => {
-                tooltip.style.opacity = '1';
-                tooltip.style.transform = 'translateY(0)';
-            });
-        }
-
-        function ocultarTooltip() {
-            const tooltip = document.querySelector('.med-tooltip');
-            if (tooltip) {
-                tooltip.style.opacity = '0';
-                tooltip.style.transform = 'translateY(-10px)';
-                setTimeout(() => {
-                    if (tooltip.style.opacity === '0') {
-                        tooltip.style.display = 'none';
-                    }
-                }, 300);
-            }
-            tooltipItem = null;
-        }
-
-        const filtro_presentacion = $('#filtro_presentacion');
-        const filtro_funcion = $('#filtro_funcion');
-        const filtro_via = $('#filtro_via');
-        const filtro_proveedor = $('#filtro_proveedor');
-
-        let resultsContainer = $('#med_search_results');
-        if (!resultsContainer && medSearch) {
-            resultsContainer = document.createElement('div');
-            resultsContainer.id = 'med_search_results';
-            resultsContainer.className = 'search-results-dropdown';
-            resultsContainer.style.cssText = `
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-top: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        `;
-            medSearch.parentElement.style.position = 'relative';
-            medSearch.parentElement.appendChild(resultsContainer);
-        }
-
-        const tablaBody = $('#tabla_items_venta');
-        const tablaMasVendidos = $('#tabla_mas_vendidos');
-        const inputDinero = $('#input_dinero_recibido');
-        const subtotalText = $('#subtotal_texto');
-        const totalText = $('#total_texto');
-        const cambioText = $('#cambio_texto');
-
-        function formatMoney(n) {
+        // metodo para formatear dinero
+        formatMoney(n) {
             return Number(n || 0).toFixed(2);
         }
 
-        function escapeHtml(s) {
+        // metodo para escapar html
+        escapeHtml(s) {
             if (s == null) return '';
             return String(s).replace(/[&<>"'`]/g, function(m) {
                 return ({
@@ -1273,74 +1174,60 @@
             });
         }
 
-        //  FUNCIÓN MEJORADA: Buscar índice considerando med_id + lm_id (lote específico)
-        function findItemIndex(med_id, lote_id) {
-            return cart.findIndex(item =>
+        // metodo para encontrar indice de item en carrito
+        findItemIndex(med_id, lote_id) {
+            return this.cart.findIndex(item =>
                 String(item.med_id) === String(med_id) &&
                 String(item.lote_id || null) === String(lote_id || null)
             );
         }
 
-        function renderCart() {
-            if (!tablaBody) return;
+        // metodo para renderizar el carrito
+        renderCart() {
+            if (!this.tablaBody) return;
 
-            tablaBody.innerHTML = '';
+            this.tablaBody.innerHTML = '';
 
-            if (cart.length === 0) {
-                tablaBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:12px">No hay medicamentos en la lista</td></tr>';
+            if (this.cart.length === 0) {
+                this.tablaBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;padding:12px">no hay medicamentos en la lista</td></tr>';
             } else {
-                cart.forEach((it, i) => {
+                this.cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
                     tr.dataset.med = it.med_id;
 
-                    let nombreDisplay = escapeHtml(it.nombre);
+                    let nombreDisplay = this.escapeHtml(it.nombre);
                     if (it.lote) {
                         nombreDisplay += '<br><small style="color: #666;">' +
                             '<ion-icon name="barcode-outline"></ion-icon> ' +
-                            escapeHtml(it.lote) +
-                            (it.proveedor ? ' | ' + escapeHtml(it.proveedor) : '')
+                            this.escapeHtml(it.lote) +
+                            (it.proveedor ? ' | ' + this.escapeHtml(it.proveedor) : '')
                         '</small>';
                     }
 
-                    // Calcular cajas y unidades restantes
+                    // calcular cajas y unidades restantes
                     const unidadesPorCaja = it.unidades_por_caja || 1;
                     const cajas = Math.floor(it.cantidad / unidadesPorCaja);
                     const unidadesRestantes = it.cantidad % unidadesPorCaja;
 
                     tr.innerHTML =
                         '<td>' +
-                        '<button type="button" class="btn delete-item" data-index="' + i + '" title="Eliminar" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<button type="button" class="btn delete-item" data-index="' + i + '" title="eliminar" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
                         '<ion-icon name="trash-outline" style="font-size: 20px; color: red;"></ion-icon>' +
                         '</button>' +
                         '</td>' +
                         '<td>' + nombreDisplay + '</td>' +
-                        '<td>' + escapeHtml(it.presentacion || '') + '</td>' +
-                        '<td><div class="table-cantidad-unidades" style="display:flex; align-items:center; gap:4px;">' +
-                        '<button type="button" class="qty-dec-unidades" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
-                        '<ion-icon name="remove-outline" style="font-size: 14px;"></ion-icon>' +
-                        '</button>' +
-                        '<input type="number" class="qty-input-unidades" data-index="' + i + '" value="' + unidadesRestantes + '" min="0" max="' + (unidadesPorCaja - 1) + '" style="width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 2px; font-size: 12px;">' +
-                        '<button type="button" class="qty-inc-unidades" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
-                        '<ion-icon name="add-outline" style="font-size: 14px;"></ion-icon>' +
-                        '</button>' +
-                        '</div></td>' +
-                        '<td><div class="table-cantidad-cajas" style="display:flex; align-items:center; gap:4px;">' +
-                        '<button type="button" class="qty-dec-cajas" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
-                        '<ion-icon name="remove-outline" style="font-size: 14px;"></ion-icon>' +
-                        '</button>' +
-                        '<input type="number" class="qty-input-cajas" data-index="' + i + '" value="' + cajas + '" min="0" style="width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 2px; font-size: 12px;">' +
-                        '<button type="button" class="qty-inc-cajas" data-index="' + i + '" style="padding: 0; min-width: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">' +
-                        '<ion-icon name="add-outline" style="font-size: 14px;"></ion-icon>' +
-                        '</button>' +
-                        '</div></td>' +
-                        '<td>' + formatMoney(it.precio) + '</td>' +
-                        '<td>' + formatMoney(it.precio * it.cantidad) + '</td>';
+                        '<td>' + this.escapeHtml(it.presentacion || '') + '</td>' +
+                        '<td><input type="text" class="qty-input-unidades inp" data-index="' + i + '" value="' + unidadesRestantes + '" style="width: 60px; text-align: center;"></td>' +
+                        '<td><input type="text" class="qty-input-cajas inp" data-index="' + i + '" value="' + cajas + '" style="width: 60px; text-align: center;"></td>' +
+                        '<td>' + this.formatMoney(it.precio * (it.unidades_por_caja || 1)) + '</td>' +
+                        '<td>' + this.formatMoney(it.precio) + '</td>' +
+                        '<td>' + this.formatMoney(it.precio * it.cantidad) + '</td>';
 
-                    tablaBody.appendChild(tr);
+                    this.tablaBody.appendChild(tr);
                 });
             }
 
-            itemsHidden.value = JSON.stringify(cart.map(i => {
+            this.itemsHidden.value = JSON.stringify(this.cart.map(i => {
                 const upc = i.unidades_por_caja || 1;
                 return {
                     med_id: i.med_id,
@@ -1354,85 +1241,77 @@
                 };
             }));
 
-            updateTotals();
-            attachQtyEvents();
+            this.updateTotals();
+            this.attachQtyEvents();
         }
 
-        function eliminarItem(index) {
-            if (index < 0 || index >= cart.length) return;
+        // metodo para eliminar item del carrito
+        eliminarItem(index) {
+            if (index < 0 || index >= this.cart.length) return;
 
             Swal.fire({
-                title: '¿Eliminar este medicamento?',
-                text: 'Esta acción no se puede deshacer',
+                title: 'eliminar este medicamento?',
+                text: 'esta accion no se puede deshacer',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
+                confirmButtonText: 'si, eliminar',
+                cancelButtonText: 'cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    cart.splice(index, 1);
-                    renderCart();
+                    this.cart.splice(index, 1);
+                    this.renderCart();
                 }
             });
         }
 
-        function attachQtyEvents() {
-            // Eventos para unidades
-            $all('.qty-inc-unidades').forEach(b => {
-                b.onclick = function() {
-                    changeQtyUnidadesByIndex(parseInt(this.dataset.index), 1);
+        // metodo para adjuntar eventos a inputs de cantidad
+        attachQtyEvents() {
+            // eventos para unidades
+            this.$all('.qty-input-unidades').forEach(i => {
+                i.oninput = function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
                 };
-            });
-            $all('.qty-dec-unidades').forEach(b => {
-                b.onclick = function() {
-                    changeQtyUnidadesByIndex(parseInt(this.dataset.index), -1);
-                };
-            });
-            $all('.qty-input-unidades').forEach(i => {
                 i.onchange = function() {
-                    setQtyUnidadesByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                    this.manager.setQtyUnidadesByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
                 };
+                i.manager = this; // referencia a la instancia
             });
 
-            // Eventos para cajas
-            $all('.qty-inc-cajas').forEach(b => {
-                b.onclick = function() {
-                    changeQtyCajasByIndex(parseInt(this.dataset.index), 1);
+            // eventos para cajas
+            this.$all('.qty-input-cajas').forEach(i => {
+                i.oninput = function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
                 };
-            });
-            $all('.qty-dec-cajas').forEach(b => {
-                b.onclick = function() {
-                    changeQtyCajasByIndex(parseInt(this.dataset.index), -1);
-                };
-            });
-            $all('.qty-input-cajas').forEach(i => {
                 i.onchange = function() {
-                    setQtyCajasByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                    this.manager.setQtyCajasByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
                 };
+                i.manager = this;
             });
 
-            // Eventos para botones de eliminar
-            $all('.delete-item').forEach(btn => {
+            // eventos para botones de eliminar
+            this.$all('.delete-item').forEach(btn => {
                 btn.onclick = function() {
                     const index = parseInt(this.dataset.index);
-                    eliminarItem(index);
+                    this.manager.eliminarItem(index);
                 };
+                btn.manager = this;
             });
         }
 
-        function changeQtyUnidadesByIndex(idx, delta) {
-            if (idx < 0 || idx >= cart.length) return;
+        // metodo para cambiar cantidad de unidades por indice
+        changeQtyUnidadesByIndex(idx, delta) {
+            if (idx < 0 || idx >= this.cart.length) return;
 
-            const item = cart[idx];
+            const item = this.cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
 
             let nuevasUnidades = unidadesActuales + delta;
 
-            // Validar límites de unidades (0 a unidadesPorCaja-1)
+            // validar limites de unidades
             if (nuevasUnidades < 0) {
                 nuevasUnidades = 0;
             } else if (nuevasUnidades >= unidadesPorCaja) {
@@ -1441,152 +1320,156 @@
 
             const nuevaCantidadTotal = (cajasActuales * unidadesPorCaja) + nuevasUnidades;
 
-            // Validar stock total
+            // validar stock total
             if (item.stock != null && nuevaCantidadTotal > item.stock) {
                 Swal.fire({
-                    title: 'Sin stock suficiente',
-                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
+                    title: 'sin stock suficiente',
+                    html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
                     icon: 'warning',
-                    confirmButtonText: 'Entendido'
+                    confirmButtonText: 'entendido'
                 });
                 return;
             }
 
             item.cantidad = nuevaCantidadTotal;
-            renderCart();
+            this.renderCart();
         }
 
-        function changeQtyCajasByIndex(idx, delta) {
-            if (idx < 0 || idx >= cart.length) return;
+        // metodo para cambiar cantidad de cajas por indice
+        changeQtyCajasByIndex(idx, delta) {
+            if (idx < 0 || idx >= this.cart.length) return;
 
-            const item = cart[idx];
+            const item = this.cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
 
             let nuevasCajas = cajasActuales + delta;
 
-            // Validar que no sea negativo
+            // validar que no sea negativo
             if (nuevasCajas < 0) {
                 nuevasCajas = 0;
             }
 
             const nuevaCantidadTotal = (nuevasCajas * unidadesPorCaja) + unidadesActuales;
 
-            // Validar stock total
+            // validar stock total
             if (item.stock != null && nuevaCantidadTotal > item.stock) {
-                // Calcular cuántas cajas completas y unidades restantes se pueden agregar
+                // calcular cuantas cajas completas y unidades restantes se pueden agregar
                 const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
                 const unidadesRestantes = item.stock % unidadesPorCaja;
 
-                // Mostrar alerta con información detallada
+                // mostrar alerta con informacion detallada
                 Swal.fire({
-                    title: 'Sin stock suficiente',
-                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
-                       <p>Intentando agregar: <strong>${nuevasCajas}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
+                    title: 'sin stock suficiente',
+                    html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
+                       <p>intentando agregar: <strong>${nuevasCajas}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
                     icon: 'warning',
-                    confirmButtonText: 'Entendido'
+                    confirmButtonText: 'entendido'
                 });
                 return;
             }
 
             item.cantidad = nuevaCantidadTotal;
-            renderCart();
+            this.renderCart();
         }
 
-        function setQtyUnidadesByIndex(idx, val) {
-            if (idx < 0 || idx >= cart.length) return;
+        // metodo para establecer cantidad de unidades por indice
+        setQtyUnidadesByIndex(idx, val) {
+            if (idx < 0 || idx >= this.cart.length) return;
 
-            const item = cart[idx];
+            const item = this.cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
 
-            // Validar rango de unidades
+            // validar rango de unidades
             if (val < 0) val = 0;
             if (val >= unidadesPorCaja) val = unidadesPorCaja - 1;
 
             const nuevaCantidadTotal = (cajasActuales * unidadesPorCaja) + val;
 
-            // Validar stock total
+            // validar stock total
             if (item.stock != null && nuevaCantidadTotal > item.stock) {
                 Swal.fire({
-                    title: 'Sin stock suficiente',
-                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
+                    title: 'sin stock suficiente',
+                    html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
                     icon: 'warning',
-                    confirmButtonText: 'Entendido'
+                    confirmButtonText: 'entendido'
                 });
                 return;
             }
 
             item.cantidad = nuevaCantidadTotal;
-            renderCart();
+            this.renderCart();
         }
 
-        function setQtyCajasByIndex(idx, val) {
-            if (idx < 0 || idx >= cart.length) return;
+        // metodo para establecer cantidad de cajas por indice
+        setQtyCajasByIndex(idx, val) {
+            if (idx < 0 || idx >= this.cart.length) return;
 
-            const item = cart[idx];
+            const item = this.cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
             const unidadesActuales = item.cantidad % unidadesPorCaja;
 
-            // Validar que no sea negativo
+            // validar que no sea negativo
             if (val < 0) val = 0;
 
             const nuevaCantidadTotal = (val * unidadesPorCaja) + unidadesActuales;
 
-            // Validar stock total
+            // validar stock total
             if (item.stock != null && nuevaCantidadTotal > item.stock) {
-                // Calcular cuántas cajas completas y unidades restantes se pueden agregar
+                // calcular cuantas cajas completas y unidades restantes se pueden agregar
                 const maxCajasCompletas = Math.floor(item.stock / unidadesPorCaja);
                 const unidadesRestantes = item.stock % unidadesPorCaja;
 
-                // Mostrar alerta con información detallada
+                // mostrar alerta con informacion detallada
                 Swal.fire({
-                    title: 'Sin stock suficiente',
-                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                       ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>Equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
-                       <p>Intentando agregar: <strong>${val}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
+                    title: 'sin stock suficiente',
+                    html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
+                       ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
+                       <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
+                       <p>equivalente a: <strong>${maxCajasCompletas}</strong> cajas y <strong>${unidadesRestantes}</strong> unidades</p>
+                       <p>intentando agregar: <strong>${val}</strong> cajas y <strong>${unidadesActuales}</strong> unidades</p>`,
                     icon: 'warning',
-                    confirmButtonText: 'Entendido'
+                    confirmButtonText: 'entendido'
                 });
                 return;
             }
 
             item.cantidad = nuevaCantidadTotal;
-            renderCart();
+            this.renderCart();
         }
 
-        function setQtyByIndex(idx, val) {
-            if (idx < 0 || idx >= cart.length) return;
+        // metodo para establecer cantidad por indice
+        setQtyByIndex(idx, val) {
+            if (idx < 0 || idx >= this.cart.length) return;
 
-            const item = cart[idx];
+            const item = this.cart[idx];
 
             if (val <= 0) {
                 Swal.fire({
-                    title: 'Cantidad 0',
-                    text: '¿Eliminar este medicamento?',
+                    title: 'cantidad 0',
+                    text: 'eliminar este medicamento?',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
+                    confirmButtonText: 'si, eliminar',
+                    cancelButtonText: 'cancelar'
                 }).then(r => {
                     if (r.isConfirmed) {
-                        cart.splice(idx, 1);
-                        renderCart();
+                        this.cart.splice(idx, 1);
+                        this.renderCart();
                     } else {
                         item.cantidad = 1;
-                        renderCart();
+                        this.renderCart();
                     }
                 });
                 return;
@@ -1594,53 +1477,55 @@
 
             if (item.stock != null && val > item.stock) {
                 Swal.fire({
-                    title: 'Sin stock suficiente',
-                    html: `<p><strong>${escapeHtml(item.nombre)}</strong></p>
-                   ${item.lote ? '<p>Lote: <strong>' + escapeHtml(item.lote) + '</strong></p>' : ''}
-                   <p>Stock disponible: <strong>${item.stock}</strong> unidades</p>
-                   <p>Cantidad ingresada: <strong>${val}</strong> unidades</p>`,
+                    title: 'sin stock suficiente',
+                    html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
+                   ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
+                   <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
+                   <p>cantidad ingresada: <strong>${val}</strong> unidades</p>`,
                     icon: 'warning',
-                    confirmButtonText: 'Entendido'
+                    confirmButtonText: 'entendido'
                 });
                 item.cantidad = item.stock > 0 ? item.stock : 1;
-                renderCart();
+                this.renderCart();
                 return;
             }
 
             item.cantidad = val;
-            renderCart();
+            this.renderCart();
         }
 
-        function updateTotals() {
-            const subtotal = cart.reduce((s, i) => s + (i.precio * i.cantidad), 0);
+        // metodo para actualizar totales
+        updateTotals() {
+            const subtotal = this.cart.reduce((s, i) => s + (i.precio * i.cantidad), 0);
             const total = subtotal;
-            subtotalHidden.value = subtotal.toFixed(2);
-            totalHidden.value = total.toFixed(2);
-            if (subtotalText) subtotalText.textContent = 'Bs. ' + formatMoney(subtotal);
-            if (totalText) totalText.textContent = 'Bs. ' + formatMoney(total);
-            const dinero = Number(inputDinero ? inputDinero.value : 0);
+            this.subtotalHidden.value = subtotal.toFixed(2);
+            this.totalHidden.value = total.toFixed(2);
+            if (this.subtotalText) this.subtotalText.textContent = 'bs. ' + this.formatMoney(subtotal);
+            if (this.totalText) this.totalText.textContent = 'bs. ' + this.formatMoney(total);
+            const dinero = Number(this.inputDinero ? this.inputDinero.value : 0);
             const cambio = dinero - total;
-            cambioHidden.value = (cambio > 0 ? cambio : 0).toFixed(2);
-            if (cambioText) cambioText.textContent = (isNaN(cambio) ? '0.00' : formatMoney(Math.max(0, cambio)));
-            if (dineroHidden) dineroHidden.value = dinero;
+            this.cambioHidden.value = (cambio > 0 ? cambio : 0).toFixed(2);
+            if (this.cambioText) this.cambioText.textContent = (isNaN(cambio) ? '0.00' : this.formatMoney(Math.max(0, cambio)));
+            if (this.dineroHidden) this.dineroHidden.value = dinero;
         }
 
-        function addItem(m) {
-            const idx = findItemIndex(m.med_id, m.lote_id);
+        // metodo para agregar item al carrito
+        addItem(m) {
+            const idx = this.findItemIndex(m.med_id, m.lote_id);
 
             if (idx !== -1) {
-                const ex = cart[idx];
+                const ex = this.cart[idx];
                 const nuevaCantidad = ex.cantidad + 1;
 
                 if (m.stock != null && nuevaCantidad > m.stock) {
                     Swal.fire({
-                        title: 'Sin stock suficiente',
-                        html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
-                       ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
-                       <p>Stock disponible: <strong>${m.stock}</strong> unidades</p>
-                       <p>Ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
+                        title: 'sin stock suficiente',
+                        html: `<p><strong>${this.escapeHtml(m.nombre)}</strong></p>
+                       ${m.lote ? '<p>lote: <strong>' + this.escapeHtml(m.lote) + '</strong></p>' : ''}
+                       <p>stock disponible: <strong>${m.stock}</strong> unidades</p>
+                       <p>ya tienes <strong>${ex.cantidad}</strong> en el carrito</p>`,
                         icon: 'warning',
-                        confirmButtonText: 'Entendido'
+                        confirmButtonText: 'entendido'
                     });
                     return;
                 }
@@ -1649,233 +1534,244 @@
             } else {
                 if (m.stock != null && m.stock <= 0) {
                     Swal.fire({
-                        title: 'Sin stock',
-                        html: `<p><strong>${escapeHtml(m.nombre)}</strong></p>
-                       ${m.lote ? '<p>Lote: <strong>' + escapeHtml(m.lote) + '</strong></p>' : ''}
-                       <p>Este lote no tiene stock disponible</p>`,
+                        title: 'sin stock',
+                        html: `<p><strong>${this.escapeHtml(m.nombre)}</strong></p>
+                       ${m.lote ? '<p>lote: <strong>' + this.escapeHtml(m.lote) + '</strong></p>' : ''}
+                       <p>este lote no tiene stock disponible</p>`,
                         icon: 'error',
-                        confirmButtonText: 'Entendido'
+                        confirmButtonText: 'entendido'
                     });
                     return;
                 }
 
-                cart.push({
+                this.cart.push({
                     med_id: m.med_id,
                     lote_id: m.lote_id || null,
                     lote: m.lote || null,
                     nombre: m.nombre,
-                    presentacion: m.presentacion || '',
-                    proveedor: m.proveedor || '',
+                    presentacion: m.presentacion,
+                    proveedor: m.proveedor,
                     precio: parseFloat(m.precio) || 0,
-                    cantidad: 1,
+                    cantidad: 0,
                     stock: m.stock != null ? Number(m.stock) : null,
                     unidades_por_caja: m.unidades_por_caja || 1
                 });
             }
-            renderCart();
+            this.renderCart();
         }
 
-        function doSearch(term) {
+        // metodo para buscar medicamentos
+        doSearch(term) {
             if (!term || term.trim().length < 1) {
-                if (resultsContainer) {
-                    resultsContainer.innerHTML = '';
-                    resultsContainer.style.display = 'none';
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.style.display = 'none';
                 }
                 return;
             }
 
             const cacheKey = JSON.stringify({
                 term,
-                presentacion: filtro_presentacion ? filtro_presentacion.value : null,
-                funcion: filtro_funcion ? filtro_funcion.value : null,
-                via: filtro_via ? filtro_via.value : null,
-                proveedor: filtro_proveedor ? filtro_proveedor.value : null
+                presentacion: this.filtro_presentacion ? this.filtro_presentacion.value : null,
+                funcion: this.filtro_funcion ? this.filtro_funcion.value : null,
+                via: this.filtro_via ? this.filtro_via.value : null,
+                proveedor: this.filtro_proveedor ? this.filtro_proveedor.value : null
             });
 
-            if (medicamentosCache[cacheKey]) {
-                renderResults(medicamentosCache[cacheKey]);
+            if (this.medicamentosCache[cacheKey]) {
+                this.renderResults(this.medicamentosCache[cacheKey]);
                 return;
             }
 
             const body = new URLSearchParams();
             body.append('ventaAjax', 'buscar');
             body.append('termino', term);
-            if (filtro_presentacion && filtro_presentacion.value) body.append('presentacion', filtro_presentacion.value);
-            if (filtro_funcion && filtro_funcion.value) body.append('funcion', filtro_funcion.value);
-            if (filtro_via && filtro_via.value) body.append('via', filtro_via.value);
-            if (filtro_proveedor && filtro_proveedor.value) body.append('proveedor', filtro_proveedor.value);
+            if (this.filtro_presentacion && this.filtro_presentacion.value) body.append('presentacion', this.filtro_presentacion.value);
+            if (this.filtro_funcion && this.filtro_funcion.value) body.append('funcion', this.filtro_funcion.value);
+            if (this.filtro_via && this.filtro_via.value) body.append('via', this.filtro_via.value);
+            if (this.filtro_proveedor && this.filtro_proveedor.value) body.append('proveedor', this.filtro_proveedor.value);
 
-            fetch(URL_MED, {
+            fetch(this.URL_MED, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
-                medicamentosCache[cacheKey] = json || [];
-                renderResults(json || []);
+                this.medicamentosCache[cacheKey] = json || [];
+                this.renderResults(json || []);
             }).catch(err => {
-                if (resultsContainer) {
-                    resultsContainer.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
-                    resultsContainer.style.display = 'block';
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '<div class="search-results-item no-results">error en la busqueda</div>';
+                    this.resultsContainer.style.display = 'block';
                 }
             });
         }
 
-        function renderResults(items) {
-            if (!resultsContainer) return;
+        // metodo para renderizar resultados de busqueda
+        renderResults(items) {
+            if (!this.resultsContainer) return;
 
             if (!items || items.length === 0) {
-                resultsContainer.innerHTML = '<div class="search-results-item no-results">No se encontraron resultados</div>';
-                resultsContainer.style.display = 'block';
+                this.resultsContainer.innerHTML = `
+                    <div class="table-popup-wrap">
+                        <div class="table-popup open">
+                            <div class="tp-scroll">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td class="tp-empty" colspan="8">no se encontraron resultados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                this.resultsContainer.style.display = 'block';
                 return;
             }
 
-            resultsContainer.innerHTML = '';
-            items.forEach(it => {
-                const nombre = escapeHtml(it.nombre || '');
-                const lote = escapeHtml(it.lm_numero_lote || '');
-                const presentacion = escapeHtml(it.presentacion || 'Sin presentación');
-                const proveedor = escapeHtml(it.proveedor || 'Sin proveedor');
-                const precio = formatMoney(it.precio_venta || 0);
-                const stock = Number(it.stock || 0);
-                const blister = Number(it.lm_cant_blister || 1);
-                const unidad = Number(it.lm_cant_unidad || 1);
-                const unidadesPorCaja = blister * unidad;
+            const tableHtml = `
+                <div class="table-popup-wrap">
+                    <div class="table-popup open">
+                        <div class="tp-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>numero de lote</th>
+                                        <th>descripcion</th>
+                                        <th>presentacion</th>
+                                        <th>codigo de barras</th>
+                                        <th>cantidad unidad actual</th>
+                                        <th>precio de compra</th>
+                                        <th>precio de venta unitario</th>
+                                        <th>precio de venta caja</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.map((it, index) => {
+                                        const nombre = this.escapeHtml(it.nombre || '');
+                                        const lote = this.escapeHtml(it.lm_numero_lote || '');
+                                        const presentacion = this.escapeHtml(it.presentacion || 'sin presentacion');
+                                        const proveedor = this.escapeHtml(it.proveedor || 'sin proveedor');
+                                        const precio = this.formatMoney(it.precio_venta || 0);
+                                        const stock = Number(it.stock || 0);
+                                        const blister = Number(it.lm_cant_blister || 1);
+                                        const unidad = Number(it.lm_cant_unidad || 1);
+                                        const unidadesPorCaja = blister * unidad;
 
-                let diasVenc = '';
-                let fechaVencimientoDisplay = '';
-                if (it.fecha_vencimiento) {
-                    const hoy = new Date();
-                    const vence = new Date(it.fecha_vencimiento);
-                    const diff = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
+                                        let diasVenc = '';
+                                        let fechaVencimientoDisplay = '';
+                                        if (it.fecha_vencimiento) {
+                                            const hoy = new Date();
+                                            const vence = new Date(it.fecha_vencimiento);
+                                            const diff = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
 
-                    const dia = String(vence.getDate()).padStart(2, '0');
-                    const mes = String(vence.getMonth() + 1).padStart(2, '0');
-                    const anio = vence.getFullYear();
-                    fechaVencimientoDisplay = `${dia}/${mes}/${anio}`;
+                                            const dia = String(vence.getDate()).padStart(2, '0');
+                                            const mes = String(vence.getMonth() + 1).padStart(2, '0');
+                                            const anio = vence.getFullYear();
+                                            fechaVencimientoDisplay = `${dia}/${mes}/${anio}`;
 
-                    if (diff < 0) {
-                        diasVenc = '<span style="color: red; font-weight: bold;">⚠ VENCIDO</span>';
-                    } else if (diff <= 30) {
-                        diasVenc = `<span style="color: orange; font-weight: bold;">⚠ ${diff}d</span>`;
-                    } else if (diff <= 90) {
-                        diasVenc = `<span style="color: #ff9800;">${diff}d</span>`;
-                    }
-                }
+                                            if (diff < 0) {
+                                                diasVenc = '<span style="color: red; font-weight: bold;">vencido</span>';
+                                            } else if (diff <= 30) {
+                                                diasVenc = `<span style="color: orange; font-weight: bold;">${diff}d</span>`;
+                                            } else if (diff <= 90) {
+                                                diasVenc = `<span style="color: #ff9800;">${diff}d</span>`;
+                                            }
+                                        }
 
-                const stockText = stock > 0 ?
-                    `<span style="color: #4caf50;">Stock: ${stock}</span>` :
-                    '<span style="color: red;">Sin stock</span>';
+                                        const stockText = stock > 0 ?
+                                            `<span style="color: #4caf50;">${stock}</span>` :
+                                            '<span style="color: red;">sin stock</span>';
 
-                const sinStock = stock <= 0 ? 'sin-stock' : '';
+                                        const sinStock = stock <= 0 ? 'sin-stock' : '';
 
-                const itemEl = document.createElement('div');
-                itemEl.className = `search-results-item ${sinStock}`;
-                itemEl.innerHTML = `
-                <div class="search-result-name">
-                    <strong>${nombre}</strong>
-                    <span style="font-size: 0.85em; color: #666; margin-left: 8px;">(${proveedor})</span>
+                                        const descripcion = `${nombre} - ${presentacion}`;
+                                        const precioCompra = 'n/a'; // no disponible en respuesta
+                                        const precioVentaUnitario = this.formatMoney(it.precio_venta || 0);
+                                        const precioVentaCaja = this.formatMoney((it.precio_venta || 0) * unidadesPorCaja);
+
+                                        return `
+                                            <tr class="tr-cart ${sinStock}" data-med-id="${it.med_id}" data-lote-id="${it.lm_id || ''}" data-nombre="${this.escapeHtml(it.nombre)}" data-presentacion="${this.escapeHtml(it.presentacion)}" data-proveedor="${this.escapeHtml(it.proveedor)}" data-precio="${it.precio_venta || 0}" data-stock="${stock}" data-unidades-caja="${unidadesPorCaja}" data-lote="${this.escapeHtml(it.lm_numero_lote || '')}">
+                                                <td>${lote}</td>
+                                                <td class="tdp">${descripcion}</td>
+                                                <td>${presentacion}</td>
+                                                <td>${this.escapeHtml(it.med_codigo_barras || 'n/a')}</td>
+                                                <td>${stock}</td>
+                                                <td>${precioCompra}</td>
+                                                <td>bs. ${precioVentaUnitario}</td>
+                                                <td>bs. ${precioVentaCaja}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="search-result-details" style="font-size: 0.9em; color: #555;">
-                    <span><ion-icon name="barcode-outline"></ion-icon> ${lote}</span>
-                    <span style="margin: 0 6px;">•</span>
-                    <span>${presentacion}</span>
-                    <span style="margin: 0 6px;">•</span>
-                    <span style="color: #00a2d3; text-decoration:underline; font-size: 18px; font-weight: bold; "><ion-icon name="pricetag-outline"></ion-icon> Bs. ${precio}</span>
-                    <span style="margin: 0 6px;">•</span>
-                    ${stockText}
-                    ${fechaVencimientoDisplay ? '<span style="margin: 0 6px;">•</span><span><ion-icon name="calendar-outline"></ion-icon> Vence: ' + fechaVencimientoDisplay + '</span>' : ''}
-                    ${diasVenc ? '<span style="margin: 0 6px;">•</span>' + diasVenc : ''}
-                </div>
-                `;
+            `;
 
-                itemEl.addEventListener('click', () => {
-                    addItem({
-                        med_id: it.med_id,
-                        lote_id: it.lm_id || null,
-                        lote: it.lm_numero_lote || null,
-                        nombre: it.nombre,
-                        presentacion: it.presentacion,
-                        proveedor: it.proveedor,
-                        precio: parseFloat(it.precio_venta || 0),
-                        stock: stock,
-                        unidades_por_caja: unidadesPorCaja
+            this.resultsContainer.innerHTML = tableHtml;
+
+            // agregar eventos de click a las filas de la tabla
+            this.resultsContainer.querySelectorAll('.table-popup tr.tr-cart').forEach(row => {
+                row.addEventListener('click', () => {
+                    const data = row.dataset;
+                    this.addItem({
+                        med_id: data.medId,
+                        lote_id: data.loteId || null,
+                        lote: data.lote || null,
+                        nombre: data.nombre,
+                        presentacion: data.presentacion,
+                        proveedor: data.proveedor,
+                        precio: parseFloat(data.precio || 0),
+                        stock: Number(data.stock || 0),
+                        unidades_por_caja: Number(data.unidadesCaja || 1)
                     });
-                    resultsContainer.innerHTML = '';
-                    resultsContainer.style.display = 'none';
-                    if (medSearch) medSearch.value = '';
-                    ocultarTooltip();
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.style.display = 'none';
+                    if (this.medSearch) this.medSearch.value = '';
                 });
-
-                itemEl.addEventListener('mouseenter', (e) => {
-                    clearTimeout(tooltipTimeout);
-                    tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, itemEl), 3000);
-                });
-                itemEl.addEventListener('mousemove', (e) => {
-                    clearTimeout(tooltipTimeout);
-                    tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, itemEl), 3000);
-                });
-                itemEl.addEventListener('mouseleave', () => {
-                    clearTimeout(tooltipTimeout);
-                    ocultarTooltip();
-                });
-
-                resultsContainer.appendChild(itemEl);
             });
 
-            resultsContainer.style.display = 'block';
+            this.resultsContainer.style.display = 'block';
         }
 
-        if (medSearch) {
-            medSearch.addEventListener('input', e => {
-                const term = e.target.value.trim();
-                clearTimeout(debounce);
-
-                if (term.length === 0) {
-                    if (resultsContainer) {
-                        resultsContainer.innerHTML = '';
-                        resultsContainer.style.display = 'none';
-                    }
-                    return;
+        // metodo para realizar busqueda
+        performSearch() {
+            const term = this.medSearch.value.trim();
+            if (term.length === 0) {
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.style.display = 'none';
                 }
-
-                debounce = setTimeout(() => doSearch(term), 200);
-            });
-
-            medSearch.addEventListener('focus', function() {
-                if (this.value.trim().length > 0 && resultsContainer && resultsContainer.innerHTML) {
-                    resultsContainer.style.display = 'block';
-                }
-            });
+                return;
+            }
+            this.doSearch(term);
         }
 
-        [filtro_presentacion, filtro_funcion, filtro_via, filtro_proveedor].forEach(sel => {
-            if (sel) sel.addEventListener('change', () => {
-                if (medSearch && medSearch.value) doSearch(medSearch.value);
-            });
-        });
-
-        function loadMostSold() {
+        // metodo para cargar medicamentos mas vendidos
+        loadMostSold() {
             const body = new URLSearchParams();
             body.append('ventaAjax', 'mas_vendidos');
             body.append('limit', '5');
 
-            fetch(URL_MED, {
+            fetch(this.URL_MED, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: body.toString()
             }).then(r => r.json()).then(json => {
-                if (!tablaMasVendidos) return;
+                if (!this.tablaMasVendidos) return;
 
-                tablaMasVendidos.innerHTML = '';
+                this.tablaMasVendidos.innerHTML = '';
                 (json || []).forEach((it, i) => {
                     const stock = Number(it.stock || 0);
                     const stockClass = stock <= 0 ? 'sin-stock' : '';
-                    const stockText = stock > 0 ? `(Stock: ${stock})` : '<span style="color: red;">(Sin stock)</span>';
+                    const stockText = stock > 0 ? `(stock: ${stock})` : '<span style="color: red;">(sin stock)</span>';
 
                     const tr = document.createElement('tr');
                     tr.className = stockClass;
@@ -1883,15 +1779,15 @@
                     tr.innerHTML = `
                     <td>${i + 1}</td>
                     <td>
-                        <strong>${escapeHtml(it.nombre)}</strong><br>
-                        <small style="color: #666;">Lote: ${it.lote || 'N/A'} | ${it.proveedor || 'Sin proveedor'}</small>
+                        <strong>${this.escapeHtml(it.nombre)}</strong><br>
+                        <small style="color: #666;">lote: ${it.lote || 'n/a'} | ${it.proveedor || 'sin proveedor'}</small>
                     </td>
-                    <td>Bs. ${formatMoney(it.precio_venta)} ${stockText}</td>
+                    <td>bs. ${this.formatMoney(it.precio_venta)} ${stockText}</td>
                     <td>
                         <button type="button"
                            class="btn caja btn-add"
                            data-id="${it.med_id}"
-                           data-nombre="${escapeHtml(it.nombre)}"
+                           data-nombre="${this.escapeHtml(it.nombre)}"
                            data-lote-id="${it.lote_id}"
                            data-lote="${it.lote}"
                            data-presentacion="${it.presentacion}"
@@ -1905,31 +1801,31 @@
                     `;
 
                     tr.addEventListener('mouseenter', (e) => {
-                        clearTimeout(tooltipTimeout);
-                        tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
+                        clearTimeout(this.tooltipTimeout);
+                        this.tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
                     });
                     tr.addEventListener('mousemove', (e) => {
-                        clearTimeout(tooltipTimeout);
-                        tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
+                        clearTimeout(this.tooltipTimeout);
+                        this.tooltipTimeout = setTimeout(() => mostrarTooltip(e, it, tr), 3000);
                     });
                     tr.addEventListener('mouseleave', () => {
-                        clearTimeout(tooltipTimeout);
+                        clearTimeout(this.tooltipTimeout);
                         ocultarTooltip();
                     });
 
-                    tablaMasVendidos.appendChild(tr);
+                    this.tablaMasVendidos.appendChild(tr);
                 });
             });
 
-            // Attach event listener to the table for dynamic buttons
-            if (!tablaMasVendidos.dataset.hasListener) {
-                tablaMasVendidos.addEventListener('click', e => {
+            // adjuntar event listener a la tabla para botones dinamicos
+            if (!this.tablaMasVendidos.dataset.hasListener) {
+                this.tablaMasVendidos.addEventListener('click', e => {
                     if (e.target.classList.contains('btn-add')) {
                         e.preventDefault();
                         const el = e.target;
                         const stock = Number(el.dataset.stock || 0);
 
-                        addItem({
+                        this.addItem({
                             med_id: el.dataset.id,
                             lote_id: el.dataset.loteId || null,
                             lote: el.dataset.lote || null,
@@ -1943,278 +1839,362 @@
                         ocultarTooltip();
                     }
                 });
-                tablaMasVendidos.dataset.hasListener = 'true';
+                this.tablaMasVendidos.dataset.hasListener = 'true';
             }
         }
 
-        // Limpiar cache cada 5 minutos
-        setInterval(() => {
-            for (const key in medicamentosCache) {
-                delete medicamentosCache[key];
+        // metodo para inicializar
+        init() {
+            if (this.medSearch) {
+                this.medSearch.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.performSearch();
+                    }
+                });
+
+                this.medSearch.addEventListener('focus', function() {
+                    if (this.value.trim().length > 0 && this.manager.resultsContainer && this.manager.resultsContainer.innerHTML) {
+                        this.manager.resultsContainer.style.display = 'block';
+                    }
+                });
+                this.medSearch.manager = this;
             }
-        }, 300000);
 
-        if (inputDinero) inputDinero.addEventListener('input', updateTotals);
+            const btnBuscarMed = this.formVenta.querySelector('.btn_buscar_med');
+            if (btnBuscarMed) {
+                btnBuscarMed.addEventListener('click', () => this.performSearch());
+            }
 
-        formVenta.addEventListener('submit', function(e) {
-            if (cart.length === 0) {
-                e.preventDefault();
-                Swal.fire('Carrito vacío', 'Agrega al menos un medicamento para realizar la venta.', 'warning');
+            [this.filtro_presentacion, this.filtro_funcion, this.filtro_via, this.filtro_proveedor].forEach(sel => {
+                if (sel) sel.addEventListener('change', () => {
+                    if (this.medSearch && this.medSearch.value) this.doSearch(this.medSearch.value);
+                });
+            });
+
+            // limpiar cache cada 5 minutos
+            setInterval(() => {
+                for (const key in this.medicamentosCache) {
+                    delete this.medicamentosCache[key];
+                }
+            }, 300000);
+
+            if (this.inputDinero) this.inputDinero.addEventListener('input', () => this.updateTotals());
+
+            this.formVenta.addEventListener('submit', e => {
+                if (this.cart.length === 0) {
+                    e.preventDefault();
+                    Swal.fire('carrito vacio', 'agrega al menos un medicamento para realizar la venta.', 'warning');
+                    return;
+                }
+
+                this.updateTotals();
+            });
+
+            this.loadMostSold();
+            this.renderCart();
+
+            // prevenir submit del formulario al presionar enter en inputs
+            this.formVenta.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'submit') {
+                    e.preventDefault();
+                }
+            });
+
+            document.addEventListener('click', e => {
+                if (this.resultsContainer &&
+                    !this.resultsContainer.contains(e.target) &&
+                    e.target !== this.medSearch) {
+                    this.resultsContainer.style.display = 'none';
+                }
+            });
+
+            // exponer metodos globalmente
+            window.VentaCaja = {
+                addItem: (m) => this.addItem(m),
+                cart: this.cart,
+                renderCart: () => this.renderCart(),
+                updateTotals: () => this.updateTotals()
+            };
+        }
+    }
+
+    // clase para manejar la cotizacion
+    class CotizarManager {
+        constructor() {
+            // inicializa propiedades
+            this.medSearchQuote = document.querySelector('.med_search_quote');
+            this.btnBuscarQuote = document.querySelector('.btn_buscar_med_quote');
+            this.filtroProveedorQuote = document.getElementById('filtro_proveedor_quote');
+            this.resultsContainer = null;
+            this.debounce = null;
+
+            if (!this.medSearchQuote) return;
+
+            // crear contenedor de resultados
+            this.resultsContainer = document.createElement('div');
+            this.resultsContainer.id = 'quote_search_results';
+            this.resultsContainer.className = 'search-results-dropdown';
+            this.resultsContainer.style.cssText = `
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px var(--shadow-md);
+        `;
+            document.body.appendChild(this.resultsContainer);
+
+            // posicionar debajo del input
+            this.updatePosition();
+
+            // inicializa eventos
+            this.init();
+        }
+
+        // metodo para escapar html
+        escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/[&<>"'`]/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": "&#39;",
+                    '`': '&#96;'
+                })[m];
+            });
+        }
+
+        // metodo para buscar
+        doSearch(term) {
+            if (!term || term.trim().length < 1) {
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.style.display = 'none';
+                }
                 return;
             }
 
-            updateTotals();
-        });
+            const body = new URLSearchParams();
+            body.append('ventaAjax', 'buscar');
+            body.append('termino', term);
+            body.append('proveedor', this.filtroProveedorQuote ? this.filtroProveedorQuote.value : '');
+            // otros filtros vacios para cotizacion
 
-        loadMostSold();
-        renderCart();
+            fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
+            }).then(r => r.json()).then(json => {
+                this.renderResults(json || []);
+            }).catch(err => {
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '<div class="search-results-item no-results">error en la busqueda</div>';
+                    this.resultsContainer.style.display = 'block';
+                }
+            });
+        }
 
-        document.addEventListener('click', function(e) {
-            if (resultsContainer &&
-                !resultsContainer.contains(e.target) &&
-                e.target !== medSearch) {
-                resultsContainer.style.display = 'none';
+        // metodo para renderizar resultados
+        renderResults(items) {
+            if (!this.resultsContainer) return;
+
+            if (!items || items.length === 0) {
+                this.resultsContainer.innerHTML = '<div class="txctr tc">no se encontraron resultados</div>';
+                this.updatePosition();
+                this.resultsContainer.style.display = 'block';
+                return;
             }
-        });
 
-        window.VentaCaja = {
-            addItem,
-            cart,
-            renderCart,
-            updateTotals
-        };
-    })();
+            const tableHtml = `
+                <div class="tw">
+                    <table>
+                        <thead>
+                            <tr style="background: var(--bg-secondary);">
+                                <th>numero de lote</th>
+                                <th>descripcion</th>
+                                <th>precio unitario</th>
+                                <th>precio caja</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map((it) => {
+                                const nombre = this.escapeHtml(it.nombre || '');
+                                const lote = this.escapeHtml(it.lm_numero_lote || '');
+                                const presentacion = this.escapeHtml(it.presentacion || 'sin presentacion');
+                                const precioUnitario = this.formatMoney(it.precio_venta || 0);
+                                const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
+                                const precioCaja = this.formatMoney((it.precio_venta || 0) * unidadesPorCaja);
+
+                                const descripcion = `${nombre} - ${presentacion}`;
+
+                                return `
+                                    <tr>
+                                        <td>${lote}</td>
+                                        <td>${descripcion}</td>
+                                        <td>bs. ${precioUnitario}</td>
+                                        <td>bs. ${precioCaja}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            this.resultsContainer.innerHTML = tableHtml;
+            this.updatePosition();
+            this.resultsContainer.style.display = 'block';
+        }
+
+        // metodo para formatear dinero
+        formatMoney(n) {
+            return Number(n || 0).toFixed(2);
+        }
+
+        // metodo para actualizar posicion
+        updatePosition() {
+            if (!this.medSearchQuote) return;
+            const rect = this.medSearchQuote.getBoundingClientRect();
+            this.resultsContainer.style.top = (rect.bottom + window.scrollY) + 'px';
+            this.resultsContainer.style.left = (rect.left + window.scrollX) + 'px';
+            this.resultsContainer.style.width = rect.width + 'px';
+        }
+
+        // metodo para inicializar
+        init() {
+            if (this.medSearchQuote) {
+                this.medSearchQuote.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.performSearch();
+                    }
+                });
+
+                this.medSearchQuote.addEventListener('focus', () => {
+                    if (this.medSearchQuote.value.trim().length > 0 && this.resultsContainer && this.resultsContainer.innerHTML) {
+                        this.resultsContainer.style.display = 'block';
+                    }
+                });
+            }
+
+            if (this.btnBuscarQuote) {
+                this.btnBuscarQuote.addEventListener('click', () => this.performSearch());
+            }
+
+            if (this.filtroProveedorQuote) {
+                this.filtroProveedorQuote.addEventListener('change', () => {
+                    if (this.medSearchQuote && this.medSearchQuote.value) this.doSearch(this.medSearchQuote.value);
+                });
+            }
+
+            // cerrar resultados al hacer click fuera
+            document.addEventListener('click', e => {
+                if (this.resultsContainer &&
+                    !this.resultsContainer.contains(e.target) &&
+                    e.target !== this.medSearchQuote) {
+                    this.resultsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // metodo para realizar busqueda
+        performSearch() {
+            const term = this.medSearchQuote.value.trim();
+            if (term.length === 0) {
+                if (this.resultsContainer) {
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.style.display = 'none';
+                }
+                return;
+            }
+            this.doSearch(term);
+        }
+    }
+
+    // instanciar las clases cuando el dom este listo
+    document.addEventListener('DOMContentLoaded', () => {
+        new CajaManager();
+        new CotizarManager();
+    });
 </script>
 
 <!-- script busqueda de cliente para caja -->
 <script>
-    // Script mejorado para búsqueda de clientes
-    (function() {
-        const URL_CLI = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
-        const inputCliente = document.getElementById("buscar_cliente_venta");
-        let resultadoClientes = document.getElementById("resultado_clientes");
+    // clase para manejar la busqueda de clientes
+    class ClienteBusquedaManager {
+        constructor() {
+            // inicializa propiedades
+            this.URL_CLI = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
+            this.inputCliente = document.getElementById("buscar_cliente_venta");
+            this.resultadoClientes = document.getElementById("resultado_clientes");
 
-        let clienteSeleccionado = null;
-        let debounceCliente = null;
+            this.clienteSeleccionado = null;
+            this.debounceCliente = null;
 
-        // Verificar si el contenedor existe, si no, crearlo
-        if (!resultadoClientes) {
-            resultadoClientes = document.createElement('div');
-            resultadoClientes.id = 'resultado_clientes';
-            resultadoClientes.className = 'resultado-busqueda';
-        }
-
-        // CRÍTICO: Encontrar el contenedor correcto (.ventas-cliente)
-        const ventasClienteContainer = inputCliente.closest('.ventas-cliente');
-
-        if (ventasClienteContainer) {
-            // Asegurar position relative en el contenedor
-            ventasClienteContainer.style.position = 'relative';
-
-            // Insertar el dropdown como hijo directo del contenedor
-            if (!ventasClienteContainer.contains(resultadoClientes)) {
-                ventasClienteContainer.appendChild(resultadoClientes);
-            }
-        } else if (inputCliente.parentElement) {
-            // Fallback: usar el padre directo
-            inputCliente.parentElement.style.position = 'relative';
-            if (!inputCliente.parentElement.contains(resultadoClientes)) {
-                inputCliente.parentElement.appendChild(resultadoClientes);
-            }
-        }
-
-        // Aplicar estilos críticos al contenedor
-        resultadoClientes.style.cssText = `
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        max-height: 300px;
-        overflow-y: auto;
-        background: white;
-        border: 1px solid #ddd;
-        border-top: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-radius: 0 0 4px 4px;
-        margin-top: 0;
-    `;
-
-
-        // Obtener contenedor de cliente seleccionado
-        const clienteSeleccionadoContainer = document.getElementById('cliente_seleccionado_container');
-        const clienteNombreTexto = document.getElementById('cliente_nombre_texto');
-        const quitarClienteBtn = document.getElementById('quitar_cliente_btn');
-        const clienteIdHidden = document.getElementById('cliente_id_seleccionado');
-
-        // Event listener para búsqueda en tiempo real (sin botón)
-        if (inputCliente) {
-            inputCliente.addEventListener("input", function() {
-                const termino = this.value.trim();
-                clearTimeout(debounceCliente);
-
-
-                if (termino.length < 1) {
-                    resultadoClientes.innerHTML = "";
-                    resultadoClientes.style.display = "none";
-                    return;
-                }
-
-                // Buscar después de 250ms (búsqueda en tiempo real)
-                debounceCliente = setTimeout(() => {
-                    buscarClientes(termino);
-                }, 250);
-            });
-
-            inputCliente.addEventListener("focus", function() {
-                if (this.value.trim().length > 0 && resultadoClientes.innerHTML) {
-                    resultadoClientes.style.display = "block";
-                }
-            });
-
-            // Prevenir que el Enter envíe el formulario desde este input
-            inputCliente.addEventListener("keydown", function(e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    // Si hay un resultado visible, seleccionar el primero
-                    const primerResultado = resultadoClientes.querySelector('.cliente-item');
-                    if (primerResultado && resultadoClientes.style.display === "block") {
-                        seleccionarCliente(primerResultado);
-                    }
-                }
-            });
-        }
-
-        async function buscarClientes(termino) {
-
-            const formData = new FormData();
-            formData.append("ventaAjax", "buscar_cliente");
-            formData.append("termino", termino);
-
-            try {
-                const response = await fetch(URL_CLI, {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const text = await response.text();
-
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    data = [];
-                }
-
-                mostrarResultadosClientes(data);
-
-            } catch (error) {
-                resultadoClientes.innerHTML = '<div class="search-results-item no-results">Error en la búsqueda</div>';
-                resultadoClientes.style.display = "block";
-            }
-        }
-
-        function mostrarResultadosClientes(clientes) {
-
-            if (!clientes || clientes.length === 0) {
-                resultadoClientes.innerHTML = '<div class="search-results-item no-results">No se encontraron clientes</div>';
-                resultadoClientes.style.display = "block";
-                return;
+            // verificar si el contenedor existe, si no, crearlo
+            if (!this.resultadoClientes) {
+                this.resultadoClientes = document.createElement('div');
+                this.resultadoClientes.id = 'resultado_clientes';
+                this.resultadoClientes.className = 'resultado-busqueda';
             }
 
-            // Generar HTML usando la misma estructura que medicamentos
-            const html = clientes.map(cli => {
-                const nombreCompleto = `${cli.cl_nombres || ''} ${cli.cl_apellido_paterno || ''} ${cli.cl_apellido_materno || ''}`.trim();
-                const carnet = cli.cl_carnet || 'Sin CI';
-                const telefono = cli.cl_telefono ? ` · ${cli.cl_telefono}` : '';
+            // encontrar el contenedor correcto
+            this.ventasClienteContainer = this.inputCliente.closest('.ventas-cliente');
 
-                return `
-                <div class="search-results-item cliente-item" 
-                    data-id="${cli.cl_id}" 
-                    data-nombre="${escapeHtml(nombreCompleto)}">
-                    <div class="search-result-name">
-                        <ion-icon name="person-circle-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>
-                        ${escapeHtml(nombreCompleto)}
-                    </div>
-                    <div class="search-result-details">CI: ${escapeHtml(carnet)}${escapeHtml(telefono)}</div>
-                </div>`;
-            }).join('');
+            if (this.ventasClienteContainer) {
+                // asegurar position relative en el contenedor
+                this.ventasClienteContainer.style.position = 'relative';
 
-            resultadoClientes.innerHTML = html;
-            resultadoClientes.style.display = "block";
-
-
-            // Agregar event listeners a los items
-            resultadoClientes.querySelectorAll('.cliente-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    seleccionarCliente(this);
-                });
-            });
-        }
-
-        function seleccionarCliente(item) {
-            const id = item.dataset.id;
-            const nombre = item.dataset.nombre;
-
-            // Guardar cliente seleccionado
-            clienteSeleccionado = {
-                id,
-                nombre
-            };
-
-            // Mostrar en la interfaz
-            if (clienteNombreTexto) clienteNombreTexto.textContent = nombre;
-            if (clienteIdHidden) clienteIdHidden.value = id;
-            if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "block";
-
-            // Limpiar búsqueda
-            resultadoClientes.innerHTML = "";
-            resultadoClientes.style.display = "none";
-            if (inputCliente) inputCliente.value = "";
-        }
-
-        // Quitar cliente seleccionado
-        if (quitarClienteBtn) {
-            quitarClienteBtn.addEventListener("click", function(e) {
-                e.preventDefault();
-                clienteSeleccionado = null;
-                if (clienteIdHidden) clienteIdHidden.value = "";
-                if (clienteSeleccionadoContainer) clienteSeleccionadoContainer.style.display = "none";
-                if (inputCliente) {
-                    inputCliente.value = "";
-                    inputCliente.focus();
+                // insertar el dropdown como hijo directo del contenedor
+                if (!this.ventasClienteContainer.contains(this.resultadoClientes)) {
+                    this.ventasClienteContainer.appendChild(this.resultadoClientes);
                 }
-            });
-        }
-
-        // Cerrar resultados al hacer click fuera
-        document.addEventListener("click", function(e) {
-            if (resultadoClientes &&
-                resultadoClientes.style.display === "block" &&
-                !inputCliente.contains(e.target) &&
-                !resultadoClientes.contains(e.target)) {
-                resultadoClientes.style.display = "none";
+            } else if (this.inputCliente.parentElement) {
+                // fallback: usar el padre directo
+                this.inputCliente.parentElement.style.position = 'relative';
+                if (!this.inputCliente.parentElement.contains(this.resultadoClientes)) {
+                    this.inputCliente.parentElement.appendChild(this.resultadoClientes);
+                }
             }
-        });
 
-        // Asegurar que el formulario envíe el cliente_id
-        const formVenta = document.querySelector('.form.FormularioAjax');
-        if (formVenta) {
-            formVenta.addEventListener('submit', function(e) {
-                if (clienteSeleccionado && clienteIdHidden) {
-                    clienteIdHidden.value = clienteSeleccionado.id;
-                }
-            });
+            // aplicar estilos al contenedor
+            this.resultadoClientes.style.cssText = `
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 0 0 4px 4px;
+            margin-top: 0;
+        `;
+
+            // obtener contenedor de cliente seleccionado
+            this.clienteSeleccionadoContainer = document.getElementById('cliente_seleccionado_container');
+            this.clienteNombreTexto = document.getElementById('cliente_nombre_texto');
+            this.quitarClienteBtn = document.getElementById('quitar_cliente_btn');
+            this.clienteIdHidden = document.getElementById('cliente_id_seleccionado');
+
+            // inicializa eventos
+            this.init();
         }
 
-        // Función helper para escapar HTML
-        function escapeHtml(text) {
+        // metodo para escapar html
+        escapeHtml(text) {
             if (text == null) return '';
             const map = {
                 '&': '&amp;',
@@ -2226,135 +2206,332 @@
             return String(text).replace(/[&<>"']/g, m => map[m]);
         }
 
-        // Exponer funciones globalmente si es necesario
-        window.ClienteBusqueda = {
-            seleccionarCliente,
-            clienteSeleccionado: () => clienteSeleccionado
-        };
+        // metodo para buscar clientes
+        async buscarClientes(termino) {
+            const formData = new FormData();
+            formData.append("ventaAjax", "buscar_cliente");
+            formData.append("termino", termino);
 
-    })();
+            try {
+                const response = await fetch(this.URL_CLI, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`http error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    data = [];
+                }
+
+                this.mostrarResultadosClientes(data);
+
+            } catch (error) {
+                this.resultadoClientes.innerHTML = '<div class="search-results-item no-results">error en la busqueda</div>';
+                this.resultadoClientes.style.display = "block";
+            }
+        }
+
+        // metodo para mostrar resultados de clientes
+        mostrarResultadosClientes(clientes) {
+            if (!clientes || clientes.length === 0) {
+                this.resultadoClientes.innerHTML = '<div class="search-results-item no-results">no se encontraron clientes</div>';
+                this.resultadoClientes.style.display = "block";
+                return;
+            }
+
+            // generar html usando la misma estructura que medicamentos
+            const html = clientes.map(cli => {
+                const nombreCompleto = `${cli.cl_nombres || ''} ${cli.cl_apellido_paterno || ''} ${cli.cl_apellido_materno || ''}`.trim();
+                const carnet = cli.cl_carnet || 'sin ci';
+                const telefono = cli.cl_telefono ? ` · ${cli.cl_telefono}` : '';
+
+                return `
+                <div class="search-results-item cliente-item" 
+                    data-id="${cli.cl_id}" 
+                    data-nombre="${this.escapeHtml(nombreCompleto)}">
+                    <div class="search-result-name">
+                        <ion-icon name="person-circle-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>
+                        ${this.escapeHtml(nombreCompleto)}
+                    </div>
+                    <div class="search-result-details">ci: ${this.escapeHtml(carnet)}${this.escapeHtml(telefono)}</div>
+                </div>`;
+            }).join('');
+
+            this.resultadoClientes.innerHTML = html;
+            this.resultadoClientes.style.display = "block";
+
+            // agregar event listeners a los items
+            this.resultadoClientes.querySelectorAll('.cliente-item').forEach(item => {
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.seleccionarCliente(item);
+                });
+            });
+        }
+
+        // metodo para seleccionar cliente
+        seleccionarCliente(item) {
+            const id = item.dataset.id;
+            const nombre = item.dataset.nombre;
+
+            // guardar cliente seleccionado
+            this.clienteSeleccionado = {
+                id,
+                nombre
+            };
+
+            // mostrar en la interfaz
+            if (this.clienteNombreTexto) this.clienteNombreTexto.textContent = nombre;
+            if (this.clienteIdHidden) this.clienteIdHidden.value = id;
+            if (this.clienteSeleccionadoContainer) this.clienteSeleccionadoContainer.style.display = "block";
+
+            // limpiar busqueda
+            this.resultadoClientes.innerHTML = "";
+            this.resultadoClientes.style.display = "none";
+            if (this.inputCliente) this.inputCliente.value = "";
+        }
+
+        // metodo para quitar cliente seleccionado
+        quitarCliente() {
+            this.clienteSeleccionado = null;
+            if (this.clienteIdHidden) this.clienteIdHidden.value = "";
+            if (this.clienteSeleccionadoContainer) this.clienteSeleccionadoContainer.style.display = "none";
+            if (this.inputCliente) {
+                this.inputCliente.value = "";
+                this.inputCliente.focus();
+            }
+        }
+
+        // metodo para inicializar
+        init() {
+            if (this.inputCliente) {
+                this.inputCliente.addEventListener("input", () => {
+                    const termino = this.inputCliente.value.trim();
+                    clearTimeout(this.debounceCliente);
+
+                    if (termino.length < 1) {
+                        this.resultadoClientes.innerHTML = "";
+                        this.resultadoClientes.style.display = "none";
+                        return;
+                    }
+
+                    // buscar despues de 250ms
+                    this.debounceCliente = setTimeout(() => {
+                        this.buscarClientes(termino);
+                    }, 250);
+                });
+
+                this.inputCliente.addEventListener("focus", () => {
+                    if (this.inputCliente.value.trim().length > 0 && this.resultadoClientes.innerHTML) {
+                        this.resultadoClientes.style.display = "block";
+                    }
+                });
+
+                // prevenir que el enter envie el formulario desde este input
+                this.inputCliente.addEventListener("keydown", e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        // si hay un resultado visible, seleccionar el primero
+                        const primerResultado = this.resultadoClientes.querySelector('.cliente-item');
+                        if (primerResultado && this.resultadoClientes.style.display === "block") {
+                            this.seleccionarCliente(primerResultado);
+                        }
+                    }
+                });
+            }
+
+            // quitar cliente seleccionado
+            if (this.quitarClienteBtn) {
+                this.quitarClienteBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    this.quitarCliente();
+                });
+            }
+
+            // cerrar resultados al hacer click fuera
+            document.addEventListener("click", e => {
+                if (this.resultadoClientes &&
+                    this.resultadoClientes.style.display === "block" &&
+                    !this.inputCliente.contains(e.target) &&
+                    !this.resultadoClientes.contains(e.target)) {
+                    this.resultadoClientes.style.display = "none";
+                }
+            });
+
+            // asegurar que el formulario envie el cliente_id
+            const formVenta = document.querySelector('.form.FormularioAjax');
+            if (formVenta) {
+                formVenta.addEventListener('submit', () => {
+                    if (this.clienteSeleccionado && this.clienteIdHidden) {
+                        this.clienteIdHidden.value = this.clienteSeleccionado.id;
+                    }
+                });
+            }
+
+            // exponer funciones globalmente si es necesario
+            window.ClienteBusqueda = {
+                seleccionarCliente: (item) => this.seleccionarCliente(item),
+                clienteSeleccionado: () => this.clienteSeleccionado
+            };
+        }
+    }
+
+    // instanciar la clase cuando el dom este listo
+    document.addEventListener('DOMContentLoaded', () => {
+        new ClienteBusquedaManager();
+    });
 </script>
 <!-- script para cerrar caja -->
 <script>
-    // 🔐 Script para cerrar caja con doble confirmación
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnCerrarCaja = document.getElementById('btn_cerrar_caja');
+    // clase para manejar el cierre de caja
+    class CerrarCajaManager {
+        constructor() {
+            // inicializa propiedades
+            this.btnCerrarCaja = document.getElementById('btn_cerrar_caja');
+            this.URL_AJAX = "<?php echo SERVER_URL ?>ajax/ventaAjax.php";
 
-        if (btnCerrarCaja) {
-            btnCerrarCaja.addEventListener('click', function(e) {
-                e.preventDefault();
+            // inicializa eventos
+            this.init();
+        }
 
-                // 🛡️ Primera confirmación
-                Swal.fire({
-                    title: '¿Cerrar caja?',
-                    html: `
-                    <div style="text-align: left; padding: 10px;">
-                        <p style="margin-bottom: 15px;"><ion-icon name="warning-outline" style="color: #ff9800; font-size: 24px; vertical-align: middle;"></ion-icon> <strong>Esta acción cerrará tu caja actual</strong></p>
-                        <ul style="list-style: none; padding: 0;">
-                            <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> Se realizará un balance automático</li>
-                            <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> El detalle será visible para administradores</li>
-                        </ul>
-                    </div>
-                `,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ff9800',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Continuar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // 🛡️ Segunda confirmación (más seria)
-                        Swal.fire({
-                            title: '⚠️ Confirmar cierre de caja',
-                            html: `
-                            <p style="font-size: 16px; margin: 20px 0;">
-                                <strong>¿Estás completamente seguro?</strong>
-                            </p>
-                            <p style="color: #666; margin-bottom: 15px;">
-                                Esta acción es irreversible y cerrará tu sesión de ventas.
-                            </p>
-                        `,
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
-                            confirmButtonText: 'Sí, cerrar caja',
-                            cancelButtonText: 'No, cancelar',
-                            reverseButtons: true
-                        }).then((result2) => {
-                            if (result2.isConfirmed) {
-                                //  Proceder con el cierre
-                                cerrarCajaAjax();
-                            }
-                        });
-                    }
-                });
+        // metodo para confirmar cierre de caja
+        confirmarCierre() {
+            // primera confirmacion
+            Swal.fire({
+                title: 'cerrar caja?',
+                html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="margin-bottom: 15px;"><ion-icon name="warning-outline" style="color: #ff9800; font-size: 24px; vertical-align: middle;"></ion-icon> <strong>esta accion cerrara tu caja actual</strong></p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> se realizara un balance automatico</li>
+                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> el detalle sera visible para administradores</li>
+                    </ul>
+                </div>
+            `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff9800',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'continuar',
+                cancelButtonText: 'cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // segunda confirmacion
+                    this.confirmarCierreSegunda();
+                }
             });
         }
-    });
 
-    /**
-     * 📡 Función AJAX para cerrar caja
-     */
-    async function cerrarCajaAjax() {
-        // Mostrar loading
-        Swal.fire({
-            title: 'Cerrando caja...',
-            html: 'Por favor espera',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        try {
-            const formData = new FormData();
-            formData.append('ventaAjax', 'cerrar-caja');
-
-            const response = await fetch('<?php echo SERVER_URL; ?>ajax/ventaAjax.php', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            Swal.close();
-
-            // Mostrar resultado
-            if (data.Alerta === 'recargar') {
-                await Swal.fire({
-                    icon: data.Tipo || 'success',
-                    title: data.Titulo || 'Éxito',
-                    html: data.texto || 'Operación exitosa',
-                    confirmButtonText: 'Entendido'
-                });
-
-                // Recargar página
-                window.location.reload();
-            } else {
-                Swal.fire({
-                    icon: data.Tipo || 'info',
-                    title: data.Titulo || 'Atención',
-                    html: data.texto || 'Operación completada',
-                    confirmButtonText: 'Entendido'
-                });
-            }
-
-        } catch (error) {
+        // metodo para segunda confirmacion
+        confirmarCierreSegunda() {
             Swal.fire({
-                icon: 'error',
-                title: 'Error de conexión',
-                text: 'No se pudo cerrar la caja: ' + error.message,
-                confirmButtonText: 'Entendido'
+                title: 'confirmar cierre de caja',
+                html: `
+                <p style="font-size: 16px; margin: 20px 0;">
+                    <strong>estas completamente seguro?</strong>
+                </p>
+                <p style="color: #666; margin-bottom: 15px;">
+                    esta accion es irreversible y cerrara tu sesion de ventas.
+                </p>
+            `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'si, cerrar caja',
+                cancelButtonText: 'no, cancelar',
+                reverseButtons: true
+            }).then((result2) => {
+                if (result2.isConfirmed) {
+                    // proceder con el cierre
+                    this.cerrarCajaAjax();
+                }
             });
+        }
+
+        // metodo ajax para cerrar caja
+        async cerrarCajaAjax() {
+            // mostrar loading
+            Swal.fire({
+                title: 'cerrando caja...',
+                html: 'por favor espera',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const formData = new FormData();
+                formData.append('ventaAjax', 'cerrar-caja');
+
+                const response = await fetch(this.URL_AJAX, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`http ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                Swal.close();
+
+                // mostrar resultado
+                if (data.Alerta === 'recargar') {
+                    await Swal.fire({
+                        icon: data.Tipo || 'success',
+                        title: data.Titulo || 'exito',
+                        html: data.texto || 'operacion exitosa',
+                        confirmButtonText: 'entendido'
+                    });
+
+                    // recargar pagina
+                    window.location.reload();
+                } else {
+                    Swal.fire({
+                        icon: data.Tipo || 'info',
+                        title: data.Titulo || 'atencion',
+                        html: data.texto || 'operacion completada',
+                        confirmButtonText: 'entendido'
+                    });
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'error de conexion',
+                    text: 'no se pudo cerrar la caja: ' + error.message,
+                    confirmButtonText: 'entendido'
+                });
+            }
+        }
+
+        // metodo para inicializar
+        init() {
+            if (this.btnCerrarCaja) {
+                this.btnCerrarCaja.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.confirmarCierre();
+                });
+            }
         }
     }
+
+    // instanciar la clase cuando el dom este listo
+    document.addEventListener('DOMContentLoaded', () => {
+        new CerrarCajaManager();
+    });
 </script>
 
 <!-- base 64s -->

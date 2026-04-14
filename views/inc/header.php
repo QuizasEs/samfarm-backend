@@ -7,18 +7,18 @@
     <div class="bc">
         <a href="<?php echo SERVER_URL ?>dashboard/" class="link">Inicio</a>
         <span class="sep">/</span>
-        <span class="cur">Dashboard</span>
+        <span class="cur"><?php echo $page_title; ?></span>
     </div>
 
     <div class="tbr">
-        <div class="ibtn" id="thico">
+        <div class="ibtn" id="thico" onclick="App.toggleTheme()">
             <ion-icon name="moon-outline"></ion-icon>
         </div>
 
         <div class="notificacion-container">
-            <button class="notificacion ibtn" id="notificacionBtn">
+            <button class="notificacion" id="notificacionBtn">
                 <ion-icon name="notifications-outline"></ion-icon>
-                <span class="ndot" id="notificacionBadge"></span>
+                <span class="ndot" id="notificacionBadge" style="display: none;"></span>
             </button>
             <div class="notificacion-modal" id="notificacionModal">
                 <div class="notificacion-header">

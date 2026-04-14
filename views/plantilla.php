@@ -11,6 +11,50 @@
     $IV = new viewsController();
     $vistas = $IV->get_views_controller();
 
+    $view_name = basename($vistas, '-view.php'); // extraer 'dashboard' de './views/content/dashboard-view.php'
+
+    $page_title = 'Dashboard'; // default
+    switch ($view_name) {
+        case 'dashboard':
+            $page_title = 'Dashboard';
+            break;
+        case 'inventarioLista':
+            $page_title = 'Inventario';
+            break;
+        case 'loteLista':
+            $page_title = 'Lotes';
+            break;
+        case 'recepcionarLista':
+            $page_title = 'Recepcionar';
+            break;
+        case 'proveedorLista':
+            $page_title = 'Proveedores';
+            break;
+        case 'sucursalLista':
+            $page_title = 'Sucursales';
+            break;
+        case 'usuarioLista':
+            $page_title = 'Usuarios';
+            break;
+        case 'clienteLista':
+            $page_title = 'Clientes';
+            break;
+        case 'ventaLista':
+            $page_title = 'Ventas';
+            break;
+        case 'compraLista':
+            $page_title = 'Compras';
+            break;
+        case 'devolucion':
+            $page_title = 'Devoluciones';
+            break;
+        // Agregar más vistas según sea necesario
+        default:
+            $clean = str_replace(['-view', 'Lista', 'Form'], ['', '', ''], $view_name);
+            $page_title = ucfirst($clean);
+            break;
+    }
+
     if ($vistas == "login" || $vistas == "404") {
         require_once "./views/content/" . $vistas . "-view.php";
     } else {

@@ -1,6 +1,3 @@
-<div class="title">
-    <h2><ion-icon name="desktop-outline"></ion-icon> dashboard</h2>
-</div>
 
 <?php if (in_array($_SESSION['rol_smp'], [1, 2, 3 ])) {
     require_once './controllers/dashboardController.php';
@@ -21,8 +18,10 @@
 
     <!-- enlaces directos o acrotadores mas usados -->
     <?php if ($_SESSION['rol_smp'] == 1) { ?>
-        <div class="direct-link">
-            <div class="container-direct-links">
+        <h2 class="th2">Enlaces directos</h2>
+        <div class="">
+            <div class="card mb16">
+                <div class="container-direct-links">
                 <div class="direct-link-item red">
                     <a href="<?php echo SERVER_URL; ?>sucursalLista/">
                         <div class="direct-link-text">
@@ -101,29 +100,23 @@
 
     <?php if (in_array($_SESSION['rol_smp'], [1, 2])) { ?>
     <!-- tabla de fechas de vencimiento -->
-    <div class="sub-title">
-        <h2>proximas fechas de vencimiento</h2>
-    </div>
-    <div class="res-compras">
-        <div class="table-container">
-            <table class="table">
+    <h2 class="th2">Próximas fechas de vencimiento</h2>
+    <div class="card mb16">
+        <div class="tw table-detail">
+            <table>
                 <thead>
                     <tr>
-                        <th>N°</th>
-                        <th>Producto</th>
-                        <th>Lote</th>
-                        <th>Unidades</th>
-                        <th>Sucursal</th>
-                        <th>Fecha Vencimiento</th>
-                        <th>Días Restantes</th>
-                        <th>Estado</th>
+                        <th style="width:45%">Producto</th>
+                        <th style="width:25%">Sucursal</th>
+                        <th style="width:15%">Unidades</th>
+                        <th style="width:15%">Vencimiento</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $proximos_vencimientos = dashboardController::obtener_proximos_vencimientos_controller($su_id);
                     if (empty($proximos_vencimientos)) {
-                        echo "<tr><td colspan='8' style='text-align: center;'>No hay productos próximos a vencer</td></tr>";
+                        echo "<tr><td colspan='4' style='text-align: center;'>No hay productos próximos a vencer</td></tr>";
                     }
                     foreach ($proximos_vencimientos as $index => $vencimiento):
                         $fecha_vencimiento = new DateTime($vencimiento['lm_fecha_vencimiento']);
@@ -131,14 +124,14 @@
                         $dias_restantes = $fecha_vencimiento->diff($hoy)->days;
                     ?>
                         <tr>
-                            <td><?php echo $index + 1; ?></td>
-                            <td><?php echo $vencimiento['med_nombre_quimico']; ?></td>
-                            <td><?php echo $vencimiento['lm_numero_lote']; ?></td>
-                            <td><?php echo $vencimiento['lm_cant_actual_unidades']; ?></td>
-                            <td><?php echo $vencimiento['su_nombre']; ?></td>
-                            <td><?php echo date('d/m/Y', strtotime($vencimiento['lm_fecha_vencimiento'])); ?></td>
-                            <td><?php echo $dias_restantes; ?> días</td>
-                            <td><span class="estate" style="color: #ffa500; font-weight: bold;">PRÓXIMO</span></td>
+                            <td>
+                                <div class="td-main"><?php echo $vencimiento['med_nombre_quimico']; ?></div>
+                                <div class="td-sub">Lote: <?php echo $vencimiento['lm_numero_lote']; ?> · <?php echo $dias_restantes; ?> días restantes</div>
+                                <div class="td-meta"><span class="badge bwar bsm">Vencimiento próximo</span></div>
+                            </td>
+                            <td><div class="td-main"><?php echo $vencimiento['su_nombre']; ?></div></td>
+                            <td><div class="td-main"><?php echo $vencimiento['lm_cant_actual_unidades']; ?> u.</div></td>
+                            <td><div class="td-main"><?php echo date('d/m/Y', strtotime($vencimiento['lm_fecha_vencimiento'])); ?></div></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -147,62 +140,56 @@
     </div>
 
     <!-- grafico de pastel de vencimientos -->
-    <div class="sub-title">
-        <h2>resumen de vencimientos</h2>
-    </div>
-    <div class="ingresos-egresos-barras">
-        <div class="graphyc-container">
+    <h2 class="th2">Resumen de vencimientos</h2>
+    <div class="card mb16">
+        <div class="cb">
             <div id="chartVencimientos" style="width: 100%; height: 400px;"></div>
         </div>
     </div>
 
     <!-- tabla de stock minimo -->
-    <div class="sub-title">
-        <h2>productos con stock minimo</h2>
-    </div>
-    <div class="res-compras">
-        <div class="table-container">
-            <table class="table">
+    <h2 class="th2">Productos con stock mínimo</h2>
+    <div class="card mb16">
+        <div class="tw table-detail">
+            <table>
                 <thead>
                     <tr>
-                        <th>N°</th>
-                        <th>Producto</th>
-                        <th>Sucursal</th>
-                        <th>Stock Actual</th>
-                        <th>Stock Mínimo</th>
-                        <th>Deficiencia</th>
-                        <th>% Disponible</th>
-                        <th>Estado</th>
+                        <th style="width:40%">Producto</th>
+                        <th style="width:25%">Sucursal</th>
+                        <th style="width:20%">Stock</th>
+                        <th style="width:15%">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $stock_minimo = dashboardController::obtener_stock_minimo_controller($su_id);
                     if (empty($stock_minimo)) {
-                        echo "<tr><td colspan='8' style='text-align: center;'>No hay productos con stock mínimo</td></tr>";
+                        echo "<tr><td colspan='4' style='text-align: center;'>No hay productos con stock mínimo</td></tr>";
                     }
                     foreach ($stock_minimo as $index => $producto):
                         $estado_color = '';
                         $estado_texto = '';
+                        $badge_class = '';
                         $diferencia = $producto['inv_minimo'] - $producto['inv_total_unidades'];
                         $porcentaje = $producto['inv_minimo'] > 0 ? round(($producto['inv_total_unidades'] / $producto['inv_minimo']) * 100, 1) : 0;
                         if ($producto['estado_stock'] === 'sin_stock') {
-                            $estado_color = 'color: #d32f2f;';
-                            $estado_texto = 'SIN STOCK';
+                            $estado_color = 'var(--btn-danger)';
+                            $estado_texto = 'Sin Stock';
+                            $badge_class = 'bdan';
                         } else {
-                            $estado_color = 'color: #ffa500;';
-                            $estado_texto = 'BAJO STOCK';
+                            $estado_color = 'var(--btn-warning)';
+                            $estado_texto = 'Bajo Stock';
+                            $badge_class = 'bwar';
                         }
                     ?>
                         <tr>
-                            <td><?php echo $index + 1; ?></td>
-                            <td><?php echo $producto['med_nombre_quimico']; ?></td>
-                            <td><?php echo $producto['su_nombre']; ?></td>
-                            <td><?php echo $producto['inv_total_unidades']; ?></td>
-                            <td><?php echo $producto['inv_minimo']; ?></td>
-                            <td><?php echo $diferencia; ?></td>
-                            <td><?php echo $porcentaje; ?>%</td>
-                            <td><span class="estate" style="<?php echo $estado_color; ?> font-weight: bold;"><?php echo $estado_texto; ?></span></td>
+                            <td>
+                                <div class="td-main"><?php echo $producto['med_nombre_quimico']; ?></div>
+                                <div class="td-sub">Mínimo: <?php echo $producto['inv_minimo']; ?> u. · Disponible: <?php echo $porcentaje; ?>%</div>
+                            </td>
+                            <td><div class="td-main"><?php echo $producto['su_nombre']; ?></div></td>
+                            <td><div class="td-main"><?php echo $producto['inv_total_unidades']; ?> u.</div><div class="td-sub" style="color:<?php echo $estado_color; ?>">Deficiencia: <?php echo $diferencia; ?> u.</div></td>
+                            <td><span class="badge <?php echo $badge_class; ?> bsm"><?php echo $estado_texto; ?></span></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -211,39 +198,32 @@
     </div>
 
     <!-- grafico de barras de stock minimo -->
-    <div class="sub-title">
-        <h2>grafico de stock minimo</h2>
-    </div>
-    <div class="ingresos-egresos-barras">
-        <div class="graphyc-container">
+    <h2 class="th2">Gráfico de stock mínimo</h2>
+    <div class="card mb16">
+        <div class="cb">
             <div id="chartStockMinimo" style="width: 100%; height: 400px;"></div>
         </div>
     </div>
     <?php } ?>
 
     <!-- tabla de productos mas vendidos -->
-    <div class="sub-title">
-        <h2>productos mas vendidos</h2>
-    </div>
-    <div class="res-compras">
-        <div class="table-container">
-            <table class="table">
+    <h2 class="th2">Productos más vendidos</h2>
+    <div class="card mb16">
+        <div class="tw table-detail">
+            <table>
                 <thead>
                     <tr>
-                        <th>N°</th>
-                        <th>Producto</th>
-                        <th>Sucursal</th>
-                        <th>Cantidad Vendida</th>
-                        <th>Ingreso Total</th>
-                        <th>Precio Promedio</th>
-                        <th>Posición</th>
+                        <th style="width:40%">Producto</th>
+                        <th style="width:25%">Sucursal</th>
+                        <th style="width:20%">Ventas</th>
+                        <th style="width:15%">Posición</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $productos_vendidos = dashboardController::obtener_productos_mas_vendidos_controller($su_id);
                     if (empty($productos_vendidos)) {
-                        echo "<tr><td colspan='7' style='text-align: center;'>No hay datos de ventas</td></tr>";
+                        echo "<tr><td colspan='4' style='text-align: center;'>No hay datos de ventas</td></tr>";
                     }
                     foreach ($productos_vendidos as $index => $producto):
                         $promedio = $producto['cantidad_vendida'] > 0 ? $producto['total_vendido'] / $producto['cantidad_vendida'] : 0;
@@ -259,13 +239,13 @@
                         }
                     ?>
                         <tr>
-                            <td><?php echo $index + 1; ?></td>
-                            <td><?php echo $producto['med_nombre_quimico']; ?></td>
-                            <td><?php echo $producto['su_nombre']; ?></td>
-                            <td><?php echo $producto['cantidad_vendida']; ?></td>
-                            <td><?php echo number_format($producto['total_vendido'], 2); ?> Bs</td>
-                            <td><?php echo number_format($promedio, 2); ?> Bs</td>
-                            <td><?php echo $posicion; ?></td>
+                            <td>
+                                <div class="td-main"><?php echo $producto['med_nombre_quimico']; ?></div>
+                                <div class="td-sub">Total vendido: <?php echo number_format($producto['total_vendido'], 2); ?> Bs · Precio promedio: <?php echo number_format($promedio, 2); ?> Bs</div>
+                            </td>
+                            <td><div class="td-main"><?php echo $producto['su_nombre']; ?></div></td>
+                            <td><div class="td-main"><?php echo $producto['cantidad_vendida']; ?> u.</div></td>
+                            <td><div class="td-main"><?php echo $posicion; ?></div></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -274,51 +254,44 @@
     </div>
 
     <!-- grafico de barras de productos mas vendidos -->
-    <div class="sub-title">
-        <h2>grafico de productos mas vendidos</h2>
-    </div>
-    <div class="ingresos-egresos-barras">
-        <div class="graphyc-container">
+    <h2 class="th2">Gráfico de productos más vendidos</h2>
+    <div class="card mb16">
+        <div class="cb">
             <div id="chartProductosVendidos" style="width: 100%; height: 400px;"></div>
         </div>
     </div>
 
     <!-- tabla de ventas mensuales -->
-    <div class="sub-title">
-        <h2>ventas mensuales</h2>
-    </div>
-    <div class="res-compras">
-        <div class="table-container">
-            <table class="table">
+    <h2 class="th2">Ventas mensuales</h2>
+    <div class="card mb16">
+        <div class="tw table-detail">
+            <table>
                 <thead>
                     <tr>
-                        <th>N°</th>
-                        <th>Período</th>
-                        <th>Sucursal</th>
-                        <th>Transacciones</th>
-                        <th>Total Mensual</th>
-                        <th>Promedio x Venta</th>
-                        <th>Venta Diaria Aprox</th>
+                        <th style="width:30%">Período</th>
+                        <th style="width:25%">Sucursal</th>
+                        <th style="width:20%">Transacciones</th>
+                        <th style="width:25%">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $ventas_mensuales = dashboardController::obtener_ventas_mensuales_controller($su_id);
                     if (empty($ventas_mensuales)) {
-                        echo "<tr><td colspan='7' style='text-align: center;'>No hay datos de ventas</td></tr>";
+                        echo "<tr><td colspan='4' style='text-align: center;'>No hay datos de ventas</td></tr>";
                     }
                     foreach ($ventas_mensuales as $index => $venta):
                         $promedio = $venta['cantidad_ventas'] > 0 ? $venta['total_mes'] / $venta['cantidad_ventas'] : 0;
                         $venta_diaria = $venta['total_mes'] / 30;
                     ?>
                         <tr>
-                            <td><?php echo $index + 1; ?></td>
-                            <td><?php echo date('M/Y', strtotime($venta['mes'] . '-01')); ?></td>
-                            <td><?php echo $venta['su_nombre']; ?></td>
-                            <td><?php echo $venta['cantidad_ventas']; ?></td>
-                            <td><?php echo number_format($venta['total_mes'], 2); ?> Bs</td>
-                            <td><?php echo number_format($promedio, 2); ?> Bs</td>
-                            <td><?php echo number_format($venta_diaria, 2); ?> Bs</td>
+                            <td>
+                                <div class="td-main"><?php echo date('M/Y', strtotime($venta['mes'] . '-01')); ?></div>
+                                <div class="td-sub">Promedio x venta: <?php echo number_format($promedio, 2); ?> Bs · Venta diaria: <?php echo number_format($venta_diaria, 2); ?> Bs</div>
+                            </td>
+                            <td><div class="td-main"><?php echo $venta['su_nombre']; ?></div></td>
+                            <td><div class="td-main"><?php echo $venta['cantidad_ventas']; ?></div></td>
+                            <td><div class="td-main"><?php echo number_format($venta['total_mes'], 2); ?> Bs</div></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -327,11 +300,9 @@
     </div>
 
     <!-- grafico de barras de ventas mensuales -->
-    <div class="sub-title">
-        <h2>grafico de ventas mensuales</h2>
-    </div>
-    <div class="ingresos-egresos-barras">
-        <div class="graphyc-container">
+    <h2 class="th2">Gráfico de ventas mensuales</h2>
+    <div class="card mb16">
+        <div class="cb">
             <div id="chartVentasMensuales" style="width: 100%; height: 400px;"></div>
         </div>
     </div>
