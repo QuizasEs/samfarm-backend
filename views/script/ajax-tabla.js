@@ -217,9 +217,9 @@ function obtenerAjaxConfig(container) {
 
         // Delegar clicks de paginación
         destino.addEventListener("click", (e) => {
-            const a = e.target.closest("a.page-link");
-            if (!a) return;
-            const page = a.dataset.page || parsePageFromHref(a.getAttribute("href"));
+            const btn = e.target.closest(".pb");
+            if (!btn || btn.classList.contains('dis') || btn.disabled) return;
+            const page = btn.dataset.page;
             if (!page) return;
             e.preventDefault();
             cargarPagina(page);

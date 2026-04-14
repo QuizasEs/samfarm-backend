@@ -95,8 +95,8 @@ class clienteController extends clienteModel
         $Npaginas = ceil($total / $registros);
 
         $tabla .= '
-                <div class="table-container">
-                    <table class="table">
+                <div class="tw">
+                    <table>
                         <thead>
                             <tr>
                                 <th>N°</th>
@@ -104,9 +104,9 @@ class clienteController extends clienteModel
                                 <th>CI/CARNET</th>
                                 <th>TELÉFONO</th>
                                 <th>CORREO</th>
-                                <th>FECHA REGISTRO</th>
-                                <th>ÚLTIMA COMPRA</th>
-                                <th>TOTAL COMPRAS</th>
+                                <th>REGISTRO</th>
+                                <th>ÚLT. COMPRA</th>
+                                <th style="text-align:center;">COMPRAS</th>
                                 <th>ESTADO</th>
                                 <th>ACCIONES</th>
                             </tr>
@@ -133,39 +133,41 @@ class clienteController extends clienteModel
                 $total_compras = (int)($row['total_compras'] ?? 0);
 
                 $estado_html = $row['cl_estado'] == 1
-                    ? '<span class="estado-badge activo">Activo</span>'
-                    : '<span class="estado-badge caducado">Inactivo</span>';
+                    ? '<span class="badge bgr"><span class="bdt"></span>Activo</span>'
+                    : '<span class="badge bdan"><span class="bdt"></span>Inactivo</span>';
 
                 $tabla .= '
                         <tr>
                             <td>' . $contador . '</td>
-                            <td><strong>' . htmlspecialchars($nombre_completo) . '</strong></td>
+                            <td class="tdp">' . htmlspecialchars($nombre_completo) . '</td>
                             <td>' . htmlspecialchars($carnet) . '</td>
                             <td>' . htmlspecialchars($telefono) . '</td>
-                            <td>' . htmlspecialchars($correo) . '</td>
+                            <td class="tdmu">' . htmlspecialchars($correo) . '</td>
                             <td>' . $fecha_registro . '</td>
                             <td>' . $ultima_compra . '</td>
-                            <td style="text-align:center;"><strong style="color:#1976D2;">' . $total_compras . '</strong></td>
+                            <td style="text-align:center;"><span class="badge bdef">' . $total_compras . '</span></td>
                             <td>' . $estado_html . '</td>
-                        <td class="buttons">
-                                ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
-                                class="btn default"
-                                title="Ver detalle"
-                                onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
-                                    Detalle
-                                </a>' : '') . '
-                                <a href="javascript:void(0)"
-                                class="btn primary"
-                                title="Editar"
-                                onclick="ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
-                                    Editar
-                                </a>
-                                ' . ($rol_usuario != 3 ? '<a href="javascript:void(0)"
-                                class="btn ' . ($row['cl_estado'] == 1 ? 'danger' : 'success') . '"
-                                title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
-                                onclick="ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
-                                    ' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '
-                                </a>' : '') . '
+                            <td>
+                                <div class="tda">
+                                    ' . ($rol_usuario != 3 ? '<button type="button"
+                                    class="btn btn-gho btn-ico btn-sm"
+                                    title="Ver detalle"
+                                    onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
+                                        <ion-icon name="eye-outline"></ion-icon>
+                                    </button>' : '') . '
+                                    <button type="button"
+                                    class="btn btn-gho btn-ico btn-sm"
+                                    title="Editar"
+                                    onclick="ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
+                                        <ion-icon name="pencil-outline"></ion-icon>
+                                    </button>
+                                    ' . ($rol_usuario != 3 ? '<button type="button"
+                                    class="btn btn-ico btn-sm ' . ($row['cl_estado'] == 1 ? 'btn-wouc' : 'btn-souc') . '"
+                                    title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
+                                    onclick="ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
+                                        <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-outline' : 'checkmark-outline') . '"></ion-icon>
+                                    </button>' : '') . '
+                                </div>
                             </td>
                         </tr>
                     ';
@@ -173,16 +175,22 @@ class clienteController extends clienteModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
-                            No hay registros
+            $tabla .= '<tr><td colspan="10" style="text-align:center;padding:40px;">
+                            <div class="empty">
+                                <ion-icon class="empi" name="people-outline"></ion-icon>
+                                <div class="empt">No hay clientes</div>
+                                <div class="empx">No se encontraron registros que coincidan con la búsqueda.</div>
+                            </div>
                         </td></tr>';
         }
 
         $tabla .= '</tbody></table></div>';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= '<div class="pag">
+                        <div class="pginf">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</div>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
+            $tabla .= '</div>';
         }
 
         return $tabla;

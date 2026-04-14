@@ -148,7 +148,6 @@ if ($valor === "crear") {
                         <th>VENCIMIENTO</th>
                         <th>ESTADO</th>
                         <th>CANTIDAD</th>
-                        <th>ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -170,22 +169,17 @@ if ($valor === "crear") {
             }
 
             $tabla .= '
-                <tr>
-                    <td>' . $contador . '</td>
-                    <td>
-                        <strong>' . htmlspecialchars($lote['med_nombre_quimico'] ?? '') . '</strong>
-                    </td>
-                    <td>' . htmlspecialchars($lote['lm_numero_lote'] ?? 'N/A') . '</td>
-                    <td>' . htmlspecialchars($lote['su_nombre'] ?? '') . '</td>
-                    <td>' . htmlspecialchars($lote['lm_fecha_vencimiento']) . '</td>
-                    <td>' . $estado_html . '</td>
-                    <td>' . number_format($lote['lm_cant_actual_unidades'], 0) . ' unidades</td>
-                    <td class="buttons">
-                        <button type="button" class="btn success btn-sm" onclick="abrirModalMermaRegistro(' . (int)$lote['lm_id'] . ', \'' . htmlspecialchars($lote['med_nombre_quimico']) . '\', ' . (int)$lote['lm_cant_actual_unidades'] . ')">
-                            <ion-icon name="create-outline"></ion-icon> Registrar
-                        </button>
-                    </td>
-                </tr>
+            <tr class="tr-click" onclick="abrirModalMermaRegistro(' . (int)$lote['lm_id'] . ', \'' . htmlspecialchars($lote['med_nombre_quimico']) . '\', ' . (int)$lote['lm_cant_actual_unidades'] . ')">
+                <td>' . $contador . '</td>
+                <td>
+                    <div class="td-main">' . htmlspecialchars($lote['med_nombre_quimico'] ?? '') . '</div>
+                </td>
+                <td>' . htmlspecialchars($lote['lm_numero_lote'] ?? 'N/A') . '</td>
+                <td>' . htmlspecialchars($lote['su_nombre'] ?? '') . '</td>
+                <td>' . htmlspecialchars($lote['lm_fecha_vencimiento']) . '</td>
+                <td>' . $estado_html . '</td>
+                <td>' . number_format($lote['lm_cant_actual_unidades'], 0) . ' unidades</td>
+            </tr>
             ';
             $contador++;
         }
@@ -204,16 +198,46 @@ if ($valor === "crear") {
     if (count($lotes_pagina) > 0) {
         $reg_inicio = $inicio + 1;
         $reg_final = $inicio + count($lotes_pagina);
-        $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
-        
-        if ($total_paginas > 1) {
-            $tabla .= '<div class="pagination-custom" style="text-align: center; padding: 20px;">';
-            for ($i = 1; $i <= $total_paginas; $i++) {
-                $clase_activa = ($i == $pagina) ? 'active' : '';
-                $tabla .= '<a href="#" class="page-link ' . $clase_activa . '" data-page="' . $i . '">' . $i . '</a> ';
-            }
-            $tabla .= '</div>';
+
+        // Paginación estándar del sistema
+        $tabla .= '<div class="pag">';
+        $tabla .= '<div class="pginf">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</div>';
+
+        // Botón anterior
+        if ($pagina == 1) {
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-back-outline"></ion-icon></button>';
+        } else {
+            $prev = $pagina - 1;
+            $tabla .= '<button class="pb" data-page="' . $prev . '"><ion-icon name="chevron-back-outline"></ion-icon></button>';
         }
+
+        // Calcular rango de botones
+        $botones = 5;
+        $mitad = floor($botones / 2);
+        $inicio_pag = max(1, $pagina - $mitad);
+        $fin_pag = min($total_paginas, $inicio_pag + $botones - 1);
+        
+        if ($fin_pag - $inicio_pag + 1 < $botones) {
+            $inicio_pag = max(1, $fin_pag - $botones + 1);
+        }
+
+        for ($i = $inicio_pag; $i <= $fin_pag; $i++) {
+            if ($pagina == $i) {
+                $tabla .= '<button class="pb ac" data-page="' . $i . '">' . $i . '</button>';
+            } else {
+                $tabla .= '<button class="pb" data-page="' . $i . '">' . $i . '</button>';
+            }
+        }
+
+        // Botón siguiente
+        if ($pagina == $total_paginas) {
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-forward-outline"></ion-icon></button>';
+        } else {
+            $next = $pagina + 1;
+            $tabla .= '<button class="pb" data-page="' . $next . '"><ion-icon name="chevron-forward-outline"></ion-icon></button>';
+        }
+        
+        $tabla .= '</div>';
     }
 
     echo $tabla;

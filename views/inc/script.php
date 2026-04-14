@@ -3,24 +3,26 @@
     const toggle = document.querySelector('#darkModeToggleInput'); // el input real
     const body = document.querySelector('body');
 
-    load();
+    if (toggle) {
+        load();
 
-    // Detectar cambio de estado
-    toggle.addEventListener('change', () => {
-        body.classList.toggle('dark');
-        store(body.classList.contains('dark'));
-    });
+        // Detectar cambio de estado
+        toggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            store(body.classList.contains('dark'));
+        });
 
-    // Cargar estado guardado
-    function load() {
-        const darkmode = localStorage.getItem('dark') === 'true';
-        body.classList.toggle('dark', darkmode);
-        toggle.checked = darkmode; // refleja el estado en el toggle
-    }
+        // Cargar estado guardado
+        function load() {
+            const darkmode = localStorage.getItem('dark') === 'true';
+            body.classList.toggle('dark', darkmode);
+            toggle.checked = darkmode; // refleja el estado en el toggle
+        }
 
-    // Guardar estado
-    function store(value) {
-        localStorage.setItem('dark', value);
+        // Guardar estado
+        function store(value) {
+            localStorage.setItem('dark', value);
+        }
     }
 </script>
 
@@ -38,36 +40,41 @@
 </script>
 
 <script type="text/javascript">
-    //crafica de ingresos y egresos 
+    //crafica de ingresos y egresos
     // Initialize the echarts instance based on the prepared dom
-    var myChart = echarts.init(document.getElementById('graphyc'));
+    var graphycEl = document.getElementById('graphyc');
+    if (graphycEl) {
+        var myChart = echarts.init(graphycEl);
+    }
 
-    // Specify the configuration items and data for the chart
-    var option = {
-        title: {
-            text: 'INGRESOS EGRESOS'
-        },
-        tooltip: {},
-        legend: {
-            data: ['sales']
-        },
-        xAxis: {
-            data: ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO']
-        },
-        yAxis: {},
-        series: [{
-            name: 'egresos',
-            type: 'bar',
-            data: [5, 25, 36, 10, 10, 34, 1]
-        }, {
-            name: 'ingresos',
-            type: 'bar',
-            data: [1, 20, 56, 10, 13, 20, 1]
-        }]
-    };
+    if (graphycEl) {
+        // Specify the configuration items and data for the chart
+        var option = {
+            title: {
+                text: 'INGRESOS EGRESOS'
+            },
+            tooltip: {},
+            legend: {
+                data: ['sales']
+            },
+            xAxis: {
+                data: ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO']
+            },
+            yAxis: {},
+            series: [{
+                name: 'egresos',
+                type: 'bar',
+                data: [5, 25, 36, 10, 10, 34, 1]
+            }, {
+                name: 'ingresos',
+                type: 'bar',
+                data: [1, 20, 56, 10, 13, 20, 1]
+            }]
+        };
 
-    // Display the chart using the configuration items and data just specified.
-    myChart.setOption(option);
+        // Display the chart using the configuration items and data just specified.
+        myChart.setOption(option);
+    }
 </script>
 <script src="<?php echo SERVER_URL; ?>views/script/alertas.js"></script>
 <script>
@@ -446,7 +453,8 @@
             const vencimiento = document.getElementById("fecha_vencimiento").value;
             const precioCompra = parseFloat(document.getElementById("precio_compra").value);
             const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
-            const activar = document.getElementById("cb5").checked ? 1 : 0;
+            const cb5El = document.getElementById("cb5");
+            const activar = cb5El ? (cb5El.checked ? 1 : 0) : 0;
 
             if (!numero) {
                 Swal.fire('Error', 'No se pudo generar el número de lote.', 'error');
@@ -2386,7 +2394,9 @@
 
     // instanciar la clase cuando el dom este listo
     document.addEventListener('DOMContentLoaded', () => {
-        new ClienteBusquedaManager();
+        if (document.getElementById("buscar_cliente_venta")) {
+            new ClienteBusquedaManager();
+        }
     });
 </script>
 <!-- script para cerrar caja -->

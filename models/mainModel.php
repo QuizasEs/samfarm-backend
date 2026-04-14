@@ -119,20 +119,18 @@ class mainModel
     /* -----------------------------------------funcion paginador de tablas--------------------------------------------- */
     protected static function paginador_tablas($pagina, $Npaginas, $url, $botones)
     {
-        $tabla = '<nav aria-label="Page navigation example">
-                        <ul class="custom-pagination">';
-        if ($pagina == 1) {
-            $tabla .= '<li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>';
-        } else {
-            $tabla .= '<li class="page-item">
-                            <a class="page-link" href="' . $url . ($pagina - 1) . '/" tabindex="-1">Previous</a>
-                        </li>
-                        
-                        ';
-        }
+        $tabla = '<div class="pag">';
+        
+        // Información de registros
+        $tabla .= '<div class="pginf">Página ' . $pagina . ' de ' . $Npaginas . '</div>';
 
+        // Botón anterior
+        if ($pagina == 1) {
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-back-outline"></ion-icon></button>';
+        } else {
+            $prev = $pagina - 1;
+            $tabla .= '<button class="pb" data-page="' . $prev . '"><ion-icon name="chevron-back-outline"></ion-icon></button>';
+        }
 
         // Calcular el rango de páginas a mostrar centrado en la página actual
         $mitad = floor($botones / 2);
@@ -146,40 +144,36 @@ class mainModel
 
         for ($i = $inicio; $i <= $fin; $i++) {
             if ($pagina == $i) {
-                $tabla .= '<li class="page-item active"><a class="page-link" href="' . $url . $i . '/">' . $i . '</a></li>';
+                $tabla .= '<button class="pb ac" data-page="' . $i . '">' . $i . '</button>';
             } else {
-                $tabla .= '<li class="page-item"><a class="page-link" href="' . $url . $i . '/">' . $i . '</a></li>';
+                $tabla .= '<button class="pb" data-page="' . $i . '">' . $i . '</button>';
             }
         }
 
+        // Botón siguiente
         if ($pagina == $Npaginas) {
-            $tabla .= '<li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Next</a>
-                        </li>';
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-forward-outline"></ion-icon></button>';
         } else {
-            $tabla .= '<li class="page-item">
-                            <a class="page-link" href="' . $url . ($pagina + 1) . '/" tabindex="-1">Next</a>
-                        </li>
-                        
-                        ';
+            $next = $pagina + 1;
+            $tabla .= '<button class="pb" data-page="' . $next . '"><ion-icon name="chevron-forward-outline"></ion-icon></button>';
         }
-        $tabla .= ' </ul>
-                    </nav>';
+        
+        $tabla .= '</div>';
         return $tabla;
     }
     protected static function paginador_tablas_main($pagina, $Npaginas, $url, $botones)
     {
-        $tabla = '<nav aria-label="Page navigation example">
-                    <ul class="custom-pagination">';
+        $tabla = '<div class="pag">';
+        
+        // Información de registros
+        $tabla .= '<div class="pginf">Página ' . $pagina . ' de ' . $Npaginas . '</div>';
+
+        // Botón anterior
         if ($pagina == 1) {
-            $tabla .= '<li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">Previous</a>
-                    </li>';
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-back-outline"></ion-icon></button>';
         } else {
             $prev = $pagina - 1;
-            $tabla .= '<li class="page-item">
-                        <a class="page-link" href="' . $url . $prev . '/" data-page="' . $prev . '" tabindex="-1">Previous</a>
-                    </li>';
+            $tabla .= '<button class="pb" data-page="' . $prev . '"><ion-icon name="chevron-back-outline"></ion-icon></button>';
         }
 
         // Calcular el rango de páginas a mostrar centrado en la página actual
@@ -194,24 +188,21 @@ class mainModel
 
         for ($i = $inicio; $i <= $fin; $i++) {
             if ($pagina == $i) {
-                $tabla .= '<li class="page-item active"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
+                $tabla .= '<button class="pb ac" data-page="' . $i . '">' . $i . '</button>';
             } else {
-                $tabla .= '<li class="page-item"><a class="page-link" href="' . $url . $i . '/" data-page="' . $i . '">' . $i . '</a></li>';
+                $tabla .= '<button class="pb" data-page="' . $i . '">' . $i . '</button>';
             }
         }
 
+        // Botón siguiente
         if ($pagina == $Npaginas) {
-            $tabla .= '<li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">Next</a>
-                    </li>';
+            $tabla .= '<button class="pb dis" disabled><ion-icon name="chevron-forward-outline"></ion-icon></button>';
         } else {
             $next = $pagina + 1;
-            $tabla .= '<li class="page-item">
-                        <a class="page-link" href="' . $url . $next . '/" data-page="' . $next . '" tabindex="-1">Next</a>
-                    </li>';
+            $tabla .= '<button class="pb" data-page="' . $next . '"><ion-icon name="chevron-forward-outline"></ion-icon></button>';
         }
-        $tabla .= ' </ul>
-                </nav>';
+        
+        $tabla .= '</div>';
         return $tabla;
     }
 

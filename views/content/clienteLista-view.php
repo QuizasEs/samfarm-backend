@@ -2,451 +2,339 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2 || $_SESSION['rol_smp'] == 3)) {
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/clientesAjax.php"
         data-ajax-param="clientesAjax"
         data-ajax-registros="10">
-        <div class="title">
-            <h2>
-                <ion-icon name="people-outline"></ion-icon> Gestión de Clientes
-            </h2>
-        </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Estado</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todos</option>
-                        <option value="activo">Activos</option>
-                        <option value="inactivo">Inactivos</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Con Compras</small>
-                    <select class="select-filtro" name="select2">
-                        <option value="">Todos</option>
-                        <option value="con_compras">Con compras</option>
-                        <option value="sin_compras">Sin compras</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Última Compra</small>
-                    <select class="select-filtro" name="select3">
-                        <option value="">Todos</option>
-                        <option value="7">Últimos 7 días</option>
-                        <option value="30">Últimos 30 días</option>
-                        <option value="90">Últimos 90 días</option>
-                        <option value="mas_90">Más de 90 días</option>
-                        <option value="nunca">Nunca</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
-                </div>
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre, CI, teléfono...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
-
+        <div class="ph">
+            <div>
+                <div class="ptit">Gestión de Clientes</div>
+                <div class="psub">Administre y consulte la información detallada de sus clientes</div>
             </div>
-
-            <div class="filtro-dinamico-buttons">
-                <button type="button" class="btn success" onclick="ClientesModals.abrirModalNuevo()">
-                    <ion-icon name="person-add-outline"></ion-icon> Nuevo
+            <div class="tbr">
+                <button type="button" class="btn btn-def" onclick="ClientesModals.abrirModalNuevo()">
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Cliente
                 </button>
                 <?php if ($_SESSION['rol_smp'] != 3) { ?>
-                <button type="button" class="btn success" id="btnExportarExcelClientes">
-                    <ion-icon name="download-outline"></ion-icon> Excel
-                </button>
-                <button type="button" class="btn primary" id="btnExportarPDFClientes">
-                    <ion-icon name="document-text-outline"></ion-icon> PDF
-                </button>
+                    <button type="button" class="btn btn-sec" id="btnExportarExcelClientes" data-tip="Exportar a Excel">
+                        <ion-icon name="download-outline"></ion-icon> Excel
+                    </button>
+                    <button type="button" class="btn btn-sec" id="btnExportarPDFClientes" data-tip="Exportar a PDF">
+                        <ion-icon name="document-text-outline"></ion-icon> PDF
+                    </button>
                 <?php } ?>
             </div>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Estado</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="">Todos</option>
+                                <option value="activo">Activos</option>
+                                <option value="inactivo">Inactivos</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Con Compras</label>
+                            <select class="sel select-filtro" name="select2">
+                                <option value="">Todos</option>
+                                <option value="con_compras">Con compras</option>
+                                <option value="sin_compras">Sin compras</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Última Compra</label>
+                            <select class="sel select-filtro" name="select3">
+                                <option value="">Todos</option>
+                                <option value="7">Últimos 7 días</option>
+                                <option value="30">Últimos 30 días</option>
+                                <option value="90">Últimos 90 días</option>
+                                <option value="mas_90">Más de 90 días</option>
+                                <option value="nunca">Nunca</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde">
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta">
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Nombre, CI, teléfono...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
-    <!-- modal -->
-    <div class="modal" id="modalEditarCliente" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title"><ion-icon name="create-outline"></ion-icon> Editar Cliente</div>
-                <a class="close" onclick="ClientesModals.cerrarModalEditar()"><ion-icon name="close-outline"></ion-icon></a>
+    <!-- Modal Editar Cliente -->
+    <div class="mov" id="modalEditarCliente" style="display: none;">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Cliente</div>
+                    <div class="ms">Actualice la información del cliente seleccionado</div>
+                </div>
+                <button class="mcl" onclick="ClientesModals.cerrarModalEditar()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
             </div>
 
             <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/clientesAjax.php" method="POST" data-form="update" autocomplete="off">
-                <input type="hidden" name="clientesAjax" value="editar">
-                <input type="hidden" name="cl_id_editar" id="cl_id_editar">
+                <div class="mb">
+                    <input type="hidden" name="clientesAjax" value="editar">
+                    <input type="hidden" name="cl_id_editar" id="cl_id_editar">
 
-                <div class="modal-group">
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Nombres</label>
-                                <input type="text" name="Nombres_cl" id="Nombres_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                            </div>
+                    <div class="fg">
+                        <label class="fl req">Nombres</label>
+                        <input class="inp" type="text" name="Nombres_cl" id="Nombres_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">Apellido Paterno</label>
+                            <input class="inp" type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Apellido Materno</label>
+                            <input class="inp" type="text" name="Materno_cl" id="Materno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Apellido Paterno</label>
-                                <input type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                            </div>
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">Carnet / CI</label>
+                            <input class="inp" type="number" name="Carnet_cl" id="Carnet_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_cl" id="Materno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
-                            </div>
+                        <div class="fg">
+                            <label class="fl">Teléfono</label>
+                            <input class="inp" type="number" name="Telefono_cl" id="Telefono_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Carnet</label>
-                                <input type="number" name="Carnet_cl" id="Carnet_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="number" name="Telefono_cl" id="Telefono_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl">Dirección</label>
+                        <input class="inp" type="text" name="Direccion_cl" id="Direccion_cl_edit">
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Dirección</label>
-                                <input type="text" name="Direccion_cl" id="Direccion_cl_edit">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_cl" id="Correo_cl_edit">
-                            </div>
-                        </div>
+                    <div class="fg" style="margin-bottom:0">
+                        <label class="fl">Correo Electrónico</label>
+                        <input class="inp" type="email" name="Correo_cl" id="Correo_cl_edit">
                     </div>
+                </div>
 
-                    <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalEditar()">Cancelar</a>
-                        <button type="submit" class="btn success">Actualizar</button>
-                    </div>
+                <div class="mf">
+                    <button type="button" class="btn btn-gho" onclick="ClientesModals.cerrarModalEditar()">Cancelar</button>
+                    <button type="submit" class="btn btn-def">Actualizar Cliente</button>
                 </div>
             </form>
         </div>
     </div>
-    <!-- registrar cliente -->
-    <div class="modal" id="modalNuevoCliente" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title"><ion-icon name="person-add-outline"></ion-icon> Nuevo Cliente</div>
-                <a class="close" onclick="ClientesModals.cerrarModalNuevo()"><ion-icon name="close-outline"></ion-icon></a>
+    <!-- Modal Nuevo Cliente -->
+    <div class="mov" id="modalNuevoCliente" style="display: none;">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Nuevo Cliente</div>
+                    <div class="ms">Complete los datos para registrar un nuevo cliente</div>
+                </div>
+                <button class="mcl" onclick="ClientesModals.cerrarModalNuevo()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
             </div>
 
             <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/clientesAjax.php" method="POST" data-form="save" autocomplete="off">
-                <input type="hidden" name="clientesAjax" value="nuevo">
+                <div class="mb">
+                    <input type="hidden" name="clientesAjax" value="nuevo">
 
-                <div class="modal-group">
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Nombres</label>
-                                <input type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                            </div>
+                    <div class="fg">
+                        <label class="fl req">Nombres</label>
+                        <input class="inp" type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">Apellido Paterno</label>
+                            <input class="inp" type="text" name="Paterno_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Apellido Materno</label>
+                            <input class="inp" type="text" name="Materno_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Apellido Paterno</label>
-                                <input type="text" name="Paterno_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
-                            </div>
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">Carnet / CI</label>
+                            <input class="inp" type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Apellido Materno</label>
-                                <input type="text" name="Materno_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100">
-                            </div>
+                        <div class="fg">
+                            <label class="fl">Teléfono</label>
+                            <input class="inp" type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Carnet</label>
-                                <input type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
-                            </div>
-                        </div>
-
+                    <div class="fg">
+                        <label class="fl">Dirección</label>
+                        <input class="inp" type="text" name="Direccion_cl">
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Dirección</label>
-                                <input type="text" name="Direccion_cl">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_cl">
-                            </div>
-                        </div>
+                    <div class="fg" style="margin-bottom:0">
+                        <label class="fl">Correo Electrónico</label>
+                        <input class="inp" type="email" name="Correo_cl">
                     </div>
+                </div>
 
-                    <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalNuevo()">Cancelar</a>
-                        <button type="submit" class="btn success">Registrar</button>
-                    </div>
+                <div class="mf">
+                    <button type="button" class="btn btn-gho" onclick="ClientesModals.cerrarModalNuevo()">Cancelar</button>
+                    <button type="submit" class="btn btn-def">Registrar Cliente</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- detalle cliente y estadisticas -->
-    <div class="modal" id="modalDetalleCliente" style="display: none;">
-        <div class="modal-content detalle" style="max-width: 1200px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="person-circle-outline"></ion-icon>
-                    Detalle del Cliente - <span id="detalleClienteNombre">...</span>
+    <!-- Modal Detalle Cliente -->
+    <div class="mov" id="modalDetalleCliente" style="display: none;">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">Detalle del Cliente</div>
+                    <div class="ms" id="detalleClienteNombre">...</div>
                 </div>
-                <a class="close" onclick="ClientesModals.cerrarModalDetalle()">
+                <button class="mcl" onclick="ClientesModals.cerrarModalDetalle()">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
-            <input type="hidden" id="detalleClienteId">
+            <div class="mb">
+                <input type="hidden" id="detalleClienteId">
 
-            <div class="modal-group modal-estadisticas">
-                <div class="modal-title">
-                    <h3><ion-icon name="information-circle-outline"></ion-icon> Información Personal</h3>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-detalles-info">
-                            <div class="detalle-info-bloque">
-                                <label>Nombre Completo:</label>
-                                <p id="detalleNombreCompleto">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>CI/Carnet:</label>
-                                <p id="detalleCarnet">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Teléfono:</label>
-                                <p id="detalleTelefono">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Correo Electrónico:</label>
-                                <p id="detalleCorreo">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Dirección:</label>
-                                <p id="detalleDireccion">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Fecha de Registro:</label>
-                                <p id="detalleFechaRegistro">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Estado:</label>
-                                <p id="detalleEstado">-</p>
-                            </div>
-
-
-
-                            <div class="detalle-info-bloque">
-                                <label>Antigüedad como Cliente:</label>
-                                <p id="detalleAntiguedad">-</p>
-                            </div>
+                <div class="stit">Información Personal</div>
+                <div class="fr">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Nombre Completo</div><div class="th5" id="detalleNombreCompleto">-</div></div></div>
+                            <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">CI / Carnet</div><div class="th5" id="detalleCarnet">-</div></div></div>
+                            <div class="litem"><ion-icon name="call-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Teléfono</div><div class="th5" id="detalleTelefono">-</div></div></div>
+                            <div class="litem"><ion-icon name="mail-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Correo Electrónico</div><div class="th5" id="detalleCorreo">-</div></div></div>
                         </div>
-
                     </div>
-                    <div class="col">
-                        <div class="modal-title">
-                            <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Compra</h3>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Dirección</div><div class="th5" id="detalleDireccion">-</div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha de Registro</div><div class="th5" id="detalleFechaRegistro">-</div></div></div>
+                            <div class="litem"><ion-icon name="time-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Antigüedad</div><div class="th5"><span id="detalleAntiguedad">-</span> días</div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="shield-checkmark-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div id="detalleEstado">-</div></div></div>
                         </div>
-
-                        <div class="row">
-                            <div class="col">
-                                <div style="background:#e8f5e9;padding:15px;border-radius:8px;text-align:center;">
-                                    <label style="color:#2e7d32;">Total Compras:</label>
-                                    <p style="font-size:24px;font-weight:bold;color:#1b5e20;margin:5px 0;" id="detalleTotalCompras">0</p>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div style="background:#e3f2fd;padding:15px;border-radius:8px;text-align:center;">
-                                    <label style="color:#1565c0;">Monto Total Gastado:</label>
-                                    <p style="font-size:24px;font-weight:bold;color:#0d47a1;margin:5px 0;" id="detalleMontoTotal">Bs. 0.00</p>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div style="background:#fff3e0;padding:15px;border-radius:8px;text-align:center;">
-                                    <label style="color:#e65100;">Facturas Emitidas:</label>
-                                    <p style="font-size:24px;font-weight:bold;color:#bf360c;margin:5px 0;" id="detalleFacturasEmitidas">0</p>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="row">
-                            <div class="col">
-                                <div style="background:#f3e5f5;padding:15px;border-radius:8px;text-align:center;">
-                                    <label style="color:#7b1fa2;">Promedio por Compra:</label>
-                                    <p style="font-size:24px;font-weight:bold;color:#4a148c;margin:5px 0;" id="detallePromedio">Bs. 0.00</p>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div style="background:#fce4ec;padding:15px;border-radius:8px;text-align:center;">
-                                    <label style="color:#c2185b;">Última Compra:</label>
-                                    <p style="font-size:18px;font-weight:bold;color:#880e4f;margin:5px 0;" id="detalleUltimaCompra">-</p>
-                                </div>
-                            </div>
-                        </div>
-
-
                     </div>
                 </div>
-                <div class="modal-title">
-                    <h3><ion-icon name="bar-chart-outline"></ion-icon> Gráfico de Compras Mensuales</h3>
+
+                <div class="stit">Estadísticas de Compra</div>
+                <div class="grid4">
+                    <div class="statc"><div class="siw gr"><ion-icon name="cart-outline"></ion-icon></div><div><div class="sv" id="detalleTotalCompras">0</div><div class="sl">Total Compras</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="cash-outline"></ion-icon></div><div><div class="sv" id="detalleMontoTotal">Bs. 0.00</div><div class="sl">Monto Total</div></div></div>
+                    <div class="statc"><div class="siw ww"><ion-icon name="document-text-outline"></ion-icon></div><div><div class="sv" id="detalleFacturasEmitidas">0</div><div class="sl">Facturas</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="stats-chart-outline"></ion-icon></div><div><div class="sv" id="detallePromedio">Bs. 0.00</div><div class="sl">Promedio</div></div></div>
                 </div>
 
-                <div class="row">
-                    <div id="graficoComprasMensuales" style="width:100%;height:350px;"></div>
+                <div class="stit">Resumen de Actividad</div>
+                <div class="fr">
+                    <div class="card">
+                        <div class="ch"><span class="ct">Medicamentos más Comprados</span></div>
+                        <div class="tw">
+                            <table style="font-size: 12px;">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Medicamento</th>
+                                        <th>Veces</th>
+                                        <th>Unidades</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaMedicamentosMasComprados">
+                                    <tr><td colspan="4" class="txctr tmut">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch"><span class="ct">Gráfico Mensual</span></div>
+                        <div class="cb">
+                            <div id="graficoComprasMensuales" style="width: 100%; height: 250px;"></div>
+                        </div>
+                    </div>
                 </div>
 
-
-
-                <div class="title">
-                    <h3><ion-icon name="receipt-outline"></ion-icon> Últimas 5 Compras</h3>
-                </div>
-
-                <div class="row">
-                    <div class="table-container">
-                        <table class="table">
+                <div class="stit">Últimas Compras</div>
+                <div class="card">
+                    <div class="tw">
+                        <table style="font-size: 12px;">
                             <thead>
                                 <tr>
-                                    <th>N° Documento</th>
+                                    <th>Documento</th>
                                     <th>Fecha</th>
                                     <th>Medicamentos</th>
                                     <th>Unidades</th>
-                                    <th>Subtotal</th>
                                     <th>Total</th>
                                     <th>Vendedor</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaUltimasCompras">
-                                <tr>
-                                    <td colspan="6" style="text-align:center;">
-                                        <ion-icon name="hourglass-outline"></ion-icon> Cargando...
-                                    </td>
-                                </tr>
+                                <tr><td colspan="6" class="txctr tmut">Cargando...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
-                    <h3><ion-icon name="medical-outline"></ion-icon> Medicamentos Más Comprados (Top 5)</h3>
-                </div>
-
-                <div class="row">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Medicamento</th>
-                                    
-                                    <th>Laboratorio</th>
-                                    <th>Forma</th>
-                                    <th>Veces</th>
-                                    <th>Unidades</th>
-                                    <th>Última Compra</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaMedicamentosMasComprados">
-                                <tr>
-                                    <td colspan="4" style="text-align:center;">
-                                        <ion-icon name="hourglass-outline"></ion-icon> Cargando...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="ClientesModals.cerrarModalDetalle()">
-                        Cerrar
-                    </a>
-                    <?php if ($_SESSION['rol_smp'] != 3) { ?>
-                    <a href="javascript:void(0)" class="btn danger" id="btnToggleEstadoDetalle">
-                        <ion-icon name="power-outline"></ion-icon>Estado
-                    </a>
-                    <?php } ?>
-                    <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.editarDesdeDetalle()">
-                        <ion-icon name="create-outline"></ion-icon> Editar
-                    </a>
-                    <?php if ($_SESSION['rol_smp'] != 3) { ?>
-                    <a href="javascript:void(0)" class="btn primary" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
+            <div class="mf">
+                <button type="button" class="btn btn-gho" onclick="ClientesModals.cerrarModalDetalle()">Cerrar</button>
+                <?php if ($_SESSION['rol_smp'] != 3) { ?>
+                    <button type="button" class="btn btn-war" id="btnToggleEstadoDetalle">
+                        <ion-icon name="power-outline"></ion-icon> Estado
+                    </button>
+                <?php } ?>
+                <button type="button" class="btn btn-def" onclick="ClientesModals.editarDesdeDetalle()">
+                    <ion-icon name="create-outline"></ion-icon> Editar
+                </button>
+                <?php if ($_SESSION['rol_smp'] != 3) { ?>
+                    <button type="button" class="btn btn-sec" onclick="ClientesModals.exportarPDFDetalle(document.getElementById('detalleClienteId').value)">
                         <ion-icon name="document-text-outline"></ion-icon> PDF
-                    </a>
-                    <a href="javascript:void(0)" class="btn default" onclick="ClientesModals.verHistorialCompleto()">
+                    </button>
+                    <button type="button" class="btn btn-sec" onclick="ClientesModals.verHistorialCompleto()">
                         <ion-icon name="time-outline"></ion-icon> Historial
-                    </a>
-                    <?php } ?>
-                </div>
+                    </button>
+                <?php } ?>
             </div>
         </div>
     </div>
@@ -462,12 +350,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById('modalNuevoCliente');
                 if (modal) {
                     modal.style.display = 'flex';
+                    modal.classList.add('open');
                 }
             }
 
             function cerrarModalNuevo() {
                 const modal = document.getElementById('modalNuevoCliente');
                 if (modal) {
+                    modal.classList.remove('open');
                     modal.style.display = 'none';
                     const form = modal.querySelector('form');
                     if (form) form.reset();
@@ -504,7 +394,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('Carnet_cl_edit').value = data.cl_carnet || '';
 
                     const modal = document.getElementById('modalEditarCliente');
-                    if (modal) modal.style.display = 'flex';
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        modal.classList.add('open');
+                    }
 
                 } catch (error) {
                     console.error('Error:', error);
@@ -515,6 +408,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             function cerrarModalEditar() {
                 const modal = document.getElementById('modalEditarCliente');
                 if (modal) {
+                    modal.classList.remove('open');
                     modal.style.display = 'none';
                 }
             }
@@ -577,7 +471,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 document.getElementById('detalleClienteId').value = cl_id;
 
                 const modal = document.getElementById('modalDetalleCliente');
-                if (modal) modal.style.display = 'flex';
+                if (modal) {
+                    modal.style.display = 'flex';
+                    modal.classList.add('open');
+                }
 
                 try {
                     const response = await fetch(API_URL, {
@@ -609,15 +506,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleAntiguedad').textContent = data.antiguedad_dias;
 
                     const estadoHtml = data.cl_estado == 1 ?
-                        '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
-                        '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                        '<span class="badge bgr"><span class="bdt"></span> Activo</span>' :
+                        '<span class="badge bdan"><span class="bdt"></span> Inactivo</span>';
                     document.getElementById('detalleEstado').innerHTML = estadoHtml;
 
                     document.getElementById('detalleTotalCompras').textContent = data.total_compras || 0;
                     document.getElementById('detalleMontoTotal').textContent = 'Bs. ' + formatearNumero(data.monto_total || 0);
                     document.getElementById('detalleFacturasEmitidas').textContent = data.facturas_emitidas || 0;
-                    document.getElementById('detallePromedio').textContent = 'Bs. ' + formatearNumero(data.promedio_compra || 0);
-                    document.getElementById('detalleUltimaCompra').textContent = data.ultima_compra ? formatearFecha(data.ultima_compra) : 'Nunca';
+                     document.getElementById('detallePromedio').textContent = 'Bs. ' + formatearNumero(data.promedio_compra || 0);
 
                     const btnToggle = document.getElementById('btnToggleEstadoDetalle');
                     if (btnToggle) {
@@ -663,14 +559,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                             return `
                         <tr>
-                            <td><strong>${compra.ve_numero_documento}</strong></td>
+                            <td class="tdp">${compra.ve_numero_documento}</td>
                             <td>${formatearFecha(compra.ve_fecha_emision)}</td>
-                            <td  title="${compra.medicamentos_detalle || ''}">${medicamentos}</td>
-                            <td style="text-align:center;"><strong>${compra.total_unidades || 0}</strong></td>
-                            <td >Bs. ${formatearNumero(compra.ve_subtotal || compra.ve_total)}</td>
-                            <td ><strong style="color:#1976D2;">Bs. ${formatearNumero(compra.ve_total)}</strong></td>
-                            <td >${vendedor}</td>
-                            
+                            <td class="tdmu" title="${compra.medicamentos_detalle || ''}">${medicamentos}</td>
+                            <td style="text-align:center;"><span class="badge bdef">${compra.total_unidades || 0}</span></td>
+                            <td><strong class="tsuc">Bs. ${formatearNumero(compra.ve_total)}</strong></td>
+                            <td class="tdmu">${vendedor}</td>
                         </tr>
                     `
                         }).join('');
@@ -703,17 +597,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         tbody.innerHTML = data.medicamentos.map((med, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td><strong>${med.med_nombre_quimico}</strong></td>
-                            
-                            <td>${med.proveedor || '-'}</td>
-                            <td>${med.forma_farmaceutica || '-'}</td>
-                            <td style="text-align:center;"><strong style="color:#1976D2;">${med.veces_comprado}</strong></td>
-                            <td style="text-align:center;"><strong>${med.total_unidades}</strong></td>
-                            <td>${formatearFecha(med.ultima_compra)}</td>
+                            <td class="tdp">${med.med_nombre_quimico}</td>
+                            <td style="text-align:center;"><span class="badge binf">${med.veces_comprado}</span></td>
+                            <td style="text-align:center;"><span class="badge bdef">${med.total_unidades}</span></td>
                         </tr>
                     `).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos comprados</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="txctr tmut">Sin medicamentos comprados</td></tr>';
                     }
 
                 } catch (error) {
@@ -862,7 +752,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             function cerrarModalDetalle() {
                 const modal = document.getElementById('modalDetalleCliente');
-                if (modal) modal.style.display = 'none';
+                if (modal) {
+                    modal.classList.remove('open');
+                    modal.style.display = 'none';
+                }
             }
 
             function editarDesdeDetalle() {
@@ -960,16 +853,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     const tablaHTML = `
-                    <div style="max-height:500px;overflow-y:auto;">
-                        <table class="table" style="width:100%;font-size:11px;">
+                    <div class="tw" style="max-height:500px;overflow-y:auto;">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>N°</th>
                                     <th>Documento</th>
                                     <th>Fecha</th>
                                     <th>Medicamentos</th>
-                                    <th>Unidades</th>
-                                    <th>Total</th>
+                                    <th style="text-align:center;">Unid.</th>
+                                    <th style="text-align:right;">Total</th>
                                     <th>Vendedor</th>
                                     <th>Sucursal</th>
                                 </tr>
@@ -985,22 +878,22 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     return `
                                     <tr>
                                         <td>${i + 1}</td>
-                                        <td>${c.ve_numero_documento}</td>
+                                        <td class="tdp">${c.ve_numero_documento}</td>
                                         <td>${formatearFecha(c.ve_fecha_emision)}</td>
-                                        <td style="font-size:10px;" title="${c.medicamentos_detalle || ''}">${medicamentos}</td>
-                                        <td style="text-align:center;">${c.total_unidades || 0}</td>
-                                        <td style="text-align:right;">Bs. ${formatearNumero(c.ve_total)}</td>
-                                        <td style="font-size:10px;">${vendedor.trim() || 'N/A'}</td>
-                                        <td style="font-size:10px;">${c.sucursal_nombre || '-'}</td>
+                                        <td class="tdmu" title="${c.medicamentos_detalle || ''}">${medicamentos}</td>
+                                        <td style="text-align:center;"><span class="badge bdef">${c.total_unidades || 0}</span></td>
+                                        <td style="text-align:right;"><strong class="tsuc">Bs. ${formatearNumero(c.ve_total)}</strong></td>
+                                        <td class="tdmu">${vendedor.trim() || 'N/A'}</td>
+                                        <td class="tdmu">${c.sucursal_nombre || '-'}</td>
                                     </tr>
                                 `}).join('')}
                             </tbody>
                             <tfoot>
-                                <tr style="background:#f5f5f5;font-weight:bold;">
+                                <tr style="background:var(--bg-secondary);font-weight:bold;">
                                     <td colspan="4">TOTALES:</td>
-                                    <td style="text-align:center;">${compras.reduce((sum, c) => sum + parseInt(c.total_unidades || 0), 0)}</td>
-                                    <td style="text-align:right;">Bs. ${formatearNumero(compras.reduce((sum, c) => sum + parseFloat(c.ve_total), 0))}</td>
-                                    <td colspan="2">${compras.length} compras</td>
+                                    <td style="text-align:center;"><span class="badge bdef">${compras.reduce((sum, c) => sum + parseInt(c.total_unidades || 0), 0)}</span></td>
+                                    <td style="text-align:right;"><strong class="tsuc">Bs. ${formatearNumero(compras.reduce((sum, c) => sum + parseFloat(c.ve_total), 0))}</strong></td>
+                                    <td colspan="2" class="tdmu">${compras.length} compras</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -1042,7 +935,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modals = ['modalNuevoCliente', 'modalEditarCliente', 'modalDetalleCliente'];
                 modals.forEach(modalId => {
                     const modal = document.getElementById(modalId);
-                    if (modal && modal.style.display === 'flex' && e.target === modal) {
+                    if (modal && modal.classList.contains('open') && e.target === modal) {
+                        modal.classList.remove('open');
                         modal.style.display = 'none';
                     }
                 });
