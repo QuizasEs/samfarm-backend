@@ -183,10 +183,10 @@ class medicamentoController extends medicamentoModel
         /* ===== CONSTRUIR WHERE DINÁMICO ===== */
         $whereParts = [];
 
-        // Validar estados activos
-        $whereParts[] = "(ff.ff_estado = 1 OR ff.ff_estado IS NULL)";
-        $whereParts[] = "(vd.vd_estado = 1 OR vd.vd_estado IS NULL)";
-        $whereParts[] = "(uf.uf_estado = 1 OR uf.uf_estado IS NULL)";
+        // Validar estados activos (comentado para mostrar todos)
+        // $whereParts[] = "(ff.ff_estado = 1 OR ff.ff_estado IS NULL)";
+        // $whereParts[] = "(vd.vd_estado = 1 OR vd.vd_estado IS NULL)";
+        // $whereParts[] = "(uf.uf_estado = 1 OR uf.uf_estado IS NULL)";
 
         // Búsqueda por texto
         if (!empty($busqueda)) {

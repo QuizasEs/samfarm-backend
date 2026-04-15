@@ -1365,3 +1365,188 @@ img, table, pre, .tw { max-width: 100%; }
   color: var(--text-secondary);
   font-size: 12px;
 }
+
+/* ══════════════════════════════════════════
+    PRICE CARDS AND BALANCES
+══════════════════════════════════════════ */
+
+.medicamentos-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.price-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    margin: 10px 0;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.dark .price-card {
+    background: var(--dark-bg-primary);
+    border: 1px solid var(--dark-border-dark);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.price-card:hover {
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.dark .price-card:hover {
+    box-shadow: 0 4px 12px var(--dark-shadow-dark);
+}
+
+/* Header */
+.price-card-header {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.dark .price-card-header {
+    padding: 16px;
+    background: var(--dark-bg-secondary);
+    border-bottom: 1px solid var(--dark-border-dark);
+}
+
+.price-card-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.price-card-title strong {
+    font-size: 16px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.dark .price-card-title strong {
+    font-size: 16px;
+    color: var(--dark-text-primary);
+    font-weight: 600;
+}
+
+.price-card-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.dark .price-card-subtitle {
+    font-size: 13px;
+    color: var(--dark-text-secondary);
+}
+
+/* Body - Lista de información */
+.price-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.price-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.dark .price-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dark-border-dark);
+}
+
+.price-card-row:last-child {
+    border-bottom: none;
+}
+
+.price-card-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.dark .price-card-label {
+    font-size: 14px;
+    color: var(--dark-text-secondary);
+    font-weight: 500;
+}
+
+.price-card-value {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.dark .price-card-value {
+    font-size: 15px;
+    color: var(--dark-text-primary);
+    font-weight: 600;
+}
+
+.price-card-highlight {
+    font-size: 16px;
+}
+
+/* Footer */
+.price-card-footer {
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dark .price-card-footer {
+    padding: 12px 16px;
+    background: var(--dark-bg-secondary);
+    border-top: 1px solid var(--dark-border-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-card-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.dark .price-card-info {
+    font-size: 12px;
+    color: var(--dark-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .medicamentos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .price-card-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .price-card-button {
+        width: 100%;
+    }
+
+    .price-card-info {
+        text-align: center;
+    }
+}
+

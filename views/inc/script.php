@@ -902,21 +902,21 @@
             const id = btn.dataset.id;
             const nombre = btn.dataset.nombre;
 
-            const modal = document.getElementById('modalActivarLote');
-            modal.style.display = 'flex';
+            const modalId = 'modalActivarLote';
+            showM(modalId);
 
             document.getElementById('detalleLote').innerHTML = `
-            <p><b>Lote:</b> #${id}</p>
-            <p><b>Medicamento:</b> ${nombre}</p>
-            <p>Confirma que deseas activar este lote. Esta acción no se puede deshacer.</p>
+            <div class="litem"><ion-icon name="barcode-outline"></ion-icon><div class="f1"><div class="tc">ID Lote</div><div class="th5">#${id}</div></div></div>
+            <div class="litem"><ion-icon name="medical-outline"></ion-icon><div class="f1"><div class="tc">Medicamento</div><div class="th5">${nombre}</div></div></div>
+            <div class="psub mt16">Confirme que desea activar este lote. Esta acción no se puede deshacer y habilitará el medicamento para la venta.</div>
         `;
 
             document.getElementById('btnConfirmarActivacion').dataset.id = id;
         }
 
         // CERRAR MODAL CON BOTÓN (Cancelar o X)
-        if (e.target.classList.contains('modal-close') || e.target.classList.contains('close')) {
-            e.target.closest('.modal').style.display = 'none';
+        if (e.target.classList.contains('modal-close') || e.target.classList.contains('mcl')) {
+            closeM('modalActivarLote');
         }
     });
 
@@ -928,11 +928,11 @@
 
             Swal.fire({
                 title: "¿Activar este lote?",
-                text: "Solo se puede activar una vez.",
+                text: "Al activar el lote, el stock estará disponible para la venta.",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#28a745",
-                cancelButtonColor: "#d33",
+                confirmButtonColor: "var(--btn-default)",
+                cancelButtonColor: "var(--btn-warning)",
                 confirmButtonText: "Sí, activar",
                 cancelButtonText: "Cancelar"
             }).then((r) => {
@@ -945,7 +945,7 @@
     async function activarLote(id) {
         Swal.fire({
             title: 'Procesando...',
-            text: 'Activando lote',
+            text: 'Activando lote en el sistema',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
@@ -965,11 +965,12 @@
             await Swal.fire({
                 title: data.Titulo || 'Resultado',
                 html: data.texto || '',
-                icon: data.Tipo || 'info'
+                icon: data.Tipo || 'info',
+                confirmButtonColor: "var(--btn-default)"
             });
 
             if (data.Alerta === 'recargar' || data.Tipo === 'success') {
-                document.getElementById('modalActivarLote').style.display = 'none';
+                closeM('modalActivarLote');
                 document.querySelector('.filtro-dinamico .btn-search')?.click();
             }
 
@@ -2623,17 +2624,11 @@
             },
 
             abrir(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'flex';
-                }
+                App.showM(modalId);
             },
 
             cerrar(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'none';
-                }
+                App.closeM(modalId);
             },
 
             formatearFecha(fecha) {

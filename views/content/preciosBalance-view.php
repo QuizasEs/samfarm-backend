@@ -2,35 +2,51 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/preciosAjax.php"
         data-ajax-param="preciosAjax"
         data-ajax-registros="10"
         data-ajax-action="listar_informes">
-        
-        <div class="title">
-            <h2>
-                <ion-icon name="document-text-outline"></ion-icon> Informes de Cambios de Precios
-            </h2>
-        </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por medicamento...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
-
-                <a href="<?php echo SERVER_URL; ?>preciosLista" class="btn default">
+        <div class="ph">
+            <div>
+                <div class="ptit">Informes de Cambios de Precios</div>
+                <div class="psub">Historial de modificaciones de precios por medicamento</div>
+            </div>
+            <div class="tbr">
+                <a href="<?php echo SERVER_URL; ?>preciosLista" class="btn btn-def">
                     <ion-icon name="arrow-back-outline"></ion-icon> Volver a Balance
                 </a>
             </div>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por medicamento...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
 
     </div>
 

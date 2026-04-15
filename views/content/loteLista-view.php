@@ -7,99 +7,87 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/loteAjax.php"
         data-ajax-param="loteAjax"
         data-ajax-registros="10">
-        <div class="title">
-            <h2>
-                <ion-icon name="bandage-outline"></ion-icon> Lotes de medicamentos
-            </h2>
-        </div>
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
 
-
-                <!-- Fechas -->
-                <div class="form-fechas">
-                    <small>
-                        Desde
-                    </small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-                <div class="form-fechas">
-                    <small>
-                        Hasta
-                    </small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
-                </div>
-                <div class="form-fechas">
-
-                    <small>Estados</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todos los estados</option>
-                        <option value="en_espera">En Espera</option>
-                        <option value="activo">Activo</option>
-                        <option value="terminado">Terminado</option>
-                        <option value="caducado">Caducado</option>
-                        <!--                       <option value="devuelto">Devuelto</option>
-                        <option value="bloqueado">Bloqueado</option> -->
-                    </select>
-                </div>
-                <!-- <div class="form-fechas">
-                    <small>Meses</small>
-                    <select class="select-filtro" name="select2" id="">
-                        <option value="">Mes</option>
-                        <option value="1">Enero</option>
-                        <option value="2">Febrero</option>
-                        <option value="3">Marzo</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Mayo</option>
-                        <option value="6">Junio</option>
-                        <option value="7">Julio</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Septiempre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
-                    </select>
-                </div> -->
-                <!-- select de sucursales solo para administrador -->
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                    <div class="form-fechas">
-
-                        <small>Sucursales</small>
-                        <select class="select-filtro" name="select3" id="">
-                            <option value="">Sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                <?php } ?>
-
-                <div class="search">
-                    <!-- Búsqueda -->
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre o principio activo...">
-
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
+        <div class="ph">
+            <div>
+                <div class="ptit">Lotes de Medicamentos</div>
+                <div class="psub">Seguimiento y gestión de stock por lotes y fechas de vencimiento</div>
             </div>
-
-            <div class="filtro-dinamico-buttons">
-                <button type="button" class="btn success" id="btnExportarExcelLote">
+            <div class="tbr">
+                <button type="button" class="btn btn-sec" id="btnExportarExcelLote" data-tip="Exportar a Excel">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn primary" id="btnExportarPDFLote">
+                <button type="button" class="btn btn-sec" id="btnExportarPDFLote" data-tip="Exportar a PDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr4">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Estado</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="">Todos</option>
+                                <option value="en_espera">En Espera</option>
+                                <option value="activo">Activo</option>
+                                <option value="terminado">Terminado</option>
+                                <option value="caducado">Caducado</option>
+                            </select>
+                        </div>
+                        <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal</label>
+                                <select class="sel select-filtro" name="select3">
+                                    <option value="">Todas</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre o principio activo...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tw">
+                    <div class="tabla-contenedor"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -183,34 +171,36 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         }
     </script>
 
-    <!-- modal -->
     <!-- Modal Activar Lote -->
-    <div id="modalActivarLote" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">📦<span> Activar lote</span></div>
-                <a class="close" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></a>
-            </div>
-            <div class="modal-group">
-                <h3>Activar lote</h3>
-
-                <div class="row">
-                    <div id="detalleLote"></div>
-
+    <div class="mov" id="modalActivarLote">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Activar Lote</div>
+                    <div class="ms">Confirme la activación del lote seleccionado</div>
                 </div>
-                <div class="row">
-                    <div class="modal-info">
+                <button class="mcl" onclick="closeM('modalActivarLote')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <div class="mb">
+                <div id="detalleLote"></div>
 
-                        <p class="info">
-                            <strong>Atención:</strong> La activación del lote solo puede hacerse una vez.
-                            Luego la edición será limitada.
-                        </p>
+                <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
+                    <div class="cb">
+                        <div class="litem" style="border:none">
+                            <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
+                            <div class="f1">
+                                <div class="th5" style="color:var(--btn-warning)">Atención</div>
+                                <div class="tc" style="color:var(--btn-warning)">La activación del lote solo puede hacerse una vez. Luego la edición será limitada.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <button id="btnConfirmarActivacion" class="btn success">Activar</button>
-                    <button class="modal-close btn warning">Cancelar</button>
-                </div>
+            </div>
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="closeM('modalActivarLote')">Cancelar</button>
+                <button type="button" id="btnConfirmarActivacion" class="btn btn-def">Activar Lote</button>
             </div>
         </div>
     </div>

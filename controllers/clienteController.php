@@ -96,17 +96,12 @@ class clienteController extends clienteModel
 
         $tabla .= '
                 <div class="tw">
-                    <table>
+                    <table class="table-detail">
                         <thead>
                             <tr>
                                 <th>N°</th>
                                 <th>CLIENTE</th>
-                                <th>CI/CARNET</th>
-                                <th>TELÉFONO</th>
-                                <th>CORREO</th>
-                                <th>REGISTRO</th>
-                                <th>ÚLT. COMPRA</th>
-                                <th style="text-align:center;">COMPRAS</th>
+                                <th>COMPRA INFO</th>
                                 <th>ESTADO</th>
                                 <th>ACCIONES</th>
                             </tr>
@@ -136,35 +131,41 @@ class clienteController extends clienteModel
                     ? '<span class="badge bgr"><span class="bdt"></span>Activo</span>'
                     : '<span class="badge bdan"><span class="bdt"></span>Inactivo</span>';
 
+                $contacto_info = [];
+                if (!empty($telefono)) $contacto_info[] = '<ion-icon name="call-outline"></ion-icon>' . htmlspecialchars($telefono);
+                if (!empty($correo)) $contacto_info[] = '<ion-icon name="mail-outline"></ion-icon>' . htmlspecialchars($correo);
+                $contacto_html = implode(' ', $contacto_info);
+
+                $compra_info = '<div class="td-meta"><ion-icon name="calendar-outline"></ion-icon>Registro: ' . $fecha_registro . '</div>';
+                if ($total_compras > 0) {
+                    $compra_info .= '<div class="td-meta"><ion-icon name="cart-outline"></ion-icon>' . $total_compras . ' compras</div>';
+                }
+
                 $tabla .= '
-                        <tr>
+                        <tr class="tr-click" onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
                             <td>' . $contador . '</td>
-                            <td class="tdp">' . htmlspecialchars($nombre_completo) . '</td>
-                            <td>' . htmlspecialchars($carnet) . '</td>
-                            <td>' . htmlspecialchars($telefono) . '</td>
-                            <td class="tdmu">' . htmlspecialchars($correo) . '</td>
-                            <td>' . $fecha_registro . '</td>
-                            <td>' . $ultima_compra . '</td>
-                            <td style="text-align:center;"><span class="badge bdef">' . $total_compras . '</span></td>
+                            <td>
+                                <div class="td-main">' . htmlspecialchars($nombre_completo) . '</div>
+                                <div class="td-sub">' . htmlspecialchars($carnet) . '</div>
+                                <div class="td-meta">' . $contacto_html . '</div>
+                            </td>
+                            <td>
+                                <div class="td-main">' . $ultima_compra . '</div>
+                                ' . $compra_info . '
+                            </td>
                             <td>' . $estado_html . '</td>
                             <td>
                                 <div class="tda">
-                                    ' . ($rol_usuario != 3 ? '<button type="button"
-                                    class="btn btn-gho btn-ico btn-sm"
-                                    title="Ver detalle"
-                                    onclick="ClientesModals.verDetalle(' . $row['cl_id'] . ')">
-                                        <ion-icon name="eye-outline"></ion-icon>
-                                    </button>' : '') . '
                                     <button type="button"
                                     class="btn btn-gho btn-ico btn-sm"
                                     title="Editar"
-                                    onclick="ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
+                                    onclick="event.stopPropagation(); ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
                                         <ion-icon name="pencil-outline"></ion-icon>
                                     </button>
                                     ' . ($rol_usuario != 3 ? '<button type="button"
                                     class="btn btn-ico btn-sm ' . ($row['cl_estado'] == 1 ? 'btn-wouc' : 'btn-souc') . '"
                                     title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
-                                    onclick="ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
+                                    onclick="event.stopPropagation(); ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
                                         <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-outline' : 'checkmark-outline') . '"></ion-icon>
                                     </button>' : '') . '
                                 </div>
@@ -175,7 +176,7 @@ class clienteController extends clienteModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="10" style="text-align:center;padding:40px;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:40px;">
                             <div class="empty">
                                 <ion-icon class="empi" name="people-outline"></ion-icon>
                                 <div class="empt">No hay clientes</div>

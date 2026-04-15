@@ -2,301 +2,295 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
-    <div id="tabla-uso-farmacologico" class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/categoriaAjax.php"
         data-ajax-param="categoriaAjax"
         data-ajax-registros="6"
         data-ajax-action="listar_uso">
-        <div class="title">
-            <h2>
-                <ion-icon name="fitness-outline"></ion-icon> Uso Farmacológico
-            </h2>
 
+        <div class="ph">
+            <div>
+                <div class="ptit">Uso Farmacológico</div>
+                <div class="psub">Administre los usos farmacológicos de los medicamentos</div>
+            </div>
+            <div class="tbr">
+                <button type="button" class="btn btn-def" onclick="abrirModalAgregarUsoFarmacologico()">
+                    <ion-icon name="add-outline"></ion-icon> Nuevo Uso Farmacológico
+                </button>
+            </div>
         </div>
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
-                <div class="filtro-dinamico-buttons">
-                    <button type="button" class="btn success" onclick="abrirModalAgregarUsoFarmacologico()">
-                        <ion-icon name="add-circle-outline"></ion-icon> Nuevo Uso
-                    </button>
-                </div>
-            </div>
-        </form>
-        <div class="tabla-contenedor"></div>
-    </div>
 
-    <div id="modalAgregarUsoFarmacologico" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>Agregar Uso Farmacológico</span>
-                </div>
-                <a class="close" onclick="cerrarModalAgregarUsoFarmacologico()">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
-                    <input type="hidden" name="categoriaAjax" value="agregar_uso">
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_uso" class="required">Nombre</label>
-                                <input type="text" name="nombre_uso" id="nombre_uso" required maxlength="250">
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_uso">Imagen</label>
-                                <input type="file" name="imgLoad_uso" id="imgLoad_uso" accept="image/*">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-uso" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalAgregarUsoFarmacologico()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Guardar
-                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tw">
+                    <div class="tabla-contenedor"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="modalEditarUsoFarmacologico" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="create-outline"></ion-icon>
-                    <span>Editar Uso Farmacológico</span>
+    <!-- Modal Agregar Uso Farmacológico -->
+    <div class="mov" id="modalAgregarUsoFarmacologico">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Agregar Uso Farmacológico</div>
+                    <div class="ms">Complete los datos para agregar un nuevo uso farmacológico</div>
                 </div>
-                <a class="close" onclick="cerrarModalEditarUsoFarmacologico()">
+                <button class="mcl" onclick="App.closeM('modalAgregarUsoFarmacologico')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+
+            <div class="mb">
+                <form id="formAgregarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                    <input type="hidden" name="categoriaAjax" value="agregar_uso">
+
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_uso" id="nombre_uso" required maxlength="250">
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_uso" id="imgLoad_uso" accept="image/*">
+                    </div>
+
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-uso" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
+                    </div>
+                </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalAgregarUsoFarmacologico')">Cancelar</button>
+                <button type="submit" form="formAgregarUso" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Uso Farmacológico -->
+    <div class="mov" id="modalEditarUsoFarmacologico">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Uso Farmacológico</div>
+                    <div class="ms">Actualice los datos del uso farmacológico seleccionado</div>
+                </div>
+                <button class="mcl" onclick="App.closeM('modalEditarUsoFarmacologico')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+
+            <div class="mb">
+                <form id="formEditarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
                     <input type="hidden" name="categoriaAjax" value="actualizar_uso">
                     <input type="hidden" name="id_uso_edit" id="id_uso_edit">
                     <input type="hidden" name="imagen_antigua_edit" id="imagen_antigua_edit">
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_uso_edit" class="required">Nombre</label>
-                                <input type="text" name="nombre_uso_edit" id="nombre_uso_edit" required maxlength="250">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_uso_edit" id="nombre_uso_edit" required maxlength="250">
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_uso_edit">Imagen</label>
-                                <input type="file" name="imgLoad_uso_edit" id="imgLoad_uso_edit" accept="image/*">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_uso_edit" id="imgLoad_uso_edit" accept="image/*">
                     </div>
 
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-uso-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalEditarUsoFarmacologico()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Actualizar
-                        </button>
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-uso-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalEditarUsoFarmacologico')">Cancelar</button>
+                <button type="submit" form="formEditarUso" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Actualizar
+                </button>
             </div>
         </div>
     </div>
 
     <!-- via de administracion -->
-    <div id="tabla-via-administracion" class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/categoriaAjax.php"
         data-ajax-param="categoriaAjax"
         data-ajax-registros="6"
         data-ajax-action="listar_via">
-        <div class="title">
-            <h2>
-                <ion-icon name="medkit-outline"></ion-icon> Vía de Administración
-            </h2>
 
-        </div>
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
+        <div class="ph">
+            <div>
+                <div class="ptit">Vía de Administración</div>
+                <div class="psub">Administre las vías de administración de los medicamentos</div>
             </div>
-            <div class="filtro-dinamico-buttons">
-                <button type="button" class="btn success" onclick="abrirModalAgregarViaAdministracion()">
-                    <ion-icon name="add-circle-outline"></ion-icon> Nueva Vía
+            <div class="tbr">
+                <button type="button" class="btn btn-def" onclick="abrirModalAgregarViaAdministracion()">
+                    <ion-icon name="add-outline"></ion-icon> Nueva Vía de Administración
                 </button>
             </div>
-        </form>
-        <div class="tabla-contenedor"></div>
-    </div>
+        </div>
 
-    <div id="modalAgregarViaAdministracion" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>Agregar Vía de Administración</span>
-                </div>
-                <a class="close" onclick="cerrarModalAgregarViaAdministracion()">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
-                    <input type="hidden" name="categoriaAjax" value="agregar_via">
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_via" class="required">Nombre</label>
-                                <input type="text" name="nombre_via" id="nombre_via" required maxlength="250">
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_via">Imagen</label>
-                                <input type="file" name="imgLoad_via" id="imgLoad_via" accept="image/*">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-via" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalAgregarViaAdministracion()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Guardar
-                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tw">
+                    <div class="tabla-contenedor"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="modalEditarViaAdministracion" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="create-outline"></ion-icon>
-                    <span>Editar Vía de Administración</span>
+    <!-- Modal Agregar Vía de Administración -->
+    <div class="mov" id="modalAgregarViaAdministracion">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Agregar Vía de Administración</div>
+                    <div class="ms">Complete los datos para agregar una nueva vía de administración</div>
                 </div>
-                <a class="close" onclick="cerrarModalEditarViaAdministracion()">
+                <button class="mcl" onclick="App.closeM('modalAgregarViaAdministracion')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+
+            <div class="mb">
+                <form id="formAgregarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                    <input type="hidden" name="categoriaAjax" value="agregar_via">
+
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_via" id="nombre_via" required maxlength="250">
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_via" id="imgLoad_via" accept="image/*">
+                    </div>
+
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-via" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
+                    </div>
+                </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalAgregarViaAdministracion')">Cancelar</button>
+                <button type="submit" form="formAgregarVia" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Vía de Administración -->
+    <div class="mov" id="modalEditarViaAdministracion">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Vía de Administración</div>
+                    <div class="ms">Actualice los datos de la vía de administración seleccionada</div>
+                </div>
+                <button class="mcl" onclick="App.closeM('modalEditarViaAdministracion')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+
+            <div class="mb">
+                <form id="formEditarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
                     <input type="hidden" name="categoriaAjax" value="actualizar_via">
                     <input type="hidden" name="id_via_edit" id="id_via_edit">
                     <input type="hidden" name="imagen_antigua_edit_via" id="imagen_antigua_edit_via">
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_via_edit" class="required">Nombre</label>
-                                <input type="text" name="nombre_via_edit" id="nombre_via_edit" required maxlength="250">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_via_edit" id="nombre_via_edit" required maxlength="250">
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_via_edit">Imagen</label>
-                                <input type="file" name="imgLoad_via_edit" id="imgLoad_via_edit" accept="image/*">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_via_edit" id="imgLoad_via_edit" accept="image/*">
                     </div>
 
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-via-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalEditarViaAdministracion()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Actualizar
-                        </button>
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-via-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalEditarViaAdministracion')">Cancelar</button>
+                <button type="submit" form="formEditarVia" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Actualizar
+                </button>
             </div>
         </div>
     </div>
     <!-- uso farmacologico  -->
     <script>
         function abrirModalAgregarUsoFarmacologico() {
-            const modal = document.getElementById('modalAgregarUsoFarmacologico');
-            if (modal) {
-                modal.style.display = 'flex';
-                document.getElementById('nombre_uso').value = '';
-                document.getElementById('imgLoad_uso').value = '';
-                document.getElementById('img-pic-uso').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
-            }
+            document.getElementById('nombre_uso').value = '';
+            document.getElementById('imgLoad_uso').value = '';
+            document.getElementById('img-pic-uso').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
+            App.showM('modalAgregarUsoFarmacologico');
         }
 
         function cerrarModalAgregarUsoFarmacologico() {
-            const modal = document.getElementById('modalAgregarUsoFarmacologico');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalAgregarUsoFarmacologico');
         }
 
         async function abrirModalEditarUsoFarmacologico(id) {
@@ -336,8 +330,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 document.getElementById('imgLoad_uso_edit').value = '';
 
-                const modal = document.getElementById('modalEditarUsoFarmacologico');
-                if (modal) modal.style.display = 'flex';
+                App.showM('modalEditarUsoFarmacologico');
 
             } catch (error) {
                 console.error('Error:', error);
@@ -346,8 +339,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         }
 
         function cerrarModalEditarUsoFarmacologico() {
-            const modal = document.getElementById('modalEditarUsoFarmacologico');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalEditarUsoFarmacologico');
         }
 
         function cambiarEstadoUsoFarmacologico(id, nuevoEstado) {
@@ -382,7 +374,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         });
 
                         if (data.Alerta === 'recargar') {
-                            document.getElementById('tabla-uso-farmacologico').querySelector('.btn-search')?.click();
+                            document.querySelector('[data-ajax-action="listar_uso"]').querySelector('.btn-search')?.click();
                         }
 
                     } catch (error) {
@@ -453,18 +445,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     <!-- via de administracion script -->
     <script>
         function abrirModalAgregarViaAdministracion() {
-            const modal = document.getElementById('modalAgregarViaAdministracion');
-            if (modal) {
-                modal.style.display = 'flex';
-                document.getElementById('nombre_via').value = '';
-                document.getElementById('imgLoad_via').value = '';
-                document.getElementById('img-pic-via').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
-            }
+            document.getElementById('nombre_via').value = '';
+            document.getElementById('imgLoad_via').value = '';
+            document.getElementById('img-pic-via').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
+            App.showM('modalAgregarViaAdministracion');
         }
 
         function cerrarModalAgregarViaAdministracion() {
-            const modal = document.getElementById('modalAgregarViaAdministracion');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalAgregarViaAdministracion');
         }
 
         async function abrirModalEditarViaAdministracion(id) {
@@ -504,8 +492,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 document.getElementById('imgLoad_via_edit').value = '';
 
-                const modal = document.getElementById('modalEditarViaAdministracion');
-                if (modal) modal.style.display = 'flex';
+                App.showM('modalEditarViaAdministracion');
 
             } catch (error) {
                 console.error('Error:', error);
@@ -514,8 +501,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         }
 
         function cerrarModalEditarViaAdministracion() {
-            const modal = document.getElementById('modalEditarViaAdministracion');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalEditarViaAdministracion');
         }
 
         function cambiarEstadoViaAdministracion(id, nuevoEstado) {
@@ -550,7 +536,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         });
 
                         if (data.Alerta === 'recargar') {
-                            document.getElementById('tabla-via-administracion').querySelector('.btn-search')?.click();
+                            document.querySelector('[data-ajax-action="listar_via"]').querySelector('.btn-search')?.click();
                         }
 
                     } catch (error) {
@@ -619,158 +605,155 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         });
     </script>
 
-    <div id="tabla-forma-farmaceutica" class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/categoriaAjax.php"
         data-ajax-param="categoriaAjax"
         data-ajax-registros="6"
         data-ajax-action="listar_forma">
-        <div class="title">
-            <h2>
-                <ion-icon name="flask-outline"></ion-icon> Forma Farmacéutica
-            </h2>
 
+        <div class="ph">
+            <div>
+                <div class="ptit">Forma Farmacéutica</div>
+                <div class="psub">Administre las formas farmacéuticas de los medicamentos</div>
+            </div>
+            <div class="tbr">
+                <button type="button" class="btn btn-def" onclick="abrirModalAgregarFormaFarmaceutica()">
+                    <ion-icon name="add-outline"></ion-icon> Nueva Forma Farmacéutica
+                </button>
+            </div>
         </div>
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
-            </div>
-            <button type="button" class="btn success" onclick="abrirModalAgregarFormaFarmaceutica()">
-                <ion-icon name="add-circle-outline"></ion-icon> Nueva Forma
-            </button>
-        </form>
-        <div class="tabla-contenedor"></div>
-    </div>
 
-    <div id="modalAgregarFormaFarmaceutica" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>Agregar Forma Farmacéutica</span>
-                </div>
-                <a class="close" onclick="cerrarModalAgregarFormaFarmaceutica()">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
-                    <input type="hidden" name="categoriaAjax" value="agregar_forma">
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_forma" class="required">Nombre</label>
-                                <input type="text" name="nombre_forma" id="nombre_forma" required maxlength="250">
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_forma">Imagen</label>
-                                <input type="file" name="imgLoad_forma" id="imgLoad_forma" accept="image/*">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-forma" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalAgregarFormaFarmaceutica()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Guardar
-                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tw">
+                    <div class="tabla-contenedor"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="modalEditarFormaFarmaceutica" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="create-outline"></ion-icon>
-                    <span>Editar Forma Farmacéutica</span>
+    <!-- Modal Agregar Forma Farmacéutica -->
+    <div class="mov" id="modalAgregarFormaFarmaceutica">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Agregar Forma Farmacéutica</div>
+                    <div class="ms">Complete los datos para agregar una nueva forma farmacéutica</div>
                 </div>
-                <a class="close" onclick="cerrarModalEditarFormaFarmaceutica()">
+                <button class="mcl" onclick="App.closeM('modalAgregarFormaFarmaceutica')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
-            <div class="modal-group">
-                <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+
+            <div class="mb">
+                <form id="formAgregarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                    <input type="hidden" name="categoriaAjax" value="agregar_forma">
+
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_forma" id="nombre_forma" required maxlength="250">
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_forma" id="imgLoad_forma" accept="image/*">
+                    </div>
+
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-forma" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
+                    </div>
+                </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalAgregarFormaFarmaceutica')">Cancelar</button>
+                <button type="submit" form="formAgregarForma" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Forma Farmacéutica -->
+    <div class="mov" id="modalEditarFormaFarmaceutica">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Forma Farmacéutica</div>
+                    <div class="ms">Actualice los datos de la forma farmacéutica seleccionada</div>
+                </div>
+                <button class="mcl" onclick="App.closeM('modalEditarFormaFarmaceutica')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+
+            <div class="mb">
+                <form id="formEditarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
                     <input type="hidden" name="categoriaAjax" value="actualizar_forma">
                     <input type="hidden" name="id_forma_edit" id="id_forma_edit">
                     <input type="hidden" name="imagen_antigua_forma_edit" id="imagen_antigua_forma_edit">
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="nombre_forma_edit" class="required">Nombre</label>
-                                <input type="text" name="nombre_forma_edit" id="nombre_forma_edit" required maxlength="250">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl req">Nombre</label>
+                        <input class="inp" type="text" name="nombre_forma_edit" id="nombre_forma_edit" required maxlength="250">
                     </div>
 
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label for="imgLoad_forma_edit">Imagen</label>
-                                <input type="file" name="imgLoad_forma_edit" id="imgLoad_forma_edit" accept="image/*">
-                            </div>
-                        </div>
+                    <div class="fg">
+                        <label class="fl">Imagen</label>
+                        <input class="inp" type="file" name="imgLoad_forma_edit" id="imgLoad_forma_edit" accept="image/*">
                     </div>
 
-                    <div class="row">
-                        <div class="col" style="text-align: center;">
-                            <img id="img-pic-forma-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                                style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                                onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <button type="button" class="btn warning" onclick="cerrarModalEditarFormaFarmaceutica()">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="save-outline"></ion-icon> Actualizar
-                        </button>
+                    <div class="fg" style="text-align: center;">
+                        <img id="img-pic-forma-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
+                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
+                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
+            </div>
+
+            <div class="mf">
+                <button type="button" class="btn btn-war" onclick="App.closeM('modalEditarFormaFarmaceutica')">Cancelar</button>
+                <button type="submit" form="formEditarForma" class="btn btn-def">
+                    <ion-icon name="save-outline"></ion-icon> Actualizar
+                </button>
             </div>
         </div>
     </div>
     <!-- forma farmaceutica script -->
     <script>
         function abrirModalAgregarFormaFarmaceutica() {
-            const modal = document.getElementById('modalAgregarFormaFarmaceutica');
-            if (modal) {
-                modal.style.display = 'flex';
-                document.getElementById('nombre_forma').value = '';
-                document.getElementById('imgLoad_forma').value = '';
-                document.getElementById('img-pic-forma').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
-            }
+            document.getElementById('nombre_forma').value = '';
+            document.getElementById('imgLoad_forma').value = '';
+            document.getElementById('img-pic-forma').src = '<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png';
+            App.showM('modalAgregarFormaFarmaceutica');
         }
 
         function cerrarModalAgregarFormaFarmaceutica() {
-            const modal = document.getElementById('modalAgregarFormaFarmaceutica');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalAgregarFormaFarmaceutica');
         }
 
         async function abrirModalEditarFormaFarmaceutica(id) {
@@ -810,8 +793,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 document.getElementById('imgLoad_forma_edit').value = '';
 
-                const modal = document.getElementById('modalEditarFormaFarmaceutica');
-                if (modal) modal.style.display = 'flex';
+                App.showM('modalEditarFormaFarmaceutica');
 
             } catch (error) {
                 console.error('Error:', error);
@@ -820,8 +802,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         }
 
         function cerrarModalEditarFormaFarmaceutica() {
-            const modal = document.getElementById('modalEditarFormaFarmaceutica');
-            if (modal) modal.style.display = 'none';
+            App.closeM('modalEditarFormaFarmaceutica');
         }
 
         function cambiarEstadoFormaFarmaceutica(id, nuevoEstado) {
@@ -856,7 +837,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         });
 
                         if (data.Alerta === 'recargar') {
-                            document.getElementById('tabla-forma-farmaceutica').querySelector('.btn-search')?.click();
+                            document.querySelector('[data-ajax-action="listar_forma"]').querySelector('.btn-search')?.click();
                         }
 
                     } catch (error) {
