@@ -8,219 +8,231 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/comprasHistorialAjax.php"
         data-ajax-param="comprasHistorialAjax"
         data-ajax-registros="10">
-        <div class="title">
-            <h2>
-                <ion-icon name="receipt-outline"></ion-icon> Historial de Compras
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="receipt-outline"></ion-icon> Historial de Compras
+                </div>
+                <div class="psub">Consulta el historial completo de compras realizadas</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Fecha Compra Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Desde">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Fecha Compra Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Usuario</small>
-                    <select class="select-filtro" name="select2">
-                        <option value="">Todos los usuarios</option>
-                        <?php
-                        foreach ($datos_select['caja'] as $usuario) {
-                            $nombre_completo = trim(($usuario['us_nombres'] ?? '') . ' ' . ($usuario['us_apellido_paterno'] ?? ''));
-                            echo '<option value="' . $usuario['us_id'] . '">' . $nombre_completo . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-
-
-                <?php if ($rol_usuario == 1) { ?>
-                    <div class="form-fechas">
-                        <small>Sucursal</small>
-                        <select class="select-filtro" name="select3">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Usuario</label>
+                            <select class="sel select-filtro" name="select2">
+                                <option value="">Todos los usuarios</option>
+                                <?php
+                                foreach ($datos_select['caja'] as $usuario) {
+                                    $nombre_completo = trim(($usuario['us_nombres'] ?? '') . ' ' . ($usuario['us_apellido_paterno'] ?? ''));
+                                    echo '<option value="' . $usuario['us_id'] . '">' . $nombre_completo . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php if ($rol_usuario == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal</label>
+                                <select class="sel select-filtro" name="select3">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } else { ?>
+                            <div></div>
+                        <?php } ?>
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por N° compra, factura, NIT o proveedor...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                <?php } ?>
-
-
-                <!-- <div class="form-fechas">
-                    <small>Estado de Lotes</small>
-                    <select class="select-filtro" name="select5">
-                        <option value="">Todos</option>
-                        <option value="pendientes">Con lotes pendientes</option>
-                        <option value="activos">Con lotes activos</option>
-                        <option value="completado">Completamente procesado</option>
-                    </select>
-                </div> -->
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por N° compra, factura, NIT o proveedor...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
+                    <div class="flxe mt12">
+                        <button type="button" class="btn btn-def" id="btnExportarExcelComprasHistorial">
+                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                        </button>
+                        <button type="button" class="btn btn-def" id="btnExportarPDFComprasHistorial">
+                            <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="filtro-dinamico-buttons">
-
-                <button type="button" class="btn success" id="btnExportarExcelComprasHistorial">
-                    <ion-icon name="download-outline"></ion-icon> Excel
-                </button>
-                <button type="button" class="btn primary" id="btnExportarPDFComprasHistorial">
-                    <ion-icon name="document-text-outline"></ion-icon> PDF
-                </button>
-            </div>
-        </form>
-
-        <div class="tabla-contenedor"></div>
-    </div>
-
-    <div class="container" id="grafico-compras-container">
-        <div class="title">
-            <h2>
-                <ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras por Proveedor
-            </h2>
         </div>
-        <div id="grafico-compras-periodo" style="width: 100%; height: 400px;"></div>
+
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Compras Realizadas</div>
+            </div>
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="modal" id="modalDetalleCompra" style="display: none;">
-        <div class="modal-content detalle">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="document-text-outline"></ion-icon>
-                    Detalle de Compra - <span id="modalCompraNumero">...</span>
+    <div class="card">
+        <div class="ch">
+            <div class="ct"><ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras por Proveedor</div>
+        </div>
+        <div class="cb">
+            <div id="grafico-compras-periodo" style="width: 100%; height: 400px;"></div>
+        </div>
+    </div>
+
+    <div class="mov" id="modalDetalleCompra">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="document-text-outline"></ion-icon>
+                        Detalle de Compra - <span id="modalCompraNumero">...</span>
+                    </div>
+                    <div class="ms">Información completa de la compra seleccionada</div>
                 </div>
-                <a class="close" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
+                <button class="mcl" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
             <input type="hidden" id="modalCompraId">
 
-            <div class="modal-group">
-                <div class="row">
-                    <h3><ion-icon name="information-circle-outline"></ion-icon> Información General</h3>
+            <div class="mb">
+                <div class="stit">
+                    <ion-icon name="information-circle-outline"></ion-icon> Información General
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Número de Compra:</label>
-                        <p id="detalleNumeroCompra">-</p>
+                <div class="fr mb16">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Número de Compra</div><div class="th5" id="detalleNumeroCompra">-</div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha de Compra</div><div class="th5" id="detalleFechaCompra">-</div></div></div>
+                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Proveedor</div><div class="th5" id="detalleProveedor">-</div></div></div>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label>Fecha de Compra:</label>
-                        <p id="detalleFechaCompra">-</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Proveedor:</label>
-                        <p id="detalleProveedor">-</p>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleSucursal">-</div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario</div><div class="th5" id="detalleUsuario">-</div></div></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Sucursal:</label>
-                        <p id="detalleSucursal">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Usuario:</label>
-                        <p id="detalleUsuario">-</p>
+                <div class="stit">
+                    <ion-icon name="list-outline"></ion-icon> Detalle de Medicamentos
+                </div>
+                <div class="card mb16">
+                    <div class="cb">
+                        <div class="tw">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>MEDICAMENTO</th>
+                                        <th>CANTIDAD</th>
+                                        <th>PRECIO</th>
+                                        <th>DESCUENTO</th>
+                                        <th>SUBTOTAL</th>
+                                        <th>LOTE</th>
+                                        <th>ESTADO LOTE</th>
+                                        <th>VENCIMIENTO</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaDetalleMedicamentos">
+                                    <tr>
+                                        <td colspan="9" class="txctr">
+                                            <ion-icon name="hourglass-outline"></ion-icon> Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <h3><ion-icon name="list-outline"></ion-icon> Detalle de Medicamentos</h3>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>MEDICAMENTO</th>
-                                    <th>CANTIDAD</th>
-                                    <th>PRECIO</th>
-                                    <th>DESCUENTO</th>
-                                    <th>SUBTOTAL</th>
-                                    <th>LOTE</th>
-                                    <th>ESTADO LOTE</th>
-                                    <th>VENCIMIENTO</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaDetalleMedicamentos">
-                                <tr>
-                                    <td colspan="9" style="text-align:center;">
-                                        <ion-icon name="hourglass-outline"></ion-icon> Cargando...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="stit">
+                    <ion-icon name="calculator-outline"></ion-icon> Totales
+                </div>
+                <div class="grid4 mb16">
+                    <div class="statc">
+                        <div class="siw gr"><ion-icon name="cash-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleSubtotal">Bs. 0.00</div>
+                            <div class="sl">Subtotal</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw ww"><ion-icon name="receipt-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleImpuestos">Bs. 0.00</div>
+                            <div class="sl">Impuestos</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw rd"><ion-icon name="calculator-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleTotal">Bs. 0.00</div>
+                            <div class="sl">Total</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <h3><ion-icon name="calculator-outline"></ion-icon> Totales</h3>
+                <div class="stit">
+                    <ion-icon name="cube-outline"></ion-icon> Estado de Lotes
                 </div>
+                <div class="grid4">
+                    <div class="statc">
+                        <div class="siw bl"><ion-icon name="archive-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleTotalLotes">-</div>
+                            <div class="sl">Total Lotes</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw gr"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleLotesActivos">-</div>
+                            <div class="sl">Activos</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw ww"><ion-icon name="time-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleLotesEspera">-</div>
+                            <div class="sl">En Espera</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Subtotal:</label>
-                        <p id="detalleSubtotal">Bs. 0.00</p>
-                    </div>
-                    <div class="col">
-                        <label>Impuestos:</label>
-                        <p id="detalleImpuestos">Bs. 0.00</p>
-                    </div>
-                    <div class="col">
-                        <label>Total:</label>
-                        <p id="detalleTotal" style="font-weight: bold; color: #2c3e50;">Bs. 0.00</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <h3><ion-icon name="cube-outline"></ion-icon> Estado de Lotes</h3>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Total de Lotes:</label>
-                        <p id="detalleTotalLotes">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Activos:</label>
-                        <p id="detalleLotesActivos">-</p>
-                    </div>
-                    <div class="col">
-                        <label>En Espera:</label>
-                        <p id="detalleLotesEspera">-</p>
-                    </div>
-                </div>
-
-                <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">
-                        Cerrar
-                    </a>
-                    <a href="javascript:void(0)" class="btn primary" onclick="ComprasHistorialModals.imprimirPDF()" id="btnImprimirPDF">
-                        <ion-icon name="print-outline"></ion-icon> Imprimir PDF
-                    </a>
-                </div>
+            <div class="mf">
+                <button class="btn btn-war" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">Cerrar</button>
+                <button class="btn btn-def" onclick="ComprasHistorialModals.imprimirPDF()" id="btnImprimirPDF">
+                    <ion-icon name="print-outline"></ion-icon> Imprimir PDF
+                </button>
             </div>
         </div>
     </div>
@@ -259,13 +271,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const modal = document.getElementById(modalId);
                     if (modal) {
                         modal.style.display = 'flex';
+                        modal.classList.add('open');
                     }
                 },
 
                 cerrar(modalId) {
                     const modal = document.getElementById(modalId);
                     if (modal) {
-                        modal.style.display = 'none';
+                        modal.classList.remove('open');
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                        }, 300);
                     }
                 },
 
@@ -646,8 +662,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>

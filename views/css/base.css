@@ -510,6 +510,8 @@ tr.tr-cart:hover td { background: var(--btn-success-pale); }
 /* botones de accion en tabla: nunca reducir por debajo de su contenido */
 .tda .btn { flex-shrink: 0; min-width: fit-content; white-space: nowrap; }
 
+.table-container { overflow-x: auto; }
+
 /* tabla 2 - compacta con detalle expandido (pocas columnas, mas info) */
 .table-detail table { table-layout: fixed; }
 .table-detail th { padding: 10px 16px; }
@@ -1548,5 +1550,305 @@ img, table, pre, .tw { max-width: 100%; }
     .price-card-info {
         text-align: center;
     }
+}
+
+/* Sucursal Styles */
+
+.grillas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Tablets */
+@media (max-width: 992px) {
+    .grillas-container {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .grillas-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sucursal-card {
+        max-width: 100%;
+    }
+
+    .sucursal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sucursal-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .grafico-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    #graficoCostoBeneficio {
+        height: 350px;
+    }
+}
+
+.sucursal-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    border-left: 4px solid #4CAF50;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.dark .sucursal-card {
+    background: var(--dark-bg-primary);
+    box-shadow: 0 2px 8px var(--dark-shadow-dark);
+}
+
+.sucursal-card.inactiva {
+    border-left-color: #f44336;
+    opacity: 0.7;
+}
+
+.sucursal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.dark .sucursal-card:hover {
+    box-shadow: 0 4px 12px var(--dark-shadow-dark);
+}
+
+.sucursal-card::before {
+    content: 'Click para ver detalles';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(25, 118, 210, 0.9);
+    color: var(--bg-primary);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.dark .sucursal-card::before {
+    color: var(--dark-bg-primary);
+}
+
+.sucursal-card:hover::before {
+    opacity: 1;
+}
+
+.sucursal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.sucursal-nombre {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dark .sucursal-nombre {
+    color: var(--dark-text-secondary);
+}
+
+.sucursal-estado {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sucursal-estado.activo {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.sucursal-estado.inactivo {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.sucursal-info {
+    margin: 15px 0;
+}
+
+.sucursal-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.dark .sucursal-info-item {
+    color: var(--dark-text-secondary);
+}
+
+.sucursal-info-item ion-icon {
+    font-size: 18px;
+    color: #1976D2;
+    flex-shrink: 0;
+}
+
+.sucursal-cajas-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    font-weight: 600;
+    color: #1565c0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark .sucursal-cajas-badge {
+    background: var(--dark-bg-secondary);
+}
+
+.sucursal-cajas-badge:hover {
+    background: #1976D2;
+    color: var(--bg-primary);
+    transform: scale(1.05);
+}
+
+.dark .sucursal-cajas-badge:hover {
+    color: var(--dark-bg-primary);
+}
+
+.sucursal-cajas-badge.sin-cajas {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: default;
+}
+
+.dark .sucursal-cajas-badge.sin-cajas {
+    background: var(--dark-bg-secondary);
+    color: var(--dark-text-secondary);
+}
+
+.sucursal-cajas-badge.sin-cajas:hover {
+    transform: none;
+}
+
+.sucursal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.sucursal-actions .btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.loader-grillas {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.loader-grillas ion-icon {
+    font-size: 48px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.dark .no-results {
+    color: var(--dark-text-secondary);
+}
+
+.no-results ion-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.sucursal-header {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.sucursal-header:hover {
+    background: rgba(25, 118, 210, 0.05);
+    border-radius: 8px;
+    margin: -5px;
+    padding: 5px;
+}
+
+.sucursal-info {
+    cursor: pointer;
+}
+
+.sucursal-cajas-badge {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sucursal-actions {
+    pointer-events: auto;
+}
+
+.sucursal-actions a {
+    pointer-events: auto;
+}
+
+.grafico-periodo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.grafico-periodo .sel {
+    min-width: 180px;
 }
 

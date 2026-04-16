@@ -5,110 +5,152 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="container">
-        <div class="title">
-            <h2>
-                <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
-            </h2>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
+                </div>
+                <div class="psub">Busque y seleccione medicamentos disponibles para transferir entre sucursales</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico" id="form-buscar-lotes-transfer">
-            <div class="filtro-dinamico-search">
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico" id="form-buscar-lotes-transfer">
+                    <div class="fr3">
+                        <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal Origen</label>
+                                <select class="sel select-filtro" name="su_origen_filter" id="su_origen_filter_transfer">
+                                    <option value="">Mi sucursal</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } ?>
 
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                    <div class="form-fechas">
-                        <small>Sucursal Origen</small>
-                        <select class="select-filtro" name="su_origen_filter" id="su_origen_filter_transfer">
-                            <option value="">Mi sucursal</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
+                        <div class="fg">
+                            <label class="fl">Vence hasta</label>
+                            <input class="inp" type="date" name="fecha_venc_max_transfer" id="fecha_venc_max_transfer">
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda_transfer" id="busqueda_transfer" placeholder="Buscar medicamento o lote...">
+                                <button type="button" class="btn btn-def btn-search" id="btn-buscar-lotes-transfer">
+                                    <ion-icon name="search"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                <?php } ?>
-
-                <div class="form-fechas">
-                    <small>Vence hasta</small>
-                    <input type="date" name="fecha_venc_max_transfer" id="fecha_venc_max_transfer">
-                </div>
-
-                <div class="search">
-                    <input type="text" name="busqueda_transfer" id="busqueda_transfer" placeholder="Buscar medicamento o lote...">
-                    <button type="button" class="btn-search" id="btn-buscar-lotes-transfer">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
+                </form>
             </div>
-        </form>
-
-        <div id="resultado-busqueda-lotes-transfer" style="margin-top: 20px;">
-            <p style="text-align:center; padding: 20px; color: #666;">
-                <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon><br>
-                Use los filtros para buscar lotes disponibles
-            </p>
         </div>
 
-        <div class="title" style="margin-top: 40px;">
-            <h3>
-                <ion-icon name="list-outline"></ion-icon> Items a Transferir
-            </h3>
-        </div>
-
-        <div id="lista-items-transfer-container">
-            <p style="text-align:center; padding: 20px; color: #999;">
-                <ion-icon name="cube-outline" style="font-size: 48px;"></ion-icon><br>
-                No hay items agregados
-            </p>
-        </div>
-
-        <div id="resumen-transfer-container">
-            <div class="resumen-grid">
-                <div>
-                    <strong>Total Items:</strong>
-                    <p id="resumen-total-items-transfer" class="resumen-valor">0</p>
-                </div>
-                <div>
-                    <strong>Total Cajas:</strong>
-                    <p id="resumen-total-cajas-transfer" class="resumen-valor">0</p>
-                </div>
-                <div>
-                    <strong>Total Unidades:</strong>
-                    <p id="resumen-total-unidades-transfer" class="resumen-valor">0</p>
-                </div>
-                <div>
-                    <strong>Total Valorado:</strong>
-                    <p id="resumen-total-valorado-transfer" class="resumen-valor total">Bs. 0.00</p>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Lotes Disponibles</div>
+            </div>
+            <div class="cb">
+                <div id="resultado-busqueda-lotes-transfer">
+                    <p class="txctr tmut" style="padding: 20px;">
+                        <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon><br>
+                        Use los filtros para buscar lotes disponibles
+                    </p>
                 </div>
             </div>
+        </div>
 
-            <div class="observaciones-container">
-                <label for="observaciones-transfer">Observaciones (opcional):</label>
-                <textarea id="observaciones-transfer" rows="3"></textarea>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Items a Transferir</div>
             </div>
+            <div class="cb">
+                <div id="lista-items-transfer-container">
+                    <p class="txctr tmut" style="padding: 20px;">
+                        <ion-icon name="cube-outline" style="font-size: 48px;"></ion-icon><br>
+                        No hay items agregados
+                    </p>
+                </div>
+            </div>
+        </div>
 
-            <div class="btn-generar-container">
-                <button type="button" class="btn success" id="btn-generar-transfer">
-                    <ion-icon name="send-outline"></ion-icon> Generar Transferencia
-                </button>
+        <div id="resumen-transfer-container" style="display: none;">
+            <div class="card">
+                <div class="ch">
+                    <div class="ct"><ion-icon name="stats-chart-outline"></ion-icon> Resumen de Transferencia</div>
+                </div>
+                <div class="cb">
+                    <div class="grid4 mb16">
+                        <div class="statc">
+                            <div class="siw bl"><ion-icon name="cube-outline"></ion-icon></div>
+                            <div>
+                                <div class="sv" id="resumen-total-items-transfer">0</div>
+                                <div class="sl">Total Items</div>
+                            </div>
+                        </div>
+                        <div class="statc">
+                            <div class="siw gr"><ion-icon name="archive-outline"></ion-icon></div>
+                            <div>
+                                <div class="sv" id="resumen-total-cajas-transfer">0</div>
+                                <div class="sl">Total Cajas</div>
+                            </div>
+                        </div>
+                        <div class="statc">
+                            <div class="siw ww"><ion-icon name="medical-outline"></ion-icon></div>
+                            <div>
+                                <div class="sv" id="resumen-total-unidades-transfer">0</div>
+                                <div class="sl">Total Unidades</div>
+                            </div>
+                        </div>
+                        <div class="statc">
+                            <div class="siw rd"><ion-icon name="cash-outline"></ion-icon></div>
+                            <div>
+                                <div class="sv" id="resumen-total-valorado-transfer">Bs. 0.00</div>
+                                <div class="sl">Valor Total</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fg mb16">
+                        <label class="fl">Observaciones (opcional)</label>
+                        <textarea class="ta" id="observaciones-transfer" rows="3"></textarea>
+                    </div>
+
+                    <div class="flxe">
+                        <button type="button" class="btn btn-def" id="btn-generar-transfer">
+                            <ion-icon name="send-outline"></ion-icon> Generar Transferencia
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modal-agregar-item-transfer" style="display: none;">
-        <input type="hidden" id="modal-stock-cajas-real-transfer">
-        <input type="hidden" id="modal-stock-unidades-real-transfer">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="add-circle-outline"></ion-icon>
-                    <span>Agregar a Transferencia</span>
+    <div class="mov" id="modal-agregar-item-transfer">
+        <div class="modal">
+            <input type="hidden" id="modal-stock-cajas-real-transfer">
+            <input type="hidden" id="modal-stock-unidades-real-transfer">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="add-circle-outline"></ion-icon>
+                        Agregar a Transferencia
+                    </div>
+                    <div class="ms">Seleccione la cantidad y sucursal destino</div>
                 </div>
-                <a class="close" onclick="TransferManager.cerrarModalAgregar()">
+                <button class="mcl" onclick="TransferManager.cerrarModalAgregar()">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
-            <div class="modal-group">
+            <div class="mb">
                 <input type="hidden" id="modal-lm-id-transfer">
                 <input type="hidden" id="modal-med-id-transfer">
                 <input type="hidden" id="modal-precio-compra-transfer">
@@ -116,57 +158,52 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="hidden" id="modal-cant-blister-transfer">
                 <input type="hidden" id="modal-cant-unidad-transfer">
 
-                <div class="row">
-                    <h4 id="modal-medicamento-nombre-transfer"></h4>
-                    <p><strong>Lote:</strong> <span id="modal-lote-numero-transfer"></span></p>
-                    <p><strong>Stock disponible:</strong> <span id="modal-stock-disponible-transfer"></span></p>
-                    <p><strong>Vencimiento:</strong> <span id="modal-vencimiento-transfer"></span></p>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label class="required">Cantidad (cajas)</label>
-                            <input type="number" id="modal-cantidad-cajas-transfer" min="1" required>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Equivale a (unidades)</label>
-                            <input type="number" id="modal-cantidad-unidades-transfer" readonly style="background: #f5f5f5;">
+                <div class="fr mb16">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="th4 mb8" id="modal-medicamento-nombre-transfer"></div>
+                            <div class="litem"><ion-icon name="pricetag-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Lote</div><div class="th5" id="modal-lote-numero-transfer"></div></div></div>
+                            <div class="litem"><ion-icon name="cube-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Stock Disponible</div><div class="th5" id="modal-stock-disponible-transfer"></div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Vencimiento</div><div class="th5" id="modal-vencimiento-transfer"></div></div></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label class="required">Sucursal Destino</label>
-                            <select class="select-filtro" style="background: white; color: black;" id="modal-sucursal-destino-transfer" required>
-                                <option value="">Seleccione...</option>
-                                <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                    <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
+                <div class="fr mb16">
+                    <div class="fg">
+                        <label class="fl req">Cantidad (cajas)</label>
+                        <input class="inp" type="number" id="modal-cantidad-cajas-transfer" min="1" required>
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Equivale a (unidades)</label>
+                        <input class="inp" type="number" id="modal-cantidad-unidades-transfer" readonly>
                     </div>
                 </div>
 
-                <div class="row">
-                    <p style="background: #e8f5e9; padding: 10px; border-radius: 4px;">
-                        <strong>Subtotal valorado:</strong>
-                        <span id="modal-subtotal-transfer" style="color: #27ae60; font-size: 18px;">Bs. 0.00</span>
-                    </p>
+                <div class="fg mb16">
+                    <label class="fl req">Sucursal Destino</label>
+                    <select class="sel" id="modal-sucursal-destino-transfer" required>
+                        <option value="">Seleccione...</option>
+                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                        <?php } ?>
+                    </select>
                 </div>
 
-                <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="TransferManager.cerrarModalAgregar()">
-                        Cancelar
-                    </a>
-                    <a href="javascript:void(0)" class="btn success" onclick="TransferManager.agregarItem()">
-                        <ion-icon name="add-outline"></ion-icon> Agregar
-                    </a>
+                <div class="alert alsuc mb16">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    <div>
+                        <div class="altt">Subtotal valorado</div>
+                        <div class="altx"><span id="modal-subtotal-transfer" style="font-weight:700">Bs. 0.00</span></div>
+                    </div>
                 </div>
+            </div>
+
+            <div class="mf">
+                <button class="btn btn-war" onclick="TransferManager.cerrarModalAgregar()">Cancelar</button>
+                <button class="btn btn-def" onclick="TransferManager.agregarItem()">
+                    <ion-icon name="add-outline"></ion-icon> Agregar
+                </button>
             </div>
         </div>
     </div>
@@ -272,7 +309,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                let html = '<div class="table-container"><table class="table"><thead><tr>';
+                let html = '<div class="tw"><table><thead><tr>';
                 html += '<th>#</th>';
                 html += '<th>Medicamento</th>';
                 html += '<th>Lote</th>';
@@ -307,7 +344,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="color: ' + colorVenc + ';">' + formatearFecha(lote.lm_fecha_vencimiento) + advertencia + '</td>';
                     html += '<td>';
                     if (lote.transferible == 1) {
-                        html += '<button type="button" class="btn primary" onclick="TransferManager.abrirModalAgregar(' +
+                        html += '<button type="button" class="btn btn-def" onclick="TransferManager.abrirModalAgregar(' +
                             lote.lm_id + ', ' +
                             lote.med_id + ', \'' +
                             escapeHtml(lote.med_nombre_quimico) + '\', \'' +
@@ -354,11 +391,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 document.getElementById('modal-sucursal-destino-transfer').value = '';
                 document.getElementById('modal-subtotal-transfer').textContent = 'Bs. 0.00';
 
-                document.getElementById('modal-agregar-item-transfer').style.display = 'flex';
+                const modal = document.getElementById('modal-agregar-item-transfer');
+                modal.style.display = 'flex';
+                modal.classList.add('open');
             }
 
             function cerrarModalAgregar() {
-                document.getElementById('modal-agregar-item-transfer').style.display = 'none';
+                const modal = document.getElementById('modal-agregar-item-transfer');
+                modal.classList.remove('open');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
             }
 
             function calcularUnidadesModal() {
@@ -458,7 +501,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                let html = '<div class="table-container"><table class="table"><thead><tr>';
+                let html = '<div class="tw"><table><thead><tr>';
                 html += '<th>#</th>';
                 html += '<th>Medicamento</th>';
                 html += '<th>Lote</th>';
@@ -478,7 +521,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + item.cantidad_unidades + '</strong></td>';
                     html += '<td><span style="background:#E3F2FD;padding:4px 10px;border-radius:4px;color:#1565C0;font-weight:600;">' + escapeHtml(item.su_destino_nombre) + '</span></td>';
                     html += '<td style="text-align:right;">Bs. ' + item.subtotal.toFixed(2) + '</td>';
-                    html += '<td><button type="button" class="btn danger" onclick="TransferManager.eliminarItem(' + index + ')"><ion-icon name="trash-outline"></ion-icon></button></td>';
+                    html += '<td><button type="button" class="btn btn-war" onclick="TransferManager.eliminarItem(' + index + ')"><ion-icon name="trash-outline"></ion-icon></button></td>';
                     html += '</tr>';
                 });
 
@@ -651,8 +694,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </script>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>

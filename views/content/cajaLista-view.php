@@ -2,118 +2,120 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/cajaAjax.php"
         data-ajax-param="cajaAjax"
         data-ajax-action="listar"
         data-ajax-registros="10">
 
-        <div class="title">
-            <h2>
-                <ion-icon name="cash-outline"></ion-icon> Gestión de Cajas
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit"><ion-icon name="cash-outline"></ion-icon> Gestión de Cajas</div>
+                <div class="psub">Administre y supervise las cajas del sistema</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-                <div class="form-fechas">
-                    <small>Estado</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="abierta">Abiertas</option>
-                        <option value="cerrada">Cerradas</option>
-                        <option value="">Todas</option>
-                    </select>
-                </div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr2">
+                        <div class="fg">
+                            <label class="fl">Estado</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="abierta">Abiertas</option>
+                                <option value="cerrada">Cerradas</option>
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
 
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre o usuario...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
+                        <div class="fg">
+                            <label class="fl">Búsqueda rápida</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre o usuario...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb16">
+            <div class="cb">
+                <div class="tw">
+                    <div class="tabla-contenedor"></div>
                 </div>
             </div>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
-
-        <div class="caja-grafico-container">
-            <h3 class="caja-grafico-title">Total de Ventas por Usuario</h3>
-            <div id="graficoVentasUsuario" class="caja-grafico-chart"></div>
+        <div class="card">
+            <div class="ch">
+                <div class="ct"><ion-icon name="bar-chart-outline"></ion-icon> Total de Ventas por Usuario</div>
+            </div>
+            <div class="cb">
+                <div id="graficoVentasUsuario"></div>
+            </div>
         </div>
     </div>
 
-    <div class="modal" id="modalCerrarCaja" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="checkmark-circle-outline"></ion-icon> Cerrar Caja
+    <div class="mov" id="modalCerrarCaja" style="display: none;">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt"><ion-icon name="checkmark-circle-outline"></ion-icon> Cerrar Caja</div>
+                    <div class="ms">Confirme el cierre de la caja con los datos finales</div>
                 </div>
-                <a class="close" onclick="CajaGestion.cerrarModalCerrar()">
-                    <ion-icon name="close-outline"></ion-icon>
-                </a>
+                <button class="mcl" onclick="CajaGestion.cerrarModalCerrar()"><ion-icon name="close-outline"></ion-icon></button>
             </div>
-
-            <div class="modal-group">
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Nombre de Caja:</label>
-                            <p id="modalNombreCaja" class="text-bold">-</p>
-                        </div>
+            <div class="mb">
+                <div class="fr1">
+                    <div class="fg">
+                        <label class="fl">Nombre de Caja:</label>
+                        <p class="tbs" id="modalNombreCaja">-</p>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Usuario Responsable:</label>
-                            <p id="modalUsuarioCaja" class="text-bold">-</p>
-                        </div>
+                <div class="fr1">
+                    <div class="fg">
+                        <label class="fl">Usuario Responsable:</label>
+                        <p class="tbs" id="modalUsuarioCaja">-</p>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Saldo Inicial (Bs):</label>
-                            <p id="modalSaldoInicial" class="text-bold">-</p>
-                        </div>
+                <div class="fr2">
+                    <div class="fg">
+                        <label class="fl">Saldo Inicial (Bs):</label>
+                        <p class="tbs" id="modalSaldoInicial">-</p>
                     </div>
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Total Ingresos (Bs):</label>
-                            <p id="modalTotalIngresos" class="text-bold">-</p>
-                        </div>
+                    <div class="fg">
+                        <label class="fl">Total Ingresos (Bs):</label>
+                        <p class="tbs" id="modalTotalIngresos">-</p>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Saldo Final Teórico (Bs):</label>
-                            <p id="modalSaldoFinal" class="text-bold">-</p>
-                        </div>
+                <div class="fr1">
+                    <div class="fg">
+                        <label class="fl">Saldo Final Teórico (Bs):</label>
+                        <p class="tbs" id="modalSaldoFinal">-</p>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="modal-bloque">
-                            <label>Observaciones:</label>
-                            <textarea id="modalObservacion" class="modal-textarea"></textarea>
-                        </div>
+                <div class="fr1">
+                    <div class="fg">
+                        <label class="fl">Observaciones:</label>
+                        <textarea id="modalObservacion" class="inp" rows="3"></textarea>
                     </div>
                 </div>
-
-                <div class="modal-btn-content">
-                    <button type="button" class="btn danger btn-full" onclick="CajaGestion.confirmarCierre()">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Confirmar Cierre
-                    </button>
-                    <button type="button" class="btn warning btn-full" onclick="CajaGestion.cerrarModalCerrar()">
-                        <ion-icon name="close-outline"></ion-icon> Cancelar
-                    </button>
-                </div>
+            </div>
+            <div class="mf">
+                <button class="btn btn-war" onclick="CajaGestion.cerrarModalCerrar()">Cancelar</button>
+                <button class="btn btn-danger" onclick="CajaGestion.confirmarCierre()"><ion-icon name="checkmark-circle-outline"></ion-icon> Confirmar Cierre</button>
             </div>
         </div>
     </div>
@@ -329,7 +331,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         document.getElementById('modalObservacion').value = '';
 
                         const modal = document.getElementById('modalCerrarCaja');
-                        if (modal) modal.style.display = 'flex';
+                        if (modal) {
+                            modal.style.display = 'flex';
+                            modal.classList.add('open');
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -383,8 +388,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             function cerrarModalCerrar() {
                 const modal = document.getElementById('modalCerrarCaja');
-                if (modal) modal.style.display = 'none';
-                cajaActual = null;
+                if (modal) {
+                    modal.classList.remove('open');
+                    setTimeout(() => modal.style.display = 'none', 300);
+                    cajaActual = null;
+                }
             }
 
             function init() {
@@ -419,8 +427,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </script>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>Solo administradores pueden acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit"><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</div>
+                <div class="psub">Solo administradores pueden acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb">
+                <div style="text-align: center; padding: 60px;">
+                    <ion-icon name="lock-closed-outline" style="font-size: 64px; color: #ccc;"></ion-icon>
+                </div>
+            </div>
+        </div>
     </div>
 <?php } ?>

@@ -8,109 +8,139 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/cajaHistorialAjax.php"
         data-ajax-param="cajaHistorialAjax"
         data-ajax-registros="15">
 
-        <div class="title">
-            <h2>
-                <ion-icon name="cash-outline"></ion-icon> Historial de Movimientos de Caja
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="cash-outline"></ion-icon> Historial de Movimientos de Caja
+                </div>
+                <div class="psub">Consulte el historial completo de movimientos de caja</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Selecciona fecha desde">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Selecciona fecha hasta">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Tipo de Movimiento</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todos</option>
-                        <option value="ingreso">Ingreso</option>
-                        <option value="egreso">Egreso</option>
-                        <option value="venta">Venta</option>
-                        <option value="compra">Compra</option>
-                        <option value="ajuste">Ajuste</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Usuario</small>
-                    <select class="select-filtro" name="select2">
-                        <option value="">Todos los usuarios</option>
-                        <?php
-                        foreach ($datos_select['caja'] as $usuario) {
-                            $nombre_completo = trim(($usuario['us_nombres'] ?? '') . ' ' . ($usuario['us_apellido_paterno'] ?? ''));
-                            echo '<option value="' . $usuario['us_id'] . '">' . $nombre_completo . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-
-                <?php if ($rol_usuario == 1) { ?>
-                    <div class="form-fechas">
-                        <small>Sucursal</small>
-                        <select class="select-filtro" name="select3">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Tipo de Movimiento</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="">Todos</option>
+                                <option value="ingreso">Ingreso</option>
+                                <option value="egreso">Egreso</option>
+                                <option value="venta">Venta</option>
+                                <option value="compra">Compra</option>
+                                <option value="ajuste">Ajuste</option>
+                            </select>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Usuario</label>
+                            <select class="sel select-filtro" name="select2">
+                                <option value="">Todos los usuarios</option>
+                                <?php
+                                foreach ($datos_select['caja'] as $usuario) {
+                                    $nombre_completo = trim(($usuario['us_nombres'] ?? '') . ' ' . ($usuario['us_apellido_paterno'] ?? ''));
+                                    echo '<option value="' . $usuario['us_id'] . '">' . $nombre_completo . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php if ($rol_usuario == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal</label>
+                                <select class="sel select-filtro" name="select3">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } else { ?>
+                            <div></div>
+                        <?php } ?>
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por concepto o referencia...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                <?php } ?>
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por concepto o referencia...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
-
+                    <div class="flxe mt12">
+                        <button type="button" class="btn btn-def" id="btnExportarExcelCajaHistorial">
+                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                        </button>
+                        <button type="button" class="btn btn-def" id="btnExportarPDFCajaHistorial">
+                            <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <div class="filtro-dinamico-buttons">
-
-                <button type="button" class="btn success" id="btnExportarExcelCajaHistorial">
-                    <ion-icon name="download-outline"></ion-icon> Excel
-                </button>
-                <button type="button" class="btn primary" id="btnExportarPDFCajaHistorial">
-                    <ion-icon name="document-text-outline"></ion-icon> PDF
-                </button>
+        <div id="resumen-periodo" class="card mb16">
+            <div class="cb">
+                <!-- Resumen will be loaded here -->
             </div>
-        </form>
+        </div>
 
-        <div id="resumen-periodo"></div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Movimientos</div>
+            </div>
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
 
-        <div class="tabla-contenedor"></div>
-
-        <div id="grafico-movimientos" style="width: 100%; height: 400px; margin-top: 20px;"></div>
+        <div class="card">
+            <div class="ch">
+                <div class="ct"><ion-icon name="bar-chart-outline"></ion-icon> Gráfico de Movimientos</div>
+            </div>
+            <div class="cb">
+                <div id="grafico-movimientos" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Detalle de Caja Historial -->
-    <div id="modalReferenciaCajaHistorial" class="modal" style="display:none;">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="cash-outline"></ion-icon>
-                    <span>Detalle del Movimiento</span>
+    <div id="modalReferenciaCajaHistorial" class="mov">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="cash-outline"></ion-icon>
+                        Detalle del Movimiento
+                    </div>
+                    <div class="ms">Información detallada del movimiento seleccionado</div>
                 </div>
-                <a class="close" onclick="CajaHistorial.cerrarModalReferenciaCaja()">
+                <button class="mcl" onclick="CajaHistorial.cerrarModalReferenciaCaja()">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
-            <div class="modal-group">
-                <div id="contenidoReferenciaCajaHistorial"></div>
+            <div class="mb">
+                <div id="contenidoReferenciaCajaHistorial" class="cb tb"></div>
+            </div>
+            <div class="mf">
+                <button class="btn btn-war" onclick="CajaHistorial.cerrarModalReferenciaCaja()">Cerrar</button>
             </div>
         </div>
     </div>
@@ -128,8 +158,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     const modal = document.getElementById('modalReferenciaCajaHistorial');
                     const contenido = document.getElementById('contenidoReferenciaCajaHistorial');
-                    
+
                     modal.style.display = 'flex';
+                    modal.classList.add('open');
 
                     fetch('<?php echo SERVER_URL; ?>ajax/cajaHistorialAjax.php', {
                         method: 'POST',
@@ -159,14 +190,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 cerrarModalReferencia: function() {
                     const modal = document.getElementById('modalReferenciaCajaHistorial');
                     if (modal) {
-                        modal.style.display = 'none';
+                        modal.classList.remove('open');
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                        }, 300);
                     }
                 },
-                
+
                 cerrarModalReferenciaCaja: function() {
                     const modal = document.getElementById('modalReferenciaCajaHistorial');
                     if (modal) {
-                        modal.style.display = 'none';
+                        modal.classList.remove('open');
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                        }, 300);
                     }
                 },
 
@@ -298,8 +335,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </script>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>

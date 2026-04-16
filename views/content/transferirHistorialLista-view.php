@@ -7,158 +7,215 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/transferirHistorialAjax.php"
         data-ajax-param="transferirHistorialAjax"
         data-ajax-registros="10">
 
-        <div class="title">
-            <h2>
-                <ion-icon name="swap-horizontal-outline"></ion-icon> Historial de Transferencias
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="swap-horizontal-outline"></ion-icon> Historial de Transferencias
+                </div>
+                <div class="psub">Consulta el historial completo de transferencias realizadas</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
-                </div>
-
-                <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                    <div class="form-fechas">
-                        <small>Sucursal Origen</small>
-                        <select class="select-filtro" name="select1">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-
-                    <div class="form-fechas">
-                        <small>Sucursal Destino</small>
-                        <select class="select-filtro" name="select2">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                <?php } ?>
-
-                <div class="form-fechas">
-                    <small>Usuario</small>
-                    <select class="select-filtro" name="select3">
-                        <option value="">Todos los usuarios</option>
-                        <?php if (!empty($datos_select['usuarios'])) { ?>
-                            <?php foreach ($datos_select['usuarios'] as $usuario) { ?>
-                                <option value="<?php echo $usuario['us_id'] ?>"><?php echo $usuario['us_nombres'] ?></option>
-                            <?php } ?>
-                        <?php } ?>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Estado</small>
-                    <select class="select-filtro" name="select4">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="aceptada">Aceptada</option>
-                        <option value="rechazada">Rechazada</option>
-                    </select>
-                </div>
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por N° transferencia...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-        </form>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde" title="Fecha desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta" title="Fecha hasta">
+                        </div>
 
-        <div class="tabla-contenedor"></div>
+                        <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal Origen</label>
+                                <select class="sel select-filtro" name="select1">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="fg">
+                                <label class="fl">Sucursal Destino</label>
+                                <select class="sel select-filtro" name="select2">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } else { ?>
+                            <div></div>
+                            <div></div>
+                        <?php } ?>
+
+                        <div class="fg">
+                            <label class="fl">Usuario</label>
+                            <select class="sel select-filtro" name="select3">
+                                <option value="">Todos los usuarios</option>
+                                <?php if (!empty($datos_select['usuarios'])) { ?>
+                                    <?php foreach ($datos_select['usuarios'] as $usuario) { ?>
+                                        <option value="<?php echo $usuario['us_id'] ?>"><?php echo $usuario['us_nombres'] ?></option>
+                                    <?php } ?>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Estado</label>
+                            <select class="sel select-filtro" name="select4">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="aceptada">Aceptada</option>
+                                <option value="rechazada">Rechazada</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por N° transferencia...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="modalDetalleTransferencia" class="modal" style="display:none;">
-        <div class="modal-content detalle" >
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="swap-horizontal-outline"></ion-icon>
-                    <span>Detalle de Transferencia</span>
+    <div id="modalDetalleTransferencia" class="mov">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="swap-horizontal-outline"></ion-icon>
+                        Detalle de Transferencia
+                    </div>
+                    <div class="ms">Información completa de la transferencia seleccionada</div>
                 </div>
-                <a class="close" onclick="TransferirHistorialModals.cerrar('modalDetalleTransferencia')">
+                <button class="mcl" onclick="TransferirHistorialModals.cerrar('modalDetalleTransferencia')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
-            <div class="modal-group">
-                <h3>Información de la Transferencia</h3>
+            <div class="mb">
+                <div class="stit">Información de la Transferencia</div>
 
                 <input type="hidden" id="modalDetalleTrId">
 
-                <div class="row">
-                    <div class="col-50">
-                        <p><strong>N° Transferencia:</strong> <span id="detalleNumero"></span></p>
-                        <p><strong>Fecha Envío:</strong> <span id="detalleFechaEnvio"></span></p>
-                        <p><strong>Origen:</strong> <span id="detalleOrigen"></span></p>
+                <div class="fr mb16">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Transferencia</div><div class="th5" id="detalleNumero"></div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha Envío</div><div class="th5" id="detalleFechaEnvio"></div></div></div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Origen</div><div class="th5" id="detalleOrigen"></div></div></div>
+                        </div>
                     </div>
-                    <div class="col-50">
-                        <p><strong>Destino:</strong> <span id="detalleDestino"></span></p>
-                        <p><strong>Usuario Emisor:</strong> <span id="detalleUsuarioEmisor"></span></p>
-                        <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 20px;">Medicamentos Transferidos</h3>
-
-                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Medicamento</th>
-                                <th>Lote</th>
-                                <th>Cajas</th>
-                                <th>Unidades</th>
-                                <th>Precio Unit.</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaItemsTransferencia">
-                            <tr>
-                                <td colspan="6" style="text-align:center;">
-                                    <ion-icon name="hourglass-outline"></ion-icon> Cargando...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-70"></div>
-                    <div class="col-30">
-                        <p><strong>Total Cajas:</strong> <span id="detalleTotalCajas">0</span></p>
-                        <p><strong>Total Unidades:</strong> <span id="detalleTotalUnidades">0</span></p>
-                        <p style="font-size: 18px; color: #2e7d32;"><strong>TOTAL:</strong> <span id="detalleTotal">Bs. 0.00</span></p>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Destino</div><div class="th5" id="detalleDestino"></div></div></div>
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario Emisor</div><div class="th5" id="detalleUsuarioEmisor"></div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="radio-button-on-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div id="detalleEstado"></div></div></div>
+                        </div>
                     </div>
                 </div>
 
+                <div class="stit">Medicamentos Transferidos</div>
+                <div class="card mb16">
+                    <div class="cb">
+                        <div class="tw" style="max-height: 400px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Lote</th>
+                                        <th>Cajas</th>
+                                        <th>Unidades</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaItemsTransferencia">
+                                    <tr>
+                                        <td colspan="6" class="txctr">
+                                            <ion-icon name="hourglass-outline"></ion-icon> Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="stit">Totales</div>
+                <div class="grid4">
+                    <div class="statc">
+                        <div class="siw gr"><ion-icon name="archive-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleTotalCajas">0</div>
+                            <div class="sl">Total Cajas</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw ww"><ion-icon name="medical-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleTotalUnidades">0</div>
+                            <div class="sl">Total Unidades</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw rd"><ion-icon name="cash-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="detalleTotal">Bs. 0.00</div>
+                            <div class="sl">Total Valorado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mf">
+                <button class="btn btn-war" onclick="TransferirHistorialModals.cerrar('modalDetalleTransferencia')">Cerrar</button>
             </div>
         </div>
     </div>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>
 
@@ -202,6 +259,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
+                    modal.classList.add('open');
                     console.log(` Modal abierto: ${modalId}`);
                 }
             },
@@ -209,7 +267,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             cerrar(modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
-                    modal.style.display = 'none';
+                    modal.classList.remove('open');
+                    setTimeout(() => modal.style.display = 'none', 300);
                     console.log(` Modal cerrado: ${modalId}`);
                 }
             },

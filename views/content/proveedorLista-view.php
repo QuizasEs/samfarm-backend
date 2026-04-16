@@ -5,178 +5,153 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/proveedoresAjax.php"
         data-ajax-param="proveedoresAjax"
         data-ajax-registros="10">
-        <div class="title">
-            <h2>
-                <ion-icon name="people-outline"></ion-icon> Gestión de Proveedores
-            </h2>
-        </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Estado</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todos</option>
-                        <option value="activo">Activos</option>
-                        <option value="inactivo">Inactivos</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Con Compras</small>
-                    <select class="select-filtro" name="select2">
-                        <option value="">Todos</option>
-                        <option value="con_compras">Con compras</option>
-                        <option value="sin_compras">Sin compras</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Última Compra</small>
-                    <select class="select-filtro" name="select3">
-                        <option value="">Todos</option>
-                        <option value="7">Últimos 7 días</option>
-                        <option value="30">Últimos 30 días</option>
-                        <option value="90">Últimos 90 días</option>
-                        <option value="mas_90">Más de 90 días</option>
-                        <option value="nunca">Nunca</option>
-                    </select>
-                </div>
-
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
-                </div>
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por nombre, NIT o teléfono...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
-
+        <div class="ph">
+            <div>
+                <div class="ptit">Gestión de Proveedores</div>
+                <div class="psub">Administre y consulte la información detallada de sus proveedores</div>
             </div>
-            <div class="filtro-dinamico-buttons">
-
-                <button type="button" class="btn success" onclick="ProveedoresModals.abrirRegistro()">
-                    <ion-icon name="person-add-outline"></ion-icon> Nuevo
+            <div class="tbr">
+                <button type="button" class="btn btn-def" onclick="ProveedoresModals.abrirRegistro()">
+                    <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
                 </button>
-
-                <button type="button" class="btn success" id="btnExportarExcelProveedor">
+                <button type="button" class="btn btn-sec" id="btnExportarExcelProveedor" data-tip="Exportar a Excel">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn primary" id="btnExportarPDFProveedor">
+                <button type="button" class="btn btn-sec" id="btnExportarPDFProveedor" data-tip="Exportar a PDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Estado</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="">Todos</option>
+                                <option value="activo">Activos</option>
+                                <option value="inactivo">Inactivos</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Con Compras</label>
+                            <select class="sel select-filtro" name="select2">
+                                <option value="">Todos</option>
+                                <option value="con_compras">Con compras</option>
+                                <option value="sin_compras">Sin compras</option>
+                            </select>
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Última Compra</label>
+                            <select class="sel select-filtro" name="select3">
+                                <option value="">Todos</option>
+                                <option value="7">Últimos 7 días</option>
+                                <option value="30">Últimos 30 días</option>
+                                <option value="90">Últimos 90 días</option>
+                                <option value="mas_90">Más de 90 días</option>
+                                <option value="nunca">Nunca</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde" title="Fecha desde">
+                        </div>
+
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta" title="Fecha hasta">
+                        </div>
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Búsqueda rápida</label>
+                        <div class="inpg">
+                            <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre, NIT o teléfono...">
+                            <button type="button" class="btn btn-def btn-search">
+                                <ion-icon name="search-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
     <!-- modal para detalles -->
-    <div class="modal" id="modalDetalleProveedor" style="display: none;">
-        <div class="modal-content" style="max-width: 1000px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="person-circle-outline"></ion-icon>
-                    Detalle de Proveedor - <span id="modalDetalleProveedorNombre">...</span>
+    <div class="mov" id="modalDetalleProveedor" style="display: none;">
+        <div class="modal mxl">
+            <div class="mh">
+                <div>
+                    <div class="mt">Detalle del Proveedor</div>
+                    <div class="ms" id="modalDetalleProveedorNombre">...</div>
                 </div>
-                <a class="close" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">
+                <button class="mcl" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
             <input type="hidden" id="modalDetallePrId">
 
-            <div class="modal-group">
-                <div class="row">
-                    <h3><ion-icon name="information-circle-outline"></ion-icon> Información del Proveedor</h3>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Nombre/Razón Social:</label>
-                        <p id="detalleNombreCompleto">-</p>
+            <div class="mb">
+                <div class="stit">Información del Proveedor</div>
+                <div class="fr">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Nombre Completo</div><div class="th5" id="detalleNombreCompleto">-</div></div></div>
+                            <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">NIT</div><div class="th5" id="detalleNit">-</div></div></div>
+                            <div class="litem"><ion-icon name="call-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Teléfono</div><div class="th5" id="detalleTelefono">-</div></div></div>
+                            <div class="litem"><ion-icon name="mail-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Correo</div><div class="th5" id="detalleCorreo">-</div></div></div>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label>NIT:</label>
-                        <p id="detalleNit">-</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Teléfono:</label>
-                        <p id="detalleTelefono">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Correo:</label>
-                        <p id="detalleCorreo">-</p>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Nombre Comercial</div><div class="th5" id="detalleNombreComercial">-</div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha de Registro</div><div class="th5" id="detalleFechaRegistro">-</div></div></div>
+                            <div class="litem"><ion-icon name="time-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Antigüedad</div><div class="th5"><span id="detalleAntiguedad">-</span> días</div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="shield-checkmark-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div id="detalleEstado">-</div></div></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <label>Nombre Comercial:</label>
-                        <p id="detalleNombreComercial">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Fecha de Registro:</label>
-                        <p id="detalleFechaRegistro">-</p>
+                <div class="stit">Estadísticas de Compra</div>
+                <div class="grid4">
+                    <div class="statc"><div class="siw gr"><ion-icon name="cart-outline"></ion-icon></div><div><div class="sv" id="detalleTotalCompras">0</div><div class="sl">Total Compras</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="cash-outline"></ion-icon></div><div><div class="sv" id="detalleMontoTotal">Bs. 0.00</div><div class="sl">Monto Total</div></div></div>
+                    <div class="statc"><div class="siw ww"><ion-icon name="document-text-outline"></ion-icon></div><div><div class="sv" id="detalleTotalLotes">0</div><div class="sl">Lotes Generados</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="stats-chart-outline"></ion-icon></div><div><div class="sv" id="detallePromedio">Bs. 0.00</div><div class="sl">Promedio por Compra</div></div></div>
+                </div>
+
+                <div class="stit">Última Compra</div>
+                <div class="card">
+                    <div class="cb">
+                        <div class="th5" id="detalleUltimaCompra">-</div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <h3><ion-icon name="stats-chart-outline"></ion-icon> Estadísticas de Compra</h3>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Total de Compras:</label>
-                        <p id="detalleTotalCompras">0</p>
-                    </div>
-                    <div class="col">
-                        <label>Monto Total Comprado:</label>
-                        <p id="detalleMontoTotal">Bs. 0.00</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Lotes Generados:</label>
-                        <p id="detalleTotalLotes">0</p>
-                    </div>
-                    <div class="col">
-                        <label>Promedio por Compra:</label>
-                        <p id="detallePromedio">Bs. 0.00</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Última Compra:</label>
-                        <p id="detalleUltimaCompra">-</p>
-                    </div>
-                    <div class="col">
-                        <label>Antigüedad:</label>
-                        <p id="detalleAntiguedad">-</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <h3><ion-icon name="receipt-outline"></ion-icon> Últimas 5 Compras</h3>
-                    <div class="table-container">
+                <div class="stit">Últimas 5 Compras</div>
+                <div class="card">
+                    <div class="tw">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -197,9 +172,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="row">
-                    <h3><ion-icon name="medkit-outline"></ion-icon> Top 5 Medicamentos Suministrados</h3>
-                    <div class="table-container">
+                <div class="stit">Top 5 Medicamentos Suministrados</div>
+                <div class="card">
+                    <div class="tw">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -217,146 +192,123 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <div class="btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">
-                        Cerrar
-                    </a>
-                </div>
+            <div class="mf">
+                <button class="btn btn-war" onclick="ProveedoresModals.cerrar('modalDetalleProveedor')">Cerrar</button>
             </div>
         </div>
     </div>
-    <!-- modal para registro -->
-    <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/proveedoresAjax.php" method="POST" autocomplete="off" data-form="save" id="formRegistroProveedor">
-        <input type="hidden" name="proveedoresAjax" value="registrar">
-
-        <div class="modal" id="modalRegistroProveedor" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">
-                        <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
-                    </div>
-                    <a class="close" onclick="ProveedoresModals.cerrarRegistro()">
-                        <ion-icon name="close-outline"></ion-icon>
-                    </a>
+    <!-- Modal Nuevo Proveedor -->
+    <div class="mov" id="modalRegistroProveedor" style="display: none;">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Nuevo Proveedor</div>
+                    <div class="ms">Complete los datos para registrar un nuevo proveedor</div>
                 </div>
-
-                <div class="modal-group">
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Nombres / Razón Social</label>
-                                <input type="text" name="Nombres_pr" id="registroNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">NIT</label>
-                                <input type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,30}" maxlength="30" required>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="text" name="Telefono_pr" id="registroTelefono" pattern="[0-9]{6,30}" maxlength="30">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_pr" id="registroCorreo" maxlength="200">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Nombre Comercial</label>
-                                <input type="text" name="Direccion_pr" id="registroDireccion" maxlength="250">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarRegistro()">Cancelar</a>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="checkmark-outline"></ion-icon> Registrar
-                        </button>
-                    </div>
-                </div>
+                <button class="mcl" onclick="ProveedoresModals.cerrarRegistro()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
             </div>
+
+            <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/proveedoresAjax.php" method="POST" autocomplete="off" data-form="save" id="formRegistroProveedor">
+                <div class="mb">
+                    <input type="hidden" name="proveedoresAjax" value="registrar">
+
+                    <div class="fg">
+                        <label class="fl req">Nombres / Razón Social</label>
+                        <input class="inp" type="text" name="Nombres_pr" id="registroNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">NIT</label>
+                            <input class="inp" type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,30}" maxlength="30" required>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Teléfono</label>
+                            <input class="inp" type="text" name="Telefono_pr" id="registroTelefono" pattern="[0-9]{6,30}" maxlength="30">
+                        </div>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl">Correo</label>
+                            <input class="inp" type="email" name="Correo_pr" id="registroCorreo" maxlength="200">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Nombre Comercial</label>
+                            <input class="inp" type="text" name="Direccion_pr" id="registroDireccion" maxlength="250">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mf">
+                    <button type="button" class="btn btn-war" onclick="ProveedoresModals.cerrarRegistro()">Cancelar</button>
+                    <button type="submit" class="btn btn-def">
+                        <ion-icon name="checkmark-outline"></ion-icon> Registrar
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
-    <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/proveedoresAjax.php" method="POST" autocomplete="off" data-form="update" id="formEdicionProveedor">
-        <input type="hidden" name="proveedoresAjax" value="actualizar">
-        <input type="hidden" name="PrId_up" id="edicionPrId">
-
-        <div class="modal" id="modalEdicionProveedor" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">
-                        <ion-icon name="create-outline"></ion-icon> Editar Proveedor
-                    </div>
-                    <a class="close" onclick="ProveedoresModals.cerrarEdicion()">
-                        <ion-icon name="close-outline"></ion-icon>
-                    </a>
+    <!-- Modal Editar Proveedor -->
+    <div class="mov" id="modalEdicionProveedor" style="display: none;">
+        <div class="modal">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Proveedor</div>
+                    <div class="ms">Actualice la información del proveedor seleccionado</div>
                 </div>
-
-                <div class="modal-group">
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">Nombres / Razón Social</label>
-                                <input type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label class="required">NIT</label>
-                                <input type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,30}" maxlength="30" required>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Teléfono</label>
-                                <input type="text" name="Telefono_pr_up" id="edicionTelefono" pattern="[0-9]{6,30}" maxlength="30">
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Correo</label>
-                                <input type="email" name="Correo_pr_up" id="edicionCorreo" maxlength="200">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <div class="modal-bloque">
-                                <label>Nombre Comercial</label>
-                                <input type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-btn-content">
-                        <a href="javascript:void(0)" class="btn warning" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</a>
-                        <button type="submit" class="btn success">
-                            <ion-icon name="checkmark-outline"></ion-icon> Actualizar
-                        </button>
-                    </div>
-                </div>
+                <button class="mcl" onclick="ProveedoresModals.cerrarEdicion()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
             </div>
+
+            <form class="FormularioAjax" action="<?php echo SERVER_URL ?>ajax/proveedoresAjax.php" method="POST" autocomplete="off" data-form="update" id="formEdicionProveedor">
+                <div class="mb">
+                    <input type="hidden" name="proveedoresAjax" value="actualizar">
+                    <input type="hidden" name="PrId_up" id="edicionPrId">
+
+                    <div class="fg">
+                        <label class="fl req">Nombres / Razón Social</label>
+                        <input class="inp" type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl req">NIT</label>
+                            <input class="inp" type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,30}" maxlength="30" required>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Teléfono</label>
+                            <input class="inp" type="text" name="Telefono_pr_up" id="edicionTelefono" pattern="[0-9]{6,30}" maxlength="30">
+                        </div>
+                    </div>
+
+                    <div class="fr">
+                        <div class="fg">
+                            <label class="fl">Correo</label>
+                            <input class="inp" type="email" name="Correo_pr_up" id="edicionCorreo" maxlength="200">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Nombre Comercial</label>
+                            <input class="inp" type="text" name="Direccion_pr_up" id="edicionDireccion" maxlength="250">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mf">
+                    <button type="button" class="btn btn-war" onclick="ProveedoresModals.cerrarEdicion()">Cancelar</button>
+                    <button type="submit" class="btn btn-def">
+                        <ion-icon name="checkmark-outline"></ion-icon> Actualizar
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
     <!-- generar excel para el modulo proveedor -->
     <script>
@@ -499,12 +451,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                 abrir(modalId) {
                     const modal = document.getElementById(modalId);
-                    if (modal) modal.style.display = 'flex';
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        modal.classList.add('open');
+                    }
                 },
 
                 cerrar(modalId) {
                     const modal = document.getElementById(modalId);
-                    if (modal) modal.style.display = 'none';
+                    if (modal) {
+                        modal.classList.remove('open');
+                        setTimeout(() => modal.style.display = 'none', 300);
+                    }
                 },
 
                 formatearFecha(fecha) {

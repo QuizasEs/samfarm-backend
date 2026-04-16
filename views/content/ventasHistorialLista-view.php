@@ -8,160 +8,201 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/ventasHistorialAjax.php"
         data-ajax-param="ventasHistorialAjax"
         data-ajax-registros="10">
 
-        <div class="title">
-            <h2>
-                <ion-icon name="receipt-outline"></ion-icon> Historial de Ventas
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="receipt-outline"></ion-icon> Historial de Ventas
+                </div>
+                <div class="psub">Consulte y administre el historial completo de ventas realizadas</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde" title="Fecha desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta" title="Fecha hasta">
+                        </div>
 
-                <!-- Filtro por Rango de Fechas -->
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Desde" title="Fecha desde">
-                </div>
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Hasta" title="Fecha hasta">
-                </div>
-
-                <!-- Select Sucursal (solo para admin) -->
-                <div class="form-fechas">
-                    <small>Sucursales</small>
-                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                        <select class="select-filtro" name="select1">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
-                    <?php } ?>
-                </div>
-
-
-                <!-- Select cajero -->
-                <div class="form-fechas">
-                    <small>Cajero</small>
-                    <select class="select-filtro" name="select3">
-                        <option value="">Todos los cajeros</option>
-                        <?php foreach ($datos_select['caja'] as $caja) { ?>
-                            <option value="<?php echo $caja['us_id'] ?>"><?php echo $caja['us_nombres'] ?></option>
+                        <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursales</label>
+                                <select class="sel select-filtro" name="select1">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } else { ?>
+                            <div></div>
                         <?php } ?>
 
-                    </select>
-                </div>
+                        <div class="fg">
+                            <label class="fl">Cajero</label>
+                            <select class="sel select-filtro" name="select3">
+                                <option value="">Todos los cajeros</option>
+                                <?php foreach ($datos_select['caja'] as $caja) { ?>
+                                    <option value="<?php echo $caja['us_id'] ?>"><?php echo $caja['us_nombres'] ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
 
-                <!-- Select Tipo Documento -->
-                <div class="form-fechas">
-                    <small>Tipo de documento</small>
-                    <select class="select-filtro" name="select4">
-                        <option value="">Todos los tipos</option>
-                        <option value="nota de venta">Nota de Venta</option>
-                        <option value="factura">Factura</option>
-                    </select>
-                </div>
+                        <div class="fg">
+                            <label class="fl">Tipo de documento</label>
+                            <select class="sel select-filtro" name="select4">
+                                <option value="">Todos los tipos</option>
+                                <option value="nota de venta">Nota de Venta</option>
+                                <option value="factura">Factura</option>
+                            </select>
+                        </div>
 
-                <!-- Búsqueda -->
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por N° documento o cliente...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
-                </div>
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por N° documento o cliente...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                        <div class="flxe mt12">
+                            <button type="button" id="btnExportarExcel" class="btn btn-def">
+                                <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                            </button>
+                        </div>
+                    <?php } ?>
+                </form>
             </div>
-            <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                <div class="filtro-acciones" style="display:flex; gap:10px; margin-top:10px;">
-                    <button type="button" id="btnExportarExcel" class="btn success">
-                        <ion-icon name="download-outline"></ion-icon> Excel
-                    </button>
-                </div>
-            <?php } ?>
-        </form>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card">
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Detalle de Venta -->
-    <div id="modalDetalleVenta" class="modal" style="display:none;">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="receipt-outline"></ion-icon>
-                    <span>Detalle de Venta</span>
+    <div id="modalDetalleVenta" class="mov">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="receipt-outline"></ion-icon>
+                        Detalle de Venta
+                    </div>
+                    <div class="ms">Información completa de la venta seleccionada</div>
                 </div>
-                <a class="close" onclick="VentasHistorialModals.cerrar('modalDetalleVenta')">
+                <button class="mcl" onclick="VentasHistorialModals.cerrar('modalDetalleVenta')">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
-            <div class="modal-group">
-                <h3>Información de la Venta</h3>
+            <div class="mb">
+                <div class="stit">Información de la Venta</div>
 
                 <input type="hidden" id="modalDetalleVeId">
 
-                <div class="row">
-                    <div class="col-50">
-                        <p><strong>N° Documento:</strong> <span id="detalleNumeroDocumento"></span></p>
-                        <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
-                        <p><strong>Cliente:</strong> <span id="detalleCliente"></span></p>
-                        <p><strong>CI/NIT:</strong> <span id="detalleCarnet"></span></p>
+                <div class="fr mb16">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Documento</div><div class="th5" id="detalleNumeroDocumento"></div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha</div><div class="th5" id="detalleFecha"></div></div></div>
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Cliente</div><div class="th5" id="detalleCliente"></div></div></div>
+                            <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">CI/NIT</div><div class="th5" id="detalleCarnet"></div></div></div>
+                        </div>
                     </div>
-                    <div class="col-50">
-                        <p><strong>Vendedor:</strong> <span id="detalleVendedor"></span></p>
-                        <p><strong>Sucursal:</strong> <span id="detalleSucursal"></span></p>
-                        <p><strong>Caja:</strong> <span id="detalleCaja"></span></p>
-                        <p><strong>N° Factura:</strong> <span id="detalleNumeroFactura">-</span></p>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="person-circle-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Vendedor</div><div class="th5" id="detalleVendedor"></div></div></div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleSucursal"></div></div></div>
+                            <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Caja</div><div class="th5" id="detalleCaja"></div></div></div>
+                            <div class="litem"><ion-icon name="receipt-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Factura</div><div class="th5" id="detalleNumeroFactura">-</div></div></div>
+                        </div>
                     </div>
                 </div>
 
-                <h3 style="margin-top: 20px;">Medicamentos Vendidos</h3>
-
-                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Medicamento</th>
-                                <th>Lote</th>
-                                <th>Cantidad</th>
-                                <th>Precio Unit.</th>
-                                <th>Descuento</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaItemsVenta">
-                            <tr>
-                                <td colspan="6" style="text-align:center;">
-                                    <ion-icon name="hourglass-outline"></ion-icon> Cargando...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-70"></div>
-                    <div class="col-30">
-                        <p><strong>Subtotal:</strong> <span id="detalleSubtotal">Bs. 0.00</span></p>
-                        <p><strong>Impuestos:</strong> <span id="detalleImpuesto">Bs. 0.00</span></p>
-                        <p style="font-size: 18px; color: #2e7d32;"><strong>TOTAL:</strong> <span id="detalleTotal">Bs. 0.00</span></p>
+                <div class="stit">Medicamentos Vendidos</div>
+                <div class="card mb16">
+                    <div class="cb">
+                        <div class="tw" style="max-height: 400px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Lote</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Descuento</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaItemsVenta">
+                                    <tr>
+                                        <td colspan="6" class="txctr">
+                                            <ion-icon name="hourglass-outline"></ion-icon> Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <div class="stit">Totales</div>
+                <div class="fr">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><div class="tc">Subtotal</div><div class="th5" id="detalleSubtotal">Bs. 0.00</div></div>
+                            <div class="litem"><div class="tc">Impuestos</div><div class="th5" id="detalleImpuesto">Bs. 0.00</div></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="cb txctr">
+                            <div class="tsuc" style="font-size:18px;font-weight:700">TOTAL: <span id="detalleTotal">Bs. 0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mf">
+                <button class="btn btn-war" onclick="VentasHistorialModals.cerrar('modalDetalleVenta')">Cerrar</button>
             </div>
         </div>
     </div>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>
 
@@ -205,6 +246,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'flex';
+                    modal.classList.add('open');
                     console.log(` Modal abierto: ${modalId}`);
                 } else {
                     console.error(`  Modal no encontrado: ${modalId}`);
@@ -214,7 +256,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             cerrar(modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
-                    modal.style.display = 'none';
+                    modal.classList.remove('open');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
                     console.log(` Modal cerrado: ${modalId}`);
                 }
             },

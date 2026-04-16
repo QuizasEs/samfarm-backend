@@ -2,125 +2,148 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
-    <div class="container">
-        <div class="title">
-            <h2>
-                <ion-icon name="cloud-download-outline"></ion-icon> Recepcionar Transferencias
-            </h2>
-        </div>
-
-        <div class="filtro-dinamico" id="form-filtro-recepcionar">
-            <div class="filtro-dinamico-search">
-                <div class="search">
-                    <input type="text" id="busqueda_recepcionar" placeholder="Buscar por número de transferencia...">
-                    <button type="button" class="btn-search" id="btn-buscar-recepcionar">
-                        <ion-icon name="search"></ion-icon>
-                    </button>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="cloud-download-outline"></ion-icon> Recepcionar Transferencias
                 </div>
+                <div class="psub">Administre las transferencias pendientes de recepción en su sucursal</div>
             </div>
         </div>
 
-        <div id="resultado-busqueda-recepcionar" style="margin-top: 20px;">
-            <p style="text-align:center; padding: 20px; color: #666;">
-                <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon><br>
-                Use el buscador para encontrar transferencias pendientes
-            </p>
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <form class="filtro-dinamico" id="form-filtro-recepcionar">
+                    <div class="fr1">
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" id="busqueda_recepcionar" placeholder="Buscar por número de transferencia...">
+                                <button type="button" class="btn btn-def btn-search" id="btn-buscar-recepcionar">
+                                    <ion-icon name="search"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Transferencias Pendientes</div>
+            </div>
+            <div class="cb">
+                <div id="resultado-busqueda-recepcionar">
+                    <p class="txctr tmut" style="padding: 20px;">
+                        <ion-icon name="search-outline" style="font-size: 48px;"></ion-icon><br>
+                        Use el buscador para encontrar transferencias pendientes
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="modal" id="modal-detalles-transfer-recepcionar" style="display: none;">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <ion-icon name="document-text-outline"></ion-icon>
-                    <span>Detalles de Transferencia</span>
+    <div class="mov" id="modal-detalles-transfer-recepcionar">
+        <div class="modal mlg">
+            <div class="mh">
+                <div>
+                    <div class="mt">
+                        <ion-icon name="document-text-outline"></ion-icon>
+                        Detalles de Transferencia
+                    </div>
+                    <div class="ms">Revise los detalles antes de aceptar o rechazar</div>
                 </div>
-                <a class="close" onclick="RecepcionManager.cerrarModalDetalles()">
+                <button class="mcl" onclick="RecepcionManager.cerrarModalDetalles()">
                     <ion-icon name="close-outline"></ion-icon>
-                </a>
+                </button>
             </div>
 
-            <div class="modal-group">
-                <div class="row">
-                    <div class="col">
-                        <label><strong>Número Transferencia:</strong></label>
-                        <p id="modal-numero-transfer-recepcionar"></p>
-                    </div>
-                    <div class="col">
-                        <label><strong>Estado:</strong></label>
-                        <p id="modal-estado-transfer-recepcionar"></p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label><strong>Sucursal Origen:</strong></label>
-                        <p id="modal-sucursal-origen-recepcionar"></p>
-                    </div>
-                    <div class="col">
-                        <label><strong>Sucursal Destino:</strong></label>
-                        <p id="modal-sucursal-destino-recepcionar"></p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label><strong>Usuario Emisor:</strong></label>
-                        <p id="modal-usuario-emisor-recepcionar"></p>
-                    </div>
-                    <div class="col">
-                        <label><strong>Fecha Envío:</strong></label>
-                        <p id="modal-fecha-envio-recepcionar"></p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <label><strong>Observaciones:</strong></label>
-                    <p id="modal-observaciones-recepcionar" style="color: #666; font-style: italic;"></p>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <h4>Items en Transferencia</h4>
-                    <div id="modal-detalles-items-recepcionar" style="max-height: 400px; overflow-y: auto;"></div>
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: #f0f7ff; border-radius: 8px;">
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                        <div>
-                            <strong>Total Items:</strong>
-                            <p style="font-size: 18px; color: #1976D2;" id="modal-total-items-recepcionar">0</p>
+            <div class="mb">
+                <div class="fr mb16">
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Número Transferencia</div><div class="th5" id="modal-numero-transfer-recepcionar"></div></div></div>
+                            <div class="litem"><ion-icon name="radio-button-on-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div class="th5" id="modal-estado-transfer-recepcionar"></div></div></div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal Origen</div><div class="th5" id="modal-sucursal-origen-recepcionar"></div></div></div>
+                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal Destino</div><div class="th5" id="modal-sucursal-destino-recepcionar"></div></div></div>
                         </div>
-                        <div>
-                            <strong>Total Cajas:</strong>
-                            <p style="font-size: 18px; color: #1976D2;" id="modal-total-cajas-recepcionar">0</p>
-                        </div>
-                        <div>
-                            <strong>Total Unidades:</strong>
-                            <p style="font-size: 18px; color: #1976D2;" id="modal-total-unidades-recepcionar">0</p>
-                        </div>
-                        <div>
-                            <strong>Total Valorado:</strong>
-                            <p style="font-size: 18px; color: #27ae60;" id="modal-total-valorado-recepcionar">Bs. 0.00</p>
+                    </div>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario Emisor</div><div class="th5" id="modal-usuario-emisor-recepcionar"></div></div></div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha Envío</div><div class="th5" id="modal-fecha-envio-recepcionar"></div></div></div>
+                            <div class="litem" style="border:none"><ion-icon name="chatbox-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Observaciones</div><div class="th5" id="modal-observaciones-recepcionar" style="font-style: italic;"></div></div></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="modal-rechazo-container" style="display: none; margin-top: 20px;">
-                    <label for="modal-motivo-rechazo"><strong>Motivo de Rechazo:</strong></label>
-                    <textarea id="modal-motivo-rechazo" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                <div class="stit">Items en Transferencia</div>
+                <div class="card mb16">
+                    <div class="cb">
+                        <div id="modal-detalles-items-recepcionar" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
                 </div>
 
-                <div class="modal-btn-content">
-                    <a href="javascript:void(0)" class="btn warning" onclick="RecepcionManager.cerrarModalDetalles()">
-                        Cancelar
-                    </a>
-                    <a href="javascript:void(0)" class="btn danger" id="btn-rechazar-transfer-modal" onclick="RecepcionManager.mostrarRechazo()">
-                        <ion-icon name="close-circle-outline"></ion-icon> Rechazar
-                    </a>
-                    <a href="javascript:void(0)" class="btn success" id="btn-aceptar-transfer-modal" onclick="RecepcionManager.aceptarTransferencia()">
-                        <ion-icon name="checkmark-circle-outline"></ion-icon> Aceptar
-                    </a>
+                <div class="stit">Resumen</div>
+                <div class="grid4 mb16">
+                    <div class="statc">
+                        <div class="siw bl"><ion-icon name="cube-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="modal-total-items-recepcionar">0</div>
+                            <div class="sl">Total Items</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw gr"><ion-icon name="archive-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="modal-total-cajas-recepcionar">0</div>
+                            <div class="sl">Total Cajas</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw ww"><ion-icon name="medical-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="modal-total-unidades-recepcionar">0</div>
+                            <div class="sl">Total Unidades</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw rd"><ion-icon name="cash-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="modal-total-valorado-recepcionar">Bs. 0.00</div>
+                            <div class="sl">Valor Total</div>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="modal-rechazo-container" style="display: none;">
+                    <div class="alert alwar mb16">
+                        <ion-icon name="warning-outline"></ion-icon>
+                        <div>
+                            <div class="altt">Modo Rechazo</div>
+                            <div class="altx">Ingrese el motivo del rechazo.</div>
+                        </div>
+                    </div>
+                    <div class="fg mb16">
+                        <label class="fl req">Motivo de Rechazo</label>
+                        <textarea class="ta" id="modal-motivo-rechazo" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mf">
+                <button class="btn btn-war" onclick="RecepcionManager.cerrarModalDetalles()">Cancelar</button>
+                <button class="btn btn-dan" id="btn-rechazar-transfer-modal" onclick="RecepcionManager.mostrarRechazo()">
+                    <ion-icon name="close-circle-outline"></ion-icon> Rechazar
+                </button>
+                <button class="btn btn-def" id="btn-aceptar-transfer-modal" onclick="RecepcionManager.aceptarTransferencia()">
+                    <ion-icon name="checkmark-circle-outline"></ion-icon> Aceptar
+                </button>
             </div>
         </div>
     </div>
@@ -198,7 +221,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                let html = '<div class="table-container"><table class="table"><thead><tr>';
+                let html = '<div class="tw"><table><thead><tr>';
                 html += '<th>#</th>';
                 html += '<th>Número</th>';
                 html += '<th>Origen</th>';
@@ -221,7 +244,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="text-align:right;">Bs. ' + formatearNumero(transfer.tr_total_valorado) + '</td>';
                     html += '<td>' + formatearFecha(transfer.tr_fecha_envio) + '</td>';
                     html += '<td>';
-                    html += '<button type="button" class="btn primary" onclick="RecepcionManager.verDetalles(' + transfer.tr_id + ')">';
+                    html += '<button type="button" class="btn btn-def" onclick="RecepcionManager.verDetalles(' + transfer.tr_id + ')">';
                     html += '<ion-icon name="eye-outline"></ion-icon> Ver';
                     html += '</button>';
                     html += '</td>';
@@ -252,7 +275,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     transferenciasSeleccionada = data.transferencia;
                     mostrarDetallesTransferencia(data.transferencia, data.detalles);
-                    document.getElementById('modal-detalles-transfer-recepcionar').style.display = 'flex';
+                    const modal = document.getElementById('modal-detalles-transfer-recepcionar');
+                    modal.style.display = 'flex';
+                    modal.classList.add('open');
                     modoRechazo = false;
                     document.getElementById('modal-rechazo-container').style.display = 'none';
                     document.getElementById('btn-aceptar-transfer-modal').style.display = 'inline-block';
@@ -281,7 +306,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
             function renderizarDetallesItems(detalles) {
-                let html = '<div class="table-container"><table class="table" style="font-size: 13px;"><thead><tr>';
+                let html = '<div class="tw"><table style="font-size: 13px;"><thead><tr>';
                 html += '<th>#</th>';
                 html += '<th>Medicamento</th>';
                 html += '<th>Lote Origen</th>';
@@ -308,7 +333,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
             function cerrarModalDetalles() {
-                document.getElementById('modal-detalles-transfer-recepcionar').style.display = 'none';
+                const modal = document.getElementById('modal-detalles-transfer-recepcionar');
+                modal.classList.remove('open');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
                 modoRechazo = false;
                 document.getElementById('modal-rechazo-container').style.display = 'none';
                 document.getElementById('modal-motivo-rechazo').value = '';
@@ -500,5 +529,21 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 <?php
 } else {
-    echo "<div class='alert warning'><p>No tiene permisos para acceder a esta sección</p></div>";
+?>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
+    </div>
+<?php
 }

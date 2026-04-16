@@ -8,61 +8,89 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="container tabla-dinamica"
+    <div class="pg tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/mermaAjax.php"
         data-ajax-param="mermaAjax"
         data-ajax-action="listar"
         data-ajax-registros="15">
 
-        <div class="title">
-            <h2>
-                <ion-icon name="archive-outline"></ion-icon> Historial de Mermas Registradas
-            </h2>
+        <div class="ph">
+            <div>
+                <div class="ptit">
+                    <ion-icon name="archive-outline"></ion-icon> Historial de Mermas Registradas
+                </div>
+                <div class="psub">Consulta el historial completo de mermas detectadas en el sistema</div>
+            </div>
         </div>
 
-        <form class="filtro-dinamico">
-            <div class="filtro-dinamico-search">
-
-                <div class="form-fechas">
-                    <small>Desde</small>
-                    <input type="date" name="fecha_desde" placeholder="Selecciona fecha desde">
-                </div>
-
-                <div class="form-fechas">
-                    <small>Hasta</small>
-                    <input type="date" name="fecha_hasta" placeholder="Selecciona fecha hasta">
-                </div>
-
-                <?php if ($rol_usuario == 1) { ?>
-                    <div class="form-fechas">
-                        <small>Sucursal</small>
-                        <select class="select-filtro" name="select2">
-                            <option value="">Todas las sucursales</option>
-                            <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                <?php } ?>
-
-                <div class="search">
-                    <input type="text" name="busqueda" placeholder="Buscar por medicamento o lote...">
-                    <button type="button" class="btn-search">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </button>
-                </div>
-
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-        </form>
+            <div class="cb">
+                <form class="filtro-dinamico">
+                    <div class="fr3">
+                        <div class="fg">
+                            <label class="fl">Desde</label>
+                            <input class="inp" type="date" name="fecha_desde">
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Hasta</label>
+                            <input class="inp" type="date" name="fecha_hasta">
+                        </div>
+                        <?php if ($rol_usuario == 1) { ?>
+                            <div class="fg">
+                                <label class="fl">Sucursal</label>
+                                <select class="sel select-filtro" name="select2">
+                                    <option value="">Todas las sucursales</option>
+                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        <?php } else { ?>
+                            <div></div>
+                        <?php } ?>
+                        <div class="fg">
+                            <label class="fl">Búsqueda</label>
+                            <div class="inpg">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por medicamento o lote...">
+                                <button type="button" class="btn btn-def btn-search">
+                                    <ion-icon name="search-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        <div class="tabla-contenedor"></div>
+        <div class="card">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Mermas Registradas</div>
+            </div>
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
 
     </div>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>

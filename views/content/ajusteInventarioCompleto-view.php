@@ -14,44 +14,62 @@ $ins_ajuste = new ajusteInventarioCompletoController();
 $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
 ?>
 
-<div class="title">
-    <h1>Ajuste de Inventario Completo</h1>
-    <p>Este módulo le permite buscar un medicamento y ajustar completamente sus datos y los de sus lotes activos.</p>
-</div>
+<div class="pg">
+    <div class="ph">
+        <div>
+            <div class="ptit">Ajuste de Inventario Completo</div>
+            <div class="psub">Este módulo le permite buscar un medicamento y ajustar completamente sus datos y los de sus lotes activos.</div>
+        </div>
+    </div>
 
-<div class="container">
     <!-- Formulario de Búsqueda -->
-    <div class="form-search" style="margin-bottom: 20px;">
-        <div class="form-bloque-search">
-            <label for="termino_busqueda">Buscar Medicamento</label>
-            <input type="text" id="termino_busqueda" placeholder="Nombre, principio activo, código...">
+    <div class="card mb16">
+        <div class="ch">
+            <div class="ct"><ion-icon name="search-outline"></ion-icon> Búsqueda de Medicamento</div>
         </div>
-        <div class="form-bloque-search">
-            <label for="sucursal_busqueda">Sucursal</label>
-            <select id="sucursal_busqueda">
-                <option value="">Seleccione Sucursal...</option>
-                <?php foreach ($datos_iniciales['sucursales'] as $sucursal) { ?>
-                    <option value="<?php echo $sucursal['su_id']; ?>">
-                        <?php echo $sucursal['su_nombre']; ?>
-                    </option>
-                <?php } ?>
-            </select>
-        </div>
-        <div class="form-bloque-search">
-            <a href="javascript:void(0)" role="button" class="btn primary btn-search">
-                <ion-icon name="search-outline"></ion-icon> Buscar
-            </a>
+        <div class="cb">
+            <form class="filtro-dinamico">
+                <div class="fr3">
+                    <div class="fg">
+                        <label class="fl">Buscar Medicamento</label>
+                        <input class="inp" type="text" id="termino_busqueda" placeholder="Nombre, principio activo, código...">
+                    </div>
+                    <div class="fg">
+                        <label class="fl">Sucursal</label>
+                        <select class="sel" id="sucursal_busqueda">
+                            <option value="">Seleccione Sucursal...</option>
+                            <?php foreach ($datos_iniciales['sucursales'] as $sucursal) { ?>
+                                <option value="<?php echo $sucursal['su_id']; ?>">
+                                    <?php echo $sucursal['su_nombre']; ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="fg">
+                        <label class="fl">&nbsp;</label>
+                        <button type="button" class="btn btn-def btn-search">
+                            <ion-icon name="search-outline"></ion-icon> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Area de Resultados de Búsqueda -->
-    <div id="resultados-busqueda-container">
-        <!-- Los resultados de la búsqueda de medicamentos se cargarán aquí -->
+    <div id="resultados-busqueda-container" style="display: none;">
+        <div class="card">
+            <div class="ch">
+                <div class="ct"><ion-icon name="list-outline"></ion-icon> Resultados de Búsqueda</div>
+            </div>
+            <div class="cb">
+                <div class="tabla-contenedor"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Area de Edición -->
     <div id="edicion-medicamento-container" style="display: none;">
-        <!-- El formulario para editar el medicamento y sus lotes se cargarán aquí -->
     </div>
 
 </div>
@@ -93,7 +111,7 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
         });
 
         function renderResults(medicamentos) {
-            let html = '<div class="table-container"><table class="table"><thead><tr>';
+            let html = '<table class="table"><thead><tr>';
             html += '<th>Medicamento</th>';
             html += '<th>Principio Activo</th>';
             html += '<th>Laboratorio</th>';
@@ -112,7 +130,7 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
                             <td>${med.su_nombre}</td>
                             <td><strong>${med.inv_total_unidades}</strong></td>
                             <td class="buttons">
-                                <button class="btn success" onclick="seleccionarMedicamento(${med.med_id}, ${med.su_id})">
+                                <button class="btn btn-def" onclick="seleccionarMedicamento(${med.med_id}, ${med.su_id})">
                                     <ion-icon name="create-outline"></ion-icon> Seleccionar
                                 </button>
                             </td>
@@ -123,8 +141,9 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
                 html += '<tr><td colspan="6" style="text-align:center;">No se encontraron resultados.</td></tr>';
             }
 
-            html += '</tbody></table></div>';
-            resultsContainer.innerHTML = html;
+            html += '</tbody></table>';
+            const tablaContenedor = resultsContainer.querySelector('.tabla-contenedor');
+            tablaContenedor.innerHTML = html;
             resultsContainer.style.display = 'block';
             edicionContainer.style.display = 'none';
         }
@@ -191,129 +210,135 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
                 console.log('Datos del medicamento para formulario:', medicamento);
 
                 let html = `
-                    <div class="form-container" style="margin-top: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h2>Editar Medicamento</h2>
-                            <button class="btn primary" onclick="volverBusqueda()">Volver a Búsqueda</button>
+                    <div class="card mb16">
+                        <div class="ch">
+                            <div class="ct"><ion-icon name="create-outline"></ion-icon> Editar Medicamento</div>
+                            <div class="tbr">
+                                <button class="btn btn-sec" onclick="volverBusqueda()">
+                                    <ion-icon name="arrow-back-outline"></ion-icon> Volver a Búsqueda
+                                </button>
+                            </div>
                         </div>
-                        <form id="form-editar-medicamento">
-                            <input type="hidden" id="medicamento_id" value="${medicamento.med_id}">
-                            <input type="hidden" id="sucursal_id_hidden" value="${sucursalId}">
-                            
-                            <div class="form-row">
-                                <div class="form-bloque">
-                                    <label for="nombre">Nombre Químico</label>
-                                    <input type="text" id="nombre" value="${medicamento.med_nombre_quimico || ''}" required>
-                                </div>
-                                <div class="form-bloque">
-                                    <label for="principio">Principio Activo</label>
-                                    <input type="text" id="principio" value="${medicamento.med_principio_activo || ''}" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-bloque">
-                                    <label for="codigo">Código de Barras</label>
-                                    <input type="text" id="codigo" value="${medicamento.med_codigo_barras || ''}">
-                                </div>
-                                <div class="form-bloque">
-                                    <label for="proveedor_id">Proveedor</label>
-                                    <select id="proveedor_id">
-                                        <option value="0">Sin Proveedor</option>
-                                        ${proveedores.map(prov => `<option value="${prov.pr_id}" ${prov.pr_id == medicamento.pr_id ? 'selected' : ''}>${prov.pr_razon_social}</option>`).join('')}
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-bloque">
-                                    <label for="ff_id">Forma Farmacéutica</label>
-                                    <select id="ff_id">
-                                        <option value="0">Seleccione...</option>
-                                        ${formas.map(f => `<option value="${f.ff_id}" ${f.ff_id == medicamento.ff_id ? 'selected' : ''}>${f.ff_nombre}</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div class="form-bloque">
-                                    <label for="uf_id">Uso Farmacológico</label>
-                                    <select id="uf_id">
-                                        <option value="0">Seleccione...</option>
-                                        ${usos.map(u => `<option value="${u.uf_id}" ${u.uf_id == medicamento.uf_id ? 'selected' : ''}>${u.uf_nombre}</option>`).join('')}
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="cb">
+                            <form id="form-editar-medicamento">
+                                <input type="hidden" id="medicamento_id" value="${medicamento.med_id}">
+                                <input type="hidden" id="sucursal_id_hidden" value="${sucursalId}">
 
-                            <div class="form-row">
-                                <div class="form-bloque">
-                                    <label for="via_administracion">Vía de Administración</label>
-                                    <select id="via_administracion">
+                                <div class="fr">
+                                    <div class="fg">
+                                        <label class="fl req">Nombre Químico</label>
+                                        <input class="inp" type="text" id="nombre" value="${medicamento.med_nombre_quimico || ''}" required>
+                                    </div>
+                                    <div class="fg">
+                                        <label class="fl req">Principio Activo</label>
+                                        <input class="inp" type="text" id="principio" value="${medicamento.med_principio_activo || ''}" required>
+                                    </div>
+                                </div>
+
+                                <div class="fr">
+                                    <div class="fg">
+                                        <label class="fl">Código de Barras</label>
+                                        <input class="inp" type="text" id="codigo" value="${medicamento.med_codigo_barras || ''}">
+                                    </div>
+                                    <div class="fg">
+                                        <label class="fl">Proveedor</label>
+                                        <select class="sel" id="proveedor_id">
+                                            <option value="0">Sin Proveedor</option>
+                                            ${proveedores.map(prov => `<option value="${prov.pr_id}" ${prov.pr_id == medicamento.pr_id ? 'selected' : ''}>${prov.pr_razon_social}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="fr">
+                                    <div class="fg">
+                                        <label class="fl">Forma Farmacéutica</label>
+                                        <select class="sel" id="ff_id">
+                                            <option value="0">Seleccione...</option>
+                                            ${formas.map(f => `<option value="${f.ff_id}" ${f.ff_id == medicamento.ff_id ? 'selected' : ''}>${f.ff_nombre}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="fg">
+                                        <label class="fl">Uso Farmacológico</label>
+                                        <select class="sel" id="uf_id">
+                                            <option value="0">Seleccione...</option>
+                                            ${usos.map(u => `<option value="${u.uf_id}" ${u.uf_id == medicamento.uf_id ? 'selected' : ''}>${u.uf_nombre}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="fg">
+                                    <label class="fl">Vía de Administración</label>
+                                    <select class="sel" id="via_administracion">
                                         <option value="">Seleccione...</option>
                                         ${vias.map(v => `<option value="${v.vd_id}" ${v.vd_id == medicamento.vd_id ? 'selected' : ''}>${v.vd_nombre}</option>`).join('')}
                                     </select>
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-bloque">
-                                    <button type="button" class="btn success" onclick="guardarMedicamento()">
+
+                                <div class="cf">
+                                    <button type="button" class="btn btn-def" onclick="guardarMedicamento()">
                                         <ion-icon name="save-outline"></ion-icon> Actualizar Datos del Medicamento
                                     </button>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
 
-                    <div class="form-container" style="margin-top: 20px;">
-                        <h2>Lotes Activos en esta Sucursal</h2>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Número de Lote</th>
-                                        <th>Cajas (inicial)</th>
-                                        <th>Blisters/caja</th>
-                                        <th>Unidades/blister</th>
-                                        <th>Cajas Actuales</th>
-                                        <th>Unidades Actuales</th>
-                                        <th>P. Compra</th>
-                                        <th>P. Venta</th>
-                                        <th>Vencimiento</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct"><ion-icon name="archive-outline"></ion-icon> Lotes Activos en esta Sucursal</div>
+                        </div>
+                        <div class="cb">
+                            <div class="tabla-contenedor">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Número de Lote</th>
+                                            <th>Cajas (inicial)</th>
+                                            <th>Blisters/caja</th>
+                                            <th>Unidades/blister</th>
+                                            <th>Cajas Actuales</th>
+                                            <th>Unidades Actuales</th>
+                                            <th>P. Compra</th>
+                                            <th>P. Venta</th>
+                                            <th>Vencimiento</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
 
-                if (lotes && lotes.length > 0) {
-                    lotes.forEach(lote => {
-                        html += `
-                            <tr>
-                                <td><input type="text" class="lote-input" data-lote-id="${lote.lm_id}" data-field="numero_lote" value="${lote.lm_numero_lote}"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="cant_caja" value="${lote.lm_cant_caja}" min="0"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="cant_blister" value="${lote.lm_cant_blister}" min="0"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="cant_unidad" value="${lote.lm_cant_unidad}" min="0"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="cant_actual_cajas" value="${lote.lm_cant_actual_cajas}" min="0"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="cant_actual_unidades" value="${lote.lm_cant_actual_unidades}" min="0"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="precio_compra" value="${lote.lm_precio_compra}" min="0" step="0.01"></td>
-                                <td><input type="number" class="lote-input" data-lote-id="${lote.lm_id}" data-field="precio_venta" value="${lote.lm_precio_venta}" min="0" step="0.01"></td>
-                                <td><input type="date" class="lote-input" data-lote-id="${lote.lm_id}" data-field="fecha_vencimiento" value="${lote.lm_fecha_vencimiento}"></td>
-                                <td class="buttons">
-                                    <button class="btn primary" onclick="guardarLote(${lote.lm_id})">
-                                        <ion-icon name="checkmark-outline"></ion-icon>
-                                    </button>
-                                    <button class="btn danger" onclick="eliminarLote(${lote.lm_id})">
-                                        <ion-icon name="trash-outline"></ion-icon>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    html += '<tr><td colspan="10" style="text-align:center;">No hay lotes activos.</td></tr>';
-                }
+                    if (lotes && lotes.length > 0) {
+                        lotes.forEach(lote => {
+                            html += `
+                                <tr>
+                                    <td><input type="text" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="numero_lote" value="${lote.lm_numero_lote}"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="cant_caja" value="${lote.lm_cant_caja}" min="0"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="cant_blister" value="${lote.lm_cant_blister}" min="0"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="cant_unidad" value="${lote.lm_cant_unidad}" min="0"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="cant_actual_cajas" value="${lote.lm_cant_actual_cajas}" min="0"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="cant_actual_unidades" value="${lote.lm_cant_actual_unidades}" min="0"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="precio_compra" value="${lote.lm_precio_compra}" min="0" step="0.01"></td>
+                                    <td><input type="number" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="precio_venta" value="${lote.lm_precio_venta}" min="0" step="0.01"></td>
+                                    <td><input type="date" class="inp lote-input" data-lote-id="${lote.lm_id}" data-field="fecha_vencimiento" value="${lote.lm_fecha_vencimiento}"></td>
+                                    <td class="buttons">
+                                        <button class="btn btn-def" onclick="guardarLote(${lote.lm_id})">
+                                            <ion-icon name="checkmark-outline"></ion-icon>
+                                        </button>
+                                        <button class="btn btn-dan" onclick="eliminarLote(${lote.lm_id})">
+                                            <ion-icon name="trash-outline"></ion-icon>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        html += '<tr><td colspan="10" style="text-align:center;">No hay lotes activos.</td></tr>';
+                    }
 
-                html += `
-                                </tbody>
-                            </table>
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 `;

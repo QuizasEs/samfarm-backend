@@ -6,178 +6,185 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $rol_usuario = $_SESSION['rol_smp'];
 ?>
 
-<div class="container tabla-dinamica"
+<div class="pg tabla-dinamica"
     data-ajax-table="true"
     data-ajax-url="ajax/cajaAjax.php"
     data-ajax-param="cajaAjax"
     data-ajax-action="cajas_cerradas"
     data-ajax-registros="10">
-    
-    <div class="title">
-        <h2>
-            <ion-icon name="cash-outline"></ion-icon> Historial de Cajas Cerradas
-        </h2>
+
+    <div class="ph">
+        <div>
+            <div class="ptit">
+                <ion-icon name="cash-outline"></ion-icon> Historial de Cajas Cerradas
+            </div>
+            <div class="psub">Consulta el historial completo de cajas cerradas y sus totales</div>
+        </div>
     </div>
 
-    <form class="filtro-dinamico">
-        <div class="filtro-dinamico-search">
-            <?php if ($rol_usuario == 1) { ?>
-                <div class="form-fechas">
-                    <small>Sucursal</small>
-                    <select class="select-filtro" name="select1">
-                        <option value="">Todas las sucursales</option>
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                        <?php } ?>
-                    </select>
+    <div class="card mb16">
+        <div class="ch">
+            <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+        </div>
+        <div class="cb">
+            <form class="filtro-dinamico">
+                <div class="fr1">
+                    <?php if ($rol_usuario == 1) { ?>
+                        <div class="fg">
+                            <label class="fl">Sucursal</label>
+                            <select class="sel select-filtro" name="select1">
+                                <option value="">Todas las sucursales</option>
+                                <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
+                                    <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    <?php } ?>
+
+                    <div class="fg">
+                        <label class="fl">Búsqueda</label>
+                        <div class="inpg">
+                            <input class="inp" type="text" name="busqueda" placeholder="Buscar por nombre o usuario...">
+                            <button type="button" class="btn btn-def btn-search">
+                                <ion-icon name="search-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            <?php } ?>
-
-            <div class="search">
-                <input type="text" name="busqueda" placeholder="Buscar por nombre o usuario...">
-                <button type="button" class="btn-search">
-                    <ion-icon name="search-outline"></ion-icon>
-                </button>
-            </div>
+            </form>
         </div>
-    </form>
+    </div>
 
-    <div id="contenedorResumen" class="caja-resumen-container" style="display:none;">
-        <div class="caja-resumen-grid">
-            <div class="caja-resumen-item">
-                <label>Total Cajas Cerradas</label>
-                <p id="resumenTotalCajas">0</p>
+    <div id="contenedorResumen" style="display:none;">
+        <div class="card mb16">
+            <div class="ch">
+                <div class="ct"><ion-icon name="bar-chart-outline"></ion-icon> Resumen General</div>
             </div>
-            <div class="caja-resumen-item">
-                <label>Total Saldos Iniciales</label>
-                <p id="resumenSaldosIniciales">Bs. 0.00</p>
-            </div>
-            <div class="caja-resumen-item">
-                <label>Total Saldos Finales</label>
-                <p id="resumenSaldosFinales">Bs. 0.00</p>
-            </div>
-            <div class="caja-resumen-item">
-                <label>Diferencia Total</label>
-                <p id="resumenDiferencia">Bs. 0.00</p>
-            </div>
-            <div class="caja-resumen-item">
-                <label>Total Ventas</label>
-                <p id="resumenVentas">Bs. 0.00</p>
+            <div class="cb">
+                <div class="grid4">
+                    <div class="statc">
+                        <div class="siw bl"><ion-icon name="archive-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="resumenTotalCajas">0</div>
+                            <div class="sl">Total Cajas Cerradas</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw gr"><ion-icon name="cash-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="resumenSaldosIniciales">Bs. 0.00</div>
+                            <div class="sl">Saldos Iniciales</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw ww"><ion-icon name="wallet-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="resumenSaldosFinales">Bs. 0.00</div>
+                            <div class="sl">Saldos Finales</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw rd"><ion-icon name="trending-up-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="resumenDiferencia">Bs. 0.00</div>
+                            <div class="sl">Diferencia Total</div>
+                        </div>
+                    </div>
+                    <div class="statc">
+                        <div class="siw bl"><ion-icon name="cart-outline"></ion-icon></div>
+                        <div>
+                            <div class="sv" id="resumenVentas">Bs. 0.00</div>
+                            <div class="sl">Total Ventas</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="tabla-contenedor"></div>
+    <div class="card">
+        <div class="ch">
+            <div class="ct"><ion-icon name="list-outline"></ion-icon> Cajas Cerradas</div>
+        </div>
+        <div class="cb">
+            <div class="tabla-contenedor"></div>
+        </div>
+    </div>
 </div>
 
-<div class="modal" id="modalDetalleCajaCerrada" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">
-                <ion-icon name="cash-outline"></ion-icon> Detalle de Caja Cerrada
+<div class="mov" id="modalDetalleCajaCerrada">
+    <div class="modal">
+        <div class="mh">
+            <div>
+                <div class="mt">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    Detalle de Caja Cerrada
+                </div>
+                <div class="ms">Información completa de la caja cerrada</div>
             </div>
-            <a class="close" onclick="CajaHistorialTotales.cerrarModal()">
+            <button class="mcl" onclick="CajaHistorialTotales.cerrarModal()">
                 <ion-icon name="close-outline"></ion-icon>
-            </a>
+            </button>
         </div>
 
-        <div class="modal-group">
-            <div class="row">
-                <h3><ion-icon name="information-circle-outline"></ion-icon> Información General</h3>
+        <div class="mb">
+            <div class="stit">
+                <ion-icon name="information-circle-outline"></ion-icon> Información General
             </div>
 
-            <div class="row">
-                <div class="col">
-                    <label>Nombre de Caja:</label>
-                    <p id="detalleCajaNombre">-</p>
-                </div>
-                <div class="col">
-                    <label>Usuario:</label>
-                    <p id="detalleCajaUsuario">-</p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col">
-                    <label>Sucursal:</label>
-                    <p id="detalleCajaSucursal">-</p>
-                </div>
-                <div class="col">
-                    <label>Fecha Cierre:</label>
-                    <p id="detalleCajaFechaCierre">-</p>
+            <div class="fr mb16">
+                <div class="card">
+                    <div class="cb">
+                        <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Nombre de Caja</div><div class="th5" id="detalleCajaNombre">-</div></div></div>
+                        <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario</div><div class="th5" id="detalleCajaUsuario">-</div></div></div>
+                        <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleCajaSucursal">-</div></div></div>
+                        <div class="litem" style="border:none"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha Cierre</div><div class="th5" id="detalleCajaFechaCierre">-</div></div></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <h3><ion-icon name="trending-up-outline"></ion-icon> Movimientos Financieros</h3>
+            <div class="stit">
+                <ion-icon name="trending-up-outline"></ion-icon> Movimientos Financieros
             </div>
 
-            <div class="row">
-                <div class="col">
-                    <label>Saldo Inicial (Bs):</label>
-                    <p id="detalleCajaSaldoInicial" class="text-bold">-</p>
+            <div class="grid4">
+                <div class="statc">
+                    <div class="siw gr"><ion-icon name="cash-outline"></ion-icon></div>
+                    <div>
+                        <div class="sv" id="detalleCajaSaldoInicial">-</div>
+                        <div class="sl">Saldo Inicial</div>
+                    </div>
                 </div>
-                <div class="col">
-                    <label>Saldo Final (Bs):</label>
-                    <p id="detalleCajaSaldoFinal" class="text-bold">-</p>
+                <div class="statc">
+                    <div class="siw ww"><ion-icon name="wallet-outline"></ion-icon></div>
+                    <div>
+                        <div class="sv" id="detalleCajaSaldoFinal">-</div>
+                        <div class="sl">Saldo Final</div>
+                    </div>
+                </div>
+                <div class="statc">
+                    <div class="siw rd"><ion-icon name="trending-up-outline"></ion-icon></div>
+                    <div>
+                        <div class="sv" id="detalleCajaDiferencia">-</div>
+                        <div class="sl">Diferencia</div>
+                    </div>
+                </div>
+                <div class="statc">
+                    <div class="siw bl"><ion-icon name="cart-outline"></ion-icon></div>
+                    <div>
+                        <div class="sv" id="detalleCajaVentas">-</div>
+                        <div class="sl">Total Ventas</div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row">
-                <div class="col">
-                    <label>Diferencia Arqueo (Bs):</label>
-                    <p id="detalleCajaDiferencia" class="text-bold">-</p>
-                </div>
-                <div class="col">
-                    <label>Total Ventas (Bs):</label>
-                    <p id="detalleCajaVentas" class="text-bold">-</p>
-                </div>
-            </div>
-
-            <div class="modal-btn-content">
-                <a href="javascript:void(0)" class="btn warning" onclick="CajaHistorialTotales.cerrarModal()">Cerrar</a>
-            </div>
+        <div class="mf">
+            <button class="btn btn-war" onclick="CajaHistorialTotales.cerrarModal()">Cerrar</button>
         </div>
     </div>
 </div>
 
-<style>
-    .caja-resumen-container {
-        margin-bottom: 30px;
-    }
-
-    .caja-resumen-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .caja-resumen-item {
-        padding: 15px;
-        background: var(--bg-secondary);
-        border-radius: 8px;
-        text-align: center;
-        border-left: 4px solid #13386c;
-    }
-
-    .caja-resumen-item label {
-        display: block;
-        font-size: 12px;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
-    }
-
-    .caja-resumen-item p {
-        font-size: 18px;
-        font-weight: bold;
-        color: var(--text-primary);
-    }
-
-    .dark .caja-resumen-item {
-        background: var(--dark-bg-secondary);
-        border-left-color: #ff7b36;
-    }
-</style>
 
 <script>
     const CajaHistorialTotales = (() => {
@@ -212,12 +219,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             document.getElementById('detalleCajaVentas').textContent = `Bs. ${formatearNumero(cajaData.total_ventas)}`;
 
             const modal = document.getElementById('modalDetalleCajaCerrada');
-            if (modal) modal.style.display = 'flex';
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('open');
+            }
         }
 
         function cerrarModal() {
             const modal = document.getElementById('modalDetalleCajaCerrada');
-            if (modal) modal.style.display = 'none';
+            if (modal) {
+                modal.classList.remove('open');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
         }
 
         function init() {
@@ -241,8 +256,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 </script>
 
 <?php } else { ?>
-    <div style="text-align: center; padding: 60px;">
-        <h2><ion-icon name="lock-closed-outline"></ion-icon> Acceso Denegado</h2>
-        <p>No tiene permisos para acceder a esta sección.</p>
+    <div class="pg">
+        <div class="ph">
+            <div>
+                <div class="ptit">Acceso Denegado</div>
+                <div class="psub">No tiene permisos para acceder a esta sección</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cb txctr" style="padding:60px">
+                <ion-icon name="lock-closed-outline" style="font-size:48px;color:var(--text-faint);margin-bottom:16px"></ion-icon>
+                <div class="th3 mb8">Acceso Denegado</div>
+                <div class="tbs tmut">No tiene permisos para acceder a esta sección.</div>
+            </div>
+        </div>
     </div>
 <?php } ?>
