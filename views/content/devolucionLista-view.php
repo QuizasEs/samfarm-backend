@@ -104,7 +104,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 <th>Cantidad</th>
                                 <th>Precio Unit.</th>
                                 <th>Subtotal</th>
-                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla_items_venta">
@@ -338,7 +337,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const tr = document.createElement('tr');
 
                     const estadoClass = item.estado == 0 ? 'style="opacity: 0.5; text-decoration: line-through;"' : '';
-                    const btnDisabled = item.estado == 0 ? 'disabled' : '';
+                    const cursorStyle = item.estado == 0 ? '' : 'cursor: pointer;';
+
+                    tr.style.cssText = cursorStyle;
+                    if (item.estado != 0) {
+                        tr.onclick = () => DevolucionManager.abrirModalDevolucion(index);
+                    }
 
                     tr.innerHTML = `
                 <td ${estadoClass}>${index + 1}</td>
@@ -350,14 +354,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <td ${estadoClass}>${item.cantidad}</td>
                 <td ${estadoClass}>Bs. ${parseFloat(item.precio_unitario).toFixed(2)}</td>
                 <td ${estadoClass}>Bs. ${parseFloat(item.subtotal).toFixed(2)}</td>
-                <td ${estadoClass}>
-                    <button type="button" 
-                            class="btn btn-dan btn-sm" 
-                            onclick="DevolucionManager.abrirModalDevolucion(${index})"
-                            ${btnDisabled}>
-                        <ion-icon name="return-down-back-outline"></ion-icon> Devolver
-                    </button>
-                </td>
             `;
 
                     tbody.appendChild(tr);

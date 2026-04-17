@@ -34,7 +34,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="cb">
                 <form class="filtro-dinamico">
-                    <div class="fr4">
+                    <div class="fr">
                         <div class="fg">
                             <label class="fl">Desde</label>
                             <input class="inp" type="date" name="fecha_desde">

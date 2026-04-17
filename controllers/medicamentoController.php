@@ -200,7 +200,9 @@ class medicamentoController extends medicamentoModel
         }
 
         // Filtros por selects
-        
+        if ($f1 !== '' && is_numeric($f1)) {
+            $whereParts[] = "m.pr_id = " . (int)$f1;
+        }
 
         if ($f2 !== '' && is_numeric($f2)) {
             $whereParts[] = "m.vd_id = " . (int)$f2;
@@ -235,6 +237,7 @@ class medicamentoController extends medicamentoModel
                 LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
                 LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
                 LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
+                LEFT JOIN proveedores AS pr ON m.pr_id = pr.pr_id
                 $whereSQL
                 ORDER BY m.med_nombre_quimico ASC
                 LIMIT $inicio, $registros
@@ -272,14 +275,10 @@ class medicamentoController extends medicamentoModel
                         <thead>
                             <tr>
                                 <th>N°</th>
-                                <th>NOMBRE QUÍMICO</th>
-                                <th>PRINCIPIO ACTIVO</th>
-                                <th>FORMA</th>
-                                <th>VÍA</th>
-                                <th>USO</th>
+                                <th>NOMBRE Y PRINCIPIO</th>
+                                <th>FORMA VÍA USO</th>
                                 <th>PRESENTACIÓN</th>
                                 <th>CÓDIGO DE BARRAS</th>
-                                <th>ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -290,19 +289,6 @@ class medicamentoController extends medicamentoModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $rows) {
-                $actions = '';
-                if ($privilegio != 3) {
-                    $actions = '
-                            <td class="buttons">
-                                <a href="' . SERVER_URL . 'medicamentoActualizar/' . mainModel::encryption($rows['med_id']) . '/" class="btn danger">
-                                    <ion-icon name="create-outline"></ion-icon> Editar
-                                </a>
-                            </td>
-                        ';
-                } else {
-                    $actions = '<td>No disponible</td>';
-                }
-
                 $barcodeText = $rows['med_codigo_barras'];
                 if (!empty($barcodeText)) {
                     $barcodeDisplay = '<span class="barcode-text">' . htmlspecialchars($barcodeText) . '</span>';
@@ -310,19 +296,22 @@ class medicamentoController extends medicamentoModel
                     $barcodeDisplay = '<span class="barcode-cell-empty">—</span>';
                 }
 
+                $onclick = ($privilegio != 3) ? ' onclick="MedicamentosModals.abrirModalEditar(' . $rows['med_id'] . ')" style="cursor: pointer;"' : '';
+
                 $tabla .= '
-                        <tr>
+                        <tr' . $onclick . '>
                             <td>' . $contador . '</td>
-                            <td><strong>' . htmlspecialchars($rows['med_nombre_quimico']) . '</strong></td>
-                            <td>' . htmlspecialchars($rows['med_principio_activo']) . '</td>
-                            
-                            <td>' . htmlspecialchars($rows['forma_farmaceutica'] ?? 'Sin forma') . '</td>
-                            <td>' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . '</td>
-                            <td>' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</td>
+                            <td>
+                                <div class="td-main"><strong>' . htmlspecialchars($rows['med_nombre_quimico']) . '</strong></div>
+                                <div class="td-sub">' . htmlspecialchars($rows['med_principio_activo']) . '</div>
+                            </td>
+                            <td>
+                                <div class="td-main">' . htmlspecialchars($rows['forma_farmaceutica'] ?? 'Sin forma') . '</div>
+                                <div class="td-sub">' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . ' - ' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</div>
+                            </td>
                             <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
-                            <td>' . $barcodeDisplay . '</td>'
-                            . $actions .
-                        '</tr>
+                            <td>' . $barcodeDisplay . '</td>
+                        </tr>
                     ';
                 $contador++;
             }
@@ -330,11 +319,9 @@ class medicamentoController extends medicamentoModel
         } else {
             if ($total >= 1) {
                 $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
-            } else {
-                $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
-                                <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
-                            </td></tr>';
-            }
+                    } else {
+                        $tabla .= '<tr><td colspan="5" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos registrados</td></tr>';
+                    }
         }
 
         $tabla .= '
@@ -344,7 +331,7 @@ class medicamentoController extends medicamentoModel
             ';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
+            $tabla .= '<p class="table-page-footer">Mostrando registros' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
         }
 
@@ -355,18 +342,30 @@ class medicamentoController extends medicamentoModel
 
 
     /* -----------------------------------controlador para recuperar datos de un medicamento en especifico------------------------------------------ */
-    public function datos_medicamento_controller($id)
+    public function datos_medicamento_controller($med_id)
     {
-        $id = mainModel::decryption($id);
-        $id =  mainModel::limpiar_cadena($id);
+        $med_id = (int)$med_id;
 
-        $sql = mainModel::conectar()->prepare("SELECT * FROM medicamento WHERE med_id = '$id'");
-        $sql->execute();
-        return $sql;
+        if ($med_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        try {
+            $stmt = self::datos_medicamento_single_model($med_id);
+            $medicamento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$medicamento) {
+                return json_encode(['error' => 'Medicamento no encontrado']);
+            }
+
+            return json_encode($medicamento, JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            error_log("Error en datos_medicamento_controller: " . $e->getMessage());
+            return json_encode(['error' => 'Error al cargar datos']);
+        }
     }
 
-
-    /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
+    /* -----------------------------------controlador para actualizar medicamentos------------------------------------------ */
     public function actualizar_medicamento_controller()
     {
         $privilegio = $_SESSION['rol_smp'] ?? 0;
@@ -381,9 +380,8 @@ class medicamentoController extends medicamentoModel
             exit();
         }
 
-        /* desencritamos la id de medicamento */
-        $id = mainModel::decryption($_POST['id']);
-        $id = mainModel::limpiar_cadena($id);
+        /* obtenemos la id de medicamento */
+        $id = mainModel::limpiar_cadena($_POST['med_id'] ?? '');
         /* verificamos que el medicamento exista en la base de datos */
         $check_med = mainModel::ejecutar_consulta_simple("SELECT * FROM medicamento WHERE med_id = '$id'");
         if ($check_med->rowCount() <= 0) {

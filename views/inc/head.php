@@ -24,6 +24,7 @@
     <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($logo_empresa); ?>">
     <!-- <link rel="stylesheet" href="<?php echo SERVER_URL; ?>views/css/style.css"> -->
     <link rel="stylesheet" href="<?php echo SERVER_URL; ?>views/css/base.css">
+    <link rel="stylesheet" href="<?php echo SERVER_URL; ?>views/css/login.css">
     <!-- script ion-icons -->
     <!--     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script> -->
     <!-- script apache echarts -->

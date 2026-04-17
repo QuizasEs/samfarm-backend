@@ -212,6 +212,16 @@ class medicamentoModel extends mainModel
 
 
 
+    protected static function datos_medicamento_single_model($med_id)
+    {
+        $sql = "SELECT * FROM medicamento WHERE med_id = :med_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':med_id', $med_id);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
     /* ------------------------------- medicamentos----------------------------------- */
     /* ------------------------------- medicamentos----------------------------------- */
     /* ------------------------------- medicamentos----------------------------------- */

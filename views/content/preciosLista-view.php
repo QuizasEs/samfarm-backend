@@ -217,15 +217,25 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                         <span class="price-card-label">Precio Compra Promedio</span>
                                         <span class="price-card-value">Bs ${parseFloat(med.precio_compra_promedio).toFixed(2)}</span>
                                     </div>
-                                    
+
                                     <div class="price-card-row">
                                         <span class="price-card-label">Stock Activo</span>
                                         <span class="price-card-value">${parseInt(med.total_unidades_activas)} unidades</span>
                                     </div>
-                                    
+
                                     <div class="price-card-row">
                                         <span class="price-card-label">Valorado</span>
                                         <span class="price-card-value price-card-highlight" style="color: ${colorMargen};">Bs ${parseFloat(med.total_valorado || 0).toFixed(2)}</span>
+                                    </div>
+
+                                    <div class="price-card-row">
+                                        <span class="price-card-label">Precio Venta Unitario</span>
+                                        <span class="price-card-value">Bs ${parseFloat(med.precio_venta_unitario_promedio || 0).toFixed(2)}</span>
+                                    </div>
+
+                                    <div class="price-card-row">
+                                        <span class="price-card-label">Precio de Venta Caja</span>
+                                        <span class="price-card-value">Bs ${parseFloat(med.precio_venta_caja_promedio || 0).toFixed(2)}</span>
                                     </div>
                                 </div>
                                 

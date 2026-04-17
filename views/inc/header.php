@@ -15,6 +15,7 @@
             <ion-icon name="moon-outline"></ion-icon>
         </div>
 
+        <?php if ($_SESSION['rol_smp'] != 3) { ?>
         <div class="notificacion-container">
             <button class="notificacion" id="notificacionBtn">
                 <ion-icon name="notifications-outline"></ion-icon>
@@ -34,6 +35,7 @@
                 </div>
             </div>
         </div>
+        <?php } ?>
 
         <div class="user">
             <button class="btn-exit-system ibtn" type="submit" title="Salir">

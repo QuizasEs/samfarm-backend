@@ -121,19 +121,19 @@ class categoriaController extends categoriaModel
 
             foreach ($datos as $rows) {
                 $estado_html = $rows['uf_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
+                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
                 $tiene_imagen = !empty($rows['uf_imagen']) && strlen(trim($rows['uf_imagen'])) > 10;
                 $imagen_src = $tiene_imagen ? $rows['uf_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
 
 
                 $tabla .= '
-                    <tr>
+                    <tr onclick="abrirModalEditarUsoFarmacologico(' . $rows['uf_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
                         <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '" 
-                                alt="' . htmlspecialchars($rows['uf_nombre']) . '" 
+                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
+                                alt="' . htmlspecialchars($rows['uf_nombre']) . '"
                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
                                 onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
                         </td>
@@ -142,15 +142,10 @@ class categoriaController extends categoriaModel
                         <td>' . date('d/m/Y H:i', strtotime($rows['uf_actualizado_en'])) . '</td>
                         <td>' . $estado_html . '</td>
                         <td class="buttons">
-                            <a href="javascript:void(0)" 
-                               class="btn default" 
-                               onclick="abrirModalEditarUsoFarmacologico(' . $rows['uf_id'] . ')">
-                                <ion-icon name="create-outline"></ion-icon> EDITAR
-                            </a>
-                            <a href="javascript:void(0)" 
-                               class="btn ' . ($rows['uf_estado'] == 1 ? 'danger' : 'success') . '" 
-                               onclick="cambiarEstadoUsoFarmacologico(' . $rows['uf_id'] . ', ' . ($rows['uf_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['uf_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon> 
+                            <a href="javascript:void(0)"
+                               class="btn ' . ($rows['uf_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
+                               onclick="event.stopPropagation(); cambiarEstadoUsoFarmacologico(' . $rows['uf_id'] . ', ' . ($rows['uf_estado'] == 1 ? 0 : 1) . ')">
+                                <ion-icon name="' . ($rows['uf_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
                                 ' . ($rows['uf_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
                             </a>
                         </td>
@@ -461,18 +456,18 @@ class categoriaController extends categoriaModel
 
             foreach ($datos as $rows) {
                 $estado_html = $rows['vd_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
+                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
                 $tiene_imagen = !empty($rows['vd_imagen']) && strlen(trim($rows['vd_imagen'])) > 10;
                 $imagen_src = $tiene_imagen ? $rows['vd_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
 
                 $tabla .= '
-                    <tr>
+                    <tr onclick="abrirModalEditarViaAdministracion(' . $rows['vd_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
                         <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '" 
-                                 alt="' . htmlspecialchars($rows['vd_nombre']) . '" 
+                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
+                                 alt="' . htmlspecialchars($rows['vd_nombre']) . '"
                                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
                                  onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
                         </td>
@@ -481,15 +476,10 @@ class categoriaController extends categoriaModel
                         <td>' . date('d/m/Y H:i', strtotime($rows['vd_actualizado_en'])) . '</td>
                         <td>' . $estado_html . '</td>
                         <td class="buttons">
-                            <a href="javascript:void(0)" 
-                               class="btn default" 
-                               onclick="abrirModalEditarViaAdministracion(' . $rows['vd_id'] . ')">
-                                <ion-icon name="create-outline"></ion-icon> EDITAR
-                            </a>
-                            <a href="javascript:void(0)" 
-                               class="btn ' . ($rows['vd_estado'] == 1 ? 'danger' : 'success') . '" 
-                               onclick="cambiarEstadoViaAdministracion(' . $rows['vd_id'] . ', ' . ($rows['vd_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['vd_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon> 
+                            <a href="javascript:void(0)"
+                               class="btn ' . ($rows['vd_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
+                               onclick="event.stopPropagation(); cambiarEstadoViaAdministracion(' . $rows['vd_id'] . ', ' . ($rows['vd_estado'] == 1 ? 0 : 1) . ')">
+                                <ion-icon name="' . ($rows['vd_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
                                 ' . ($rows['vd_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
                             </a>
                         </td>
@@ -797,18 +787,18 @@ class categoriaController extends categoriaModel
 
             foreach ($datos as $rows) {
                 $estado_html = $rows['ff_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
+                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
                 $tiene_imagen = !empty($rows['ff_imagen']) && strlen(trim($rows['ff_imagen'])) > 10;
                 $imagen_src = $tiene_imagen ? $rows['ff_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
 
                 $tabla .= '
-                    <tr>
+                    <tr onclick="abrirModalEditarFormaFarmaceutica(' . $rows['ff_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
                         <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '" 
-                                alt="' . htmlspecialchars($rows['ff_nombre']) . '" 
+                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
+                                alt="' . htmlspecialchars($rows['ff_nombre']) . '"
                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
                                 onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
                         </td>
@@ -817,15 +807,10 @@ class categoriaController extends categoriaModel
                         <td>' . date('d/m/Y H:i', strtotime($rows['ff_actualizado_en'])) . '</td>
                         <td>' . $estado_html . '</td>
                         <td class="buttons">
-                            <a href="javascript:void(0)" 
-                               class="btn default" 
-                               onclick="abrirModalEditarFormaFarmaceutica(' . $rows['ff_id'] . ')">
-                                <ion-icon name="create-outline"></ion-icon> EDITAR
-                            </a>
-                            <a href="javascript:void(0)" 
-                               class="btn ' . ($rows['ff_estado'] == 1 ? 'danger' : 'success') . '" 
-                               onclick="cambiarEstadoFormaFarmaceutica(' . $rows['ff_id'] . ', ' . ($rows['ff_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['ff_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon> 
+                            <a href="javascript:void(0)"
+                               class="btn ' . ($rows['ff_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
+                               onclick="event.stopPropagation(); cambiarEstadoFormaFarmaceutica(' . $rows['ff_id'] . ', ' . ($rows['ff_estado'] == 1 ? 0 : 1) . ')">
+                                <ion-icon name="' . ($rows['ff_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
                                 ' . ($rows['ff_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
                             </a>
                         </td>

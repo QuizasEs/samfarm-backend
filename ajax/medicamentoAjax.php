@@ -50,13 +50,17 @@ if (isset($_POST['MedicamentoAjax'])) {
         echo $ins_med->actualizar_medicamento_controller();
     }
 
+    if ($valor == "datos_medicamento") {
+        $med_id = isset($_POST['med_id']) ? $ins_med->limpiar_cadena($_POST['med_id']) : '';
+        echo $ins_med->datos_medicamento_controller($med_id);
+    }
+
     if ($valor === "listar") {
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;
         $busqueda = isset($_POST['busqueda']) ? $ins_med->limpiar_cadena($_POST['busqueda']) : '';
 
         $laboratorio = isset($_POST['select1']) ? $ins_med->limpiar_cadena($_POST['select1']) : '';
-        $laboratorio = ''; // Laboratorio deshabilitado
         $via = isset($_POST['select2']) ? $ins_med->limpiar_cadena($_POST['select2']) : '';
         $forma = isset($_POST['select3']) ? $ins_med->limpiar_cadena($_POST['select3']) : '';
         $uso = isset($_POST['select4']) ? $ins_med->limpiar_cadena($_POST['select4']) : '';

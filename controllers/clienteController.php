@@ -188,10 +188,9 @@ class clienteController extends clienteModel
         $tabla .= '</tbody></table></div>';
 
         if ($pagina <= $Npaginas && $total >= 1) {
-            $tabla .= '<div class="pag">
-                        <div class="pginf">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</div>';
+            $tabla .= '<p class="table-page-footer">Mostrando registros ' . $reg_inicio . ' al ' . $reg_final . ' de un total de ' . $total . '</p>';
             $tabla .= mainModel::paginador_tablas_main($pagina, $Npaginas, $url, 5);
-            $tabla .= '</div>';
+
         }
 
         return $tabla;

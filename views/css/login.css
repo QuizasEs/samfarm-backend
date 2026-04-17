@@ -1,0 +1,188 @@
+.sf-login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: url('../image/background-logo.png') no-repeat center center;
+  background-size: cover;
+  font-family: 'Ubuntu', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Espacio vacío para mostrar la imagen */
+.sf-login-spacer {
+  flex: 1;
+}
+
+/* Contenedor lateral que contiene el formulario */
+.sf-login-side {
+  width: 500px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 1;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .sf-login-side {
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* El formulario propiamente dicho */
+.sf-login-card {
+  width: 100%;
+  max-width: 380px;
+  animation: sf-slide-in 0.6s ease-out;
+}
+
+@keyframes sf-slide-in {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.sf-login-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.sf-login-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.sf-login-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 10px;
+  display: block;
+  font-weight: 400;
+}
+
+.sf-login-group {
+  margin-bottom: 25px;
+}
+
+.sf-login-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.sf-login-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: var(--r);
+  color: #333;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .sf-login-input {
+  background: rgba(40, 40, 40, 0.9);
+  color: #fff;
+}
+
+.sf-login-input:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--accent-light);
+}
+
+.sf-login-button {
+  width: 100%;
+  height: 52px;
+  background: var(--btn-default);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+[data-theme="dark"] .sf-login-button {
+  color: #000;
+}
+
+.sf-login-button:hover {
+  background: var(--btn-default-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive: Centrado con blur (como lo que te gustó) */
+@media (max-width: 900px) {
+  .sf-login-spacer {
+    display: none;
+  }
+  
+  .sf-login-side {
+    width: 100%;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .sf-login-side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+    opacity: 0.6;
+    z-index: -1;
+  }
+
+  .sf-login-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: var(--rlg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    max-width: 420px;
+    animation: sf-fade-in 0.6s ease-out;
+  }
+
+  [data-theme="dark"] .sf-login-card {
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  @keyframes sf-fade-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+@media (max-width: 480px) {
+  .sf-login-card {
+    padding: 30px 20px;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+  }
+}

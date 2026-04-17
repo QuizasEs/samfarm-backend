@@ -48,11 +48,13 @@ class preciosModel extends mainModel
     public static function obtener_medicamentos_con_lotes_model($su_id = null, $busqueda = "")
     {
         $sql = "
-            SELECT 
+            SELECT
                 m.med_id,
                 m.med_nombre_quimico,
                 p.pr_razon_social AS proveedor,
                 ROUND(AVG(lm.lm_precio_compra), 2) AS precio_compra_promedio,
+                ROUND(AVG(lm.lm_precio_venta), 2) AS precio_venta_unitario_promedio,
+                ROUND(AVG(lm.lm_precio_venta * COALESCE(lm.lm_cant_blister, 1) * COALESCE(lm.lm_cant_unidad, 1)), 2) AS precio_venta_caja_promedio,
                 COUNT(DISTINCT lm.lm_id) AS total_lotes,
                 SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN 1 ELSE 0 END) AS lotes_activos,
                 SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN lm.lm_cant_actual_unidades ELSE 0 END) AS total_unidades_activas,

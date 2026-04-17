@@ -164,7 +164,7 @@ class mainModel
     protected static function paginador_tablas_main($pagina, $Npaginas, $url, $botones)
     {
         $tabla = '<div class="pag">';
-        
+
         // Información de registros
         $tabla .= '<div class="pginf">Página ' . $pagina . ' de ' . $Npaginas . '</div>';
 
@@ -186,12 +186,28 @@ class mainModel
             $inicio = max(1, $fin - $botones + 1);
         }
 
+        // Siempre mostrar la primera página
+        if (1 < $inicio) {
+            $tabla .= '<button class="pb" data-page="1">1</button>';
+            if (2 < $inicio) {
+                $tabla .= '<span class="pbd">...</span>';
+            }
+        }
+
         for ($i = $inicio; $i <= $fin; $i++) {
             if ($pagina == $i) {
                 $tabla .= '<button class="pb ac" data-page="' . $i . '">' . $i . '</button>';
             } else {
                 $tabla .= '<button class="pb" data-page="' . $i . '">' . $i . '</button>';
             }
+        }
+
+        // Siempre mostrar la última página
+        if ($fin < $Npaginas) {
+            if ($fin + 1 < $Npaginas) {
+                $tabla .= '<span class="pbd">...</span>';
+            }
+            $tabla .= '<button class="pb" data-page="' . $Npaginas . '">' . $Npaginas . '</button>';
         }
 
         // Botón siguiente
@@ -201,7 +217,7 @@ class mainModel
             $next = $pagina + 1;
             $tabla .= '<button class="pb" data-page="' . $next . '"><ion-icon name="chevron-forward-outline"></ion-icon></button>';
         }
-        
+
         $tabla .= '</div>';
         return $tabla;
     }
@@ -247,13 +263,13 @@ class mainModel
     {
 
         $sql_uf = self::conectar()->prepare("
-                SELECT * FROM uso_farmacologico WHERE uf_estado = 1 ORDER BY uf_nombre ASC
+                SELECT * FROM uso_farmacologico ORDER BY uf_nombre ASC
             ");
         $sql_ff = self::conectar()->prepare("
-                SELECT * FROM forma_farmaceutica WHERE ff_estado = 1 ORDER BY ff_nombre ASC
+                SELECT * FROM forma_farmaceutica ORDER BY ff_nombre ASC
             ");
         $sql_vd = self::conectar()->prepare("
-                SELECT * FROM via_de_administracion WHERE vd_estado = 1 ORDER BY vd_nombre ASC
+                SELECT * FROM via_de_administracion ORDER BY vd_nombre ASC
             ");
         $sql_su = self::conectar()->prepare("
                 SELECT * FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC
