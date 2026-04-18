@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../models/mainModel.php';
+
 /* administrador vista */
 if ($_SESSION['rol_smp'] == 1) {
     $current_view = isset($_GET['views']) ? explode("/", $_GET['views'])[0] : '';
@@ -137,7 +139,7 @@ if ($_SESSION['rol_smp'] == 1) {
 
         </div>
 
-        <a href="<?php echo SERVER_URL ?>perfilEditar/" class="susr" data-tip="Perfil">
+        <a href="<?php echo SERVER_URL ?>perfilEditar/<?php echo mainModel::encryption($_SESSION['id_smp']); ?>/" class="susr" data-tip="Perfil">
             <div class="uav">MS</div>
             <div class="uinfo">
                 <div class="un">Mayk S.</div>

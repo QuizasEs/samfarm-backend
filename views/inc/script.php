@@ -430,6 +430,7 @@
         function abrirModal(id, nombre) {
             if (!modal) return;
             modal.style.display = "flex";
+            setTimeout(() => modal.classList.add('open'), 10);
             modalId.value = id;
             modalNombre.textContent = nombre;
             limpiarCampos();
@@ -442,7 +443,10 @@
 
         /** 🔒 Cierra modal */
         function cerrarModal() {
-            if (modal) modal.style.display = "none";
+            if (modal) {
+                modal.classList.remove('open');
+                setTimeout(() => modal.style.display = "none", 300);
+            }
         }
 
         /**  Valida datos antes de agregar lote */
