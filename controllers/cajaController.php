@@ -221,10 +221,12 @@ class cajaController extends cajaModel
             $total_registros = $total_row['total'] ?? 0;
             $total_paginas = ceil($total_registros / $registros);
 
-            $html = '<div class="table-container"><table class="table"><thead><tr>';
-            $html .= '<th>N°</th><th>Nombre de Caja</th><th>Usuario</th><th>Sucursal</th>';
-            $html .= '<th>Saldo Inicial (Bs)</th><th>Total Ingresos (Bs)</th><th>Total Egresos (Bs)</th>';
-            $html .= '<th>Estado</th><th>Fecha Apertura</th><th>Acciones</th></tr></thead><tbody>';
+            $html = '<div class="tw table-detail"><table class="table"><thead><tr>';
+            $html .= '<th width="38%">Caja</th>';
+            $html .= '<th width="13%"><ion-icon name="cash-outline"></ion-icon> Inicial</th>';
+            $html .= '<th width="20%">Movimientos</th>';
+            $html .= '<th width="29%">Estado y Fecha</th>';
+            $html .= '</tr></thead><tbody>';
 
             if (!empty($cajas) && $pagina <= $total_paginas) {
                 $contador = $inicio + 1;
@@ -246,23 +248,44 @@ class cajaController extends cajaModel
                         $btnCerrar = '<button class="btn danger btn-sm" onclick="CajaGestion.abrirModalCerrar(' . $caja['caja_id'] . ')"><ion-icon name="lock-closed-outline"></ion-icon> Cerrar</button>';
                     }
 
-                    $html .= '<tr>';
-                    $html .= '<td>' . $contador . '</td>';
-                    $html .= '<td>' . htmlspecialchars($caja['caja_nombre'] ?? '-') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($nombreUsuario ?: '-') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($caja['su_nombre'] ?? '-') . '</td>';
+                    if ($caja['caja_activa'] == 1 && $caja['caja_cerrado_en'] === null) {
+                        $html .= '<tr class="tr-click" onclick="CajaGestion.abrirModalCerrar(' . $caja['caja_id'] . ')">';
+                    } else {
+                        $html .= '<tr>';
+                    }
+                    
+                    // Columna Caja: Nombre + Usuario + Sucursal
+                    $html .= '<td>';
+                    $html .= '<div class="td-main">' . htmlspecialchars($caja['caja_nombre'] ?? '-') . '</div>';
+                    $html .= '<div class="td-sub">';
+                    $html .= '<ion-icon name="person-outline"></ion-icon> ' . htmlspecialchars($nombreUsuario ?: '-');
+                    $html .= ' | <ion-icon name="business-outline"></ion-icon> ' . htmlspecialchars($caja['su_nombre'] ?? '-');
+                    $html .= '</div>';
+                    $html .= '</td>';
+                    
+                    // Columnas
                     $html .= '<td>Bs. ' . number_format($caja['caja_saldo_inicial'] ?? 0, 2) . '</td>';
-                    $html .= '<td>Bs. ' . number_format($caja['total_ingresos'] ?? 0, 2) . '</td>';
-                    $html .= '<td>Bs. ' . number_format($caja['total_egresos'] ?? 0, 2) . '</td>';
-                    $html .= '<td><span class="' . $estadoClass . ' text-bold">' . $estado_caja . '</span></td>';
-                    $html .= '<td>' . $fecha . '</td>';
-                    $html .= '<td>' . $btnCerrar . '</td>';
+                    
+                    // Columna combinada Ingresos/Egresos
+                    $html .= '<td>';
+                    $html .= '<div style="color:#4CAF50;">+ ' . number_format($caja['total_ingresos'] ?? 0, 2) . '</div>';
+                    $html .= '<div style="color:#f44336;">- ' . number_format($caja['total_egresos'] ?? 0, 2) . '</div>';
+                    $html .= '</td>';
+                    
+                    // Columna combinada Estado + Fecha
+                    $html .= '<td>';
+                    $html .= '<div><span class="badge ' . ($estado_caja === 'Abierta' ? 'bgr' : 'bgry') . '">' . $estado_caja . '</span></div>';
+                    $html .= '<div class="td-sub" style="margin-top:4px;">';
+                    $html .= '<div class="tol">Apertura</div><ion-icon name="calendar-outline"></ion-icon> ' . $fecha;
+                    $html .= '</div>';
+                    $html .= '</td>';
+                    
                     $html .= '</tr>';
                     $contador++;
                 }
                 $reg_final = $contador - 1;
             } else {
-                $html .= '<tr><td colspan="10" style="text-align:center;">No hay cajas registradas</td></tr>';
+                $html .= '<tr><td colspan="4" style="text-align:center;">No hay cajas registradas</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
@@ -319,10 +342,14 @@ class cajaController extends cajaModel
                 $resumen_html .= '</script>';
             }
 
-            $html = '<div class="table-container"><table class="table"><thead><tr>';
-            $html .= '<th>N°</th><th>Nombre de Caja</th><th>Usuario</th><th>Sucursal</th>';
-            $html .= '<th>Saldo Inicial (Bs)</th><th>Saldo Final (Bs)</th><th>Arqueo (Bs)</th>';
-            $html .= '<th>Total Ventas (Bs)</th><th>Fecha Cierre</th><th>Acciones</th></tr></thead><tbody>';
+            $html = '<div class="tw table-detail"><table class="table"><thead><tr>';
+            $html .= '<th width="32%">Caja</th>';
+            $html .= '<th width="12%">Inicial</th>';
+            $html .= '<th width="12%">Final</th>';
+            $html .= '<th width="12%">Arqueo</th>';
+            $html .= '<th width="12%">Ventas</th>';
+            $html .= '<th width="20%">Fecha Cierre</th>';
+            $html .= '</tr></thead><tbody>';
 
             if (!empty($cajas) && $pagina <= $total_paginas) {
                 $contador = $inicio + 1;
@@ -343,23 +370,24 @@ class cajaController extends cajaModel
                     $cajaJson = json_encode($caja);
                     $btnVer = '<button class="btn default btn-sm" onclick="CajaHistorialTotales.abrirModal(' . htmlspecialchars($cajaJson) . ')"><ion-icon name="eye-outline"></ion-icon> Ver</button>';
 
-                    $html .= '<tr>';
-                    $html .= '<td>' . $contador . '</td>';
-                    $html .= '<td>' . htmlspecialchars($caja['caja_nombre'] ?? '-') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($nombreUsuario ?: '-') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($caja['su_nombre'] ?? '-') . '</td>';
+                    $cajaJson = htmlspecialchars($cajaJson);
+                    $html .= '<tr class="tr-click" onclick="CajaHistorialTotales.abrirModal(' . $cajaJson . ')">';
+                    $html .= '<td>';
+                    $html .= '<div class="td-main">' . htmlspecialchars($caja['caja_nombre'] ?? '-') . '</div>';
+                    $html .= '<div class="td-sub"><ion-icon name="person-outline"></ion-icon> ' . htmlspecialchars($nombreUsuario ?: '-') . '</div>';
+                    $html .= '<div class="td-meta"><ion-icon name="storefront-outline"></ion-icon> ' . htmlspecialchars($caja['su_nombre'] ?? '-') . '</div>';
+                    $html .= '</td>';
                     $html .= '<td>Bs. ' . number_format($caja['caja_saldo_inicial'] ?? 0, 2) . '</td>';
                     $html .= '<td>Bs. ' . number_format($caja['caja_saldo_final'] ?? 0, 2) . '</td>';
                     $html .= '<td><span class="' . $arqueoClass . ' text-bold">' . $arqueoFormato . 'Bs. ' . number_format($arqueo, 2) . '</span></td>';
                     $html .= '<td>Bs. ' . number_format($caja['total_ventas'] ?? 0, 2) . '</td>';
                     $html .= '<td>' . $fecha . '</td>';
-                    $html .= '<td>' . $btnVer . '</td>';
                     $html .= '</tr>';
                     $contador++;
                 }
                 $reg_final = $contador - 1;
             } else {
-                $html .= '<tr><td colspan="10" style="text-align:center;">No hay cajas cerradas registradas</td></tr>';
+                $html .= '<tr><td colspan="6" style="text-align:center;">No hay cajas cerradas registradas</td></tr>';
             }
 
             $html .= '</tbody></table></div>';

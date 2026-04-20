@@ -429,17 +429,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 };
             }
 
-            document.addEventListener('click', function(e) {
-                const modalAgregar = document.getElementById('modalAgregarUsoFarmacologico');
-                const modalEditar = document.getElementById('modalEditarUsoFarmacologico');
 
-                if (modalAgregar && e.target === modalAgregar) {
-                    cerrarModalAgregarUsoFarmacologico();
-                }
-                if (modalEditar && e.target === modalEditar) {
-                    cerrarModalEditarUsoFarmacologico();
-                }
-            });
         });
     </script>
     <!-- via de administracion script -->
@@ -591,17 +581,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 };
             }
 
-            document.addEventListener('click', function(e) {
-                const modalAgregar = document.getElementById('modalAgregarViaAdministracion');
-                const modalEditar = document.getElementById('modalEditarViaAdministracion');
 
-                if (modalAgregar && e.target === modalAgregar) {
-                    cerrarModalAgregarViaAdministracion();
-                }
-                if (modalEditar && e.target === modalEditar) {
-                    cerrarModalEditarViaAdministracion();
-                }
-            });
         });
     </script>
 
@@ -892,17 +872,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 };
             }
 
-            document.addEventListener('click', function(e) {
-                const modalAgregar = document.getElementById('modalAgregarFormaFarmaceutica');
-                const modalEditar = document.getElementById('modalEditarFormaFarmaceutica');
 
-                if (modalAgregar && e.target === modalAgregar) {
-                    cerrarModalAgregarFormaFarmaceutica();
-                }
-                if (modalEditar && e.target === modalEditar) {
-                    cerrarModalEditarFormaFarmaceutica();
-                }
-            });
         });
     </script>
 

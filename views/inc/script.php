@@ -3470,3 +3470,28 @@
 <script src="<?php echo SERVER_URL; ?>views/script/notificaciones.js"></script>
 
 <script src="<?php echo SERVER_URL; ?>views/script/script-base.js"></script>
+    <script>
+    // Navbar scroll behavior - Hide on scroll down, show on scroll up
+    (function() {
+        let lastScrollTop = 0;
+        const topbar = document.getElementById('topbar');
+        
+        if (!topbar) return;
+
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 60) {
+                // Scroll hacia ABAJO - ocultar navbar
+                topbar.style.transform = 'translateY(-100%)';
+                topbar.style.transition = 'transform 0.25s ease-out';
+            } else if (scrollTop < lastScrollTop) {
+                // Scroll hacia ARRIBA - mostrar navbar EN CUALQUIER POSICION
+                topbar.style.transform = 'translateY(0)';
+                topbar.style.transition = 'transform 0.2s ease-in';
+            }
+            
+            lastScrollTop = scrollTop;
+        }, { passive: true });
+    })();
+    </script>

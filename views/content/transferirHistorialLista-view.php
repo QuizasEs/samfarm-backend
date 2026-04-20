@@ -7,7 +7,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/transferirHistorialAjax.php"
         data-ajax-param="transferirHistorialAjax"
@@ -84,6 +84,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
 
+
+                    </div>
+                    <div class="fr1">
                         <div class="fg">
                             <label class="fl">Búsqueda</label>
                             <div class="inpg">
@@ -106,7 +109,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div id="modalDetalleTransferencia" class="mov">
-        <div class="modal mlg">
+        <div class="modal mxl">
             <div class="mh">
                 <div>
                     <div class="mt">
@@ -128,16 +131,46 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="fr mb16">
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Transferencia</div><div class="th5" id="detalleNumero"></div></div></div>
-                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha Envío</div><div class="th5" id="detalleFechaEnvio"></div></div></div>
-                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Origen</div><div class="th5" id="detalleOrigen"></div></div></div>
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">N° Transferencia</div>
+                                    <div class="th5" id="detalleNumero"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Fecha Envío</div>
+                                    <div class="th5" id="detalleFechaEnvio"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Origen</div>
+                                    <div class="th5" id="detalleOrigen"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Destino</div><div class="th5" id="detalleDestino"></div></div></div>
-                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario Emisor</div><div class="th5" id="detalleUsuarioEmisor"></div></div></div>
-                            <div class="litem" style="border:none"><ion-icon name="radio-button-on-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div id="detalleEstado"></div></div></div>
+                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Destino</div>
+                                    <div class="th5" id="detalleDestino"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Usuario Emisor</div>
+                                    <div class="th5" id="detalleUsuarioEmisor"></div>
+                                </div>
+                            </div>
+                            <div class="litem" style="border:none"><ion-icon name="radio-button-on-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Estado</div>
+                                    <div id="detalleEstado"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -146,20 +179,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="card mb16">
                     <div class="cb">
                         <div class="tw" style="max-height: 400px; overflow-y: auto;">
-                            <table>
+                              <table class="table-detail">
                                 <thead>
                                     <tr>
-                                        <th>Medicamento</th>
-                                        <th>Lote</th>
-                                        <th>Cajas</th>
-                                        <th>Unidades</th>
-                                        <th>Precio Unit.</th>
-                                        <th>Subtotal</th>
+                                        <th width="40%">Medicamento</th>
+                                        <th width="8%">Cajas</th>
+                                        <th width="10%">Unidades</th>
+                                        <th width="12%">Precio Unit.</th>
+                                        <th width="12%">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablaItemsTransferencia">
-                                    <tr>
-                                        <td colspan="6" class="txctr">
+                                     <tr>
+                                        <td colspan="5" class="txctr">
                                             <ion-icon name="hourglass-outline"></ion-icon> Cargando...
                                         </td>
                                     </tr>
@@ -222,7 +254,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 <script>
     const TransferirHistorialModals = (function() {
         'use strict';
-        
+
         console.log(' Inicializando módulo TransferirHistorialModals');
 
         const API_URL = '<?php echo SERVER_URL; ?>ajax/transferirHistorialAjax.php';
@@ -324,20 +356,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     const tbody = document.getElementById('tablaItemsTransferencia');
                     if (data.detalles && data.detalles.length > 0) {
-                        tbody.innerHTML = data.detalles.map(item => `
-                            <tr>
-                                <td>
-                                    <strong>${item.med_nombre_quimico}</strong>
-                                </td>
-                                <td>${item.dt_numero_lote_origen}</td>
-                                <td style="text-align:center;">${item.dt_cantidad_cajas}</td>
-                                <td style="text-align:center;">${utils.formatearNumero(item.dt_cantidad_unidades)}</td>
-                                <td style="text-align:right;">${utils.formatearMoneda(item.dt_precio_compra)}</td>
-                                <td style="text-align:right;"><strong>${utils.formatearMoneda(item.dt_subtotal_valorado)}</strong></td>
-                            </tr>
-                        `).join('');
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin items</td></tr>';
+                     tbody.innerHTML = data.detalles.map(item => `
+                        <tr>
+                            <td>
+                                <div class="td-main"><strong>${item.med_nombre_quimico}</strong></div>
+                                <div class="td-sub"><ion-icon name="pricetag-outline"></ion-icon> Lote: ${item.dt_numero_lote_origen}</div>
+                            </td>
+                            <td style="text-align:center;">${item.dt_cantidad_cajas}</td>
+                            <td style="text-align:center;">${utils.formatearNumero(item.dt_cantidad_unidades)}</td>
+                            <td style="text-align:right;">${utils.formatearMoneda(item.dt_precio_compra)}</td>
+                            <td style="text-align:right;"><strong>${utils.formatearMoneda(item.dt_subtotal_valorado)}</strong></td>
+                        </tr>
+                    `).join('');
+                     } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="cart-outline"></ion-icon> Sin items</td></tr>';
                     }
 
                 } catch (error) {
@@ -390,12 +422,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
         };
 
-        document.addEventListener('click', function(e) {
-            const modal = document.getElementById('modalDetalleTransferencia');
-            if (modal && modal.style.display === 'flex' && e.target === modal) {
-                utils.cerrar('modalDetalleTransferencia');
-            }
-        });
+
 
         const acciones = {
             async aceptar(trId) {
@@ -467,7 +494,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             descargarPDF: descarga.pdf,
             aceptarTransferencia: acciones.aceptar
         };
-        
+
         console.log(' Módulo TransferirHistorialModals creado correctamente', publicAPI);
         return publicAPI;
     })();

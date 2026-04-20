@@ -41,6 +41,17 @@ if (isset($_POST['loteAjax'])) {
     require_once "../controllers/loteController.php";
     $ins_lote = new loteController();
 
+    if ($valor === "obtener_lote") {
+        $lote_id = $_POST['lote_id'];
+        $datos = $ins_lote->datos_lote_controller($lote_id);
+        if ($datos->rowCount() == 1) {
+            echo json_encode($datos->fetch(PDO::FETCH_ASSOC));
+        } else {
+            echo json_encode(['error' => 'Lote no encontrado']);
+        }
+        exit();
+    }
+
     if ($valor === "listar") {
         // obtener parámetros
         $pagina   = isset($_POST['pagina']) ? (int) $_POST['pagina'] : 1;

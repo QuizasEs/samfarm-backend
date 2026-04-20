@@ -8,7 +8,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/mermaRegistrarAjax.php"
         data-ajax-param="mermaRegistrarAjax"
@@ -151,13 +151,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         /* registra todos los eventos del modulo */
         function registrarEventos() {
-            if (elementos.modal) {
-                elementos.modal.addEventListener('click', function(event) {
-                    if (event.target === this) {
-                        cerrarModal();
-                    }
-                });
-            }
         }
 
         /* abre el modal de registro de merma */

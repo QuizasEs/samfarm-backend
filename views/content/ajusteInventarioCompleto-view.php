@@ -14,7 +14,7 @@ $ins_ajuste = new ajusteInventarioCompletoController();
 $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
 ?>
 
-<div class="pg">
+<div class="">
     <div class="ph">
         <div>
             <div class="ptit">Ajuste de Inventario Completo</div>
@@ -113,32 +113,35 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
         function renderResults(medicamentos) {
             let html = '<table class="table"><thead><tr>';
             html += '<th>Medicamento</th>';
-            html += '<th>Principio Activo</th>';
-            html += '<th>Laboratorio</th>';
-            html += '<th>Sucursal</th>';
-            html += '<th>Stock Total</th>';
+            html += '<th>Stock</th>';
+            html += '<th>Ubicación</th>';
             html += '<th>Acción</th>';
             html += '</tr></thead><tbody>';
 
             if (Array.isArray(medicamentos) && medicamentos.length > 0) {
                 medicamentos.forEach(med => {
                     html += `
-                        <tr>
-                            <td>${med.med_nombre_quimico}</td>
-                            <td>${med.med_principio_activo}</td>
-                            <td>${med.la_nombre_comercial || 'N/A'}</td>
-                            <td>${med.su_nombre}</td>
-                            <td><strong>${med.inv_total_unidades}</strong></td>
+                        <tr class="tr-click" onclick="seleccionarMedicamento(${med.med_id}, ${med.su_id})">
+                            <td>
+                                <div class="td-main"><strong>${med.med_nombre_quimico}</strong></div>
+                                <div class="td-sub">${med.med_principio_activo} · ${med.la_nombre_comercial || 'N/A'}</div>
+                            </td>
+                            <td>
+                                <div class="td-main"><strong style="color:#1976D2;">${med.inv_total_unidades}</strong> unidades</div>
+                            </td>
+                            <td>
+                                <div class="td-main">${med.su_nombre}</div>
+                            </td>
                             <td class="buttons">
-                                <button class="btn btn-def" onclick="seleccionarMedicamento(${med.med_id}, ${med.su_id})">
-                                    <ion-icon name="create-outline"></ion-icon> Seleccionar
+                                <button class="btn btn-def" onclick="event.stopPropagation(); seleccionarMedicamento(${med.med_id}, ${med.su_id})">
+                                    <ion-icon name="create-outline"></ion-icon> Editar
                                 </button>
                             </td>
                         </tr>
                     `;
                 });
             } else {
-                html += '<tr><td colspan="6" style="text-align:center;">No se encontraron resultados.</td></tr>';
+                html += '<tr><td colspan="4" style="text-align:center;">No se encontraron resultados.</td></tr>';
             }
 
             html += '</tbody></table>';

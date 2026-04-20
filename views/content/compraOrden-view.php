@@ -16,7 +16,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 
 
 ?>
-<div class="pg">
+<div class="">
     <div class="ph">
         <div>
             <div class="ptit">Registrar Compra</div>

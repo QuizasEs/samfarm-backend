@@ -31,7 +31,7 @@ $datos_decoded = json_decode($datos, true);
 if (!isset($datos_decoded['error']) && $datos_decoded) {
    $campos = $datos_decoded;
 ?>
-   <div class="pg">
+   <div class="">
        <div class="ph">
            <div>
                <div class="ptit">Editar Perfil</div>

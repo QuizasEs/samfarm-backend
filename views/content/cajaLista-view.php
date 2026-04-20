@@ -2,7 +2,7 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/cajaAjax.php"
         data-ajax-param="cajaAjax"
@@ -22,7 +22,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="cb">
                 <form class="filtro-dinamico">
-                    <div class="fr2">
+                    <div class="fr">
                         <div class="fg">
                             <label class="fl">Estado</label>
                             <select class="sel select-filtro" name="select1">
@@ -396,15 +396,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
             function init() {
-                const modal = document.getElementById('modalCerrarCaja');
-                if (modal) {
-                    modal.addEventListener('click', function(event) {
-                        if (event.target === this) {
-                            cerrarModalCerrar();
-                        }
-                    });
-                }
-
                 // Cargar gráfico cuando el DOM esté listo
                 if (typeof echarts === 'undefined') {
                     const script = document.createElement('script');

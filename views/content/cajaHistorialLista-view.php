@@ -8,7 +8,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/cajaHistorialAjax.php"
         data-ajax-param="cajaHistorialAjax"
@@ -21,6 +21,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
                 <div class="psub">Consulte el historial completo de movimientos de caja</div>
             </div>
+            <div class="tbr">
+                        <button type="button" class="btn btn-out" id="btnExportarExcelCajaHistorial">
+                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                        </button>
+                        <button type="button" class="btn btn-out" id="btnExportarPDFCajaHistorial">
+                            <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                        </button>
+                    </div>
         </div>
 
         <div class="card mb16">
@@ -84,14 +92,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </div>
                         </div>
                     </div>
-                    <div class="flxe mt12">
-                        <button type="button" class="btn btn-def" id="btnExportarExcelCajaHistorial">
-                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
-                        </button>
-                        <button type="button" class="btn btn-def" id="btnExportarPDFCajaHistorial">
-                            <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
-                        </button>
-                    </div>
+                    
                 </form>
             </div>
         </div>
@@ -123,7 +124,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <!-- Modal Detalle de Caja Historial -->
     <div id="modalReferenciaCajaHistorial" class="mov">
-        <div class="modal mlg">
+        <div class="modal">
             <div class="mh">
                 <div>
                     <div class="mt">
@@ -137,7 +138,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </button>
             </div>
             <div class="mb">
-                <div id="contenidoReferenciaCajaHistorial" class="cb tb"></div>
+                <div class="stit">
+                    <ion-icon name="information-circle-outline"></ion-icon> Información General
+                </div>
+
+                <div class="fr1">
+                    <div class="card">
+                        <div class="cb" id="contenidoReferenciaCajaHistorial">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="mf">
                 <button class="btn btn-war" onclick="CajaHistorial.cerrarModalReferenciaCaja()">Cerrar</button>

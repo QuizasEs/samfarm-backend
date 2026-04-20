@@ -5,7 +5,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_usuario->datos_extras_usuarios_controller();
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/usuariosAjax.php"
         data-ajax-param="usuariosAjax"
@@ -86,7 +86,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div class="mov" id="modalNuevoUsuario" style="display: none;">
-        <div class="modal">
+        <div class="modal mlg">
             <div class="mh">
                 <div>
                     <div class="mt"><ion-icon name="person-add-outline"></ion-icon> Nuevo Usuario</div>
@@ -168,7 +168,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <h3 class="th3"><ion-icon name="briefcase-outline"></ion-icon> Asignación</h3>
                     </div>
 
-                    <div class="fr2">
+                    <div class="fr">
                         <div class="fg">
                             <label class="fl required">Rol</label>
                             <select class="sel" name="Rol_reg" required>
@@ -198,7 +198,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
     <!-- editar usuario -->
     <div class="mov" id="modalEditarUsuario" style="display: none;">
-        <div class="modal">
+        <div class="modal mlg">
             <div class="mh">
                 <div>
                     <div class="mt"><ion-icon name="create-outline"></ion-icon> Editar Usuario</div>
@@ -281,7 +281,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <h3 class="th3"><ion-icon name="briefcase-outline"></ion-icon> Asignación</h3>
                     </div>
 
-                    <div class="fr2">
+                    <div class="fr">
                         <div class="fg">
                             <label class="fl required">Rol</label>
                             <select class="sel" name="Rol_edit" id="Rol_edit" required>
@@ -609,8 +609,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleFechaRegistroUsuario').textContent = formatearFecha(data.us_creado_en);
 
                     const estadoHtml = data.us_estado == 1 ?
-                        '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
-                        '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                        '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
+                        '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
                     document.getElementById('detalleEstadoUsuario').innerHTML = estadoHtml;
 
                     document.getElementById('detalleTotalVentas').textContent = data.total_ventas || 0;
@@ -826,15 +826,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 return parseFloat(num || 0).toFixed(2);
             }
 
-            document.addEventListener('click', function(e) {
-                const modals = ['modalNuevoUsuario', 'modalEditarUsuario', 'modalDetalleUsuario'];
-                modals.forEach(modalId => {
-                    const modal = document.getElementById(modalId);
-                    if (modal && modal.style.display === 'flex' && e.target === modal) {
-                        modal.style.display = 'none';
-                    }
-                });
-            });
+
 
             return {
                 abrirModalNuevo,

@@ -5,7 +5,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/inventarioAjax.php"
         data-ajax-param="inventarioAjax"
@@ -17,10 +17,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="psub">Consulte el stock, estados y análisis de margen de sus productos</div>
             </div>
             <div class="tbr">
-                <button type="button" class="btn btn-sec" id="btnExportarExcel" data-tip="Exportar a Excel">
+                <button type="button" class="btn btn-out" id="btnExportarExcel" data-tip="Exportar a Excel">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn btn-sec" id="btnExportarPDFInventario" data-tip="Exportar a PDF">
+                <button type="button" class="btn btn-out" id="btnExportarPDFInventario" data-tip="Exportar a PDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
@@ -32,7 +32,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="cb">
                 <form class="filtro-dinamico">
-                    <div class="fr4">
+                    <div class="fr3">
                         <div class="fg">
                             <label class="fl">Proveedor</label>
                             <select class="sel select-filtro" name="select1">
@@ -68,7 +68,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </div>
                         <?php } ?>
 
-                        <div class="fg">
+                        <!-- <div class="fg">
                             <label class="fl">Forma Farmacéutica</label>
                             <select class="sel select-filtro" name="select4">
                                 <option value="">Todas</option>
@@ -76,7 +76,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <option value="<?php echo $forma['ff_id'] ?>"><?php echo $forma['ff_nombre'] ?></option>
                                 <?php } ?>
                             </select>
-                        </div>
+                        </div> -->
                     </div>
 
                     <div class="fr1">

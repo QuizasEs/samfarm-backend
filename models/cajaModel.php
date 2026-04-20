@@ -301,10 +301,10 @@ class cajaModel extends mainModel
 
         if ($caja_id !== null && $caja_id > 0) {
             $sql .= " LEFT JOIN caja c ON mc.caja_id = c.caja_id
-                     WHERE c.caja_id = :caja_id";
+                     WHERE c.caja_id = :caja_id AND u.ro_id != 1";
             $params[':caja_id'] = (int)$caja_id;
         } else {
-            $sql .= " WHERE u.us_estado = 1";
+            $sql .= " WHERE u.us_estado = 1 AND u.ro_id != 1";
         }
 
         $sql .= " GROUP BY u.us_id

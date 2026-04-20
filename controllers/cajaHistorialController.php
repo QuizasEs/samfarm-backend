@@ -103,22 +103,19 @@ class cajaHistorialController extends cajaHistorialModel
         $Npaginas = ceil($total / $registros);
 
         $mostrar_columna_sucursal = ($rol_usuario == 1);
-        $colspan_total = $mostrar_columna_sucursal ? 9 : 8;
+        $colspan_total = $mostrar_columna_sucursal ? 6 : 5;
 
         $tabla .= '
-            <div class="table-container">
+            <div class="tw table-detail">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>USUARIO</th>
-                            <th>CAJA</th>
-                            <th>FECHA</th>
-                            <th>TIPO</th>
-                            <th>CONCEPTO</th>
-                            <th>MONTO</th>' .
-            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>ACCIONES</th>
+                            <th width="33%">Movimiento</th>
+                            <th width="17%">Fecha</th>
+                            <th width="15%">Tipo</th>
+                            <th width="15%">Monto</th>' .
+            ($mostrar_columna_sucursal ? '<th width="12%">Sucursal</th>' : '') .
+            '<th width="8%">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,24 +132,21 @@ class cajaHistorialController extends cajaHistorialModel
                 $usuario = trim(($row['us_nombres'] ?? 'Sistema') . ' ' . ($row['us_apellido_paterno'] ?? ''));
 
                 $tabla .= '
-                    <tr>
-                        <td>' . $contador . '</td>
-                        <td>' . htmlspecialchars($usuario) . '</td>
-                        <td>' . htmlspecialchars($row['caja_nombre']) . '</td>
+                    <tr class="tr-click" onclick="CajaHistorial.verReferencia(\'' . ($row['mc_referencia_tipo'] ?? 'venta') . '\', ' . ($row['mc_referencia_id'] ?? 0) . ')">
+                        <td>
+                            <div class="td-main">' . htmlspecialchars($row['mc_concepto'] ?? '-') . '</div>
+                            <div class="td-sub">
+                                <ion-icon name="person-outline"></ion-icon> ' . htmlspecialchars($usuario) . '
+                                | <ion-icon name="cube-outline"></ion-icon> ' . htmlspecialchars($row['caja_nombre']) . '
+                            </div>
+                        </td>
                         <td>' . $fecha_formato . '</td>
                         <td>' . $tipo_badge . '</td>
-                        <td>' . htmlspecialchars($row['mc_concepto'] ?? '-') . '</td>
                         <td>' . $monto_formato . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['su_nombre']) . '</span></td>' : '') .
-                    '<td class="accion-buttons">
-                            <a href="javascript:void(0)" 
-                            class="btn default" 
-                            title="Ver referencia"
-                            onclick="CajaHistorial.verReferencia(\'' . ($row['mc_referencia_tipo'] ?? 'venta') . '\', ' . ($row['mc_referencia_id'] ?? 0) . ')">
-                                <ion-icon name="open-outline"></ion-icon> Detalles
-                            </a>' .
-                            '<a href="javascript:void(0)" class="btn primary" title="Exportar PDF" onclick="window.open(\'' . SERVER_URL . 'ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' . $row['mc_id'] . '\', \'_blank\')">
-                                <ion-icon name="document-text-outline"></ion-icon> PDF
+                    '<td>
+                            <a href="javascript:void(0)" class="btn btn-out" title="Exportar PDF" onclick="event.stopPropagation(); window.open(\'' . SERVER_URL . 'ajax/cajaHistorialAjax.php?cajaHistorialAjax=exportar_movimiento_pdf&mc_id=' . $row['mc_id'] . '\', \'_blank\')">
+                                <ion-icon name="document-text-outline"></ion-icon> pdf
                             </a>
                         </td>
                     </tr>
@@ -179,14 +173,14 @@ class cajaHistorialController extends cajaHistorialModel
     private static function generar_badge_tipo($tipo)
     {
         $badges = [
-            'ingreso' => '<span class="estado-badge activo"><ion-icon name="arrow-down-circle-outline"></ion-icon> INGRESO</span>',
-            'egreso' => '<span class="estado-badge caducado"><ion-icon name="arrow-up-circle-outline"></ion-icon> EGRESO</span>',
-            'venta' => '<span class="estado-badge activo"><ion-icon name="cart-outline"></ion-icon> VENTA</span>',
-            'compra' => '<span class="estado-badge espera"><ion-icon name="bag-outline"></ion-icon> COMPRA</span>',
-            'ajuste' => '<span class="estado-badge desconocido"><ion-icon name="create-outline"></ion-icon> AJUSTE</span>'
+            'ingreso' => '<span class="badge bgr"><ion-icon name="arrow-down-circle-outline"></ion-icon> INGRESO</span>',
+            'egreso' => '<span class="badge bdan"><ion-icon name="arrow-up-circle-outline"></ion-icon> EGRESO</span>',
+            'venta' => '<span class="badge bgr"><ion-icon name="cart-outline"></ion-icon> VENTA</span>',
+            'compra' => '<span class="badge bwar"><ion-icon name="bag-outline"></ion-icon> COMPRA</span>',
+            'ajuste' => '<span class="badge binf"><ion-icon name="create-outline"></ion-icon> AJUSTE</span>'
         ];
 
-        return $badges[$tipo] ?? '<span class="estado-badge desconocido">' . strtoupper($tipo) . '</span>';
+        return $badges[$tipo] ?? '<span class="badge bdef">' . strtoupper($tipo) . '</span>';
     }
 
     private static function formatear_monto($monto, $tipo)

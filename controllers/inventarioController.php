@@ -94,7 +94,7 @@ class inventarioController extends inventarioModel
 
         // Determinar si mostrar columna sucursal
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f3));
-        $colspan_total = $mostrar_columna_sucursal ? 13 : 12;
+        $colspan_total = 5;
 
         /* ===== CONSTRUIR TABLA ===== */
         $tabla .= '
@@ -102,17 +102,11 @@ class inventarioController extends inventarioModel
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>N°</th>
                                 <th>MEDICAMENTO</th>' .
-            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>CAJAS</th>
-                                <th>UNIDADES</th>
-                                <th>MÍNIMO</th>
-                                <th>MÁXIMO</th>
-                                <th>VALORADO</th>
+            ($mostrar_columna_sucursal ? '' : '') .
+            '<th>STOCK</th>
                                 <th>ESTADO</th>
-                                <th>LOTES</th>
-                                <th>VENCE</th>
+                                <th>DETALLES</th>
                                 <th>ACCIONES</th>
                             </tr>
                         </thead>
@@ -149,44 +143,38 @@ class inventarioController extends inventarioModel
                 }
 
                 $tabla .= '
-                        <tr>
-                            <td>' . $contador . '</td>
+                        <tr class="tr-click" onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                             <td>
-                                <strong>' . htmlspecialchars($row['med_nombre_quimico']) . '</strong><br>
-                                <small style="color:#666;">' . htmlspecialchars($row['med_principio_activo']) . '</small>
-                            </td>' .
-                    ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
-                    '<td style="text-align:center;"><strong>' . number_format($row['inv_total_cajas']) . '</strong></td>
-                            <td style="text-align:center;font-size:16px;"><strong style="color:#1976D2;">' . number_format($row['inv_total_unidades']) . '</strong></td>
-                            <td style="text-align:center;">' . number_format($row['inv_minimo'] ?? 0) . '</td>
-                            <td style="text-align:center;">' . ($row['inv_maximo'] !== null ? number_format($row['inv_maximo']) : '<span style="color:#999;">Sin límite</span>') . '</td>
-                            <td style="text-align:right;">Bs. ' . number_format($row['inv_total_valorado'], 2) . '</td>
-                            <td>' . $estado_html . '</td>
-                            <td style="text-align:center;">
-                                <span style="background:#FFF3E0;padding:4px 10px;border-radius:12px;font-weight:600;color:#E65100;">' .
-                    $row['lotes_activos'] . '</span>
+                                <div class="td-main"><strong>' . htmlspecialchars($row['med_nombre_quimico']) . '</strong></div>
+                                <div class="td-sub">' . htmlspecialchars($row['med_principio_activo']) .
+                    ($mostrar_columna_sucursal ? ' · ' . htmlspecialchars($row['sucursal_nombre']) : '') . '</div>
                             </td>
-                            <td style="text-align:center;">' . $dias_vencer . '</td>
+                            <td>
+                                <div class="td-main"><strong style="color:#1976D2;">' . number_format($row['inv_total_unidades']) . '</strong> unidades</div>
+                                <div class="td-sub">' . number_format($row['inv_total_cajas']) . ' cajas · Bs. ' . number_format($row['inv_total_valorado'], 2) . '</div>
+                            </td>
+                            <td>
+                                <div class="td-main">' . $estado_html . '</div>
+                                <div class="td-sub">Lotes: ' . $row['lotes_activos'] . '</div>
+                            </td>
+                            <td>
+                                <div class="td-main">Vence: ' . $dias_vencer . '</div>
+                                <div class="td-sub">Min: ' . number_format($row['inv_minimo'] ?? 0) . ' / Max: ' . ($row['inv_maximo'] !== null ? number_format($row['inv_maximo']) : 'Sin límite') . '</div>
+                            </td>
                             <td class="buttons">
-                                <a href="javascript:void(0)"
-                                class="btn default"
-                                title="Ver detalle"
-                                onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="eye-outline"></ion-icon> Detalles
-                                </a>
                                 ' . ($rol_usuario == 1 ? '
                                 <a href="javascript:void(0)"
-                                class="btn danger"
+                                class="btn btn-douc"
                                 title="Configurar minimo y maximo"
-                                onclick="InventarioModals.abrirConfiguracion(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\', ' . ($row['inv_minimo'] ?? 0) . ', ' . ($row['inv_maximo'] ?? 'null') . ')">
-                                    <ion-icon name="settings-outline"></ion-icon> Configurar
+                                onclick="event.stopPropagation(); InventarioModals.abrirConfiguracion(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\', ' . ($row['inv_minimo'] ?? 0) . ', ' . ($row['inv_maximo'] ?? 'null') . ')">
+                                    <ion-icon name="settings-outline"></ion-icon>
                                 </a>
                                 ' : '') . '
                                 <a href="javascript:void(0)"
-                                class="btn primary"
+                                class="btn btn-out"
                                 title="Ver historial"
-                                onclick="InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
-                                    <ion-icon name="time-outline"></ion-icon> Historial
+                                onclick="event.stopPropagation(); InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
+                                    <ion-icon name="time-outline"></ion-icon>
                                 </a>
                             </td>
                         </tr>
@@ -214,22 +202,22 @@ class inventarioController extends inventarioModel
     private static function generar_badge_estado($estado, $unidades, $minimo)
     {
         if ($unidades == 0) {
-            return '<span class="estado-badge agotado"><ion-icon name="close-circle-outline"></ion-icon> AGOTADO</span>';
+            return '<span class="badge bdan"><ion-icon name="close-circle-outline"></ion-icon> AGOTADO</span>';
         }
 
         if ($minimo == 0 || $minimo === null) {
-            return '<span class="estado-badge desconocido"><ion-icon name="help-circle-outline"></ion-icon> SIN DEFINIR</span>';
+            return '<span class="badge bgry"><ion-icon name="help-circle-outline"></ion-icon> SIN DEFINIR</span>';
         }
 
         if ($unidades < $minimo) {
-            return '<span class="estado-badge caducado"><ion-icon name="alert-circle-outline"></ion-icon> CRÍTICO</span>';
+            return '<span class="badge bdan"><ion-icon name="alert-circle-outline"></ion-icon> CRÍTICO</span>';
         }
 
         if ($unidades < ($minimo * 1.5)) {
-            return '<span class="estado-badge espera"><ion-icon name="warning-outline"></ion-icon> BAJO</span>';
+            return '<span class="badge bwar"><ion-icon name="warning-outline"></ion-icon> BAJO</span>';
         }
 
-        return '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> NORMAL</span>';
+        return '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> NORMAL</span>';
     }
 
     public function detalle_inventario_controller()

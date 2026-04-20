@@ -162,6 +162,7 @@ class sucursalModel extends mainModel
             SET su_nombre = :su_nombre,
                 su_direccion = :su_direccion,
                 su_telefono = :su_telefono,
+                su_estado = :su_estado,
                 su_actualizado_en = NOW()
             WHERE su_id = :su_id
         ";
@@ -172,6 +173,7 @@ class sucursalModel extends mainModel
         $stmt->bindParam(':su_nombre', $datos['su_nombre']);
         $stmt->bindParam(':su_direccion', $datos['su_direccion']);
         $stmt->bindParam(':su_telefono', $datos['su_telefono']);
+        $stmt->bindParam(':su_estado', $datos['su_estado'], PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }
@@ -385,7 +387,7 @@ class sucursalModel extends mainModel
                 AND v.ve_estado = 1
             WHERE s.su_estado = 1
             GROUP BY s.su_id, s.su_nombre
-            HAVING (total_costos > 0 OR total_ingresos > 0)
+
             ORDER BY beneficio_neto DESC
         ";
 

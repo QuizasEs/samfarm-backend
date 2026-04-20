@@ -5,7 +5,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="pg">
+    <div class="">
         <div class="ph">
             <div>
                 <div class="ptit">Balance de Precios de Venta</div>

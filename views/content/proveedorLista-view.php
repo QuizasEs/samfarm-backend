@@ -5,7 +5,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/proveedoresAjax.php"
         data-ajax-param="proveedoresAjax"
@@ -20,10 +20,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <button type="button" class="btn btn-def" onclick="ProveedoresModals.abrirRegistro()">
                     <ion-icon name="person-add-outline"></ion-icon> Nuevo Proveedor
                 </button>
-                <button type="button" class="btn btn-sec" id="btnExportarExcelProveedor" data-tip="Exportar a Excel">
+                <button type="button" class="btn btn-out" id="btnExportarExcelProveedor" data-tip="Exportar a Excel">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn btn-sec" id="btnExportarPDFProveedor" data-tip="Exportar a PDF">
+                <button type="button" class="btn btn-out" id="btnExportarPDFProveedor" data-tip="Exportar a PDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
@@ -613,15 +613,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
             };
 
-            document.addEventListener('click', function(e) {
-                const m1 = document.getElementById('modalDetalleProveedor');
-                const m2 = document.getElementById('modalRegistroProveedor');
-                const m3 = document.getElementById('modalEdicionProveedor');
 
-                if (m1 && m1.style.display === 'flex' && e.target === m1) utils.cerrar('modalDetalleProveedor');
-                if (m2 && m2.style.display === 'flex' && e.target === m2) utils.cerrar('modalRegistroProveedor');
-                if (m3 && m3.style.display === 'flex' && e.target === m3) utils.cerrar('modalEdicionProveedor');
-            });
 
             return {
                 cerrar: utils.cerrar,

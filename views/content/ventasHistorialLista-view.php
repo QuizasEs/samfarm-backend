@@ -8,7 +8,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/ventasHistorialAjax.php"
         data-ajax-param="ventasHistorialAjax"
@@ -20,6 +20,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="receipt-outline"></ion-icon> Historial de Ventas
                 </div>
                 <div class="psub">Consulte y administre el historial completo de ventas realizadas</div>
+            </div>
+            <div class="tbr">
+                <?php if ($_SESSION['rol_smp'] == 1) { ?>
+                        <button type="button" id="btnExportarExcel" class="btn btn-out">
+                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                        </button>
+                <?php } ?>
             </div>
         </div>
 
@@ -82,13 +89,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </div>
                         </div>
                     </div>
-                    <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                        <div class="flxe mt12">
-                            <button type="button" id="btnExportarExcel" class="btn btn-def">
-                                <ion-icon name="download-outline"></ion-icon> Exportar Excel
-                            </button>
-                        </div>
-                    <?php } ?>
+
                 </form>
             </div>
         </div>
@@ -124,18 +125,58 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="fr mb16">
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Documento</div><div class="th5" id="detalleNumeroDocumento"></div></div></div>
-                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha</div><div class="th5" id="detalleFecha"></div></div></div>
-                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Cliente</div><div class="th5" id="detalleCliente"></div></div></div>
-                            <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">CI/NIT</div><div class="th5" id="detalleCarnet"></div></div></div>
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">N° Documento</div>
+                                    <div class="th5" id="detalleNumeroDocumento"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Fecha</div>
+                                    <div class="th5" id="detalleFecha"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Cliente</div>
+                                    <div class="th5" id="detalleCliente"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="card-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">CI/NIT</div>
+                                    <div class="th5" id="detalleCarnet"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="person-circle-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Vendedor</div><div class="th5" id="detalleVendedor"></div></div></div>
-                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleSucursal"></div></div></div>
-                            <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Caja</div><div class="th5" id="detalleCaja"></div></div></div>
-                            <div class="litem"><ion-icon name="receipt-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">N° Factura</div><div class="th5" id="detalleNumeroFactura">-</div></div></div>
+                            <div class="litem"><ion-icon name="person-circle-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Vendedor</div>
+                                    <div class="th5" id="detalleVendedor"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Sucursal</div>
+                                    <div class="th5" id="detalleSucursal"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Caja</div>
+                                    <div class="th5" id="detalleCaja"></div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="receipt-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">N° Factura</div>
+                                    <div class="th5" id="detalleNumeroFactura">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,8 +212,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="fr">
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><div class="tc">Subtotal</div><div class="th5" id="detalleSubtotal">Bs. 0.00</div></div>
-                            <div class="litem"><div class="tc">Impuestos</div><div class="th5" id="detalleImpuesto">Bs. 0.00</div></div>
+                            <div class="litem">
+                                <div class="tc">Subtotal</div>
+                                <div class="th5" id="detalleSubtotal">Bs. 0.00</div>
+                            </div>
+                            <div class="litem">
+                                <div class="tc">Impuestos</div>
+                                <div class="th5" id="detalleImpuesto">Bs. 0.00</div>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
@@ -408,13 +455,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
         };
 
-        // ==================== CERRAR AL HACER CLIC FUERA ====================
-        document.addEventListener('click', function(e) {
-            const modal = document.getElementById('modalDetalleVenta');
-            if (modal && modal.style.display === 'flex' && e.target === modal) {
-                utils.cerrar('modalDetalleVenta');
-            }
-        });
+
 
         // ==================== API PÚBLICA ====================
         return {

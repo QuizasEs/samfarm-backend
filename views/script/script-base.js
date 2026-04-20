@@ -72,6 +72,8 @@
   }
 
   /* sidebar */
+  let sidebarOpenSubmenus = [];
+  
   function toggleSidebar() {
     if (global.innerWidth <= 768) {
       var cur = document.documentElement.getAttribute("data-sidebar");
@@ -85,13 +87,44 @@
     var next = cur === "collapsed" ? "expanded" : "collapsed";
     document.documentElement.setAttribute("data-sidebar", next);
     localStorage.setItem("sf-sidebar", next);
+    
     if (next === "collapsed") {
+      // Guardar cuales submenus estaban abiertos antes de contraer
+      sidebarOpenSubmenus = [];
+      document.querySelectorAll(".ni.open").forEach(function (item) {
+        // Obtener el id del submenu desde el onclick
+        const onclickAttr = item.getAttribute('onclick');
+        if (onclickAttr) {
+          const match = onclickAttr.match(/toggleSub\('([^']+)'\s*,\s*this\)/);
+          if (match && match[1]) {
+            sidebarOpenSubmenus.push(match[1]);
+          }
+        }
+      });
+      
+      // Cerrar todos los submenus
       document.querySelectorAll(".sub.open").forEach(function (s) {
         s.classList.remove("open");
       });
       document.querySelectorAll(".ni.open").forEach(function (i) {
         i.classList.remove("open");
       });
+    } else {
+      // Al expandir, restaurar los submenus que estaban abiertos
+      setTimeout(() => {
+        sidebarOpenSubmenus.forEach(subId => {
+          const sub = document.getElementById(subId);
+          if (sub) {
+            sub.classList.add('open');
+            // Buscar el item padre correspondiente
+            const onclickCall = `toggleSub('${subId}', this)`;
+            const parentItem = document.querySelector(`[onclick="${onclickCall}"]`);
+            if (parentItem) {
+              parentItem.classList.add('open');
+            }
+          }
+        });
+      }, 100);
     }
   }
 
@@ -101,10 +134,22 @@
   }
 
   function toggleSub(id, item) {
-    if (document.documentElement.getAttribute("data-sidebar") === "collapsed")
-      return;
     var sm = document.getElementById(id);
     if (!sm) return;
+    
+    // Si el sidebar esta colapsado, primero expandirlo
+    if (document.documentElement.getAttribute("data-sidebar") === "collapsed") {
+      document.documentElement.setAttribute("data-sidebar", "expanded");
+      localStorage.setItem("sf-sidebar", "expanded");
+      
+      // Abrir este submenu despues de la transicion
+      setTimeout(() => {
+        sm.classList.add("open");
+        item.classList.add("open");
+      }, 100);
+      return;
+    }
+    
     var open = sm.classList.contains("open");
     sm.classList.toggle("open", !open);
     item.classList.toggle("open", !open);

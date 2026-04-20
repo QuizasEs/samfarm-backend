@@ -384,6 +384,182 @@ a.susr {
 .fg   { margin-bottom: 14px; }
 .fl   { display: block; font-size: 16.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
 .fl .req { color: var(--btn-warning); margin-left: 2px; }
+
+.required:after {
+    content: '*';
+    color: #f44336;
+    font-weight: 700;
+    margin-left: 4px;
+    display: inline;
+}
+
+/* ******************************404************************************* */
+/* Página Error 404 - Monitor Cardíaco */
+.error-404-page {
+    display: flex;
+    min-height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #13386c 0%, #1b4681 50%, #293241 100%);
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border-radius: 0;
+    z-index: 99999;
+}
+
+.error-404-heart-monitor {
+    width: 400px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 60px rgba(19, 56, 108, 0.4);
+}
+
+.error-404-ecg-line {
+    width: 100%;
+    height: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.error-404-ecg-line svg {
+    width: 100%;
+    height: 100%;
+}
+
+.error-404-ecg-path {
+    stroke: #ffffff;
+    stroke-width: 3;
+    fill: none;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: error-404-ecg 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+}
+
+@keyframes error-404-ecg {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.error-404-code {
+    text-align: center;
+    color: white;
+    font-size: 4rem;
+    font-weight: 700;
+    margin-top: 20px;
+    animation: error-404-pulse 1.5s infinite;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes error-404-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.error-404-title {
+    color: white;
+    margin-top: 30px;
+    font-size: 2rem;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.error-404-text {
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 15px;
+    text-align: center;
+    font-size: 1.1rem;
+    max-width: 500px;
+}
+
+.error-404-btn-home {
+    margin-top: 30px;
+    padding: 15px 40px;
+    background: white;
+    color: var(--accent-primary);
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: inline-block;
+}
+
+.error-404-btn-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+    background: var(--bg-secondary);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .error-404-heart-monitor {
+        width: 250px;
+    }
+
+    .error-404-title {
+        font-size: 1.5rem;
+    }
+
+    .error-404-code {
+        font-size: 3rem;
+    }
+
+    .error-404-text {
+        font-size: 0.8rem;
+        padding: 0 20px;
+    }
+
+    .error-404-btn-home {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .error-404-heart-monitor {
+        width: 220px;
+        height: 150px;
+    }
+
+    .error-404-code {
+        font-size: 2.5rem;
+    }
+
+    .error-404-title {
+        font-size: 1.3rem;
+    }
+
+    .error-404-text {
+        font-size: 0.9rem;
+    }
+
+    .error-404-btn-home {
+        padding: 10px 25px;
+        font-size: 0.95rem;
+    }
+}
 .fh   { font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
 .ferr { font-size: 11.5px; color: var(--btn-warning); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .inp, .sel, .ta {

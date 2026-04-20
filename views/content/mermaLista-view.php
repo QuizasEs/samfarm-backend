@@ -8,7 +8,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/mermaAjax.php"
         data-ajax-param="mermaAjax"
@@ -52,6 +52,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <?php } else { ?>
                             <div></div>
                         <?php } ?>
+                        
+                    </div>
+                    <div class="fr1">
                         <div class="fg">
                             <label class="fl">Búsqueda</label>
                             <div class="inpg">

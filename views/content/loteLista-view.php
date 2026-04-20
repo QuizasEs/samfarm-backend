@@ -7,7 +7,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/loteAjax.php"
         data-ajax-param="loteAjax"
@@ -19,10 +19,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="psub">Seguimiento y gestión de stock por lotes y fechas de vencimiento</div>
             </div>
             <div class="tbr">
-                <button type="button" class="btn btn-sec" id="btnExportarExcelLote" data-tip="Exportar a Excel">
+                <button type="button" class="btn btn-out" id="btnExportarExcelLote" data-tip="Exportar a Excel">
                     <ion-icon name="download-outline"></ion-icon> Excel
                 </button>
-                <button type="button" class="btn btn-sec" id="btnExportarPDFLote" data-tip="Exportar a PDF">
+                <button type="button" class="btn btn-out" id="btnExportarPDFLote" data-tip="Exportar a PDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
@@ -34,7 +34,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="cb">
                 <form class="filtro-dinamico">
-                    <div class="fr">
+                    <div class="fr3">
                         <div class="fg">
                             <label class="fl">Desde</label>
                             <input class="inp" type="date" name="fecha_desde">
@@ -204,6 +204,162 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
     </div>
+
+    <!-- Modal Editar Lote -->
+    <div class="mov" id="modalEditarLote">
+        <div class="modal mxl">
+            <div class="mh">
+                <div>
+                    <div class="mt">Editar Lote</div>
+                    <div class="ms" id="modalEditarLoteTitulo">...</div>
+                </div>
+                <button class="mcl" onclick="LoteModals.cerrarEdicion()">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/loteAjax.php" method="POST" data-form="update" autocomplete="off" id="formEditarLote">
+                <div class="mb">
+                    <input type="hidden" name="loteAjax" value="update">
+                    <input type="hidden" name="id" id="editarLoteId">
+
+                    <div class="stit">Información del Lote</div>
+                    <div class="fr">
+                        <div class="card">
+                            <div class="cb">
+                                <div class="litem"><ion-icon name="cube-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Número de lote</div><div class="th5" id="detalleEditarNumero">-</div></div></div>
+                                <div class="litem"><ion-icon name="medical-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Medicamento</div><div class="th5" id="detalleEditarMedicamento">-</div></div></div>
+                                <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Proveedor</div><div class="th5" id="detalleEditarProveedor">-</div></div></div>
+                                <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha Ingreso</div><div class="th5" id="detalleEditarIngreso">-</div></div></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="cb">
+                                <div class="litem"><ion-icon name="pricetag-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div class="th5" id="detalleEditarEstado">-</div></div></div>
+                                <div class="litem"><ion-icon name="cart-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Precio Compra Actual</div><div class="th5" id="detalleEditarPrecioCompra">-</div></div></div>
+                                <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Precio Venta Actual</div><div class="th5" id="detalleEditarPrecioVenta">-</div></div></div>
+                                <div class="litem" style="border:none"><ion-icon name="time-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Vencimiento Actual</div><div class="th5" id="detalleEditarVencimiento">-</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stit">Datos Editables</div>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="fr3">
+                                <div class="fg">
+                                    <label class="fl">Cajas del lote</label>
+                                    <input class="inp" type="number" name="Cantidad_caja_up" id="editarCantidadCaja" min="0">
+                                </div>
+                                <div class="fg">
+                                    <label class="fl">Unidades de empaque por caja</label>
+                                    <input class="inp" type="number" name="Cantidad_blister_up" id="editarCantidadBlister" min="0">
+                                </div>
+                                <div class="fg">
+                                    <label class="fl">Unidades individuales por empaque</label>
+                                    <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="0">
+                                </div>
+                            </div>
+                            <div class="fr3">
+                                <div class="fg">
+                                    <label class="fl">Precio de compra</label>
+                                    <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" required>
+                                </div>
+                                <div class="fg">
+                                    <label class="fl">Precio venta por unidad</label>
+                                    <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" required>
+                                </div>
+                                <div class="fg">
+                                    <label class="fl">Fecha de vencimiento</label>
+                                    <input class="inp" type="date" name="Fecha_vencimiento_up" id="editarFechaVencimiento" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
+                        <div class="cb">
+                            <div class="litem" style="border:none">
+                                <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
+                                <div class="f1">
+                                    <div class="th5" style="color:var(--btn-warning)">Atención</div>
+                                    <div class="tc" style="color:var(--btn-warning)">Verifique apropiadamente la información que desea modificar, cualquier cambio puede influir de manera negativa al inventario.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mf">
+                    <button type="button" class="btn btn-war" onclick="LoteModals.cerrarEdicion()">Cancelar</button>
+                    <button type="submit" class="btn btn-def"><ion-icon name="save-outline"></ion-icon> Actualizar Lote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const LoteModals = (function() {
+            'use strict';
+            const API_URL = '<?php echo SERVER_URL; ?>ajax/loteAjax.php';
+
+            async function abrirEdicion(loteId) {
+                try {
+                    const formData = new FormData();
+                    formData.append('loteAjax', 'obtener_lote');
+                    formData.append('lote_id', loteId);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                        return;
+                    }
+
+                    document.getElementById('editarLoteId').value = loteId;
+                    document.getElementById('modalEditarLoteTitulo').textContent = data.lm_numero_lote + ' - ' + data.med_nombre;
+                    document.getElementById('detalleEditarNumero').textContent = data.lm_numero_lote;
+                    document.getElementById('detalleEditarMedicamento').textContent = data.med_nombre;
+                    document.getElementById('detalleEditarProveedor').textContent = data.proveedor_nombres || 'Sin proveedor';
+                    document.getElementById('detalleEditarIngreso').textContent = data.lm_fecha_ingreso;
+                    document.getElementById('detalleEditarEstado').textContent = data.lm_estado;
+                    document.getElementById('detalleEditarPrecioCompra').textContent = data.lm_precio_compra + ' Bs';
+                    document.getElementById('detalleEditarPrecioVenta').textContent = data.lm_precio_venta + ' Bs';
+                    document.getElementById('detalleEditarVencimiento').textContent = data.lm_fecha_vencimiento;
+
+                    document.getElementById('editarCantidadCaja').value = data.lm_cant_caja;
+                    document.getElementById('editarCantidadBlister').value = data.lm_cant_blister;
+                    document.getElementById('editarCantidadUnidades').value = data.lm_cant_unidad;
+                    document.getElementById('editarPrecioCompra').value = data.lm_precio_compra;
+                    document.getElementById('editarPrecioVenta').value = data.lm_precio_venta;
+                    document.getElementById('editarFechaVencimiento').value = data.lm_fecha_vencimiento;
+
+                    document.getElementById('modalEditarLote').style.display = 'flex';
+                    document.getElementById('modalEditarLote').classList.add('open');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Ocurrió un error al cargar los datos del lote', 'error');
+                }
+            }
+
+            function cerrarEdicion() {
+                const modal = document.getElementById('modalEditarLote');
+                modal.classList.remove('open');
+                setTimeout(() => modal.style.display = 'none', 300);
+                document.getElementById('formEditarLote').reset();
+            }
+
+
+
+            return {
+                abrirEdicion,
+                cerrarEdicion
+            };
+        })();
+    </script>
 
 <?php } else {
     echo "que miras bobo";

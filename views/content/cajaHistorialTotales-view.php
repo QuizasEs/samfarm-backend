@@ -6,7 +6,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $rol_usuario = $_SESSION['rol_smp'];
 ?>
 
-<div class="pg tabla-dinamica"
+<div class="tabla-dinamica"
     data-ajax-table="true"
     data-ajax-url="ajax/cajaAjax.php"
     data-ajax-param="cajaAjax"
@@ -28,7 +28,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
         <div class="cb">
             <form class="filtro-dinamico">
-                <div class="fr1">
+                <div class="fr">
                     <?php if ($rol_usuario == 1) { ?>
                         <div class="fg">
                             <label class="fl">Sucursal</label>
@@ -132,7 +132,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <ion-icon name="information-circle-outline"></ion-icon> Información General
             </div>
 
-            <div class="fr mb16">
+            <div class="fr1 mb16">
                 <div class="card">
                     <div class="cb">
                         <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Nombre de Caja</div><div class="th5" id="detalleCajaNombre">-</div></div></div>
@@ -236,14 +236,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         }
 
         function init() {
-            const modal = document.getElementById('modalDetalleCajaCerrada');
-            if (modal) {
-                modal.addEventListener('click', function(event) {
-                    if (event.target === this) {
-                        cerrarModal();
-                    }
-                });
-            }
         }
 
         document.addEventListener('DOMContentLoaded', init);

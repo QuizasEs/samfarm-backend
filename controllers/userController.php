@@ -94,22 +94,15 @@ class userController extends userModel
         $colspan_total = $mostrar_columna_sucursal ? 11 : 10;
 
         $tabla .= '
-                <div class="table-container">
+                <div class="tw table-detail">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>N°</th>
-                                <th>NOMBRE COMPLETO</th>
-                                <th>USUARIO</th>
-                                <th>CARNET</th>
-                                <th>TELÉFONO</th>
-                                <th>CORREO</th>
-                                <th>DIRECCIÓN</th>
-                                <th>FECHA CREACIÓN</th>
-                                <th>ROL</th>' .
-            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>ESTADO</th>
-                                <th>ACCIONES</th>
+                                <th width="33%">Usuario</th>
+                                <th width="20%">Rol y Sucursal</th>
+                                <th width="20%">Contacto</th>
+                                <th width="10%">Estado</th>
+                                <th width="17%">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -126,42 +119,40 @@ class userController extends userModel
                 $rol_color = $row['ro_id'] == 2 ? '#1976D2' : '#FF9800';
 
                 $estado_html = $row['us_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
+                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
                 $tabla .= '
-                        <tr>
-                            <td>' . $contador . '</td>
-                            <td><strong>' . htmlspecialchars($nombre_completo) . '</strong></td>
-                            <td>' . htmlspecialchars($row['us_username']) . '</td>
-                            <td>' . htmlspecialchars($row['us_numero_carnet'] ?: '-') . '</td>
-                            <td>' . htmlspecialchars($row['us_telefono'] ?: '-') . '</td>
-                            <td>' . htmlspecialchars($row['us_correo'] ?: '-') . '</td>
-                            <td style="font-size:11px; white-space:normal; word-wrap:break-word; max-width:200px; overflow:hidden; text-overflow:ellipsis;" style="max-height:100px; overflow:auto;">' . htmlspecialchars($row['us_direccion'] ?: '-') . '</td>
-                            <td>' . date('d/m/Y', strtotime($row['us_creado_en'])) . '</td>
-                            <td><span style="text-transform:uppercase; font-weight:600;color:' . $rol_color . ';">' . $rol_nombre . '</span></td>' .
-                    ($mostrar_columna_sucursal ? '<td><span style="font-weight:600;color:#E65100; text-transform:uppercase;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .
-                    '<td>' . $estado_html . '</td>
-                            <td class="buttons">
-                                <a href="javascript:void(0)" 
-                                class="btn default" 
-                                title="Ver detalle"
-                                onclick="UsuariosModals.verDetalle(' . $row['us_id'] . ')">
-                                    <ion-icon name="eye-outline"></ion-icon> Detalle
-                                </a>
-                                <a href="javascript:void(0)" 
-                                class="btn primary" 
-                                title="Editar"
-                                onclick="UsuariosModals.abrirModalEditar(' . $row['us_id'] . ')">
-                                    <ion-icon name="create-outline"></ion-icon> Editar
-                                </a>
-                                <a href="javascript:void(0)" 
-                                class="btn ' . ($row['us_estado'] == 1 ? 'danger' : 'success') . '" 
-                                title="' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
-                                onclick="UsuariosModals.toggleEstado(' . $row['us_id'] . ', ' . $row['us_estado'] . ')">
+                        <tr class="tr-click" onclick="UsuariosModals.abrirModalEditar(' . $row['us_id'] . ')">
+                            <td>
+                                <div class="td-main">' . htmlspecialchars($nombre_completo) . '</div>
+                                <div class="td-sub">
+                                    <ion-icon name="person-outline"></ion-icon> @' . htmlspecialchars($row['us_username']) . '
+                                    | <ion-icon name="card-outline"></ion-icon> ' . htmlspecialchars($row['us_numero_carnet'] ?: '-') . '
+                                </div>
+                                <div class="td-meta">
+                                    <ion-icon name="calendar-outline"></ion-icon> Creado: ' . date('d/m/Y', strtotime($row['us_creado_en'])) . '
+                                </div>
+                            </td>
+                            <td>
+                                <div style="text-transform:uppercase; font-weight:600;color:' . $rol_color . ';">' . $rol_nombre . '</div>' .
+                    ($mostrar_columna_sucursal ? '<div style="font-weight:600;color:#E65100; text-transform:uppercase; font-size:12px; margin-top:3px;">' . htmlspecialchars($row['sucursal_nombre']) . '</div>' : '') .
+                    '</td>
+                            <td>
+                                <div><ion-icon name="call-outline"></ion-icon> ' . htmlspecialchars($row['us_telefono'] ?: '-') . '</div>
+                                <div class="td-sub"><ion-icon name="mail-outline"></ion-icon> ' . htmlspecialchars($row['us_correo'] ?: '-') . '</div>
+                            </td>
+                            <td>' . $estado_html . '</td>
+                            <td>
+                             
+                                    <a href="javascript:void(0)" 
+                                    class="btn ' . ($row['us_estado'] == 1 ? 'btn-douc' : 'btn-souc') . ' btn-sm" 
+                                    title="' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
+                                    onclick="event.stopPropagation(); UsuariosModals.toggleEstado(' . $row['us_id'] . ', ' . $row['us_estado'] . ')">
                                     <ion-icon name="' . ($row['us_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon> 
                                     ' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '
-                                </a>
+                                    </a>
+
                             </td>
                         </tr>
                     ';
@@ -169,9 +160,7 @@ class userController extends userModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="' . $colspan_total . '" style="text-align:center;padding:20px;color:#999;">
-                            <ion-icon name="people-outline"></ion-icon> No hay registros
-                        </td></tr>';
+            $tabla .= '<tr><td colspan="5" style="text-align:center;">No hay usuarios registrados</td></tr>';
         }
 
         $tabla .= '</tbody></table></div>';
@@ -857,7 +846,7 @@ class userController extends userModel
 
         if ($actualizar->rowCount() >= 0) {
             $_SESSION['nombre_smp'] = $nombres . ' ' . $apellido_paterno;
-            
+
             if ($rol_actual == 1 && !empty($sucursal)) {
                 $_SESSION['sucursal_smp'] = $sucursal;
             }

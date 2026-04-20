@@ -8,7 +8,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/comprasHistorialAjax.php"
         data-ajax-param="comprasHistorialAjax"
@@ -19,6 +19,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="receipt-outline"></ion-icon> Historial de Compras
                 </div>
                 <div class="psub">Consulta el historial completo de compras realizadas</div>
+            </div>
+            <div class="tbr">
+                <button type="button" class="btn btn-out" id="btnExportarExcelComprasHistorial">
+                    <ion-icon name="download-outline"></ion-icon> Exportar Excel
+                </button>
+                <button type="button" class="btn btn-out" id="btnExportarPDFComprasHistorial">
+                    <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
+                </button>
             </div>
         </div>
 
@@ -49,6 +57,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 ?>
                             </select>
                         </div>
+
+
+                    </div>
+                    <div class="fr">
                         <?php if ($rol_usuario == 1) { ?>
                             <div class="fg">
                                 <label class="fl">Sucursal</label>
@@ -72,14 +84,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </div>
                         </div>
                     </div>
-                    <div class="flxe mt12">
-                        <button type="button" class="btn btn-def" id="btnExportarExcelComprasHistorial">
-                            <ion-icon name="download-outline"></ion-icon> Exportar Excel
-                        </button>
-                        <button type="button" class="btn btn-def" id="btnExportarPDFComprasHistorial">
-                            <ion-icon name="document-text-outline"></ion-icon> Exportar PDF
-                        </button>
-                    </div>
+
                 </form>
             </div>
         </div>
@@ -104,7 +109,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div class="mov" id="modalDetalleCompra">
-        <div class="modal mlg">
+        <div class="modal mxl">
             <div class="mh">
                 <div>
                     <div class="mt">
@@ -128,15 +133,40 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="fr mb16">
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Número de Compra</div><div class="th5" id="detalleNumeroCompra">-</div></div></div>
-                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Fecha de Compra</div><div class="th5" id="detalleFechaCompra">-</div></div></div>
-                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Proveedor</div><div class="th5" id="detalleProveedor">-</div></div></div>
+                            <div class="litem"><ion-icon name="document-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Número de Compra</div>
+                                    <div class="th5" id="detalleNumeroCompra">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Fecha de Compra</div>
+                                    <div class="th5" id="detalleFechaCompra">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Proveedor</div>
+                                    <div class="th5" id="detalleProveedor">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleSucursal">-</div></div></div>
-                            <div class="litem" style="border:none"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Usuario</div><div class="th5" id="detalleUsuario">-</div></div></div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Sucursal</div>
+                                    <div class="th5" id="detalleSucursal">-</div>
+                                </div>
+                            </div>
+                            <div class="litem" style="border:none"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Usuario</div>
+                                    <div class="th5" id="detalleUsuario">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -147,23 +177,20 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="card mb16">
                     <div class="cb">
                         <div class="tw">
-                            <table>
+                             <table class="table-detail">
                                 <thead>
                                     <tr>
-                                        <th>N°</th>
-                                        <th>MEDICAMENTO</th>
-                                        <th>CANTIDAD</th>
-                                        <th>PRECIO</th>
-                                        <th>DESCUENTO</th>
-                                        <th>SUBTOTAL</th>
-                                        <th>LOTE</th>
-                                        <th>ESTADO LOTE</th>
-                                        <th>VENCIMIENTO</th>
+                                        <th width="35%">Medicamento</th>
+                                        <th width="8%">Cant</th>
+                                        <th width="12%">Precio</th>
+                                        <th width="10%">Desc</th>
+                                        <th width="12%">Subtotal</th>
+                                        <th width="12%">Vencimiento</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablaDetalleMedicamentos">
                                     <tr>
-                                        <td colspan="9" class="txctr">
+                                        <td colspan="6" class="txctr">
                                             <ion-icon name="hourglass-outline"></ion-icon> Cargando...
                                         </td>
                                     </tr>
@@ -341,22 +368,23 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         if (data.medicamentos && data.medicamentos.length > 0) {
                             tbody.innerHTML = data.medicamentos.map((med, idx) => `
                         <tr>
-                            <td>${idx + 1}</td>
                             <td>
-                                <strong>${med.nombre}</strong><br>
-                                <small style="color:#666;">${med.principio_activo}</small>
+                                <div class="td-main"><strong>${med.nombre}</strong></div>
+                                <div class="td-sub">${med.principio_activo}</div>
+                                <div class="td-meta">
+                                    <ion-icon name="pricetag-outline"></ion-icon> Lote: ${med.numero_lote}
+                                    |  ${med.estado_lote}
+                                </div>
                             </td>
                             <td style="text-align:center;">${utils.formatearNumero(med.cantidad)}</td>
                             <td style="text-align:right;">${utils.formatearMoneda(med.precio_unitario)}</td>
                             <td style="text-align:right;">${utils.formatearMoneda(med.descuento)}</td>
                             <td style="text-align:right;font-weight:bold;">${utils.formatearMoneda(med.subtotal)}</td>
-                            <td>${med.numero_lote}</td>
-                            <td>${med.estado_lote}</td>
                             <td>${med.fecha_vencimiento ? utils.formatearFecha(med.fecha_vencimiento) : 'N/A'}</td>
                         </tr>
                     `).join('');
                         } else {
-                            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin medicamentos</td></tr>';
+                            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin medicamentos</td></tr>';
                         }
 
                     } catch (error) {
@@ -613,43 +641,38 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 });
             }
 
-        function exportarPDFComprasHistorial() {
-            const form = document.querySelector('.filtro-dinamico');
-            const params = new URLSearchParams();
-            params.append('comprasHistorialAjax', 'exportar_pdf');
+            function exportarPDFComprasHistorial() {
+                const form = document.querySelector('.filtro-dinamico');
+                const params = new URLSearchParams();
+                params.append('comprasHistorialAjax', 'exportar_pdf');
 
-            if (form) {
-                const fechaDesde = form.querySelector('input[name="fecha_desde"]');
-                const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
-                const select1 = form.querySelector('select[name="select1"]');
-                const select2 = form.querySelector('select[name="select2"]');
-                const select3 = form.querySelector('select[name="select3"]');
+                if (form) {
+                    const fechaDesde = form.querySelector('input[name="fecha_desde"]');
+                    const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
+                    const select1 = form.querySelector('select[name="select1"]');
+                    const select2 = form.querySelector('select[name="select2"]');
+                    const select3 = form.querySelector('select[name="select3"]');
 
-                if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
-                if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
-                if (select1 && select1.value) params.append('select1', select1.value);
-                if (select2 && select2.value) params.append('select2', select2.value);
-                if (select3 && select3.value) params.append('select3', select3.value);
+                    if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
+                    if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
+                    if (select1 && select1.value) params.append('select1', select1.value);
+                    if (select2 && select2.value) params.append('select2', select2.value);
+                    if (select3 && select3.value) params.append('select3', select3.value);
+                }
+
+                const url = '<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?' + params.toString();
+                window.open(url, '_blank');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Generando PDF',
+                    text: 'El reporte se está generando...',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
 
-            const url = '<?php echo SERVER_URL; ?>ajax/comprasHistorialAjax.php?' + params.toString();
-            window.open(url, '_blank');
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Generando PDF',
-                text: 'El reporte se está generando...',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-
-            document.addEventListener('click', function(e) {
-                const modal = document.getElementById('modalDetalleCompra');
-                if (modal && modal.style && modal.style.display === 'flex' && e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
 
             return {
                 cerrar: utils.cerrar,

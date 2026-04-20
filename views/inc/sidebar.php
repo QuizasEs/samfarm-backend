@@ -23,7 +23,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub"><?php echo htmlspecialchars($sucursal); ?></div>
+                <div class="lsub">Sistema</div>
             </div>
         </div>
 
@@ -140,9 +140,9 @@ if ($_SESSION['rol_smp'] == 1) {
         </div>
 
         <a href="<?php echo SERVER_URL ?>perfilEditar/<?php echo mainModel::encryption($_SESSION['id_smp']); ?>/" class="susr" data-tip="Perfil">
-            <div class="uav">MS</div>
+            <div class="uav">PF</div>
             <div class="uinfo">
-                <div class="un">Mayk S.</div>
+                <div class="un">Perfil</div>
                 <div class="ur">Administrador</div>
             </div>
         </a>
@@ -172,7 +172,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub"><?php echo htmlspecialchars($sucursal); ?></div>
+                <div class="lsub">Sistema</div>
             </div>
         </div>
 
@@ -262,7 +262,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub"><?php echo htmlspecialchars($sucursal); ?></div>
+                <div class="lsub">Sistema</div>
             </div>
         </div>
 
@@ -303,7 +303,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub"><?php echo htmlspecialchars($sucursal); ?></div>
+                <div class="lsub">Sistema</div>
             </div>
         </div>
 

@@ -186,28 +186,18 @@ class loteController extends loteModel
 
         // Determinar si mostrar columna SUCURSAL (solo para admin)
         $mostrar_columna_sucursal = ($rol_usuario == 1);
-        $colspan_total = $mostrar_columna_sucursal ? 16 : 15;
+        $colspan_total = 5;
 
         $tabla .= '
             <div class="table-container">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>N° LOTE</th>
-                            <th>MEDICAMENTO</th>
-                            <th>PROVEEDOR</th>' .
-            ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
-            '<th>CANT. cajas inicial</th>
-                            <th>CANT. unidades inicial</th>
-                            <th>CANT. cajas actual</th>
-                            <th>CANT. unidades actual</th>
-                            <th>PRECIO COMPRA</th>
-                            <th>PRECIO VENTA</th>
-                            <th>FECHA INGRESO</th>
-                            <th>FECHA VENCIMIENTO</th>
+                            <th>LOTE / MEDICAMENTO</th>
+                            <th>STOCK</th>
+                            <th>FECHAS</th>
                             <th>ESTADO</th>
-                            <th>ACCIONES</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -224,25 +214,25 @@ class loteController extends loteModel
                 // Generar badge de estado
                 switch ($rows['lm_estado']) {
                     case 'en_espera':
-                        $estado_html = '<span class="estado-badge espera"><ion-icon name="time-outline"></ion-icon> En Espera</span>';
+                        $estado_html = '<span class="badge bwar"><ion-icon name="time-outline"></ion-icon> En Espera</span>';
                         break;
                     case 'activo':
-                        $estado_html = '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>';
+                        $estado_html = '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>';
                         break;
                     case 'terminado':
-                        $estado_html = '<span class="estado-badge terminado"><ion-icon name="archive-outline"></ion-icon> Terminado</span>';
+                        $estado_html = '<span class="badge bgry"><ion-icon name="archive-outline"></ion-icon> Terminado</span>';
                         break;
                     case 'caducado':
-                        $estado_html = '<span class="estado-badge caducado"><ion-icon name="warning-outline"></ion-icon> Caducado</span>';
+                        $estado_html = '<span class="badge bdan"><ion-icon name="warning-outline"></ion-icon> Caducado</span>';
                         break;
                     case 'devuelto':
-                        $estado_html = '<span class="estado-badge devuelto"><ion-icon name="return-down-back-outline"></ion-icon> Devuelto</span>';
+                        $estado_html = '<span class="badge binf"><ion-icon name="return-down-back-outline"></ion-icon> Devuelto</span>';
                         break;
                     case 'bloqueado':
-                        $estado_html = '<span class="estado-badge bloqueado"><ion-icon name="lock-closed-outline"></ion-icon> Bloqueado</span>';
+                        $estado_html = '<span class="badge bgry"><ion-icon name="lock-closed-outline"></ion-icon> Bloqueado</span>';
                         break;
                     default:
-                        $estado_html = '<span class="estado-badge desconocido">' . ucfirst($rows['lm_estado']) . '</span>';
+                        $estado_html = '<span class="badge bdef">' . ucfirst($rows['lm_estado']) . '</span>';
                 }
 
                 $dias_restantes = '';
@@ -257,35 +247,36 @@ class loteController extends loteModel
                 }
 
                 $tabla .= '
-                    <tr>
-                        <td>' . $contador . '</td>
-                        <td><strong>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</strong></td>
-                        <td>' . htmlspecialchars($rows['med_nombre_quimico']) . '<br><small>' . htmlspecialchars($rows['med_principio_activo']) . '</small></td>
-                        <td>' . htmlspecialchars($rows['pr_razon_social'] ?? 'N/A') . '</td>' .
-                    ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 10px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($rows['su_nombre']) . '</span></td>' : '') .
-                    '<td>' . $rows['lm_cajas_inicial'] . '</td>
-                        <td>' . number_format($rows['lm_unidades_inicial']) . '</td>
-                        <td>' . $rows['lm_cajas_actual'] . '</td>
-                        <td><strong style="color:#1976D2;font-size:16px;">' . $rows['lm_unidades_actual'] . '</strong></td>
-                        <td>Bs. ' . number_format($rows['lm_precio_compra'], 2) . '</td>
-                        <td>Bs. ' . number_format($rows['lm_precio_venta'], 2) . '</td>
-                        <td>' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . '</td>
-                        <td>' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . $dias_restantes . '</td>
-                        <td>' .
+                    <tr class="tr-click" onclick="' . ($rows['lm_estado'] == 'activo' && $rows['lm_unidades_actual'] > 0 && $rol_usuario == 1 ? 'LoteModals.abrirEdicion(' . $rows['lm_id'] . ');' : '') . '">
+                        <td>
+                            <div class="td-main"><strong>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</strong> - ' . htmlspecialchars($rows['med_nombre_quimico']) . '</div>
+                            <div class="td-sub">' . htmlspecialchars($rows['med_principio_activo']) . ' · ' . htmlspecialchars($rows['pr_razon_social'] ?? 'N/A') .
+                    ($mostrar_columna_sucursal ? ' · ' . htmlspecialchars($rows['su_nombre']) : '') . '</div>
+                        </td>
+                        <td>
+                            <div class="td-main"><strong style="color:#1976D2;">' . $rows['lm_unidades_actual'] . '</strong> unidades</div>
+                            <div class="td-sub">' . $rows['lm_cajas_actual'] . ' cajas actuales / ' . $rows['lm_cajas_inicial'] . ' inicial</div>
+                        </td>
+                        <td>
+                            <div class="td-main">Vence: ' . ($fecha_vencimiento ? date('d/m/Y', strtotime($fecha_vencimiento)) : 'N/A') . '</div>
+                            <div class="td-sub">Ingreso: ' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . $dias_restantes . '</div>
+                        </td>
+                        <td>
+                            <div class="td-main">' .
                     ($rows['lm_estado'] == "en_espera"
                         ? '<a href="#" 
                                 class="btn-editar btn-activar-lote" 
                                 data-id="' . $rows['lm_id'] . '" 
                                 data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
-                                title="Activar lote">
+                                title="Activar lote"
+                                onclick="event.stopPropagation();">
                                 Activar
                             </a>'
                         : $estado_html)
-                    . '</td>
+                    . '</div>
+                        </td>
                         <td class="buttons">
-                            ' . ($rows['lm_estado'] == 'activo' && $rows['lm_unidades_actual'] > 0 && $rol_usuario == 1
-                                ? '<a href="' . SERVER_URL . 'loteActualizar/' . mainModel::encryption($rows['lm_id']) . '/" class="btn default"><ion-icon name="create-outline"></ion-icon> EDITAR</a>'
-                                : '<span style="color:#999;font-size:12px;">No disponible</span>')
+                            ' . ''
                             . '
                         </td>
                     </tr>

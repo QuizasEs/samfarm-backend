@@ -83,14 +83,9 @@ class proveedorController extends proveedorModel
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>PROVEEDOR/RAZON SOCIAL</th>
-                            <th>NIT</th>
-                            <th>TELÉFONO</th>
-                            <th>NOMBRE COMERCIAL</th>
-                            <th>FECHA REGISTRO</th>
-                            <th>TOTAL COMPRAS</th>
-                            <th>ÚLTIMA COMPRA</th>
+                            <th>PROVEEDOR</th>
+                            <th>CONTACTO</th>
+                            <th>ESTADÍSTICAS</th>
                             <th>ESTADO</th>
                             <th>ACCIONES</th>
                         </tr>
@@ -106,8 +101,8 @@ class proveedorController extends proveedorModel
                 $nombre_completo = $row['pr_razon_social'] ?? '';
 
                 $estado_html = $row['pr_estado'] == 1
-                    ? '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="estado-badge bloqueado"><ion-icon name="ban-outline"></ion-icon> Inactivo</span>';
+                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
+                    : '<span class="badge bgry"><ion-icon name="ban-outline"></ion-icon> Inactivo</span>';
 
                 $ultima_compra = $row['ultima_compra']
                     ? date('d/m/Y', strtotime($row['ultima_compra']))
@@ -124,28 +119,29 @@ class proveedorController extends proveedorModel
                 }
 
                 $tabla .= '
-                    <tr>
-                        <td>' . $contador . '</td>
-                        <td><strong>' . htmlspecialchars($nombre_completo) . '</strong></td>
-                        <td>' . htmlspecialchars($row['pr_nit'] ?? '-') . '</td>
-                        <td>' . htmlspecialchars($row['pr_telefono'] ?? '-') . '</td>
-                        <td>' . htmlspecialchars($nombre_comercial) . '</td>
-                        <td>' . date('d/m/Y', strtotime($row['pr_creado_en'])) . '</td>
-                        <td style="text-align:center;"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . '</strong></td>
-                        <td>' . $ultima_compra . '</td>
-                        <td>' . $estado_html . '</td>
+                    <tr class="tr-click">
+                        <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
+                            <div class="td-main"><strong>' . htmlspecialchars($nombre_completo) . '</strong></div>
+                            <div class="td-sub">' . htmlspecialchars($row['pr_nit'] ?? '-') . ' · ' . htmlspecialchars($nombre_comercial) . '</div>
+                        </td>
+                        <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
+                            <div class="td-main">' . htmlspecialchars($row['pr_telefono'] ?? '-') . '</div>
+                            <div class="td-sub">' . htmlspecialchars($row['pr_correo'] ?? '-') . '</div>
+                        </td>
+                        <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
+                            <div class="td-main"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . ' compras</strong></div>
+                            <div class="td-sub">Última: ' . $ultima_compra . '</div>
+                        </td>
+                        <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
+                            ' . $estado_html . '
+                            <div class="td-sub">Registrado: ' . date('d/m/Y', strtotime($row['pr_creado_en'])) . '</div>
+                        </td>
                         <td class="buttons">
                             <a href="javascript:void(0)"
-                            class="btn default"
-                            title="Ver detalle"
-                            onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
-                                <ion-icon name="eye-outline"></ion-icon> Detalle
-                            </a>
-                            <a href="javascript:void(0)"
-                            class="btn primary"
+                            class="btn btn-def"
                             title="Editar proveedor"
-                            onclick="ProveedoresModals.abrirEdicion(' . $row['pr_id'] . ')">
-                                <ion-icon name="create-outline"></ion-icon> Editar
+                            onclick="event.stopPropagation(); ProveedoresModals.abrirEdicion(' . $row['pr_id'] . ')">
+                                <ion-icon name="create-outline"></ion-icon>editar
                             </a>
                         </td>
                     </tr>
@@ -154,7 +150,7 @@ class proveedorController extends proveedorModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="10" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="people-outline"></ion-icon> No hay registros
                     </td></tr>';
         }

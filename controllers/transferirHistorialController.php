@@ -53,17 +53,15 @@ class transferirHistorialController extends transferirModel
 
             $Npaginas = ceil($total / $registros);
 
-            $html = '<div class="table-container">
+            $html = '<div class="tw table-detail">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th style="width:15%">N° Transferencia</th>
-                                <th style="width:20%">Origen → Destino</th>
-                                <th style="width:15%">Usuario</th>
-                                <th style="width:12%">Fecha</th>
-                                <th style="width:10%">Estado</th>
-                                <th style="width:15%">Total (Bs.)</th>
-                                <th style="width:13%">Acciones</th>
+                                <th width="40%">Transferencia</th>
+                                <th width="15%">Fecha</th>
+                                <th width="15%">Estado</th>
+                                <th width="15%">Total</th>
+                                <th width="15%">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>';
@@ -79,18 +77,19 @@ class transferirHistorialController extends transferirModel
 
                     $url_pdf = SERVER_URL . 'ajax/transferirHistorialAjax.php?transferirHistorialAjax=generar_pdf&tr_id=' . $tr['tr_id'];
 
-                    $html .= '<tr>
-                                <td><strong>' . htmlspecialchars($tr['tr_numero']) . '</strong></td>
-                                <td>' . htmlspecialchars($tr['sucursal_origen']) . ' → ' . htmlspecialchars($tr['sucursal_destino']) . '</td>
-                                <td>' . htmlspecialchars($tr['usuario_emisor']) . '</td>
+                    $html .= '<tr class="tr-click" onclick="TransferirHistorialModals.verDetalle(' . (int)$tr['tr_id'] . ', \'' . htmlspecialchars($tr['tr_numero']) . '\')">
+                                <td>
+                                    <div class="td-main"><strong>' . htmlspecialchars($tr['tr_numero']) . '</strong></div>
+                                    <div class="td-sub">' . htmlspecialchars($tr['sucursal_origen']) . ' → ' . htmlspecialchars($tr['sucursal_destino']) . '</div>
+                                    <div class="td-meta">
+                                        <ion-icon name="person-outline"></ion-icon> ' . htmlspecialchars($tr['usuario_emisor']) . '
+                                    </div>
+                                </td>
                                 <td>' . $fecha . '</td>
                                 <td>' . $estado_badge . '</td>
                                 <td style="text-align:right;"><strong>Bs. ' . $monto . '</strong></td>
-                                <td class="buttons">
-                                    <a href="#" class="btn primary" onclick="event.preventDefault(); TransferirHistorialModals.verDetalle(' . (int)$tr['tr_id'] . ', \'' . htmlspecialchars($tr['tr_numero']) . '\')" title="Ver detalles">
-                                        <ion-icon name="eye-outline"></ion-icon> Detalles
-                                    </a>
-                                    <a href="javascript:void(0)" class="btn default" title="Descargar PDF" onclick="window.open(\'' . $url_pdf . '\', \'_blank\')">
+                                <td>
+                                    <a href="javascript:void(0)" class="btn btn-sec btn-sm" title="Descargar PDF" onclick="event.stopPropagation(); window.open(\'' . $url_pdf . '\', \'_blank\')">
                                         <ion-icon name="download-outline"></ion-icon> PDF
                                     </a>
                                 </td>
@@ -100,7 +99,7 @@ class transferirHistorialController extends transferirModel
                 $reg_final = $contador - 1;
             } else {
                 $html .= '<tr>
-                            <td colspan="7" style="text-align:center;padding:20px;">
+                            <td colspan="5" style="text-align:center;padding:20px;">
                                 <ion-icon name="information-circle-outline"></ion-icon> Sin transferencias
                             </td>
                         </tr>';

@@ -161,11 +161,11 @@ if ($valor === "crear") {
             $diferencia_dias = ceil(($fecha_venc - $hoy) / (60 * 60 * 24));
 
             if ($diferencia_dias <= 0) {
-                $estado_html = '<span class="estado-badge caducado" style="font-weight:bold;">CADUCADO</span>';
+                $estado_html = '<span class="badge bdan" style="font-weight:bold;">CADUCADO</span>';
             } elseif ($diferencia_dias <= 10) {
-                $estado_html = '<span class="estado-badge espera" style="font-weight:bold;">' . $diferencia_dias . ' días</span>';
+                $estado_html = '<span class="badge bwar" style="font-weight:bold;">' . $diferencia_dias . ' días</span>';
             } else {
-                $estado_html = '<span>' . $diferencia_dias . ' días</span>';
+                $estado_html = '<span class="badge bdef">' . $diferencia_dias . ' días</span>';
             }
 
             $tabla .= '

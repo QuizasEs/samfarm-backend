@@ -2,7 +2,7 @@
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2 || $_SESSION['rol_smp'] == 3)) {
 ?>
 
-    <div class="pg tabla-dinamica"
+    <div class="tabla-dinamica"
         data-ajax-table="true"
         data-ajax-url="ajax/clientesAjax.php"
         data-ajax-param="clientesAjax"
@@ -559,8 +559,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleAntiguedad').textContent = data.antiguedad_dias;
 
                     const estadoHtml = data.cl_estado == 1 ?
-                        '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
-                        '<span class="estado-badge caducado"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
+                        '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>' :
+                        '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
                     document.getElementById('detalleEstado').innerHTML = estadoHtml;
 
                     document.getElementById('detalleTotalCompras').textContent = data.total_compras || 0;
@@ -982,15 +982,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
 
-            document.addEventListener('click', function(e) {
-                const modals = ['modalNuevoCliente', 'modalEditarCliente', 'modalDetalleCliente'];
-                modals.forEach(modalId => {
-                    const modal = document.getElementById(modalId);
-                    if (modal && modal.classList.contains('open') && e.target === modal) {
-                        modal.classList.remove('open');
-                    }
-                });
-            });
+
 
             return {
                 abrirModalNuevo,

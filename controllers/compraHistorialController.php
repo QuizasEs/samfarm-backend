@@ -93,7 +93,7 @@ class compraHistorialController extends compraHistorialModel
         $Npaginas = ceil($total / $registros);
 
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f3));
-        $colspan_total = $mostrar_columna_sucursal ? 11 : 10;
+        $colspan_total = $mostrar_columna_sucursal ? 7 : 6;
 
         $tabla .= '
             <div class="table-container">
@@ -109,7 +109,6 @@ class compraHistorialController extends compraHistorialModel
             '
                             <th>LOTES</th>
                             <th>TOTAL</th>
-                            <th>ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,7 +133,7 @@ class compraHistorialController extends compraHistorialModel
                 }
 
                 $tabla .= '
-                    <tr>
+                    <tr class="tr-click" onclick="ComprasHistorialModals.verDetalle(' . $row['co_id'] . ', \'' . addslashes($row['co_numero']) . '\')">
                         <td>' . $contador . '</td>
                         <td><strong style="color:#1976D2;">' . htmlspecialchars($row['co_numero']) . '</strong></td>
                         <td>' . date('d/m/Y', strtotime($row['co_fecha'])) . '</td>
@@ -142,16 +141,7 @@ class compraHistorialController extends compraHistorialModel
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal']) . '</span></td>' : '') .
                     '
                         <td style="text-align:center;">' . $lotes_badge . '</td>
-                        
                         <td style="text-align:right;font-weight:bold;color:#2e7d32;">Bs. ' . number_format($row['co_total'], 2) . '</td>
-                        <td class="">
-                            <a href="javascript:void(0)" 
-                            class="btn default" 
-                            title="Ver detalle"
-                            onclick="ComprasHistorialModals.verDetalle(' . $row['co_id'] . ', \'' . addslashes($row['co_numero']) . '\')">
-                                <ion-icon name="eye-outline"></ion-icon> Ver
-                            </a>
-                        </td>
                     </tr>
                 ';
                 $contador++;
@@ -196,19 +186,19 @@ class compraHistorialController extends compraHistorialModel
                 $estado_html = '';
                 switch ($med['lm_estado']) {
                     case 'en_espera':
-                        $estado_html = '<span class="estado-badge espera"><ion-icon name="time-outline"></ion-icon> En Espera</span>';
+                        $estado_html = '<span class="badge bwar"><ion-icon name="time-outline"></ion-icon> En Espera</span>';
                         break;
                     case 'activo':
-                        $estado_html = '<span class="estado-badge activo"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>';
+                        $estado_html = '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>';
                         break;
                     case 'terminado':
-                        $estado_html = '<span class="estado-badge terminado"><ion-icon name="archive-outline"></ion-icon> Terminado</span>';
+                        $estado_html = '<span class="badge bgry"><ion-icon name="archive-outline"></ion-icon> Terminado</span>';
                         break;
                     case 'caducado':
-                        $estado_html = '<span class="estado-badge caducado"><ion-icon name="warning-outline"></ion-icon> Caducado</span>';
+                        $estado_html = '<span class="badge bdan"><ion-icon name="warning-outline"></ion-icon> Caducado</span>';
                         break;
                     default:
-                        $estado_html = '<span class="estado-badge desconocido">N/A</span>';
+                        $estado_html = '<span class="badge bdef">N/A</span>';
                 }
 
                 return [

@@ -127,12 +127,12 @@ class ventasHistorialController extends ventasHistorialModel
                     ? strtoupper($row['ve_tipo_documento'])
                     : 'VENTA';
 
-                $tipo_doc_html = '<span class="estado-badge activo" style="font-size:10px;">' . $tipo_doc . '</span>';
+                $tipo_doc_html = '<span class="badge bgr" style="font-size:10px;">' . $tipo_doc . '</span>';
 
                 $tiene_factura = !empty($row['fa_id']);
 
                 $tabla .= '
-                    <tr>
+                    <tr class="tr-click" onclick="VentasHistorialModals.verDetalle(' . $row['ve_id'] . ', \'' . addslashes($row['ve_numero_documento']) . '\')">
                         <td>' . $contador . '</td>
                         <td><strong>' . htmlspecialchars($row['ve_numero_documento']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($row['ve_fecha_emision'])) . '</td>
@@ -141,18 +141,12 @@ class ventasHistorialController extends ventasHistorialModel
                     ($mostrar_columna_sucursal ? '<td><span style=";padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .'
                         <td style="text-align:right;font-size:14px;"><strong style="color:#2e7d32;">Bs. ' . number_format($row['ve_total'], 2) . '</strong></td>
                         <td style="text-align:center;">' . $tipo_doc_html . '</td>
-                        <td class="buttons">
+                        <td >
                             <a href="javascript:void(0)" 
-                               class="btn default" 
-                               title="Ver detalle"
-                               onclick="VentasHistorialModals.verDetalle(' . $row['ve_id'] . ', \'' . addslashes($row['ve_numero_documento']) . '\')">
-                                <ion-icon name="eye-outline"></ion-icon> Detalle
-                            </a>
-                            <a href="javascript:void(0)" 
-                               class="btn primary" 
+                               class="btn btn-out btn-sm" 
                                title="Reimprimir nota de venta"
-                               onclick="VentasHistorialModals.reimprimirNota(' . $row['ve_id'] . ')">
-                                <ion-icon name="print-outline"></ion-icon> Reimprimir
+                               onclick="event.stopPropagation(); VentasHistorialModals.reimprimirNota(' . $row['ve_id'] . ')">
+                                <ion-icon name="print-outline"></ion-icon>Imprimir
                             </a>
                     </td>
                     </tr>

@@ -28,7 +28,7 @@ $datos_decoded = json_decode($datos, true);
 if (!isset($datos_decoded['error']) && $datos_decoded) {
     $campos = $datos_decoded;
 ?>
-    <div class="pg">
+    <div class="">
         <div class="ph">
             <div>
                 <div class="ptit"><ion-icon name="business-outline"></ion-icon> Información de la Empresa</div>

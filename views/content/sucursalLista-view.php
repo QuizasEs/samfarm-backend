@@ -2,7 +2,7 @@
 if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 ?>
 
-    <div class="pg">
+    <div class="">
         <div class="ph">
             <div>
                 <div class="ptit"><ion-icon name="business-outline"></ion-icon> Gestión de Sucursales</div>
@@ -12,7 +12,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 <button type="button" class="btn btn-def" onclick="SucursalesModals.abrirModalNuevo()">
                     <ion-icon name="add-circle-outline"></ion-icon> Nuevo Sucursal
                 </button>
-                <button type="button" class="btn btn-sec" id="btnExportarPDF">
+                <button type="button" class="btn btn-out" id="btnExportarPDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF
                 </button>
             </div>
@@ -24,7 +24,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             </div>
             <div class="cb">
                 <form class="filtro-dinamico" id="filtroSucursales">
-                    <div class="fr2">
+                    <div class="fr">
                         <div class="fg">
                             <label class="fl">Estado</label>
                             <select class="sel select-filtro" name="estado_filtro" id="estado_filtro">
@@ -80,7 +80,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
     </div>
     <!-- cajas abiertas -->
     <div class="mov" id="modalCajasAbiertas" style="display: none;">
-        <div class="modal">
+        <div class="modal mlg">
             <div class="mh">
                 <div>
                     <div class="mt"><ion-icon name="cash-outline"></ion-icon> Cajas Abiertas - <span id="modalCajasNombreSucursal">...</span></div>
@@ -110,23 +110,18 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     </div>
                 </div>
 
-                <div class="tw">
+                <div class="tw table-detail">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>N°</th>
-                                <th>Nombre de Caja</th>
-                                <th>Usuario Responsable</th>
-                                <th>Saldo Inicial</th>
-                                <th>Fecha Apertura</th>
-                                <th>Tiempo Abierta</th>
-                                <th>Observación</th>
-                                <th>Acciones</th>
+                                <th width="55%">Caja</th>
+                                <th width="25%">Detalles</th>
+                                <th width="20%">Tiempo</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCajasAbiertas">
                             <tr>
-                                <td colspan="8" style="text-align:center;">
+                                <td colspan="4" style="text-align:center;">
                                     <ion-icon name="hourglass-outline"></ion-icon> Cargando...
                                 </td>
                             </tr>
@@ -219,6 +214,8 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                             <input class="inp" type="text" name="Telefono_edit" id="Telefono_edit" pattern="[0-9+\-\s()]{6,30}" maxlength="30">
                         </div>
                     </div>
+
+
                 </form>
             </div>
             <div class="mf">
@@ -245,26 +242,52 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     <h3 class="th3"><ion-icon name="information-circle-outline"></ion-icon> Información General</h3>
                 </div>
 
-                <div class="fr4">
-                    <div class="fg">
-                        <label class="fl">Nombre:</label>
-                        <p class="tbs" id="detalleNombreSucursalInfo">-</p>
+                <div class="fr">
+                    <div class="card">
+                        <div class="cb">
+
+
+                            <div class="litem">
+                                <ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="fr1">
+                                    <label class="tc">Nombre:</label>
+                                    <p class="th5" id="detalleNombreSucursalInfo">-</p>
+                                </div>
+                            </div>
+                            <div class="litem">
+                                <ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="fr1">
+                                    <label class="f1">Dirección:</label>
+                                    <p class="tbs" id="detalleDireccionSucursal">-</p>
+                                </div>
+                            </div>
+                            <div class="litem">
+                                <ion-icon name="call-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="fr1">
+                                    <label class="f1">Teléfono:</label>
+                                    <p class="tbs" id="detalleTelefonoSucursal">-</p>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <div class="fg">
-                        <label class="fl">Dirección:</label>
-                        <p class="tbs" id="detalleDireccionSucursal">-</p>
-                    </div>
-                    <div class="fg">
-                        <label class="fl">Teléfono:</label>
-                        <p class="tbs" id="detalleTelefonoSucursal">-</p>
-                    </div>
-                    <div class="fg">
-                        <label class="fl">Estado:</label>
-                        <p class="tbs" id="detalleEstadoSucursal">-</p>
-                    </div>
-                    <div class="fg">
-                        <label class="fl">Fecha de Creación:</label>
-                        <p class="tbs" id="detalleFechaCreacionSucursal">-</p>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="litem">
+                                <ion-icon name="power-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="fr1">
+                                    <label class="f1">Estado:</label>
+                                    <p class="tbs" id="detalleEstadoSucursal">-</p>
+                                </div>
+                            </div>
+                            <div class="litem">
+                                <ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="fr1">
+                                    <label class="fl">Fecha de Creación:</label>
+                                    <p class="tbs" id="detalleFechaCreacionSucursal">-</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -322,8 +345,14 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
     </div>
 
     <style>
-
+        #graficoCostoBeneficio {
+            height: 320px !important;
+            min-height: 320px !important;
+            width: 100% !important;
+            display: block !important;
+        }
     </style>
+
     <!-- modal sucursales editar y registrar -->
     <script>
         const SucursalesModals = (function() {
@@ -341,25 +370,6 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 cargarGraficoCostoBeneficio();
                 bindEvents();
                 cargarEcharts();
-                agregarCierreModalesAlBackdrop();
-            }
-
-            function agregarCierreModalesAlBackdrop() {
-                const modales = ['modalNuevaSucursal', 'modalEditarSucursal', 'modalDetalleSucursal', 'modalCajasAbiertas'];
-
-                modales.forEach(modalId => {
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.addEventListener('click', function(event) {
-                            if (event.target === this) {
-                                if (modalId === 'modalNuevaSucursal') cerrarModalNuevo();
-                                else if (modalId === 'modalEditarSucursal') cerrarModalEditar();
-                                else if (modalId === 'modalDetalleSucursal') cerrarModalDetalle();
-                                else if (modalId === 'modalCajasAbiertas') cerrarModalCajas();
-                            }
-                        });
-                    }
-                });
             }
             async function cargarGraficoCostoBeneficio(periodo = 'semestre') {
                 if (typeof echarts === 'undefined') {
@@ -425,19 +435,25 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
             function renderizarGraficoCostoBeneficio(sucursales) {
                 const container = document.getElementById('graficoCostoBeneficio');
-                if (!container) return;
+                if (!container || typeof echarts === 'undefined') return;
 
                 const chart = echarts.init(container);
+                chart.clear();
 
-                if (sucursales.length === 0) {
+                if (!sucursales || sucursales.length === 0) {
                     chart.setOption({
                         title: {
-                            text: 'No hay datos disponibles',
+                            text: 'No hay datos de costo-beneficio',
+                            subtext: 'No hay registros de ventas o compras para este período',
                             left: 'center',
                             top: 'middle',
                             textStyle: {
-                                color: '#0044DE',
+                                color: '#999',
                                 fontSize: 16
+                            },
+                            subtextStyle: {
+                                color: '#aaa',
+                                fontSize: 12
                             }
                         }
                     });
@@ -746,14 +762,13 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                             </div>
 
                             <div class="sucursal-actions">
-                                <a href="javascript:void(0)" class="btn primary" 
+                                <a href="javascript:void(0)" class="btn btn-out" 
                                 onclick="event.stopPropagation(); SucursalesModals.editarSucursal(${suc.su_id})">
                                     <ion-icon name="create-outline"></ion-icon> Editar
                                 </a>
-                                <a href="javascript:void(0)" class="btn ${estadoClass === 'activo' ? 'danger' : 'success'}" 
-                                onclick="event.stopPropagation(); SucursalesModals.toggleEstado(${suc.su_id}, ${suc.su_estado})">
-                                    <ion-icon name="power-outline"></ion-icon> 
-                                    ${estadoClass === 'activo' ? 'Desactivar' : 'Activar'}
+                                <a href="javascript:void(0)" class="btn btn-suc" 
+                                onclick="event.stopPropagation(); window.location.href='<?php echo SERVER_URL; ?>inventarioLista/?sucursal=${suc.su_id}'">
+                                    <ion-icon name="cube-outline"></ion-icon> Inventario
                                 </a>
                             </div>
                         </div>
@@ -1036,19 +1051,23 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     const fechaApertura = formatearFechaHora(caja.caja_creado_en);
 
                     return `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${escapeHtml(caja.caja_nombre)}</strong></td>
-                    <td>${escapeHtml(nombreUsuario)}</td>
-                    <td>Bs. ${formatearNumero(caja.caja_saldo_inicial)}</td>
-                    <td>${fechaApertura}</td>
-                    <td><span style="color:#ff9800;font-weight:600;">${tiempoAbierta}</span></td>
-                    <td>${escapeHtml(caja.caja_observacion || '-')}</td>
+                <tr class="tr-click" onclick="window.location.href='<?php echo SERVER_URL; ?>cajaHistorialLista/?select2=${caja.us_id}'">
                     <td>
-                        <a href="<?php echo SERVER_URL; ?>cajaHistorialLista/?select2=${caja.us_id}" 
-                           class="btn default btn-sm">
-                            <ion-icon name="list-outline"></ion-icon> Ver Movimientos
-                        </a>
+                        <div class="td-main">${escapeHtml(caja.caja_nombre)}</div>
+                        <div class="td-sub">
+                            <ion-icon name="person-outline"></ion-icon> ${escapeHtml(nombreUsuario)}
+                        </div>
+                        <div class="td-meta">
+                            <ion-icon name="calendar-outline"></ion-icon> ${fechaApertura}
+                            ${caja.caja_observacion ? ` | <ion-icon name="alert-circle-outline"></ion-icon> ${escapeHtml(caja.caja_observacion)}` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="td-main">Bs. ${formatearNumero(caja.caja_saldo_inicial)}</div>
+                        <div class="td-sub">Saldo Inicial</div>
+                    </td>
+                    <td>
+                        <span style="color:#ff9800;font-weight:600;">${tiempoAbierta}</span>
                     </td>
                 </tr>
             `;
