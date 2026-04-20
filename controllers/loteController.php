@@ -142,7 +142,12 @@ class loteController extends loteModel
                 lm.lm_fecha_vencimiento,
                 lm.lm_estado,
                 lm.lm_creado_en,
-                lm.lm_actualizado_en
+                lm.lm_actualizado_en,
+                lm.lm_costo_lista,
+                lm.lm_margen_u,
+                lm.lm_margen_c,
+                lm.lm_precio_min_u,
+                lm.lm_precio_min_c
             FROM lote_medicamento lm
             INNER JOIN medicamento m ON lm.med_id = m.med_id
             INNER JOIN sucursales s ON lm.su_id = s.su_id
@@ -196,8 +201,9 @@ class loteController extends loteModel
                             <th>LOTE / MEDICAMENTO</th>
                             <th>STOCK</th>
                             <th>FECHAS</th>
+                            <th>AUDITORIA</th>
                             <th>ESTADO</th>
-                            
+
                         </tr>
                     </thead>
                     <tbody>
@@ -262,6 +268,12 @@ class loteController extends loteModel
                             <div class="td-sub">Ingreso: ' . date('d/m/Y', strtotime($rows['lm_fecha_ingreso'])) . $dias_restantes . '</div>
                         </td>
                         <td>
+                            <div class="td-main">Marg. U: ' . ($rows['lm_margen_u'] ? $rows['lm_margen_u'] . '%' : 'N/A') . '</div>
+                            <div class="td-sub">Marg. C: ' . ($rows['lm_margen_c'] ? $rows['lm_margen_c'] . '%' : 'N/A') . '</div>
+                            <div class="td-sub">Min. U: ' . ($rows['lm_precio_min_u'] ? 'Bs. ' . number_format($rows['lm_precio_min_u'], 2) : 'N/A') . '</div>
+                            <div class="td-sub">Min. C: ' . ($rows['lm_precio_min_c'] ? 'Bs. ' . number_format($rows['lm_precio_min_c'], 2) : 'N/A') . '</div>
+                        </td>
+                        <td>
                             <div class="td-main">' .
                     ($rows['lm_estado'] == "en_espera"
                         ? '<a href="#" 
@@ -285,7 +297,7 @@ class loteController extends loteModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="' . $colspan_total . '" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="bug-outline"></ion-icon> No hay registros que coincidan con los filtros aplicados
                     </td></tr>';
         }
@@ -359,6 +371,12 @@ class loteController extends loteModel
         $precio_compra = (float)mainModel::limpiar_cadena($_POST['Precio_compra_up'] ?? $lote['lm_precio_compra']);
         $precio_venta = (float)mainModel::limpiar_cadena($_POST['Precio_venta_up'] ?? $lote['lm_precio_venta']);
         $fecha_vencimiento = mainModel::limpiar_cadena($_POST['Fecha_vencimiento_up'] ?? $lote['lm_fecha_vencimiento']);
+        /* campos de auditoria */
+        $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : $lote['lm_costo_lista'];
+        $margen_u = isset($_POST['lm_margen_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u']) : $lote['lm_margen_u'];
+        $margen_c = isset($_POST['lm_margen_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c']) : $lote['lm_margen_c'];
+        $precio_min_u = isset($_POST['lm_precio_min_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_u']) : $lote['lm_precio_min_u'];
+        $precio_min_c = isset($_POST['lm_precio_min_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_c']) : $lote['lm_precio_min_c'];
 
         /* Validación de datos requeridos */
         if ($precio_venta <= 0 || empty($fecha_vencimiento)) {
@@ -451,6 +469,11 @@ class loteController extends loteModel
             'lm_precio_compra' => $precio_compra,
             'lm_precio_venta' => $precio_venta,
             'lm_fecha_vencimiento' => $fecha_vencimiento,
+            'lm_costo_lista' => $costo_lista,
+            'lm_margen_u' => $margen_u,
+            'lm_margen_c' => $margen_c,
+            'lm_precio_min_u' => $precio_min_u,
+            'lm_precio_min_c' => $precio_min_c,
             'lm_origen_id' => $lote['lm_origen_id'] ?? null,
             'ID' => $id
         ];
@@ -772,7 +795,12 @@ class loteController extends loteModel
                     lm.lm_fecha_ingreso,
                     lm.lm_fecha_vencimiento,
                     lm.lm_estado,
-                    lm.lm_creado_en
+                    lm.lm_creado_en,
+                    lm.lm_costo_lista,
+                    lm.lm_margen_u,
+                    lm.lm_margen_c,
+                    lm.lm_precio_min_u,
+                    lm.lm_precio_min_c
                 FROM lote_medicamento lm
                 INNER JOIN medicamento m ON lm.med_id = m.med_id
                 INNER JOIN sucursales s ON lm.su_id = s.su_id
@@ -847,28 +875,38 @@ class loteController extends loteModel
             $headers = [];
             if ($rol_usuario == 1) {
                 $headers = [
-                    ['text' => 'N° LOTE', 'width' => 25],
-                    ['text' => 'MEDICAMENTO', 'width' => 35],
-                    ['text' => 'PROVEEDOR', 'width' => 25],
-                    ['text' => 'SUCURSAL', 'width' => 20],
-                    ['text' => 'CAJAS ACT.', 'width' => 15],
-                    ['text' => 'UND ACT.', 'width' => 15],
-                    ['text' => 'PRECIO COMPRA', 'width' => 20],
-                    ['text' => 'PRECIO VENTA', 'width' => 20],
-                    ['text' => 'VENCIMIENTO', 'width' => 20],
-                    ['text' => 'ESTADO', 'width' => 15]
+                    ['text' => 'N° LOTE', 'width' => 20],
+                    ['text' => 'MEDICAMENTO', 'width' => 25],
+                    ['text' => 'PROVEEDOR', 'width' => 20],
+                    ['text' => 'SUCURSAL', 'width' => 15],
+                    ['text' => 'CAJAS ACT.', 'width' => 12],
+                    ['text' => 'UND ACT.', 'width' => 12],
+                    ['text' => 'PRECIO COMPRA', 'width' => 15],
+                    ['text' => 'PRECIO VENTA', 'width' => 15],
+                    ['text' => 'COSTO LISTA', 'width' => 15],
+                    ['text' => 'MARG. U', 'width' => 10],
+                    ['text' => 'MARG. C', 'width' => 10],
+                    ['text' => 'MIN. U', 'width' => 12],
+                    ['text' => 'MIN. C', 'width' => 12],
+                    ['text' => 'VENCIMIENTO', 'width' => 15],
+                    ['text' => 'ESTADO', 'width' => 12]
                 ];
             } else {
                 $headers = [
-                    ['text' => 'N° LOTE', 'width' => 30],
-                    ['text' => 'MEDICAMENTO', 'width' => 40],
-                    ['text' => 'PROVEEDOR', 'width' => 30],
-                    ['text' => 'CAJAS ACT.', 'width' => 15],
-                    ['text' => 'UND ACT.', 'width' => 15],
-                    ['text' => 'PRECIO COMPRA', 'width' => 20],
-                    ['text' => 'PRECIO VENTA', 'width' => 20],
-                    ['text' => 'VENCIMIENTO', 'width' => 25],
-                    ['text' => 'ESTADO', 'width' => 15]
+                    ['text' => 'N° LOTE', 'width' => 22],
+                    ['text' => 'MEDICAMENTO', 'width' => 30],
+                    ['text' => 'PROVEEDOR', 'width' => 25],
+                    ['text' => 'CAJAS ACT.', 'width' => 12],
+                    ['text' => 'UND ACT.', 'width' => 12],
+                    ['text' => 'PRECIO COMPRA', 'width' => 15],
+                    ['text' => 'PRECIO VENTA', 'width' => 15],
+                    ['text' => 'COSTO LISTA', 'width' => 15],
+                    ['text' => 'MARG. U', 'width' => 10],
+                    ['text' => 'MARG. C', 'width' => 10],
+                    ['text' => 'MIN. U', 'width' => 12],
+                    ['text' => 'MIN. C', 'width' => 12],
+                    ['text' => 'VENCIMIENTO', 'width' => 18],
+                    ['text' => 'ESTADO', 'width' => 12]
                 ];
             }
 
@@ -888,25 +926,35 @@ class loteController extends loteModel
                 if ($rol_usuario == 1) {
                     $cells = [
                         ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
-                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 25), 'align' => 'L'],
+                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 15), 'align' => 'L'],
-                        ['text' => substr($row['su_nombre'] ?? 'N/A', 0, 15), 'align' => 'L'],
+                        ['text' => substr($row['su_nombre'] ?? 'N/A', 0, 12), 'align' => 'L'],
                         ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
                         ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
                         ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
                         ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
+                        ['text' => $row['lm_costo_lista'] ? 'Bs. ' . number_format($row['lm_costo_lista'], 2) : 'N/A', 'align' => 'R'],
+                        ['text' => $row['lm_margen_u'] ? $row['lm_margen_u'] . '%' : 'N/A', 'align' => 'C'],
+                        ['text' => $row['lm_margen_c'] ? $row['lm_margen_c'] . '%' : 'N/A', 'align' => 'C'],
+                        ['text' => $row['lm_precio_min_u'] ? 'Bs. ' . number_format($row['lm_precio_min_u'], 2) : 'N/A', 'align' => 'R'],
+                        ['text' => $row['lm_precio_min_c'] ? 'Bs. ' . number_format($row['lm_precio_min_c'], 2) : 'N/A', 'align' => 'R'],
                         ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
                         ['text' => $estado_texto, 'align' => 'C']
                     ];
                 } else {
                     $cells = [
                         ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
-                        ['text' => substr($row['med_nombre_químico'] ?? 'N/A', 0, 30), 'align' => 'L'],
+                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 25), 'align' => 'L'],
                         ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 20), 'align' => 'L'],
                         ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
                         ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
                         ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
                         ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
+                        ['text' => $row['lm_costo_lista'] ? 'Bs. ' . number_format($row['lm_costo_lista'], 2) : 'N/A', 'align' => 'R'],
+                        ['text' => $row['lm_margen_u'] ? $row['lm_margen_u'] . '%' : 'N/A', 'align' => 'C'],
+                        ['text' => $row['lm_margen_c'] ? $row['lm_margen_c'] . '%' : 'N/A', 'align' => 'C'],
+                        ['text' => $row['lm_precio_min_u'] ? 'Bs. ' . number_format($row['lm_precio_min_u'], 2) : 'N/A', 'align' => 'R'],
+                        ['text' => $row['lm_precio_min_c'] ? 'Bs. ' . number_format($row['lm_precio_min_c'], 2) : 'N/A', 'align' => 'R'],
                         ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
                         ['text' => $estado_texto, 'align' => 'C']
                     ];

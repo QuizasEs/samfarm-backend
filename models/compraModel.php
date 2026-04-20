@@ -10,20 +10,15 @@ class compraModel extends mainModel
         $db = mainModel::conectar();
         $sql = $db->prepare("
             INSERT INTO compras
-                (co_numero, co_fecha, us_id, su_id, pr_id, co_subtotal, co_impuesto, co_total, co_numero_factura, co_fecha_factura, co_razon_social)
+                (co_numero, us_id, su_id, co_subtotal, co_total)
             VALUES
-                (:co_numero, NOW(), :us_id, :su_id, :pr_id, :co_subtotal, :co_impuesto, :co_total, :co_numero_factura, :co_fecha_factura, :co_razon_social)
+                (:co_numero, :us_id, :su_id, :co_subtotal, :co_total)
         ");
         $sql->bindParam(":co_numero", $datos['co_numero']);
         $sql->bindParam(":us_id", $datos['us_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
-        $sql->bindParam(":pr_id", $datos['pr_id']);
         $sql->bindParam(":co_subtotal", $datos['co_subtotal']);
-        $sql->bindParam(":co_impuesto", $datos['co_impuesto']);
         $sql->bindParam(":co_total", $datos['co_total']);
-        $sql->bindParam(":co_numero_factura", $datos['co_numero_factura']);
-        $sql->bindParam(":co_fecha_factura", $datos['co_fecha_factura']);
-        $sql->bindParam(":co_razon_social", $datos['co_razon_social']);
 
         $sql->execute();
         return (int) $db->lastInsertId();

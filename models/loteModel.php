@@ -8,7 +8,7 @@ class loteModel extends mainModel
     public static function datos_lote_model($id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT 
+            SELECT
                 lm.lm_id,
                 lm.med_id,
                 lm.su_id,
@@ -28,6 +28,13 @@ class loteModel extends mainModel
                 lm.lm_creado_en,
                 lm.lm_actualizado_en,
                 lm.lm_origen_id,
+                lm.lm_tr_bloqueado,
+                /* campos de auditoria */
+                lm.lm_costo_lista,
+                lm.lm_margen_u,
+                lm.lm_margen_c,
+                lm.lm_precio_min_u,
+                lm.lm_precio_min_c,
                 m.med_nombre_quimico AS med_nombre,
                 m.med_principio_activo,
                 m.med_presentacion,
@@ -60,6 +67,7 @@ class loteModel extends mainModel
     public static function actualizar_lote_model($datos)
     {
         // Construir consulta dinámica basada en los campos proporcionados
+        // soporta actualizacion de campos de auditoria como costo de lista, margenes y precios minimos
         $setClauses = [];
 
         foreach ($datos as $key => $value) {

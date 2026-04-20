@@ -73,101 +73,42 @@ class compraController extends compraModel
     {
         /* validamos y limpiamos cadena entrante */
         $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
-        $proveedor_id = mainModel::limpiar_cadena($_POST['Proveedor_reg']);
-        // Datos de factura eliminados del formulario, se usan valores por defecto
-        $fecha_factura = null;
-        $numero_factura = null;
-        $impuesto = 0;
         $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
         $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp']);
 
-        $lotes_json = $_POST['lotes_json'] ?? '[]';
-        $totales_json = $_POST['totales_json'] ?? '{}';
+        $lotes_json = trim($_POST['lotes_json'] ?? '[]');
+        $totales_json = trim($_POST['totales_json'] ?? '{}');
 
         $lotes = json_decode($lotes_json, true);
         $totales = json_decode($totales_json, true);
 
-          /* validamos los campos obligatorios */
-          if (empty($numero_compra)) {
-              $alerta = [
-                  'Alerta' => 'simple',
-                  'Titulo' => 'Campos faltantes',
-                  'texto' => 'Debe completar todos los campos obligatorios.',
-                  'Tipo' => 'error'
-              ];
-              echo json_encode($alerta);
-              exit();
-          }
-
-            /* verificar que el proveedor_id sea un número válido si se proporciona y no es un valor que indique "ningún proveedor" */
-            if (!empty($proveedor_id) && $proveedor_id !== '0' && $proveedor_id !== 0) {
-                if (!is_numeric($proveedor_id) || intval($proveedor_id) <= 0) {
-                    $alerta = [
-                        'Alerta' => 'simple',
-                        'Titulo' => 'Proveedor inválido',
-                        'texto' => 'Debe seleccionar un proveedor válido.',
-                        'Tipo' => 'error'
-                    ];
-                    echo json_encode($alerta);
-                    exit();
-                }
-
-                /* convertir a entero para la consulta */
-                $proveedor_id = intval($proveedor_id);
-
-                /* obtener datos del proveedor para construir razón social */
-                $conexion = mainModel::conectar();
-                $stmt_proveedor = $conexion->prepare("SELECT pr_razon_social, pr_nit FROM proveedores WHERE pr_id = :pr_id");
-                $stmt_proveedor->bindParam(':pr_id', $proveedor_id);
-                $stmt_proveedor->execute();
-                $proveedor = $stmt_proveedor->fetch(PDO::FETCH_ASSOC);
-
-                if (!$proveedor) {
-                    $alerta = [
-                        'Alerta' => 'simple',
-                        'Titulo' => 'Proveedor no válido',
-                        'texto' => 'El proveedor seleccionado no existe.',
-                        'Tipo' => 'error'
-                    ];
-                    echo json_encode($alerta);
-                    exit();
-                }
-
-                $razon_social = $proveedor['pr_razon_social'];
-                if (!empty($proveedor['pr_nit'])) {
-                    $razon_social .= ' - NIT: ' . $proveedor['pr_nit'];
-                }
-            } else {
-                /* Si no se selecciona proveedor válido, obtener el primer proveedor disponible */
-                $conexion = mainModel::conectar();
-                $sql_predeterminado = $conexion->prepare("SELECT pr_id, pr_razon_social, pr_nit FROM proveedores ORDER BY pr_id ASC LIMIT 1");
-                $sql_predeterminado->execute();
-                $proveedor_predeterminado = $sql_predeterminado->fetch(PDO::FETCH_ASSOC);
-                
-                if ($proveedor_predeterminado) {
-                    $proveedor_id = $proveedor_predeterminado['pr_id'];
-                    $razon_social = $proveedor_predeterminado['pr_razon_social'];
-                    if (!empty($proveedor_predeterminado['pr_nit'])) {
-                        $razon_social .= ' - NIT: ' . $proveedor_predeterminado['pr_nit'];
-                    }
-                } else {
-                    /* Si no hay proveedores en la base de datos, usar un ID predeterminado (asumiendo que existe al menos uno) */
-                    $proveedor_id = 1;
-                    $razon_social = 'Compra directa';
-                }
-            }
+        // Verificar si json_decode falló
+        if ($lotes === null && $lotes_json !== '[]') {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error en datos',
+                'texto' => 'Los datos de lotes son inválidos: ' . $lotes_json,
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
 
         /* verificamos que los lotes existan en la lista */
         if (empty($lotes) || !is_array($lotes) || count($lotes) === 0) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Sin medicamentos',
-                'texto' => 'Debes agregar al menos un medicamento con su lote a la compra.',
+                'texto' => 'No has agregado medicamentos a la compra. Busca medicamentos y agrégalos a la lista.',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
             exit();
         }
+
+
+
+
 
         /* validamos el formato de totales */
         if (empty($totales) || !isset($totales['subtotal']) || !isset($totales['total'])) {
@@ -186,13 +127,8 @@ class compraController extends compraModel
             "co_numero" => $numero_compra,
             "us_id" => $usuario_id,
             "su_id" => $sucursal_id,
-            "pr_id" => $proveedor_id,
             "co_subtotal" => $totales['subtotal'],
-            "co_impuesto" => $totales['impuestos'] ?? 0,
-            "co_total" => $totales['total'],
-            "co_numero_factura" => $numero_factura,
-            "co_fecha_factura" => $fecha_factura,
-            "co_razon_social" => $razon_social
+            "co_total" => $totales['total']
         ];
 
         /* insertamos compra */
@@ -222,6 +158,24 @@ class compraController extends compraModel
             $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
 
+            /* obtener pr_id del medicamento */
+            $conexion = mainModel::conectar();
+            $stmt = $conexion->prepare("SELECT pr_id FROM medicamento WHERE med_id = :med_id");
+            $stmt->bindParam(':med_id', $medicamento_id);
+            $stmt->execute();
+            $medicamento = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$medicamento) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Medicamento no encontrado',
+                    'texto' => 'El medicamento seleccionado no existe.',
+                    'Tipo' => 'error'
+                ];
+                echo json_encode($alerta);
+                exit();
+            }
+            $pr_id_lote = $medicamento['pr_id'];
+
             /* Validar datos del lote */
             if (empty($medicamento_id) || $cantidad_cajas <= 0 || $precio_compra <= 0) {
                 $alerta = [
@@ -235,19 +189,19 @@ class compraController extends compraModel
             }
 
             /* cálculos de cantidades */
-            $lm_cant_caja = $cantidad_cajas;
-            $lm_cant_blister = $cantidad_blister;
-            $lm_cant_unidad = $cantidad_unidades;
-            $lm_total_unidades = $lm_cant_caja * $lm_cant_blister * $lm_cant_unidad;
-            $lm_cant_actual_cajas = $lm_cant_caja;
+            $lm_cant_caja = $cantidad_cajas * $cantidad_unidades; // total unidades
+            $lm_cant_blister = 1;
+            $lm_cant_unidad = 1;
+            $lm_total_unidades = $lm_cant_caja;
+            $lm_cant_actual_cajas = $cantidad_cajas; // número de cajas disponibles
             $lm_cant_actual_unidades = $lm_total_unidades;
-            $subtotal_lote = $cantidad_cajas * $precio_compra;
+            $subtotal_lote = $lm_total_unidades * $precio_compra;
             $lm_estado = $activar_lote ? 'activo' : 'en_espera';
 
             /* datos de lote medicamento */
             $datos_lote = [
-                "pr_id" => $proveedor_id,
-                "pr_id_compra" => $compra_id,
+                "pr_id" => $pr_id_lote,
+                "pr_id_compra" => $pr_id_lote,
                 "med_id" => $medicamento_id,
                 "su_id" => $sucursal_id,
                 "lm_numero_lote" => $numero_lote,
@@ -260,7 +214,13 @@ class compraController extends compraModel
                 "lm_precio_compra" => $precio_compra,
                 "lm_precio_venta" => $precio_venta,
                 "lm_fecha_vencimiento" => $fecha_vencimiento,
-                "lm_estado" => $lm_estado
+                "lm_estado" => $lm_estado,
+                /* campos de auditoría */
+                "lm_costo_lista" => $lote['costo_lista'] ?? null,
+                "lm_margen_u" => $lote['margen_unitario'] ?? null,
+                "lm_margen_c" => $lote['margen_caja'] ?? null,
+                "lm_precio_min_u" => $lote['precio_min_unitario'] ?? null,
+                "lm_precio_min_c" => $lote['precio_min_caja'] ?? null
             ];
 
             $lote_id = compraModel::agregar_lote_model($datos_lote);
@@ -396,73 +356,7 @@ class compraController extends compraModel
             }
         } /* fin foreach lotes */
 
-        /* preparar informe de compra */
-        $config_informe = [
-            "compra_id" => $compra_id,
-            "numero_compra" => $numero_compra,
-            "proveedor_id" => $proveedor_id,
-            "sucursal_id" => $sucursal_id,
-            "fecha_factura" => $fecha_factura,
-            "numero_factura" => $numero_factura,
-            "razon_social" => $razon_social,
-            "subtotal" => $totales['subtotal'],
-            "impuestos" => $totales['impuestos'],
-            "total" => $totales['total'],
-            "cantidad_lotes" => count($lotes),
-            "lotes" => array_map(function ($lote) {
-                return [
-                    "medicamento_id" => $lote['id_medicamento'],
-                    "numero_lote" => $lote['numero'],
-                    "cantidad" => $lote['cantidad'],
-                    "precio_compra" => $lote['precioCompra'],
-                    "precio_venta" => $lote['precioVenta'],
-                    "vencimiento" => $lote['vencimiento'],
-                    "activar_lote" => $lote['activar_lote'] ?? false
-                ];
-            }, $lotes)
-        ];
-
-        $datos_informe = [
-            "inf_nombre" => "Compra {$numero_compra} - {$razon_social}",
-            "inf_usuario" => $usuario_id,
-            "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
-        ];
-
-        $informe_result = compraModel::agregar_informe_compra_model($datos_informe);
-
-        if ($informe_result->rowCount() <= 0) {
-            $alerta = [
-                'Alerta' => 'simple',
-                'Titulo' => 'Advertencia',
-                'texto' => 'Compra registrada pero no se pudo crear el informe.',
-                'Tipo' => 'warning'
-            ];
-            echo json_encode($alerta);
-            exit();
-        }
-
-        // Preparamos los datos para la nueva tabla 'informes_compra'
-        $datos_informe_estructurado = [
-            "co_id" => $compra_id,
-            "pr_id" => $proveedor_id,
-            "us_id" => $usuario_id,
-            "su_id" => $sucursal_id,
-            "ic_numero_compra" => $numero_compra,
-            "ic_numero_factura" => $numero_factura,
-            "ic_fecha_compra" => date('Y-m-d H:i:s'),
-            "ic_subtotal" => $totales['subtotal'],
-            "ic_impuestos" => $totales['impuestos'],
-            "ic_total" => $totales['total'],
-            "ic_cantidad_lotes" => count($lotes),
-            "ic_config_json" => json_encode($config_informe, JSON_UNESCAPED_UNICODE) // Guardamos el JSON completo por si acaso
-        ];
-
-        // Llamamos a un nuevo método en el modelo para insertar en la nueva tabla
-        $informe_estructurado_result = compraModel::agregar_informe_compra_estructurado_model($datos_informe_estructurado);
-        if (!$informe_estructurado_result || $informe_estructurado_result->rowCount() <= 0) {
-            // Si falla, solo registramos un log pero no detenemos el proceso
-            error_log("ADVERTENCIA: No se pudo registrar el informe de compra estructurado para la compra ID: " . $compra_id);
-        }
+        /* informes comentados por incompatibilidad con estructura actual */
 
 
         /* respuesta exitosa */

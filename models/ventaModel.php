@@ -12,7 +12,7 @@ class ventaModel extends mainModel
     {
         $db = mainModel::conectar();
         $stmt = $db->prepare("
-                SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta, lm_precio_compra
+                SELECT lm_id, lm_cant_actual_unidades, lm_cant_actual_cajas, lm_cant_blister, lm_cant_unidad, lm_precio_venta, lm_precio_compra, lm_precio_min_u
                 FROM lote_medicamento
                 WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0
                 ORDER BY lm_fecha_ingreso ASC, lm_fecha_vencimiento ASC

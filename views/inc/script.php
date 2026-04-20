@@ -505,7 +505,10 @@
         /** ➕ Agrega un nuevo lote */
         function agregarLote() {
             const datos = validarCampos();
-            if (!datos) return;
+            if (!datos) {
+                alert('Datos inválidos en el modal. Verifica que todos los campos estén llenos correctamente.');
+                return;
+            }
 
             const id = modalId.value;
             const nombre = modalNombre.textContent;
@@ -519,6 +522,7 @@
             renderizarLista();
             actualizarTotales();
             cerrarModal();
+            Swal.fire('Éxito', 'Lote agregado correctamente', 'success');
         }
 
         /** 🧾 Renderiza todos los lotes */
@@ -553,7 +557,7 @@
                         </div>
 
                         <div>
-                            <a href="javascript:void(0)" class="btn warning btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
+                            <a href="javascript:void(0)" class="btn btn-douc lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
                                 <ion-icon name="trash-outline"></ion-icon> Eliminar
                             </a>
                         </div>

@@ -218,7 +218,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </button>
             </div>
             <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/loteAjax.php" method="POST" data-form="update" autocomplete="off" id="formEditarLote">
-                <div class="mb">
+                <div class="mb" style="max-height: 400px; overflow-y: auto;">
                     <input type="hidden" name="loteAjax" value="update">
                     <input type="hidden" name="id" id="editarLoteId">
 
@@ -259,22 +259,54 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="0">
                                 </div>
                             </div>
-                            <div class="fr3">
-                                <div class="fg">
-                                    <label class="fl">Precio de compra</label>
-                                    <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" required>
-                                </div>
-                                <div class="fg">
-                                    <label class="fl">Precio venta por unidad</label>
-                                    <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" required>
-                                </div>
-                                <div class="fg">
-                                    <label class="fl">Fecha de vencimiento</label>
-                                    <input class="inp" type="date" name="Fecha_vencimiento_up" id="editarFechaVencimiento" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                             <div class="fr3">
+                                 <div class="fg">
+                                     <label class="fl">Precio de compra</label>
+                                     <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" required>
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl">Precio venta por unidad</label>
+                                     <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" required>
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl">Fecha de vencimiento</label>
+                                     <input class="inp" type="date" name="Fecha_vencimiento_up" id="editarFechaVencimiento" required>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                     <div class="stit">Datos de Auditoría</div>
+                     <div class="card">
+                         <div class="cb">
+                             <div class="fr">
+                                 <div class="fg">
+                                     <label class="fl" for="costo_lista">Costo Lista</label>
+                                     <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="editarCostoLista" min="0">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl" for="margen_unitario">Margen Unitario (%)</label>
+                                     <input class="inp" type="number" step="0.01" name="lm_margen_u" id="editarMargenU" min="0">
+                                 </div>
+                             </div>
+                             <div class="fr">
+                                 <div class="fg">
+                                     <label class="fl" for="margen_caja">Margen Caja (%)</label>
+                                     <input class="inp" type="number" step="0.01" name="lm_margen_c" id="editarMargenC" min="0">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl" for="precio_min_unitario">Precio Min. Unitario</label>
+                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="editarPrecioMinU" min="0">
+                                 </div>
+                             </div>
+                             <div class="fr">
+                                 <div class="fg">
+                                     <label class="fl" for="precio_min_caja">Precio Min. Caja</label>
+                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="editarPrecioMinC" min="0">
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
 
                     <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
                         <div class="cb">
@@ -335,6 +367,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('editarPrecioCompra').value = data.lm_precio_compra;
                     document.getElementById('editarPrecioVenta').value = data.lm_precio_venta;
                     document.getElementById('editarFechaVencimiento').value = data.lm_fecha_vencimiento;
+                    /* campos de auditoria */
+                    document.getElementById('editarCostoLista').value = data.lm_costo_lista || '';
+                    document.getElementById('editarMargenU').value = data.lm_margen_u || '';
+                    document.getElementById('editarMargenC').value = data.lm_margen_c || '';
+                    document.getElementById('editarPrecioMinU').value = data.lm_precio_min_u || '';
+                    document.getElementById('editarPrecioMinC').value = data.lm_precio_min_c || '';
 
                     document.getElementById('modalEditarLote').style.display = 'flex';
                     document.getElementById('modalEditarLote').classList.add('open');

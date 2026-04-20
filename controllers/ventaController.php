@@ -346,7 +346,7 @@ class ventaController extends ventaModel
                 if ($lm_id_solicitado > 0) {
                     $db_check = mainModel::conectar();
                     $stmt_check = $db_check->prepare("
-                        SELECT lm_id, lm_cant_actual_unidades, lm_precio_compra, lm_precio_venta
+                        SELECT lm_id, lm_cant_actual_unidades, lm_precio_compra, lm_precio_venta, lm_precio_min_u
                         FROM lote_medicamento
                         WHERE lm_id = :lm_id AND med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo'
                     ");
@@ -363,6 +363,11 @@ class ventaController extends ventaModel
                     $lm_id = (int)$lm['lm_id'];
                     $lm_disp = (int)$lm['lm_cant_actual_unidades'];
                     $lm_precio_compra = (float)$lm['lm_precio_compra'];
+
+                    /* validar precio minimo del lote */
+                    if ($lm['lm_precio_min_u'] && $precio_unitario < $lm['lm_precio_min_u']) {
+                        throw new Exception("El precio de venta ({$precio_unitario}) es menor al precio minimo permitido ({$lm['lm_precio_min_u']}) para el lote seleccionado");
+                    }
 
                     if ($lm_disp < $unidades_requeridas) {
                         throw new Exception("Stock insuficiente en el lote seleccionado: {$lm_id}");
@@ -416,6 +421,11 @@ class ventaController extends ventaModel
                         if ($lm_disp <= 0) continue;
                         $take = min($lm_disp, $remaining);
                         $lm_precio_compra = (float)$lm['lm_precio_compra'];
+
+                        /* validar precio minimo del lote */
+                        if ($lm['lm_precio_min_u'] && $precio_unitario < $lm['lm_precio_min_u']) {
+                            throw new Exception("El precio de venta ({$precio_unitario}) es menor al precio minimo permitido ({$lm['lm_precio_min_u']}) para el lote {$lm_id}");
+                        }
 
                         $descuento_proporcional = ($take / $unidades_requeridas) * $descuento_item;
 
