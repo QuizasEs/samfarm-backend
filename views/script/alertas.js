@@ -4,6 +4,16 @@ const formularios_ajax = document.querySelectorAll(".FormularioAjax");
 function enviar_formulario_ajax(e) {
     e.preventDefault();
 
+    // Set JSON data for compra form
+    if (this.id === 'formCompra') {
+        if (typeof ModalManager !== 'undefined') {
+            const lotes = ModalManager.obtenerLotes();
+            const totales = ModalManager.obtenerTotales();
+            this.querySelector('#lotes_json').value = JSON.stringify(lotes);
+            this.querySelector('#totales_json').value = JSON.stringify(totales);
+        }
+    }
+
     let data = new FormData(this);
     let method = this.getAttribute("method");
     let action = this.getAttribute("action");

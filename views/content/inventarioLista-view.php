@@ -33,15 +33,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <div class="cb">
                 <form class="filtro-dinamico">
                     <div class="fr3">
-                        <div class="fg">
-                            <label class="fl">Proveedor</label>
-                            <select class="sel select-filtro" name="select1">
-                                <option value="">Todos</option>
-                                <?php foreach ($datos_select['proveedores'] as $prov) { ?>
-                                    <option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
 
                         <div class="fg">
                             <label class="fl">Estado de Stock</label>
@@ -226,7 +217,100 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalDetalleInventario')">Cerrar</button>
+                <button type="button" class="btn btn-def" onclick="InventarioModals.abrirBalance()">
+                    <ion-icon name="scale-outline"></ion-icon> Balance de Precios
+                </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Balance de Precios -->
+    <div class="mov" id="modalBalanceInventario">
+        <div class="modal ml">
+            <div class="mh">
+                <div>
+                    <div class="mt">Balance de Precios</div>
+                    <div class="ms">Ajustar precios y márgenes - <span id="modalBalanceMedicamento">...</span></div>
+                </div>
+                <button class="mcl" onclick="App.closeM('modalBalanceInventario')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+
+            <form class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/inventarioAjax.php" method="POST" data-form="balance" autocomplete="off" id="formBalanceInventario">
+                <input type="hidden" name="inventarioAjax" value="balance_precios">
+                <input type="hidden" name="med_id" id="balanceMedId">
+                <input type="hidden" name="su_id" id="balanceSuId">
+
+                <div class="mb">
+                    <div class="stit">Información del Producto</div>
+
+                    <div class="fr">
+                        <div class="card">
+                            <div class="cb">
+                                <div class="litem"><ion-icon name="medical-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Medicamento</div><div class="th5" id="balanceNombreMedicamento">-</div></div></div>
+                                <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Laboratorio</div><div class="th5" id="balanceLaboratorio">-</div></div></div>
+                                <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="balanceSucursal">-</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stit">Datos de Auditoría</div>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="fr">
+                                <div class="fg">
+                                    <label class="fl" for="balanceCostoLista">Costo Lista</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="balanceCostoLista" min="0">
+                                </div>
+                                <div class="fg">
+                                    <label class="fl" for="balanceMargenUnitario">Margen Unitario (%)</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_margen_u" id="balanceMargenUnitario" min="0">
+                                </div>
+                            </div>
+                            <div class="fr">
+                                <div class="fg">
+                                    <label class="fl" for="balanceMargenCaja">Margen Caja (%)</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_margen_c" id="balanceMargenCaja" min="0">
+                                </div>
+                                <div class="fg">
+                                    <label class="fl" for="balancePrecioVenta">Precio Venta Unitario</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_venta" id="balancePrecioVenta" min="0" readonly>
+                                </div>
+                            </div>
+                            <div class="fr">
+                                <div class="fg">
+                                    <label class="fl" for="balancePrecioMinUnitario">Precio Min. Unitario</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="balancePrecioMinUnitario" min="0">
+                                </div>
+                                <div class="fg">
+                                    <label class="fl" for="balancePrecioMinCaja">Precio Min. Caja</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="balancePrecioMinCaja" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
+                        <div class="cb">
+                            <div class="litem" style="border:none">
+                                <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
+                                <div class="f1">
+                                    <div class="th5" style="color:var(--btn-warning)">Atención</div>
+                                    <div class="tc" style="color:var(--btn-warning)">Este cambio afectará a TODOS los lotes activos de este medicamento en esta sucursal. Verifique los valores antes de guardar.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mf">
+                    <button type="button" class="btn btn-war" onclick="App.closeM('modalBalanceInventario')">Cancelar</button>
+                    <button type="submit" class="btn btn-def">
+                        <ion-icon name="scale-outline"></ion-icon> Aplicar Balance
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -348,7 +432,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
             const busqueda = form.querySelector('input[name="busqueda"]');
-            const select1 = form.querySelector('select[name="select1"]');
             const select2 = form.querySelector('select[name="select2"]');
             const select3 = form.querySelector('select[name="select3"]');
             const select4 = form.querySelector('select[name="select4"]');
@@ -357,10 +440,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             if (busqueda && busqueda.value.trim()) {
                 url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
-            }
-
-            if (select1 && select1.value) {
-                url += '&select1=' + encodeURIComponent(select1.value);
             }
 
             if (select2 && select2.value) {
@@ -396,7 +475,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             }
 
             const busqueda = form.querySelector('input[name="busqueda"]');
-            const select1 = form.querySelector('select[name="select1"]');
             const select2 = form.querySelector('select[name="select2"]');
             const select3 = form.querySelector('select[name="select3"]');
             const select4 = form.querySelector('select[name="select4"]');
@@ -405,10 +483,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             if (busqueda && busqueda.value.trim()) {
                 url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
-            }
-
-            if (select1 && select1.value) {
-                url += '&select1=' + encodeURIComponent(select1.value);
             }
 
             if (select2 && select2.value) {
@@ -601,6 +675,267 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
                 });
         }
+
+        // Funciones para modales de inventario
+        // Extender el objeto InventarioModals existente o crear uno nuevo
+        window.InventarioModals = window.InventarioModals || {};
+
+        // Agregar función verDetalle si no existe
+        if (!window.InventarioModals.verDetalle) {
+            window.InventarioModals.verDetalle = function(invId, medId, suId) {
+                // Llenar campos ocultos
+                document.getElementById('modalDetalleInvId').value = invId;
+                document.getElementById('modalDetalleMedId').value = medId;
+                document.getElementById('modalDetalleSuId').value = suId;
+
+                // Cargar datos del inventario
+                cargarDetalleInventario(invId, medId, suId);
+
+                // Abrir modal
+                document.getElementById('modalDetalleInventario').style.display = 'flex';
+                document.getElementById('modalDetalleInventario').classList.add('open');
+            };
+        }
+
+        // Función para cargar datos del detalle de inventario
+        async function cargarDetalleInventario(invId, medId, suId) {
+            try {
+                // Cargar información general
+                const formData1 = new FormData();
+                formData1.append('inventarioAjax', 'detalle_general');
+                formData1.append('med_id', medId);
+                formData1.append('su_id', suId);
+
+                const response1 = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData1
+                });
+
+                const data1 = await response1.json();
+                if (data1) {
+                    document.getElementById('detalleLaboral').textContent = data1.laboral || '-';
+                    document.getElementById('detalleSucursal').textContent = data1.sucursal || '-';
+                    document.getElementById('detalleCajas').textContent = data1.total_cajas || '-';
+                    document.getElementById('detalleUnidades').textContent = data1.total_unidades || '-';
+                    document.getElementById('detalleValorado').textContent = data1.total_valorado ? 'Bs. ' + data1.total_valorado : '-';
+                    document.getElementById('detalleEstado').innerHTML = data1.estado_html || '-';
+                    document.getElementById('modalDetalleMedicamento').textContent = data1.medicamento || '-';
+                }
+
+                // Cargar lotes disponibles
+                const formData2 = new FormData();
+                formData2.append('inventarioAjax', 'lotes_disponibles');
+                formData2.append('med_id', medId);
+                formData2.append('su_id', suId);
+
+                const response2 = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData2
+                });
+
+                const data2 = await response2.json();
+                const tablaLotes = document.getElementById('tablaLotesDetalle');
+                if (data2 && data2.length > 0) {
+                    const filas = data2.map(lote => `
+                        <tr>
+                            <td>${lote.numero_lote || 'N/A'}</td>
+                            <td>${lote.cant_actual_unidades || 0}</td>
+                            <td>Bs. ${lote.precio_venta || 0}</td>
+                            <td>${lote.fecha_vencimiento || 'N/A'}</td>
+                            <td>${lote.estado || 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                    tablaLotes.innerHTML = filas;
+                } else {
+                    tablaLotes.innerHTML = '<tr><td colspan="5" class="txctr tmut">No hay lotes disponibles</td></tr>';
+                }
+
+            } catch (error) {
+                console.error('Error cargando detalle de inventario:', error);
+            }
+        }
+
+        Object.assign(window.InventarioModals, (function() {
+            'use strict';
+
+            function abrirBalance() {
+                const medId = document.getElementById('modalDetalleMedId').value;
+                const suId = document.getElementById('modalDetalleSuId').value;
+                const medicamento = document.getElementById('modalDetalleMedicamento').textContent;
+                const sucursal = document.getElementById('detalleSucursal').textContent;
+
+                if (!medId || !suId) {
+                    Swal.fire('Error', 'No se pudo identificar el producto', 'error');
+                    return;
+                }
+
+                // Llenar información del modal
+                document.getElementById('balanceMedId').value = medId;
+                document.getElementById('balanceSuId').value = suId;
+                document.getElementById('modalBalanceMedicamento').textContent = medicamento;
+                document.getElementById('balanceNombreMedicamento').textContent = medicamento;
+                document.getElementById('balanceSucursal').textContent = sucursal;
+
+                // Obtener datos actuales de precios
+                obtenerDatosActualesBalance(medId, suId);
+
+                // Abrir modal
+                document.getElementById('modalBalanceInventario').style.display = 'flex';
+                document.getElementById('modalBalanceInventario').classList.add('open');
+
+                // Bind calculation events
+                bindCalculationEventsBalance();
+            }
+
+            async function obtenerDatosActualesBalance(medId, suId) {
+                try {
+                    const formData = new FormData();
+                    formData.append('inventarioAjax', 'obtener_datos_balance');
+                    formData.append('med_id', medId);
+                    formData.append('su_id', suId);
+
+                    const response = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Llenar campos con datos actuales
+                        document.getElementById('balanceCostoLista').value = data.costo_lista || '';
+                        document.getElementById('balanceMargenUnitario').value = data.margen_u || '';
+                        document.getElementById('balanceMargenCaja').value = data.margen_c || '';
+                        document.getElementById('balancePrecioVenta').value = data.precio_venta || '';
+                        document.getElementById('balancePrecioMinUnitario').value = data.precio_min_u || '';
+                        document.getElementById('balancePrecioMinCaja').value = data.precio_min_c || '';
+                        document.getElementById('balanceLaboratorio').textContent = data.proveedor || 'Sin proveedor';
+
+                        // Trigger initial calculations
+                        calcularPrecioVentaBalance();
+                        calcularPrecioMinCajaBalance();
+                        calcularPrecioMinUnitarioBalance();
+                    } else {
+                        console.error('Error obteniendo datos:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            function calcularPrecioVentaBalance() {
+                const costo = parseFloat(document.getElementById('balanceCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('balanceMargenUnitario')?.value) || 0;
+                const precioVenta = costo + (costo * margen / 100);
+                const precioVentaInput = document.getElementById('balancePrecioVenta');
+                if (precioVentaInput) precioVentaInput.value = precioVenta.toFixed(2);
+            }
+
+            function calcularPrecioMinCajaBalance() {
+                const costo = parseFloat(document.getElementById('balanceCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('balanceMargenCaja')?.value) || 0;
+                // Usar valor fijo de 1 para unidades por caja
+                const unidadesPorCaja = 1;
+                const precioMinCaja = costo * unidadesPorCaja * (1 + margen / 100);
+                const precioMinCajaInput = document.getElementById('balancePrecioMinCaja');
+                if (precioMinCajaInput) precioMinCajaInput.value = precioMinCaja.toFixed(2);
+            }
+
+            function calcularPrecioMinUnitarioBalance() {
+                const costo = parseFloat(document.getElementById('balanceCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('balanceMargenCaja')?.value) || 0;
+                const precioMinUnitario = costo * (1 + margen / 100);
+                const precioMinUnitarioInput = document.getElementById('balancePrecioMinUnitario');
+                if (precioMinUnitarioInput) precioMinUnitarioInput.value = precioMinUnitario.toFixed(2);
+            }
+
+            function validarMargen(input) {
+                let valor = parseFloat(input.value);
+                if (isNaN(valor)) {
+                    input.value = '0.00';
+                    return;
+                }
+                if (valor < 0) valor = 0;
+                if (valor > 100) valor = 100;
+                input.value = valor.toFixed(2);
+            }
+
+            function bindCalculationEventsBalance() {
+                const costoLista = document.getElementById('balanceCostoLista');
+                const margenU = document.getElementById('balanceMargenUnitario');
+                const margenC = document.getElementById('balanceMargenCaja');
+
+                if (costoLista) {
+                    costoLista.addEventListener('input', () => {
+                        calcularPrecioVentaBalance();
+                        calcularPrecioMinCajaBalance();
+                        calcularPrecioMinUnitarioBalance();
+                    });
+                }
+
+                if (margenU) {
+                    margenU.addEventListener('input', () => calcularPrecioVentaBalance());
+                    margenU.addEventListener('blur', (e) => validarMargen(e.target));
+                }
+
+                if (margenC) {
+                    margenC.addEventListener('input', () => {
+                        calcularPrecioMinCajaBalance();
+                        calcularPrecioMinUnitarioBalance();
+                    });
+                    margenC.addEventListener('blur', (e) => validarMargen(e.target));
+                }
+            }
+
+            function guardarConfiguracion() {
+                // Función existente para configuración de inventario
+                const invId = document.getElementById('modalConfiguracionInvId').value;
+                const medId = document.getElementById('modalConfiguracionMedId').value;
+                const suId = document.getElementById('modalConfiguracionSuId').value;
+                const minimo = document.getElementById('configuracionMinimo').value;
+                const maximo = document.getElementById('configuracionMaximo').value;
+
+                if (!invId || !medId || !suId) {
+                    Swal.fire('Error', 'Datos incompletos', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('inventarioAjax', 'guardar_configuracion');
+                formData.append('inv_id', invId);
+                formData.append('med_id', medId);
+                formData.append('su_id', suId);
+                formData.append('minimo', minimo);
+                formData.append('maximo', maximo);
+
+                fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        App.closeM('modalConfiguracionInventario');
+                        Swal.fire('Éxito', 'Configuración guardada', 'success');
+                        // Recargar tabla si es necesario
+                        if (window.tableInstance) {
+                            window.tableInstance.reload();
+                        }
+                    } else {
+                        Swal.fire('Error', data.error || 'Error al guardar', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Error de conexión', 'error');
+                });
+            }
+
+            return {
+                abrirBalance,
+                guardarConfiguracion
+            };
+        })());
 
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(cargarGraficosMargen, 500);

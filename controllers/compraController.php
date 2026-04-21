@@ -72,7 +72,7 @@ class compraController extends compraModel
     public function agregar_compra_controller()
     {
         /* validamos y limpiamos cadena entrante */
-        $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg']);
+        $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg'] ?? '');
         $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
         $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp']);
 
@@ -122,6 +122,10 @@ class compraController extends compraModel
             exit();
         }
 
+        $subtotal = floatval($totales['subtotal']);
+        $total = floatval($totales['total']);
+        $impuestos = 0; // Sin impuestos
+
         /* preparamos datos para el registro de compra */
         $datos_compra = [
             "co_numero" => $numero_compra,
@@ -158,7 +162,7 @@ class compraController extends compraModel
             $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
 
-            /* obtener pr_id del medicamento */
+            /* obtener pr_id del medicamento y validar existencia */
             $conexion = mainModel::conectar();
             $stmt = $conexion->prepare("SELECT pr_id FROM medicamento WHERE med_id = :med_id");
             $stmt->bindParam(':med_id', $medicamento_id);
@@ -175,6 +179,17 @@ class compraController extends compraModel
                 exit();
             }
             $pr_id_lote = $medicamento['pr_id'];
+
+            /* validar que el pr_id existe en proveedores, si no, setear a NULL */
+            if ($pr_id_lote) {
+                $stmt2 = $conexion->prepare("SELECT pr_id FROM proveedores WHERE pr_id = :pr_id");
+                $stmt2->bindParam(':pr_id', $pr_id_lote);
+                $stmt2->execute();
+                $proveedor = $stmt2->fetch(PDO::FETCH_ASSOC);
+                if (!$proveedor) {
+                    $pr_id_lote = NULL;
+                }
+            }
 
             /* Validar datos del lote */
             if (empty($medicamento_id) || $cantidad_cajas <= 0 || $precio_compra <= 0) {

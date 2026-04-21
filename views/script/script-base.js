@@ -607,6 +607,9 @@
     filterPopup: filterPopup,
     init: init,
   };
+
+  /* make closeM global for compatibility */
+  global.closeM = closeM;
 })(window);
 
 document.addEventListener("DOMContentLoaded", function () {

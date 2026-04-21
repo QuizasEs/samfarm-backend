@@ -92,6 +92,71 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 
     <script>
+        // OOP approach: LoteManager class to handle lote operations
+        class LoteManager {
+            constructor() {
+                this.modalId = 'modalActivarLote';
+            }
+
+            // Method to open activation modal for a specific lote
+            openActivationModal(loteId, nombre) {
+                // Populate modal
+                document.getElementById('detalleLote').innerHTML = `¿Desea activar el lote del medicamento: <strong>${nombre}</strong>?`;
+
+                // Open modal
+                const modal = document.getElementById(this.modalId);
+                modal.style.display = 'flex';
+                modal.classList.add('open');
+
+                // Bind confirm button to activate method
+                const confirmBtn = document.getElementById('btnConfirmarActivacion');
+                confirmBtn.onclick = () => {
+                    this.activateLote(loteId);
+                };
+            }
+
+            // Method to activate lote via AJAX
+            activateLote(loteId) {
+                const url = '<?php echo SERVER_URL; ?>ajax/loteAjax.php';
+                const body = `loteAjax=active&id=${loteId}`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: body
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Close modal first
+                    const modal = document.getElementById(this.modalId);
+                    modal.classList.remove('open');
+                    setTimeout(() => modal.style.display = 'none', 300);
+
+                    Swal.fire({
+                        icon: data.Tipo,
+                        title: data.Titulo,
+                        text: data.texto
+                    });
+
+                    if (data.Alerta === 'recargar') {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error al activar el lote'
+                    });
+                });
+            }
+        }
+
+        // Create global instance
+        const loteManager = new LoteManager();
+
         document.addEventListener('DOMContentLoaded', function() {
             const btnExcelLote = document.getElementById('btnExportarExcelLote');
             if (btnExcelLote) {
@@ -208,7 +273,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     <!-- Modal Editar Lote -->
     <div class="mov" id="modalEditarLote">
         <div class="modal mxl">
-            <div class="mh">
+            <div class="mh ">
                 <div>
                     <div class="mt">Editar Lote</div>
                     <div class="ms" id="modalEditarLoteTitulo">...</div>
@@ -246,28 +311,24 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="card">
                         <div class="cb">
                             <div class="fr3">
-                                <div class="fg">
-                                    <label class="fl">Cajas del lote</label>
-                                    <input class="inp" type="number" name="Cantidad_caja_up" id="editarCantidadCaja" min="0">
-                                </div>
-                                <div class="fg">
-                                    <label class="fl">Unidades de empaque por caja</label>
-                                    <input class="inp" type="number" name="Cantidad_blister_up" id="editarCantidadBlister" min="0">
-                                </div>
-                                <div class="fg">
-                                    <label class="fl">Unidades individuales por empaque</label>
-                                    <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="0">
-                                </div>
+                                 <div class="fg">
+                                     <label class="fl">Cajas del lote</label>
+                                     <input class="inp" type="number" name="Cantidad_caja_up" id="editarCantidadCaja" min="0">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl">Unidades individuales por empaque</label>
+                                     <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="0">
+                                 </div>
                             </div>
                              <div class="fr3">
                                  <div class="fg">
                                      <label class="fl">Precio de compra</label>
                                      <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" required>
                                  </div>
-                                 <div class="fg">
-                                     <label class="fl">Precio venta por unidad</label>
-                                     <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" required>
-                                 </div>
+                                  <div class="fg">
+                                      <label class="fl">Precio venta por unidad</label>
+                                      <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" readonly>
+                                  </div>
                                  <div class="fg">
                                      <label class="fl">Fecha de vencimiento</label>
                                      <input class="inp" type="date" name="Fecha_vencimiento_up" id="editarFechaVencimiento" required>
@@ -362,7 +423,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleEditarVencimiento').textContent = data.lm_fecha_vencimiento;
 
                     document.getElementById('editarCantidadCaja').value = data.lm_cant_caja;
-                    document.getElementById('editarCantidadBlister').value = data.lm_cant_blister;
                     document.getElementById('editarCantidadUnidades').value = data.lm_cant_unidad;
                     document.getElementById('editarPrecioCompra').value = data.lm_precio_compra;
                     document.getElementById('editarPrecioVenta').value = data.lm_precio_venta;
@@ -376,6 +436,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     document.getElementById('modalEditarLote').style.display = 'flex';
                     document.getElementById('modalEditarLote').classList.add('open');
+
+                    // Bind calculation events and trigger initial calculations
+                    bindCalculationEvents();
+                    calcularPrecioVenta();
+                    calcularPrecioMinCaja();
+                    calcularPrecioMinUnitario();
 
                 } catch (error) {
                     console.error('Error:', error);
@@ -392,9 +458,74 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
 
 
+            function calcularPrecioVenta() {
+                const costo = parseFloat(document.getElementById('editarCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('editarMargenU')?.value) || 0;
+                const precioVenta = costo + (costo * margen / 100);
+                const precioVentaInput = document.getElementById('editarPrecioVenta');
+                if (precioVentaInput) precioVentaInput.value = precioVenta.toFixed(2);
+            }
+
+            function calcularPrecioMinCaja() {
+                const costo = parseFloat(document.getElementById('editarCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('editarMargenC')?.value) || 0;
+                // Usar valor fijo de 1 para unidades por caja (lm_cant_blister)
+                const unidadesPorCaja = 1;
+                const precioMinCaja = costo * unidadesPorCaja * (1 + margen / 100);
+                const precioMinCajaInput = document.getElementById('editarPrecioMinC');
+                if (precioMinCajaInput) precioMinCajaInput.value = precioMinCaja.toFixed(2);
+            }
+
+            function calcularPrecioMinUnitario() {
+                const costo = parseFloat(document.getElementById('editarCostoLista')?.value) || 0;
+                const margen = parseFloat(document.getElementById('editarMargenC')?.value) || 0;
+                const precioMinUnitario = costo * (1 + margen / 100);
+                const precioMinUnitarioInput = document.getElementById('editarPrecioMinU');
+                if (precioMinUnitarioInput) precioMinUnitarioInput.value = precioMinUnitario.toFixed(2);
+            }
+
+            function validarMargen(input) {
+                let valor = parseFloat(input.value);
+                if (isNaN(valor)) {
+                    input.value = '0.00';
+                    return;
+                }
+                if (valor < 0) valor = 0;
+                if (valor > 100) valor = 100;
+                input.value = valor.toFixed(2);
+            }
+
+            function bindCalculationEvents() {
+                const costoLista = document.getElementById('editarCostoLista');
+                const margenU = document.getElementById('editarMargenU');
+                const margenC = document.getElementById('editarMargenC');
+
+                if (costoLista) {
+                    costoLista.addEventListener('input', () => {
+                        calcularPrecioVenta();
+                        calcularPrecioMinCaja();
+                        calcularPrecioMinUnitario();
+                    });
+                }
+
+                if (margenU) {
+                    margenU.addEventListener('input', () => calcularPrecioVenta());
+                    margenU.addEventListener('blur', (e) => validarMargen(e.target));
+                }
+
+                if (margenC) {
+                    margenC.addEventListener('input', () => {
+                        calcularPrecioMinCaja();
+                        calcularPrecioMinUnitario();
+                    });
+                    margenC.addEventListener('blur', (e) => validarMargen(e.target));
+                }
+            }
+
             return {
                 abrirEdicion,
-                cerrarEdicion
+                cerrarEdicion,
+                bindCalculationEvents
             };
         })();
     </script>

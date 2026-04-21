@@ -30,6 +30,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" name="compraAjax" value="save">
         <input type="hidden" name="lotes_json" id="lotes_json" value="[]">
         <input type="hidden" name="totales_json" id="totales_json" value="{}">
+        <input type="hidden" name="Proveedor_reg" id="Proveedor_reg" value="">
         <input type="hidden" id="ultimo_lote_valor" value="<?php echo $ultimo_lote ?? 0; ?>">
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
 
@@ -65,11 +66,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 }
 
                 bindEvents() {
-                    // Manejo del envío del formulario
-                    if (this.form) {
-                        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-                    }
-
                     // Cálculos automáticos (Evita el error de null al validar existencia)
                     if (this.costoLista) {
                         this.costoLista.addEventListener('input', () => {
@@ -99,6 +95,16 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     if (this.cantidadUnidades) {
                         this.cantidadUnidades.addEventListener('input', () => this.calcularPrecioMinCaja());
                     }
+
+                    // Set JSON data on form submit
+                    this.form.addEventListener('submit', (e) => {
+                        if (typeof ModalManager !== 'undefined') {
+                            const lotes = ModalManager.obtenerLotes();
+                            const totales = ModalManager.obtenerTotales();
+                            document.getElementById('lotes_json').value = JSON.stringify(lotes);
+                            document.getElementById('totales_json').value = JSON.stringify(totales);
+                        }
+                    });
                 }
 
                 initContadores() {
@@ -112,20 +118,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 }
 
 
-
-                handleSubmit(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const lotes = typeof ModalManager !== 'undefined' ? ModalManager.obtenerLotes() : [];
-                    const totales = typeof ModalManager !== 'undefined' ? ModalManager.obtenerTotales() : {};
-
-                    this.setHiddenInput('lotes_json', JSON.stringify(lotes));
-                    this.setHiddenInput('totales_json', JSON.stringify(totales));
-                    
-                    // Enviar el formulario manualmente despues de actualizar los campos
-                    this.form.submit();
-                }
 
                 setHiddenInput(id, value) {
                     let input = document.getElementById(id);
@@ -184,6 +176,111 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             function forzarLimiteMargen(input) { compraManager.validarMargen(input); }
             function validarMargen(input) { compraManager.validarMargen(input); }
         </script>
+
+        <style>
+            /* Estilos para la lista de lotes en compra */
+            .lote-card {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                background-color: #fff;
+                overflow: hidden;
+            }
+            .lote-card-header {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .lote-titulo {
+                color: #007bff; /* Color primario */
+                font-size: 1.1em;
+                margin-bottom: 5px;
+                display: block;
+            }
+            .badge {
+                display: inline-block;
+                padding: 4px 8px;
+                font-size: 0.75em;
+                font-weight: 700;
+                line-height: 1;
+                text-align: center;
+                white-space: nowrap;
+                vertical-align: baseline;
+                border-radius: 4px;
+                margin-left: 8px;
+            }
+            .badge-success {
+                background-color: #28a745; /* Color éxito */
+                color: #fff;
+            }
+            .badge-secondary {
+                background-color: #6c757d; /* Color secundario */
+                color: #fff;
+            }
+            .lote-detalles {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+            .lote-detalles span {
+                display: inline-block;
+                margin-right: 15px;
+                margin-bottom: 5px;
+            }
+            .text-muted {
+                color: #6c757d;
+            }
+            .text-success {
+                color: #28a745;
+            }
+            .text-info {
+                color: #17a2b8;
+            }
+            .text-warning {
+                color: #ffc107;
+            }
+            .btn-danger {
+                background-color: #dc3545;
+                border-color: #dc3545;
+                color: #fff;
+                padding: 6px 12px;
+                border-radius: 4px;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 0.875em;
+            }
+            .btn-danger:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 0.75em;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .lote-card-header {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .lote-card-header > div:last-child {
+                    margin-top: 10px;
+                    text-align: center;
+                }
+                .lote-detalles span {
+                    display: block;
+                    margin-right: 0;
+                    margin-bottom: 8px;
+                }
+                .espacio {
+                    margin-left: 0;
+                }
+            }
+        </style>
 
         <!-- DATOS ESENCIALES -->
         <div class="card mb16">
@@ -303,18 +400,21 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <span class="ct">Totales</span>
             </div>
             <div class="cb">
-                <div class="calc">
-                    <div class="calc-group">
-                        <span>Subtotal:</span>
-                        <span id="subtotal">$0.00</span>
+                <div class="card mb16">
+                    <div class="ch">
+                        <span class="ct">Resumen de Totales</span>
                     </div>
-                    <div class="calc-group">
-                        <span>Impuestos:</span>
-                        <span id="impuestos">$0.00</span>
-                    </div>
-                    <div class="calc-group total">
-                        <span>TOTAL:</span>
-                        <span id="total">$0.00</span>
+                    <div class="cb">
+                        <div class="tw">
+                            <table class="totales-table">
+                                <tbody>
+                                    <tr class="total-row total-row-final">
+                                        <td class="total-label total-label-final">TOTAL:</td>
+                                        <td class="total-value total-value-final text-suc" id="total">Bs0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="calc-buttons">
@@ -376,7 +476,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     </div>
                     <div class="fg">
                         <label class="fl" for="precio_venta_reg">Precio Venta</label>
-                        <input class="inp" type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" oninput="calcularMargenDePrecio();">
+                        <input class="inp" type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" readonly>
                     </div>
                 </div>
 

@@ -60,9 +60,7 @@ class compraHistorialController extends compraHistorialModel
             $filtros['fecha_hasta'] = $fecha_hasta;
         }
 
-        if ($f1 !== '' && is_numeric($f1)) {
-            $filtros['proveedor'] = (int)$f1;
-        }
+
 
         if ($f4 !== '' && is_numeric($f4)) {
             $filtros['usuario'] = (int)$f4;
@@ -93,7 +91,7 @@ class compraHistorialController extends compraHistorialModel
         $Npaginas = ceil($total / $registros);
 
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f3));
-        $colspan_total = $mostrar_columna_sucursal ? 7 : 6;
+        $colspan_total = $mostrar_columna_sucursal ? 6 : 5;
 
         $tabla .= '
             <div class="table-container">
@@ -103,7 +101,6 @@ class compraHistorialController extends compraHistorialModel
                             <th>N°</th>
                             <th>N° COMPRA</th>
                             <th>FECHA COMPRA</th>
-                            <th>PROVEEDOR</th>
                             ' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
             '
@@ -119,11 +116,6 @@ class compraHistorialController extends compraHistorialModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $row) {
-                $proveedor_info = '<strong>' . htmlspecialchars($row['proveedor_nombre']) . '</strong>';
-                if (!empty($row['proveedor_nit'])) {
-                    $proveedor_info .= '<br><small style="color:#666;">NIT: ' . htmlspecialchars($row['proveedor_nit']) . '</small>';
-                }
-
                 $lotes_badge = '<span style="background:#E3F2FD;padding:4px 10px;border-radius:12px;font-weight:600;color:#1565C0;">' .
                     $row['total_lotes'] . '</span>';
 
@@ -136,8 +128,7 @@ class compraHistorialController extends compraHistorialModel
                     <tr class="tr-click" onclick="ComprasHistorialModals.verDetalle(' . $row['co_id'] . ', \'' . addslashes($row['co_numero']) . '\')">
                         <td>' . $contador . '</td>
                         <td><strong style="color:#1976D2;">' . htmlspecialchars($row['co_numero']) . '</strong></td>
-                        <td>' . date('d/m/Y', strtotime($row['co_fecha'])) . '</td>
-                        <td>' . $proveedor_info . '</td>' .
+                        <td>' . date('d/m/Y', strtotime($row['co_creado_en'])) . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal']) . '</span></td>' : '') .
                     '
                         <td style="text-align:center;">' . $lotes_badge . '</td>
@@ -217,25 +208,14 @@ class compraHistorialController extends compraHistorialModel
             $lotesStmt = self::resumen_lotes_compra_model($co_id);
             $lotes = $lotesStmt->fetch(PDO::FETCH_ASSOC);
 
-            $proveedor_completo = $compra['proveedor_nombre'];
-            if (!empty($compra['proveedor_nit'])) {
-                $proveedor_completo .= ' (NIT: ' . $compra['proveedor_nit'] . ')';
-            }
-            if (!empty($compra['proveedor_direccion'])) {
-                $proveedor_completo .= ' - ' . $compra['proveedor_direccion'];
-            }
-            if (!empty($compra['proveedor_telefono'])) {
-                $proveedor_completo .= ' - Tel: ' . $compra['proveedor_telefono'];
-            }
-
             $response = [
                 'numero_compra' => $compra['co_numero'],
-                'fecha_compra' => date('d/m/Y', strtotime($compra['co_fecha'])),
-                'proveedor' => $proveedor_completo,
+                'fecha_compra' => date('d/m/Y', strtotime($compra['co_creado_en'])),
+                'proveedor' => 'N/A',
                 'sucursal' => $compra['sucursal'],
                 'usuario' => $compra['usuario_nombre'],
                 'subtotal' => $compra['co_subtotal'],
-                'impuestos' => $compra['co_impuesto'],
+                'impuestos' => 0.00,
                 'total' => $compra['co_total'],
                 'medicamentos' => $medicamentosFormateados,
                 'total_lotes' => $lotes['total_lotes'] ?? 0,
@@ -308,8 +288,7 @@ class compraHistorialController extends compraHistorialModel
 
             $info_superior = [
                 'N° Compra' => $compra['co_numero'],
-                'Fecha' => date('d/m/Y', strtotime($compra['co_fecha'])),
-                'Proveedor' => $compra['proveedor_nombre'],
+                'Fecha' => date('d/m/Y', strtotime($compra['co_creado_en'])),
                 'Sucursal' => $compra['sucursal'],
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
@@ -358,7 +337,6 @@ class compraHistorialController extends compraHistorialModel
 
             $resumen = [
                 'Subtotal' => ['text' => 'Bs ' . number_format($compra['co_subtotal'], 2)],
-                'Impuestos' => ['text' => 'Bs ' . number_format($compra['co_impuesto'], 2)],
                 'Total General' => [
                     'text' => 'Bs ' . number_format($compra['co_total'], 2),
                     'color' => [46, 125, 50]
@@ -457,13 +435,12 @@ class compraHistorialController extends compraHistorialModel
                 ['text' => 'N°', 'width' => 10],
                 ['text' => 'N° COMPRA', 'width' => 25],
                 ['text' => 'FECHA', 'width' => 20],
-                ['text' => 'PROVEEDOR', 'width' => 50],
                 ['text' => 'LOTES', 'width' => 15],
                 ['text' => 'TOTAL (Bs)', 'width' => 25]
             ];
 
             if ($rol_usuario == 1 && !isset($filtros['su_id'])) {
-                array_splice($headers, 4, 0, [['text' => 'SUCURSAL', 'width' => 25]]);
+                array_splice($headers, 3, 0, [['text' => 'SUCURSAL', 'width' => 25]]);
             }
 
             $total_general = 0;
@@ -483,13 +460,12 @@ class compraHistorialController extends compraHistorialModel
                     $contador,
                     $row['co_numero'],
                     $row['fecha_compra'],
-                    substr($row['proveedor'], 0, 35),
                     $row['lotes'],
                     number_format($row['co_total'], 2)
                 ];
 
                 if ($rol_usuario == 1 && !isset($filtros['su_id'])) {
-                    array_splice($cells, 4, 0, [substr($row['sucursal'], 0, 20)]);
+                    array_splice($cells, 3, 0, [substr($row['sucursal'], 0, 20)]);
                 }
 
                 foreach ($cells as $cell) {
@@ -507,7 +483,7 @@ class compraHistorialController extends compraHistorialModel
             $pdf->SetFont('Arial', 'B', 8);
 
             $colspan = count($headers) - 1;
-            $pdf->Cell($colspan * 8, 8, 'TOTAL GENERAL', 1, 0, 'R', true);
+            $pdf->Cell($colspan * 10, 8, 'TOTAL GENERAL', 1, 0, 'R', true);
             $pdf->Cell(25, 8, 'Bs ' . number_format($total_general, 2), 1, 1, 'R', true);
 
             $pdf->Ln(10);
@@ -552,13 +528,11 @@ class compraHistorialController extends compraHistorialModel
             $compra = $datos_compra['compra'];
             $detalles = $datos_compra['detalles'];
 
-            $periodo = date('d/m/Y', strtotime($compra['co_fecha']));
+            $periodo = date('d/m/Y', strtotime($compra['co_creado_en']));
 
             $info_superior = [
                 'N° Compra' => $compra['co_numero'],
                 'Fecha' => $periodo,
-                'Proveedor' => $compra['proveedor_nombre'],
-                'NIT' => $compra['proveedor_nit'],
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];
@@ -585,7 +559,6 @@ class compraHistorialController extends compraHistorialModel
 
             $resumen = [
                 'Subtotal' => ['text' => 'Bs ' . number_format($compra['co_subtotal'], 2)],
-                'Impuestos' => ['text' => 'Bs ' . number_format($compra['co_impuesto'], 2)],
                 'Total' => [
                     'text' => 'Bs ' . number_format($compra['co_total'], 2),
                     'color' => [46, 125, 50]

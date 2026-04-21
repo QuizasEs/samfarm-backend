@@ -77,7 +77,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         <div class="fg">
                             <label class="fl">Búsqueda</label>
                             <div class="inpg">
-                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por N° compra, factura, NIT o proveedor...">
+                                <input class="inp" type="text" name="busqueda" placeholder="Buscar por N° compra...">
                                 <button type="button" class="btn btn-def btn-search">
                                     <ion-icon name="search-outline"></ion-icon>
                                 </button>
@@ -101,7 +101,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <div class="card">
         <div class="ch">
-            <div class="ct"><ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras por Proveedor</div>
+            <div class="ct"><ion-icon name="stats-chart-outline"></ion-icon> Análisis de Compras por Sucursal</div>
         </div>
         <div class="cb">
             <div id="grafico-compras-periodo" style="width: 100%; height: 400px;"></div>
@@ -145,12 +145,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <div class="th5" id="detalleFechaCompra">-</div>
                                 </div>
                             </div>
-                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
-                                <div class="f1">
-                                    <div class="tc">Proveedor</div>
-                                    <div class="th5" id="detalleProveedor">-</div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                     <div class="card">
@@ -352,7 +347,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                         document.getElementById('detalleNumeroCompra').textContent = data.numero_compra || 'N/A';
                         document.getElementById('detalleFechaCompra').textContent = data.fecha_compra || 'N/A';
-                        document.getElementById('detalleProveedor').textContent = data.proveedor || 'N/A';
                         document.getElementById('detalleSucursal').textContent = data.sucursal || 'N/A';
                         document.getElementById('detalleUsuario').textContent = data.usuario || 'N/A';
 
@@ -478,7 +472,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         return;
                     }
 
-                    const proveedores = datos.map(d => d.proveedor.length > 25 ? d.proveedor.substring(0, 25) + '...' : d.proveedor);
+                    const sucursales = datos.map(d => d.sucursal.length > 25 ? d.sucursal.substring(0, 25) + '...' : d.sucursal);
                     const cantidades = datos.map(d => parseInt(d.cantidad_compras));
                     const ticketsPromedios = datos.map(d => parseFloat(d.ticket_promedio));
 
@@ -486,7 +480,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     const option = {
                         title: {
-                            text: 'Distribución de Compras por Proveedor - Ticket Promedio',
+                            text: 'Distribución de Compras por Sucursal - Ticket Promedio',
                             left: 'center'
                         },
                         tooltip: {
@@ -523,7 +517,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         },
                         xAxis: {
                             type: 'category',
-                            data: proveedores,
+                            data: sucursales,
                             axisLabel: {
                                 rotate: 45,
                                 interval: 0
@@ -615,14 +609,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 if (form) {
                     const fechaDesde = form.querySelector('input[name="fecha_desde"]');
                     const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
-                    const select1 = form.querySelector('select[name="select1"]');
                     const select2 = form.querySelector('select[name="select2"]');
                     const select3 = form.querySelector('select[name="select3"]');
                     const select4 = form.querySelector('select[name="select4"]');
 
                     if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
                     if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
-                    if (select1 && select1.value) params.append('select1', select1.value);
                     if (select2 && select2.value) params.append('select2', select2.value);
                     if (select3 && select3.value) params.append('su_id', select3.value);
                     if (select4 && select4.value) params.append('select4', select4.value);
@@ -649,13 +641,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 if (form) {
                     const fechaDesde = form.querySelector('input[name="fecha_desde"]');
                     const fechaHasta = form.querySelector('input[name="fecha_hasta"]');
-                    const select1 = form.querySelector('select[name="select1"]');
                     const select2 = form.querySelector('select[name="select2"]');
                     const select3 = form.querySelector('select[name="select3"]');
 
                     if (fechaDesde && fechaDesde.value) params.append('fecha_desde', fechaDesde.value);
                     if (fechaHasta && fechaHasta.value) params.append('fecha_hasta', fechaHasta.value);
-                    if (select1 && select1.value) params.append('select1', select1.value);
                     if (select2 && select2.value) params.append('select2', select2.value);
                     if (select3 && select3.value) params.append('select3', select3.value);
                 }

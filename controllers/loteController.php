@@ -253,7 +253,7 @@ class loteController extends loteModel
                 }
 
                 $tabla .= '
-                    <tr class="tr-click" onclick="' . ($rows['lm_estado'] == 'activo' && $rows['lm_unidades_actual'] > 0 && $rol_usuario == 1 ? 'LoteModals.abrirEdicion(' . $rows['lm_id'] . ');' : '') . '">
+                        <tr class="tr-click" onclick="' . ($rows['lm_estado'] == 'activo' && $rows['lm_unidades_actual'] > 0 && $rol_usuario == 1 ? 'LoteModals.abrirEdicion(\'' . mainModel::encryption($rows['lm_id']) . '\');' : '') . '">
                         <td>
                             <div class="td-main"><strong>' . ($rows['lm_numero_lote'] ?? 'N/A') . '</strong> - ' . htmlspecialchars($rows['med_nombre_quimico']) . '</div>
                             <div class="td-sub">' . htmlspecialchars($rows['med_principio_activo']) . ' · ' . htmlspecialchars($rows['pr_razon_social'] ?? 'N/A') .
@@ -276,14 +276,7 @@ class loteController extends loteModel
                         <td>
                             <div class="td-main">' .
                     ($rows['lm_estado'] == "en_espera"
-                        ? '<a href="#" 
-                                class="btn-editar btn-activar-lote" 
-                                data-id="' . $rows['lm_id'] . '" 
-                                data-nombre="' . htmlspecialchars($rows['med_nombre_quimico']) . '" 
-                                title="Activar lote"
-                                onclick="event.stopPropagation();">
-                                Activar
-                            </a>'
+                        ? '<a href="#" onclick="loteManager.openActivationModal(\'' . mainModel::encryption($rows['lm_id']) . '\', \'' . htmlspecialchars(addslashes($rows['med_nombre_quimico'])) . '\'); return false;" title="Activar lote">Activar</a>'
                         : $estado_html)
                     . '</div>
                         </td>
@@ -319,11 +312,12 @@ class loteController extends loteModel
 
     public function actualizar_lote_controller()
     {
-        $id = $_POST['id'];
-
+        // Desencriptar el ID una sola vez (la encriptación es importante por seguridad)
+        $id = mainModel::decryption($_POST['id']);
+        $id = mainModel::limpiar_cadena($id);
 
         /* Obtenemos la información del lote */
-        $datos = self::datos_lote_controller($id);
+        $datos = loteModel::datos_lote_model($id);
         if ($datos->rowCount() <= 0) {
             $alerta = [
                 'Alerta' => 'simple',
@@ -334,8 +328,6 @@ class loteController extends loteModel
             echo json_encode($alerta);
             exit();
         }
-        $id = mainModel::decryption($_POST['id']);
-        $id = mainModel::limpiar_cadena($id);
 
         $lote = $datos->fetch(PDO::FETCH_ASSOC);
 
@@ -366,7 +358,7 @@ class loteController extends loteModel
 
         /* Obtenemos los valores del formulario */
         $cant_caja    = (int)mainModel::limpiar_cadena($_POST['Cantidad_caja_up'] ?? $lote['lm_cant_caja']);
-        $cant_blister = (int)mainModel::limpiar_cadena($_POST['Cantidad_blister_up'] ?? $lote['lm_cant_blister']);
+        $cant_blister = 1; // Mantener valor fijo de 1 para lm_cant_blister (ya no se usa)
         $cant_unidad  = (int)mainModel::limpiar_cadena($_POST['Cantidad_unidades_up'] ?? $lote['lm_cant_unidad']);
         $precio_compra = (float)mainModel::limpiar_cadena($_POST['Precio_compra_up'] ?? $lote['lm_precio_compra']);
         $precio_venta = (float)mainModel::limpiar_cadena($_POST['Precio_venta_up'] ?? $lote['lm_precio_venta']);
@@ -379,11 +371,11 @@ class loteController extends loteModel
         $precio_min_c = isset($_POST['lm_precio_min_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_c']) : $lote['lm_precio_min_c'];
 
         /* Validación de datos requeridos */
-        if ($precio_venta <= 0 || empty($fecha_vencimiento)) {
+        if (empty($fecha_vencimiento)) {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Campos incompletos',
-                'texto' => 'Debe ingresar al menos el precio de venta y la fecha de vencimiento',
+                'texto' => 'Debe ingresar la fecha de vencimiento',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
@@ -461,11 +453,17 @@ class loteController extends loteModel
             }
         }
 
+        /* Calcular cantidades actuales */
+        $lm_cant_actual_cajas = $cant_caja;
+        $lm_cant_actual_unidades = $cant_caja * $cant_blister * $cant_unidad;
+
         /* Estructura para actualizar */
         $datos_up = [
             'lm_cant_caja' => $cant_caja,
             'lm_cant_blister' => $cant_blister,
             'lm_cant_unidad' => $cant_unidad,
+            'lm_cant_actual_cajas' => $lm_cant_actual_cajas,
+            'lm_cant_actual_unidades' => $lm_cant_actual_unidades,
             'lm_precio_compra' => $precio_compra,
             'lm_precio_venta' => $precio_venta,
             'lm_fecha_vencimiento' => $fecha_vencimiento,
@@ -481,6 +479,52 @@ class loteController extends loteModel
         $actualizado = loteModel::actualizar_lote_model($datos_up);
 
         if ($actualizado->rowCount() == 1) {
+            // Calcular diferencias para actualizar inventario
+            $unidades_anteriores = (int)$lote['lm_cant_actual_unidades'];
+            $unidades_nuevas = $cant_caja * $cant_blister * $cant_unidad;
+            $diferencia_unidades = $unidades_nuevas - $unidades_anteriores;
+
+            $cajas_anteriores = (int)$lote['lm_cant_actual_cajas'];
+            $cajas_nuevas = $cant_caja;
+            $diferencia_cajas = $cajas_nuevas - $cajas_anteriores;
+
+            // Actualizar inventario si hay cambios en cantidades
+            if ($diferencia_unidades != 0 || $diferencia_cajas != 0) {
+                $datos_inventario = [
+                    'su_id' => $lote['su_id'],
+                    'med_id' => $lote['med_id'],
+                    'inv_total_cajas' => $diferencia_cajas,
+                    'inv_total_unidades' => $diferencia_unidades,
+                    'inv_total_valorado' => 0 // No cambiar valorado en ajustes de cantidad
+                ];
+
+                $inventario_resultado = loteModel::actualizar_inventario_model($datos_inventario);
+
+                if ($inventario_resultado->rowCount() <= 0) {
+                    error_log("Error actualizando inventario para lote ID: $id");
+                } else {
+                    // Registrar movimiento de inventario
+                    $datos_movimiento = [
+                        'lm_id' => $id,
+                        'med_id' => $lote['med_id'],
+                        'su_id' => $lote['su_id'],
+                        'us_id' => $_SESSION['id_smp'],
+                        'mi_tipo' => ($diferencia_unidades > 0) ? 'entrada' : 'salida',
+                        'mi_cantidad' => abs($diferencia_unidades),
+                        'mi_unidad' => 'unidad',
+                        'mi_referencia_tipo' => 'ajuste_lote',
+                        'mi_referencia_id' => $id,
+                        'mi_motivo' => 'Ajuste de cantidades en lote ' . ($lote['lm_numero_lote'] ?? 'N/A')
+                    ];
+
+                    $movimiento_resultado = loteModel::registro_movimiento_inventario_model($datos_movimiento);
+
+                    if ($movimiento_resultado->rowCount() <= 0) {
+                        error_log("Error registrando movimiento de inventario para lote ID: $id");
+                    }
+                }
+            }
+
             // Registrar historial
             $historial = [
                 'lm_id' => $id,
@@ -501,8 +545,8 @@ class loteController extends loteModel
         } else {
             $alerta = [
                 'Alerta' => 'simple',
-                'Titulo' => 'Ocurrio un error inesperado',
-                'texto' => 'Solo se pueden activar lotes que esten en estado en espera',
+                'Titulo' => 'Error al actualizar',
+                'texto' => 'No se pudo actualizar el lote. Verifique los datos e intente nuevamente.',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
@@ -511,8 +555,11 @@ class loteController extends loteModel
     }
     public function activar_lote_controller()
     {
+        /* Desencriptar el ID por seguridad */
+        $id = mainModel::decryption($_POST['id']);
+        $id = mainModel::limpiar_cadena($id);
+
         /* validamos la id */
-        $id = $_POST['id'];
         if ($id <= 0) {
             $alerta = [
                 'Alerta' => 'simple',

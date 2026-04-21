@@ -2,8 +2,10 @@
 
 if ($peticionAjax) {
     require_once '../models/inventarioModel.php';
+    require_once '../models/loteModel.php';
 } else {
     require_once './models/inventarioModel.php';
+    require_once './models/loteModel.php';
 }
 class inventarioController extends inventarioModel
 {
@@ -665,6 +667,287 @@ class inventarioController extends inventarioModel
         } catch (Exception $e) {
             error_log("Error exportando PDF inventario: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    /* ===== OBTENER DATOS PARA BALANCE ===== */
+    public function obtener_datos_balance_controller($med_id, $su_id)
+    {
+        try {
+            // Obtener datos actuales de precios desde un lote activo representativo
+            $sql = mainModel::conectar()->prepare("
+                SELECT
+                    lm.lm_costo_lista,
+                    lm.lm_margen_u,
+                    lm.lm_margen_c,
+                    lm.lm_precio_venta,
+                    lm.lm_precio_min_u,
+                    lm.lm_precio_min_c,
+                    COALESCE(lp.pr_razon_social, mp.pr_razon_social, 'Sin proveedor') AS proveedor
+                FROM lote_medicamento lm
+                LEFT JOIN proveedores lp ON lm.pr_id = lp.pr_id
+                LEFT JOIN medicamento m ON lm.med_id = m.med_id
+                LEFT JOIN proveedores mp ON m.pr_id = mp.pr_id
+                WHERE lm.med_id = :med_id
+                  AND lm.su_id = :su_id
+                  AND lm.lm_estado = 'activo'
+                  AND lm.lm_cant_actual_unidades > 0
+                ORDER BY lm.lm_fecha_ingreso DESC
+                LIMIT 1
+            ");
+
+            $sql->bindParam(":med_id", $med_id);
+            $sql->bindParam(":su_id", $su_id);
+            $sql->execute();
+
+            if ($sql->rowCount() > 0) {
+                $datos = $sql->fetch(PDO::FETCH_ASSOC);
+                return [
+                    'success' => true,
+                    'costo_lista' => $datos['lm_costo_lista'],
+                    'margen_u' => $datos['lm_margen_u'],
+                    'margen_c' => $datos['lm_margen_c'],
+                    'precio_venta' => $datos['lm_precio_venta'],
+                    'precio_min_u' => $datos['lm_precio_min_u'],
+                    'precio_min_c' => $datos['lm_precio_min_c'],
+                    'proveedor' => $datos['proveedor']
+                ];
+            } else {
+                // Si no hay lotes activos, obtener datos del medicamento
+                $sql_med = mainModel::conectar()->prepare("
+                    SELECT
+                        m.med_id,
+                        COALESCE(p.pr_razon_social, 'Sin proveedor') AS proveedor
+                    FROM medicamento m
+                    LEFT JOIN proveedores p ON m.pr_id = p.pr_id
+                    WHERE m.med_id = :med_id
+                ");
+
+                $sql_med->bindParam(":med_id", $med_id);
+                $sql_med->execute();
+
+                if ($sql_med->rowCount() > 0) {
+                    $datos_med = $sql_med->fetch(PDO::FETCH_ASSOC);
+                    return [
+                        'success' => true,
+                        'costo_lista' => null,
+                        'margen_u' => null,
+                        'margen_c' => null,
+                        'precio_venta' => null,
+                        'precio_min_u' => null,
+                        'precio_min_c' => null,
+                        'proveedor' => $datos_med['proveedor']
+                    ];
+                } else {
+                    return ['success' => false, 'error' => 'Medicamento no encontrado'];
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error obteniendo datos balance: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Error interno del servidor'];
+        }
+    }
+
+    /* ===== APLICAR BALANCE DE PRECIOS ===== */
+    public function balance_precios_controller($med_id, $su_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
+    {
+        try {
+            // Validar permisos
+            $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+            if ($rol_usuario != 1 && $rol_usuario != 2) {
+                return [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Permiso denegado',
+                    'texto' => 'No cuenta con los privilegios necesarios para realizar balance de precios',
+                    'Tipo' => 'error'
+                ];
+            }
+
+            // Obtener todos los lotes activos de este medicamento en esta sucursal
+            $sql_lotes = mainModel::conectar()->prepare("
+                SELECT lm_id, lm_numero_lote
+                FROM lote_medicamento
+                WHERE med_id = :med_id
+                  AND su_id = :su_id
+                  AND lm_estado = 'activo'
+                  AND lm_cant_actual_unidades > 0
+            ");
+
+            $sql_lotes->bindParam(":med_id", $med_id);
+            $sql_lotes->bindParam(":su_id", $su_id);
+            $sql_lotes->execute();
+
+            $lotes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+            $cantidad_lotes = count($lotes);
+
+            if ($cantidad_lotes == 0) {
+                return [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Sin lotes activos',
+                    'texto' => 'No hay lotes activos para este medicamento en esta sucursal',
+                    'Tipo' => 'warning'
+                ];
+            }
+
+            // Preparar datos de actualización
+            $datos_up = [
+                'lm_costo_lista' => $costo_lista,
+                'lm_margen_u' => $margen_u,
+                'lm_margen_c' => $margen_c,
+                'lm_precio_venta' => $precio_venta,
+                'lm_precio_min_u' => $precio_min_u,
+                'lm_precio_min_c' => $precio_min_c
+            ];
+
+            // Actualizar cada lote
+            $lotes_actualizados = 0;
+            $errores = [];
+
+            foreach ($lotes as $lote) {
+                $datos_up['ID'] = $lote['lm_id'];
+
+                try {
+                    $resultado = loteModel::actualizar_lote_model($datos_up);
+                    if ($resultado->rowCount() == 1) {
+                        $lotes_actualizados++;
+
+                        // Registrar historial del lote
+                        $historial = [
+                            'lm_id' => $lote['lm_id'],
+                            'us_id' => $_SESSION['id_smp'],
+                            'hl_accion' => 'balance',
+                            'hl_descripcion' => 'Balance de precios aplicado a lote ' . $lote['lm_numero_lote']
+                        ];
+                        loteModel::registrar_historial_lote_model($historial);
+                    } else {
+                        $errores[] = 'Lote ' . $lote['lm_numero_lote'];
+                    }
+                } catch (Exception $e) {
+                    $errores[] = 'Lote ' . $lote['lm_numero_lote'] . ' (Error: ' . $e->getMessage() . ')';
+                }
+            }
+
+            if ($lotes_actualizados > 0) {
+                $mensaje = "Balance aplicado correctamente a $lotes_actualizados de $cantidad_lotes lotes";
+
+                if (!empty($errores)) {
+                    $mensaje .= ". Errores en: " . implode(', ', $errores);
+                }
+
+                return [
+                    'Alerta' => 'recargar',
+                    'Titulo' => 'Balance aplicado',
+                    'texto' => $mensaje,
+                    'Tipo' => $lotes_actualizados == $cantidad_lotes ? 'success' : 'warning'
+                ];
+            } else {
+                return [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error en balance',
+                    'texto' => 'No se pudo aplicar el balance a ningún lote. Errores: ' . implode(', ', $errores),
+                    'Tipo' => 'error'
+                ];
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en balance_precios_controller: " . $e->getMessage());
+            return [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error interno',
+                'texto' => 'Ocurrió un error interno al aplicar el balance',
+                'Tipo' => 'error'
+            ];
+        }
+    }
+
+    /* ===== OBTENER DETALLE GENERAL DE INVENTARIO ===== */
+    public function detalle_general_controller($med_id, $su_id)
+    {
+        try {
+            $sql = mainModel::conectar()->prepare("
+                SELECT
+                    i.inv_total_cajas,
+                    i.inv_total_unidades,
+                    i.inv_total_valorado,
+                    CASE
+                        WHEN i.inv_total_unidades <= 0 THEN 'agotado'
+                        WHEN i.inv_total_unidades <= (i.inv_minimo * 1.5) THEN 'critico'
+                        WHEN i.inv_total_unidades <= (i.inv_minimo * 3) THEN 'bajo'
+                        WHEN i.inv_total_unidades >= (i.inv_maximo * 0.9) THEN 'exceso'
+                        ELSE 'normal'
+                    END as estado,
+                    CASE
+                        WHEN i.inv_total_unidades <= 0 THEN '<span class=\"badge badge-error\">Agotado</span>'
+                        WHEN i.inv_total_unidades <= (i.inv_minimo * 1.5) THEN '<span class=\"badge badge-warning\">Crítico</span>'
+                        WHEN i.inv_total_unidades <= (i.inv_minimo * 3) THEN '<span class=\"badge badge-info\">Bajo</span>'
+                        WHEN i.inv_total_unidades >= (i.inv_maximo * 0.9) THEN '<span class=\"badge badge-purple\">Exceso</span>'
+                        ELSE '<span class=\"badge badge-success\">Normal</span>'
+                    END as estado_html,
+                    m.med_nombre_quimico as medicamento,
+                    m.med_presentacion,
+                    ff.ff_nombre as forma_farmaceutica,
+                    uf.uf_nombre as uso_farmacologico,
+                    p.pr_razon_social as laboral,
+                    s.su_nombre as sucursal
+                FROM inventarios i
+                LEFT JOIN medicamento m ON i.med_id = m.med_id
+                LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
+                LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
+                LEFT JOIN proveedores p ON m.pr_id = p.pr_id
+                LEFT JOIN sucursales s ON i.su_id = s.su_id
+                WHERE i.med_id = :med_id AND i.su_id = :su_id
+                LIMIT 1
+            ");
+
+            $sql->bindParam(":med_id", $med_id);
+            $sql->bindParam(":su_id", $su_id);
+            $sql->execute();
+
+            if ($sql->rowCount() > 0) {
+                $datos = $sql->fetch(PDO::FETCH_ASSOC);
+                return $datos;
+            } else {
+                return null;
+            }
+        } catch (Exception $e) {
+            error_log("Error obteniendo detalle general: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /* ===== OBTENER LOTES DISPONIBLES ===== */
+    public function lotes_disponibles_controller($med_id, $su_id)
+    {
+        try {
+            $sql = mainModel::conectar()->prepare("
+                SELECT
+                    lm.lm_numero_lote,
+                    lm.lm_cant_actual_unidades,
+                    lm.lm_precio_venta,
+                    lm.lm_fecha_vencimiento,
+                    CASE
+                        WHEN lm.lm_estado = 'activo' THEN 'Activo'
+                        WHEN lm.lm_estado = 'en_espera' THEN 'En Espera'
+                        WHEN lm.lm_estado = 'terminado' THEN 'Terminado'
+                        WHEN lm.lm_estado = 'caducado' THEN 'Caducado'
+                        ELSE lm.lm_estado
+                    END as estado
+                FROM lote_medicamento lm
+                WHERE lm.med_id = :med_id
+                  AND lm.su_id = :su_id
+                  AND lm.lm_estado = 'activo'
+                  AND lm.lm_cant_actual_unidades > 0
+                ORDER BY lm.lm_fecha_vencimiento ASC
+            ");
+
+            $sql->bindParam(":med_id", $med_id);
+            $sql->bindParam(":su_id", $su_id);
+            $sql->execute();
+
+            return $sql->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error obteniendo lotes disponibles: " . $e->getMessage());
+            return [];
         }
     }
 }

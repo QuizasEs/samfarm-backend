@@ -15,7 +15,7 @@ if (!isset($_SESSION['id_smp'])) {
 </div>
 <!-- formulario de registro provedor -->
 <div class="container">
-    <form class="form FormularioAjax" action="" method="POST"
+    <form class="form FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/compraAjax.php" method="POST"
         data-form="save" autocomplete="off">
 
         <input type="hidden" name="compraAjax" value="save">
@@ -27,8 +27,8 @@ if (!isset($_SESSION['id_smp'])) {
         <div class="form-group">
          <div class="form-bloque">
                  <label for="">Proveedor*</label>
-                 <select class="select-style" name="Proveedor_reg">
-                     <option value="">Seleccionar</option>
+                  <select class="select-style" name="Proveedor_reg">
+                      <option value="">Seleccionar</option>
                      <?php foreach ($datos_select['proveedores'] as $pro) { ?>
                          <option value="<?php echo $pro['pr_id'] ?>"><?php echo $pro['pr_razon_social'] ?></option>
                      <?php } ?>
@@ -141,7 +141,7 @@ if (!isset($_SESSION['id_smp'])) {
                     </div>
                 </div>
                 <div class="calc-buttons">
-                    <button class="btn success">Agregar</button>
+                    <button type="submit" class="btn success">Agregar</button>
                     <a class="btn warning">cancelar</a>
                 </div>
             </div>

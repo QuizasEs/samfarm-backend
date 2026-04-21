@@ -44,16 +44,16 @@ class loteModel extends mainModel
                 ff.ff_nombre AS forma_farmaceutica,
                 uf.uf_nombre AS uso_farmacologico,
                 vd.vd_nombre AS via_administracion,
-                pr.pr_razon_social AS proveedor_nombre,
-                p.pr_razon_social AS proveedor_contacto_nombres,
+                -- Proveedor desde lote (si existe) o desde medicamento
+                COALESCE(lp.pr_razon_social, mp.pr_razon_social, 'Sin proveedor') AS proveedor_nombres,
                 s.su_nombre AS sucursal_nombre
             FROM lote_medicamento lm
             LEFT JOIN medicamento m ON lm.med_id = m.med_id
             LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
             LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
             LEFT JOIN via_de_administracion vd ON m.vd_id = vd.vd_id
-            LEFT JOIN proveedores pr ON lm.pr_id = pr.pr_id
-            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            LEFT JOIN proveedores lp ON lm.pr_id = lp.pr_id  -- Proveedor del lote
+            LEFT JOIN proveedores mp ON m.pr_id = mp.pr_id   -- Proveedor del medicamento
             LEFT JOIN sucursales s ON lm.su_id = s.su_id
             WHERE lm.lm_id = :ID
             LIMIT 1;

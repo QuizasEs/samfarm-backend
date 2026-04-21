@@ -15,24 +15,15 @@ class compraHistorialModel extends mainModel
 
         if (isset($filtros['busqueda']) && !empty($filtros['busqueda'])) {
             $busqueda = $filtros['busqueda'];
-            $whereParts[] = "(
-                c.co_numero LIKE '%$busqueda%' OR
-                c.co_numero_factura LIKE '%$busqueda%' OR
-                c.co_nit_proveedor LIKE '%$busqueda%' OR
-                p.pr_razon_social LIKE '%$busqueda%'
-            )";
+            $whereParts[] = "c.co_numero LIKE '%$busqueda%'";
         }
 
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
-            $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) >= '" . $filtros['fecha_desde'] . "'";
         }
 
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
-            $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
-        }
-
-        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
-            $whereParts[] = "c.pr_id = '" . $filtros['proveedor'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) <= '" . $filtros['fecha_hasta'] . "'";
         }
 
         if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
@@ -43,20 +34,20 @@ class compraHistorialModel extends mainModel
             $estado = $filtros['estado_lotes'];
             if ($estado === 'pendientes') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             } elseif ($estado === 'activos') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'activo'
                 )";
             } elseif ($estado === 'completado') {
                 $whereParts[] = "NOT EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             }
@@ -67,24 +58,18 @@ class compraHistorialModel extends mainModel
         $sql = "SELECT SQL_CALC_FOUND_ROWS
                 c.co_id,
                 c.co_numero,
-                c.co_fecha,
-                c.co_numero_factura,
-                c.co_fecha_factura,
+                c.co_creado_en,
                 c.co_total,
-                c.co_nit_proveedor,
-                p.pr_razon_social AS proveedor_nombre,
-                p.pr_nit AS proveedor_nit,
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre,
                 (SELECT COUNT(*) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS total_items,
                 (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id) AS total_lotes,
                 (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id AND lm.lm_estado = 'en_espera') AS lotes_pendientes
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             INNER JOIN sucursales s ON c.su_id = s.su_id
             INNER JOIN usuarios u ON c.us_id = u.us_id
             $whereSQL
-            ORDER BY c.co_fecha DESC
+            ORDER BY c.co_creado_en DESC
             LIMIT $inicio, $registros";
 
         $conexion = mainModel::conectar();
@@ -101,24 +86,15 @@ class compraHistorialModel extends mainModel
 
         if (isset($filtros['busqueda']) && !empty($filtros['busqueda'])) {
             $busqueda = $filtros['busqueda'];
-            $whereParts[] = "(
-                c.co_numero LIKE '%$busqueda%' OR
-                c.co_numero_factura LIKE '%$busqueda%' OR
-                c.co_nit_proveedor LIKE '%$busqueda%' OR
-                p.pr_razon_social LIKE '%$busqueda%'
-            )";
+            $whereParts[] = "c.co_numero LIKE '%$busqueda%'";
         }
 
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
-            $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) >= '" . $filtros['fecha_desde'] . "'";
         }
 
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
-            $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
-        }
-
-        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
-            $whereParts[] = "c.pr_id = '" . $filtros['proveedor'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) <= '" . $filtros['fecha_hasta'] . "'";
         }
 
         if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
@@ -129,20 +105,20 @@ class compraHistorialModel extends mainModel
             $estado = $filtros['estado_lotes'];
             if ($estado === 'pendientes') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             } elseif ($estado === 'activos') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'activo'
                 )";
             } elseif ($estado === 'completado') {
                 $whereParts[] = "NOT EXISTS (
-                    SELECT 1 FROM lote_medicamento lm 
-                    WHERE lm.pr_id_compra = c.co_id 
+                    SELECT 1 FROM lote_medicamento lm
+                    WHERE lm.pr_id_compra = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             }
@@ -152,7 +128,6 @@ class compraHistorialModel extends mainModel
 
         $sql = "SELECT COUNT(*) as total
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             $whereSQL";
 
         $conexion = mainModel::conectar();
@@ -163,15 +138,11 @@ class compraHistorialModel extends mainModel
 
     protected static function detalle_compra_completo_model($co_id)
     {
-        $sql = "SELECT 
+        $sql = "SELECT
                 c.*,
-                p.pr_razon_social AS proveedor_nombre,
-                p.pr_nit AS proveedor_nit,
-                p.pr_telefono AS proveedor_telefono,
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             INNER JOIN sucursales s ON c.su_id = s.su_id
             INNER JOIN usuarios u ON c.us_id = u.us_id
             WHERE c.co_id = :co_id";
@@ -230,24 +201,24 @@ class compraHistorialModel extends mainModel
         }
 
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
-            $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) >= '" . $filtros['fecha_desde'] . "'";
         }
 
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
-            $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) <= '" . $filtros['fecha_hasta'] . "'";
         }
 
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
-        $sql = "SELECT 
-                p.pr_razon_social AS proveedor,
+        $sql = "SELECT
+                s.su_nombre AS sucursal,
                 COUNT(*) as cantidad_compras,
                 ROUND(AVG(c.co_total), 2) as ticket_promedio,
                 SUM(c.co_total) as total_monto
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
+            INNER JOIN sucursales s ON c.su_id = s.su_id
             $whereSQL
-            GROUP BY c.pr_id
+            GROUP BY c.su_id
             ORDER BY cantidad_compras DESC
             LIMIT 10";
 
@@ -263,32 +234,26 @@ class compraHistorialModel extends mainModel
         }
 
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
-            $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) >= '" . $filtros['fecha_desde'] . "'";
         }
 
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
-            $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
-        }
-
-        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
-            $whereParts[] = "c.pr_id = '" . $filtros['proveedor'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) <= '" . $filtros['fecha_hasta'] . "'";
         }
 
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
-        $sql = "SELECT 
+        $sql = "SELECT
                 c.co_numero,
-                DATE_FORMAT(c.co_fecha, '%d/%m/%Y') as fecha_compra,
-                p.pr_razon_social AS proveedor,
+                DATE_FORMAT(c.co_creado_en, '%d/%m/%Y') as fecha_compra,
                 s.su_nombre AS sucursal,
                 (SELECT COUNT(*) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS items,
                 (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id) AS lotes,
                 c.co_total
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             INNER JOIN sucursales s ON c.su_id = s.su_id
             $whereSQL
-            ORDER BY c.co_fecha DESC";
+            ORDER BY c.co_creado_en DESC";
 
         $conexion = mainModel::conectar();
         return $conexion->query($sql);
@@ -303,15 +268,11 @@ class compraHistorialModel extends mainModel
         }
 
         if (isset($filtros['fecha_desde']) && !empty($filtros['fecha_desde'])) {
-            $whereParts[] = "DATE(c.co_fecha) >= '" . $filtros['fecha_desde'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) >= '" . $filtros['fecha_desde'] . "'";
         }
 
         if (isset($filtros['fecha_hasta']) && !empty($filtros['fecha_hasta'])) {
-            $whereParts[] = "DATE(c.co_fecha) <= '" . $filtros['fecha_hasta'] . "'";
-        }
-
-        if (isset($filtros['proveedor']) && $filtros['proveedor'] != '') {
-            $whereParts[] = "c.pr_id = '" . $filtros['proveedor'] . "'";
+            $whereParts[] = "DATE(c.co_creado_en) <= '" . $filtros['fecha_hasta'] . "'";
         }
 
         if (isset($filtros['usuario']) && $filtros['usuario'] != '') {
@@ -320,11 +281,9 @@ class compraHistorialModel extends mainModel
 
         $whereSQL = count($whereParts) > 0 ? "WHERE " . implode(' AND ', $whereParts) : "";
 
-        $sql = "SELECT 
+        $sql = "SELECT
                 c.co_numero AS 'N° Compra',
-                DATE_FORMAT(c.co_fecha, '%d/%m/%Y') AS 'Fecha Compra',
-                p.pr_razon_social AS 'Proveedor',
-                p.pr_nit AS 'NIT Proveedor',
+                DATE_FORMAT(c.co_creado_en, '%d/%m/%Y') AS 'Fecha Compra',
                 s.su_nombre AS 'Sucursal',
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS 'Usuario',
                 (SELECT COUNT(*) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS 'Items',
@@ -332,15 +291,13 @@ class compraHistorialModel extends mainModel
                 (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id AND lm.lm_estado = 'activo') AS 'Lotes Activos',
                 (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id AND lm.lm_estado = 'en_espera') AS 'Lotes Pendientes',
                 c.co_subtotal AS 'Subtotal (Bs)',
-                c.co_impuesto AS 'Impuestos (Bs)',
                 c.co_total AS 'Total (Bs)',
                 DATE_FORMAT(c.co_creado_en, '%d/%m/%Y %H:%i') AS 'Registrado el'
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             INNER JOIN sucursales s ON c.su_id = s.su_id
             INNER JOIN usuarios u ON c.us_id = u.us_id
             $whereSQL
-            ORDER BY c.co_fecha DESC";
+            ORDER BY c.co_creado_en DESC";
 
         $conexion = mainModel::conectar();
         return $conexion->query($sql);
@@ -349,14 +306,11 @@ class compraHistorialModel extends mainModel
     {
         $conexion = mainModel::conectar();
 
-        $sql = "SELECT 
+        $sql = "SELECT
                 c.*,
-                p.pr_razon_social AS proveedor_nombre,
-                p.pr_nit AS proveedor_nit,
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
             FROM compras c
-            LEFT JOIN proveedores p ON c.pr_id = p.pr_id
             INNER JOIN sucursales s ON c.su_id = s.su_id
             INNER JOIN usuarios u ON c.us_id = u.us_id
             WHERE c.co_id = :co_id";
@@ -370,7 +324,7 @@ class compraHistorialModel extends mainModel
             return null;
         }
 
-        $sql_detalles = "SELECT 
+        $sql_detalles = "SELECT
                 dc.*,
                 m.med_nombre_quimico,
                 m.med_principio_activo,
@@ -399,15 +353,11 @@ class compraHistorialModel extends mainModel
         $conexion = mainModel::conectar();
 
         // Datos principales de la compra
-        $sql_compra = "SELECT 
+        $sql_compra = "SELECT
             c.*,
-            p.pr_razon_social AS proveedor_nombre,
-            p.pr_nit AS proveedor_nit,
-            p.pr_telefono AS proveedor_telefono,
             s.su_nombre AS sucursal,
             CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
         FROM compras c
-        LEFT JOIN proveedores p ON c.pr_id = p.pr_id
         INNER JOIN sucursales s ON c.su_id = s.su_id
         INNER JOIN usuarios u ON c.us_id = u.us_id
         WHERE c.co_id = :co_id";
@@ -422,7 +372,7 @@ class compraHistorialModel extends mainModel
         }
 
         // Detalles de medicamentos de la compra
-        $sql_detalles = "SELECT 
+        $sql_detalles = "SELECT
             dc.*,
             m.med_nombre_quimico,
             m.med_principio_activo,

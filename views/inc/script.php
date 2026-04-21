@@ -413,7 +413,12 @@
                 "cantidad_unidades",
                 "fecha_vencimiento",
                 "precio_compra",
-                "precio_venta_reg"
+                "precio_venta_reg",
+                "costo_lista",
+                "margen_unitario",
+                "margen_caja",
+                "precio_min_unitario",
+                "precio_min_caja"
             ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = "";
@@ -447,6 +452,7 @@
                 modal.classList.remove('open');
                 setTimeout(() => modal.style.display = "none", 300);
             }
+            limpiarCampos();
         }
 
         /**  Valida datos antes de agregar lote */
@@ -533,33 +539,31 @@
             }
 
             contenedorLista.innerHTML = listaLotes.map((lote, i) => `
-                <div class="lote-card">
-                    <div class="lote-card-header">
+                <div class="lote-card card mb-3 shadow-sm">
+                    <div class="lote-card-header card-header d-flex justify-content-between align-items-center bg-light">
                         <div class="lote-card-info">
-                            <strong class="lote-titulo">${i + 1}. ${lote.nombre}</strong>
-                            <span class="lote-estado ${lote.activar_lote ? 'activo' : 'inactivo'}">
-                                [${lote.activar_lote ? 'Activo' : 'Inactivo'}]
+                            <strong class="lote-titulo text-primary">${i + 1}. ${lote.nombre}</strong>
+                            <span class="badge ${lote.activar_lote ? 'badge-success' : 'badge-secondary'} ml-2">
+                                ${lote.activar_lote ? 'Activo' : 'Inactivo'}
                             </span>
 
-                            <br>
-
-                            <div class="lote-detalles fila-1">
-                                <span><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
-                                <span class="espacio"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
-                                <span class="espacio"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
+                            <div class="lote-detalles mt-2 fila-1">
+                                <span class="text-muted"><ion-icon name="clipboard-outline"></ion-icon> <strong>Lote:</strong> ${lote.numero}</span>
+                                <span class="espacio text-muted"><ion-icon name="cube-outline"></ion-icon> <strong>Cant:</strong> ${lote.cantidad}</span>
+                                <span class="espacio text-muted"><ion-icon name="calendar-outline"></ion-icon> <strong>Vence:</strong> ${formatearFecha(lote.vencimiento)}</span>
                             </div>
 
                             <div class="lote-detalles fila-2">
-                                <span><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
-                                <span class="espacio"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                                <span class="espacio"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
+                                <span class="text-success"><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${lote.precioCompra.toFixed(2)}</span>
+                                <span class="espacio text-info"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
+                                <span class="espacio text-warning"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.cantidad * lote.precioCompra).toFixed(2)}</span>
                             </div>
                         </div>
 
                         <div>
-                            <a href="javascript:void(0)" class="btn btn-douc lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
+                            <button type="button" class="btn btn-danger btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
                                 <ion-icon name="trash-outline"></ion-icon> Eliminar
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -572,14 +576,11 @@
             return `${d}/${m}/${y}`;
         }
 
-        /** 💰 Actualiza subtotales */
+        /** 💰 Actualiza totales */
         function actualizarTotales() {
             const subtotal = listaLotes.reduce((t, l) => t + (l.cantidad * l.precioCompra), 0);
-            const impuestos = subtotal * 0.13;
-            const total = subtotal + impuestos;
+            const total = subtotal; // Impuestos en 0%
 
-            document.getElementById("subtotal").textContent = `Bs. ${subtotal.toFixed(2)}`;
-            document.getElementById("impuestos").textContent = `Bs. ${impuestos.toFixed(2)}`;
             document.getElementById("total").textContent = `Bs. ${total.toFixed(2)}`;
         }
 
@@ -623,11 +624,9 @@
             obtenerLotes: () => listaLotes,
             obtenerTotales: () => {
                 const subtotal = listaLotes.reduce((t, l) => t + (l.cantidad * l.precioCompra), 0);
-                const impuestos = subtotal * 0.13;
                 return {
                     subtotal: subtotal.toFixed(2),
-                    impuestos: impuestos.toFixed(2),
-                    total: (subtotal + impuestos).toFixed(2),
+                    total: subtotal.toFixed(2),
                     cantidadLotes: listaLotes.length
                 };
             }
@@ -715,6 +714,16 @@
             if (subtotalField) subtotalField.value = subtotal.toFixed(2);
             if (impuestosField) impuestosField.value = impuestos.toFixed(2);
             if (totalField) totalField.value = total.toFixed(2);
+
+            // Actualizar campos JSON para alertas.js
+            const lotes = typeof ModalManager !== 'undefined' ? ModalManager.obtenerLotes() : [];
+            const totales = typeof ModalManager !== 'undefined' ? ModalManager.obtenerTotales() : {};
+            
+            const lotesField = document.getElementById('lotes_json');
+            const totalesField = document.getElementById('totales_json');
+            
+            if (lotesField) lotesField.value = JSON.stringify(lotes);
+            if (totalesField) totalesField.value = JSON.stringify(totales);
         }
 
         // Escuchar cambios en impuestos
@@ -744,6 +753,17 @@
             };
         }
 
+        // Escuchar cambios en proveedor
+        const proveedorFiltro = document.getElementById('Proveedor_filtro');
+        const proveedorHidden = document.getElementById('Proveedor_reg');
+        if (proveedorFiltro && proveedorHidden) {
+            proveedorFiltro.addEventListener('change', function() {
+                proveedorHidden.value = this.value;
+            });
+            // Valor inicial
+            proveedorHidden.value = proveedorFiltro.value;
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             conectarConModal();
             actualizarTotales(); // Calcular inicial
@@ -764,13 +784,6 @@
 
         if (form) {
             form.addEventListener('submit', function(e) {
-                // Actualizar campo de proveedor
-                const proveedorFiltro = document.getElementById('Proveedor_filtro');
-                const proveedorHidden = document.getElementById('Proveedor_reg');
-                if (proveedorFiltro && proveedorHidden) {
-                    proveedorHidden.value = proveedorFiltro.value;
-                }
-
                 // Validar que haya lotes agregados
                 const lotes = ModalManager.obtenerLotes();
 
@@ -780,35 +793,15 @@
                     return false;
                 }
 
-                // Crear campo oculto con los lotes en JSON
-                let inputLotes = document.getElementById('lotes_json');
-                if (!inputLotes) {
-                    inputLotes = document.createElement('input');
-                    inputLotes.type = 'hidden';
-                    inputLotes.name = 'lotes_json';
-                    inputLotes.id = 'lotes_json';
-                    this.appendChild(inputLotes);
+                // Asegurar que los campos JSON estén actualizados una última vez
+                if (typeof TotalManager !== 'undefined' && TotalManager.actualizarTotales) {
+                    TotalManager.actualizarTotales();
                 }
-                inputLotes.value = JSON.stringify(lotes);
 
-                // Crear campo con totales
-                const totales = ModalManager.obtenerTotales();
-                let inputTotales = document.getElementById('totales_json');
-                if (!inputTotales) {
-                    inputTotales = document.createElement('input');
-                    inputTotales.type = 'hidden';
-                    inputTotales.name = 'totales_json';
-                    inputTotales.id = 'totales_json';
-                    this.appendChild(inputTotales);
-                }
-                inputTotales.value = JSON.stringify(totales);
-
-                console.log({
+                console.log("Formulario de compra listo para enviar", {
                     lotes: lotes,
-                    totales: totales
+                    totales: ModalManager.obtenerTotales()
                 });
-
-                // Tu clase FormularioAjax manejará el envío
             });
         }
     });
