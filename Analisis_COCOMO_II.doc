@@ -1,0 +1,58 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; }
+        h1 { color: #2E5984; text-align: center; }
+        h2 { color: #2E5984; border-bottom: 2px solid #2E5984; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .total { font-weight: bold; background-color: #e6f3ff; }
+    </style>
+</head>
+<body>
+    <h1>ANÁLISIS DE COSTOS Y ESFUERZO - COCOMO II</h1>
+    <p><strong>Proyecto:</strong> samfarm-backend</p>
+    <p><strong>Fecha:</strong> 18 de abril de 2026</p>
+
+    <h2>1. Introducción</h2>
+    <p>El presente documento detalla el análisis de costos y estimación de esfuerzo del proyecto "samfarm-backend" utilizando el modelo COCOMO II (Constructive Cost Model), adaptado al contexto de desarrollo individual y el mercado laboral de Bolivia.</p>
+
+    <h2>2. Datos del Proyecto</h2>
+    <table>
+        <tr><th>Parámetro</th><th>Valor</th></tr>
+        <tr><td>Líneas de Código (KLOC)</td><td>59.547</td></tr>
+        <tr><td>Personal</td><td>1 Desarrollador</td></tr>
+        <tr><td>Tiempo de Desarrollo</td><td>8 meses</td></tr>
+        <tr><td>Infraestructura</td><td>Servidor Propio (PC Modificada) + Router Mikrotik</td></tr>
+        <tr><td>Conectividad</td><td>Internet 300 Mbps (Tigo Bolivia)</td></tr>
+        <tr><td>Herramientas</td><td>Open Source / Código Abierto (Sin costo de licencia)</td></tr>
+    </table>
+
+    <h2>3. Modelo COCOMO II (Parámetros de Esfuerzo)</h2>
+    <p>Se aplicaron los multiplicadores de esfuerzo (EM) y factores de escala (SF) ajustados para un entorno de desarrollo de tesis/proyecto individual de alta productividad:</p>
+    <ul>
+        <li><strong>Factor de Escala (E):</strong> 1.0256 (Basado en precedencia alta y cohesión de equipo máxima).</li>
+        <li><strong>Multiplicador de Esfuerzo (EM):</strong> 0.40 (Ajustado por alta capacidad del personal, experiencia en la plataforma y facilidades de red).</li>
+    </ul>
+
+    <h2>4. Estimación de Costos (Contexto Bolivia)</h2>
+    <table>
+        <thead>
+            <tr><th>Concepto</th><th>Costo Mensual (BOB)</th><th>Tiempo (Meses)</th><th>Total (BOB)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Mano de Obra (Desarrollador Full Stack)</td><td>10,388.00</td><td>8</td><td>83,104.00</td></tr>
+            <tr><td>Servicio de Internet (Tigo 300 Mbps)</td><td>450.00</td><td>8</td><td>3,600.00</td></tr>
+            <tr><td>Servicios Básicos (Electricidad/Otros)</td><td>200.00</td><td>8</td><td>1,600.00</td></tr>
+            <tr><td>Infraestructura Hardware (PC + Mikrotik) - Pago único</td><td>-</td><td>-</td><td>4,000.00</td></tr>
+            <tr><td>Software y Herramientas</td><td>0.00</td><td>-</td><td>0.00</td></tr>
+            <tr class="total"><td>TOTAL ESTIMADO</td><td></td><td></td><td>92,304.00</td></tr>
+        </tbody>
+    </table>
+
+    <h2>5. Conclusiones</h2>
+    <p>La estimación teórica de COCOMO II para un proyecto de casi 60,000 líneas de código sugiere un esfuerzo significativo. Sin embargo, al tratarse de un desarrollo individual optimizado para una titulación, la eficiencia se incrementa notablemente. El costo total de inversión para el desarrollo de este proyecto, considerando el valor de mercado del tiempo del desarrollador en Bolivia y los recursos técnicos utilizados, asciende a <strong>92,304.00 Bolivianos</strong>.</p>
+</body>
+</html>
