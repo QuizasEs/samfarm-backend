@@ -170,13 +170,6 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
-    // Si llegamos aquí, la acción no existe
-    echo json_encode([
-        "Alerta" => "simple",
-        "Titulo" => "Acción no válida",
-        "texto" => "La acción solicitada no existe",
-        "Tipo" => "error"
-    ]);
     /* ===== OBTENER DATOS PARA BALANCE ===== */
     if ($valor === "obtener_datos_balance") {
         $med_id = mainModel::limpiar_cadena($_POST['med_id']);
@@ -249,6 +242,13 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
+    // Si llegamos aquí, la acción no existe
+    echo json_encode([
+        "Alerta" => "simple",
+        "Titulo" => "Acción no válida",
+        "texto" => "La acción solicitada no existe",
+        "Tipo" => "error"
+    ]);
     exit();
 
 } else {

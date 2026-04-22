@@ -217,7 +217,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalDetalleInventario')">Cerrar</button>
-                <button type="button" class="btn btn-def" onclick="InventarioModals.abrirBalance()">
+                <button type="button" class="btn btn-def" onclick="console.log('window.InventarioModals:', window.InventarioModals); if(typeof window.InventarioModals.abrirBalance === 'function') { window.InventarioModals.abrirBalance(); } else { console.error('window.InventarioModals.abrirBalance is not a function'); }">
                     <ion-icon name="scale-outline"></ion-icon> Balance de Precios
                 </button>
             </div>
@@ -242,7 +242,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="hidden" name="med_id" id="balanceMedId">
                 <input type="hidden" name="su_id" id="balanceSuId">
 
-                <div class="mb">
+                <div class="mb" style="max-height: 70vh; overflow-y: auto;">
                     <div class="stit">Información del Producto</div>
 
                     <div class="fr">
@@ -393,7 +393,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalConfiguracionInventario')">Cancelar</button>
-                <button type="button" class="btn btn-def" onclick="InventarioModals.guardarConfiguracion()">
+                <button type="button" class="btn btn-def" onclick="window.InventarioModals.guardarConfiguracion()">
                     <ion-icon name="checkmark-outline"></ion-icon> Guardar
                 </button>
             </div>
@@ -759,12 +759,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             'use strict';
 
             function abrirBalance() {
+                console.log('abrirBalance called');
                 const medId = document.getElementById('modalDetalleMedId').value;
                 const suId = document.getElementById('modalDetalleSuId').value;
                 const medicamento = document.getElementById('modalDetalleMedicamento').textContent;
                 const sucursal = document.getElementById('detalleSucursal').textContent;
 
+                console.log('medId:', medId, 'suId:', suId);
                 if (!medId || !suId) {
+                    console.error('medId or suId missing');
                     Swal.fire('Error', 'No se pudo identificar el producto', 'error');
                     return;
                 }
@@ -780,8 +783,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 obtenerDatosActualesBalance(medId, suId);
 
                 // Abrir modal
-                document.getElementById('modalBalanceInventario').style.display = 'flex';
-                document.getElementById('modalBalanceInventario').classList.add('open');
+                console.log('Opening modal');
+                const modal = document.getElementById('modalBalanceInventario');
+                if (!modal) {
+                    console.error('Modal modalBalanceInventario not found');
+                    return;
+                }
+                modal.style.display = 'flex';
+                modal.classList.add('open');
 
                 // Bind calculation events
                 bindCalculationEventsBalance();
@@ -799,7 +808,18 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         body: formData
                     });
 
-                    const data = await response.json();
+                    console.log('Response status:', response.status, 'ok:', response.ok);
+
+                    const text = await response.text();
+                    console.log('Raw response:', text);
+
+                    if (!response.ok) {
+                        console.error('Response not ok, text:', text);
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = JSON.parse(text);
+                    console.log('Parsed data:', data);
 
                     if (data.success) {
                         // Llenar campos con datos actuales
@@ -936,6 +956,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 guardarConfiguracion
             };
         })());
+
+        console.log('InventarioModals after assign:', InventarioModals);
 
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(cargarGraficosMargen, 500);

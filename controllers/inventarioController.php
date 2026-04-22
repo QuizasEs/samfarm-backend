@@ -744,7 +744,7 @@ class inventarioController extends inventarioModel
             }
         } catch (Exception $e) {
             error_log("Error obteniendo datos balance: " . $e->getMessage());
-            return ['success' => false, 'error' => 'Error interno del servidor'];
+            return ['success' => false, 'error' => 'Error interno del servidor: ' . $e->getMessage()];
         }
     }
 
