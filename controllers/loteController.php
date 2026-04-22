@@ -824,30 +824,16 @@ class loteController extends loteModel
             // Usar la consulta existente pero con límite mayor para PDF
             $stmt = self::paginado_lote_controller(1, 1000, '#', $filtros['busqueda'] ?? '', $filtros['estado'] ?? '', $filtros['mes'] ?? '', $filtros['su_id'] ?? '');
 
-            // Obtener datos directamente del modelo para PDF
+            // Obtener datos directamente del modelo para PDF (solo campos necesarios)
             $consulta = "
                 SELECT DISTINCT
-                    lm.lm_id,
                     lm.lm_numero_lote,
                     m.med_nombre_quimico,
-                    m.med_principio_activo,
-                    p.pr_razon_social,
-                    s.su_nombre,
-                    lm.lm_cant_caja AS lm_cajas_inicial,
-                    lm.lm_total_unidades AS lm_unidades_inicial,
-                    lm.lm_cant_actual_cajas AS lm_cajas_actual,
-                    lm.lm_cant_actual_unidades AS lm_unidades_actual,
-                    lm.lm_precio_compra,
+                    lm.lm_cant_actual_cajas,
+                    lm.lm_cant_actual_unidades,
                     lm.lm_precio_venta,
-                    lm.lm_fecha_ingreso,
                     lm.lm_fecha_vencimiento,
-                    lm.lm_estado,
-                    lm.lm_creado_en,
-                    lm.lm_costo_lista,
-                    lm.lm_margen_u,
-                    lm.lm_margen_c,
-                    lm.lm_precio_min_u,
-                    lm.lm_precio_min_c
+                    lm.lm_estado
                 FROM lote_medicamento lm
                 INNER JOIN medicamento m ON lm.med_id = m.med_id
                 INNER JOIN sucursales s ON lm.su_id = s.su_id
@@ -919,45 +905,20 @@ class loteController extends loteModel
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];
 
-            $headers = [];
-            if ($rol_usuario == 1) {
-                $headers = [
-                    ['text' => 'N° LOTE', 'width' => 20],
-                    ['text' => 'MEDICAMENTO', 'width' => 25],
-                    ['text' => 'PROVEEDOR', 'width' => 20],
-                    ['text' => 'SUCURSAL', 'width' => 15],
-                    ['text' => 'CAJAS ACT.', 'width' => 12],
-                    ['text' => 'UND ACT.', 'width' => 12],
-                    ['text' => 'PRECIO COMPRA', 'width' => 15],
-                    ['text' => 'PRECIO VENTA', 'width' => 15],
-                    ['text' => 'COSTO LISTA', 'width' => 15],
-                    ['text' => 'MARG. U', 'width' => 10],
-                    ['text' => 'MARG. C', 'width' => 10],
-                    ['text' => 'MIN. U', 'width' => 12],
-                    ['text' => 'MIN. C', 'width' => 12],
-                    ['text' => 'VENCIMIENTO', 'width' => 15],
-                    ['text' => 'ESTADO', 'width' => 12]
-                ];
-            } else {
-                $headers = [
-                    ['text' => 'N° LOTE', 'width' => 22],
-                    ['text' => 'MEDICAMENTO', 'width' => 30],
-                    ['text' => 'PROVEEDOR', 'width' => 25],
-                    ['text' => 'CAJAS ACT.', 'width' => 12],
-                    ['text' => 'UND ACT.', 'width' => 12],
-                    ['text' => 'PRECIO COMPRA', 'width' => 15],
-                    ['text' => 'PRECIO VENTA', 'width' => 15],
-                    ['text' => 'COSTO LISTA', 'width' => 15],
-                    ['text' => 'MARG. U', 'width' => 10],
-                    ['text' => 'MARG. C', 'width' => 10],
-                    ['text' => 'MIN. U', 'width' => 12],
-                    ['text' => 'MIN. C', 'width' => 12],
-                    ['text' => 'VENCIMIENTO', 'width' => 18],
-                    ['text' => 'ESTADO', 'width' => 12]
-                ];
-            }
+            // Columnas mínimas necesarias para comprender el estado de los lotes
+            $headers = [
+                ['text' => 'N°', 'width' => 8],
+                ['text' => 'N° LOTE', 'width' => 25],
+                ['text' => 'MEDICAMENTO', 'width' => 40],
+                ['text' => 'CAJAS', 'width' => 12],
+                ['text' => 'UNIDADES', 'width' => 15],
+                ['text' => 'PRECIO VENTA', 'width' => 20],
+                ['text' => 'VENCIMIENTO', 'width' => 20],
+                ['text' => 'ESTADO', 'width' => 15]
+            ];
 
             $rows = [];
+            $contador = 1;
             foreach ($datos as $row) {
                 $estado_texto = '';
                 switch ($row['lm_estado']) {
@@ -970,44 +931,20 @@ class loteController extends loteModel
                     default: $estado_texto = ucfirst($row['lm_estado']);
                 }
 
-                if ($rol_usuario == 1) {
-                    $cells = [
-                        ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
-                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                        ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 15), 'align' => 'L'],
-                        ['text' => substr($row['su_nombre'] ?? 'N/A', 0, 12), 'align' => 'L'],
-                        ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
-                        ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
-                        ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
-                        ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
-                        ['text' => $row['lm_costo_lista'] ? 'Bs. ' . number_format($row['lm_costo_lista'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_margen_u'] ? $row['lm_margen_u'] . '%' : 'N/A', 'align' => 'C'],
-                        ['text' => $row['lm_margen_c'] ? $row['lm_margen_c'] . '%' : 'N/A', 'align' => 'C'],
-                        ['text' => $row['lm_precio_min_u'] ? 'Bs. ' . number_format($row['lm_precio_min_u'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_precio_min_c'] ? 'Bs. ' . number_format($row['lm_precio_min_c'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
-                        ['text' => $estado_texto, 'align' => 'C']
-                    ];
-                } else {
-                    $cells = [
-                        ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
-                        ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 25), 'align' => 'L'],
-                        ['text' => substr($row['pr_razon_social'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                        ['text' => $row['lm_cajas_actual'], 'align' => 'C'],
-                        ['text' => number_format($row['lm_unidades_actual']), 'align' => 'C'],
-                        ['text' => 'Bs. ' . number_format($row['lm_precio_compra'], 2), 'align' => 'R'],
-                        ['text' => 'Bs. ' . number_format($row['lm_precio_venta'], 2), 'align' => 'R'],
-                        ['text' => $row['lm_costo_lista'] ? 'Bs. ' . number_format($row['lm_costo_lista'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_margen_u'] ? $row['lm_margen_u'] . '%' : 'N/A', 'align' => 'C'],
-                        ['text' => $row['lm_margen_c'] ? $row['lm_margen_c'] . '%' : 'N/A', 'align' => 'C'],
-                        ['text' => $row['lm_precio_min_u'] ? 'Bs. ' . number_format($row['lm_precio_min_u'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_precio_min_c'] ? 'Bs. ' . number_format($row['lm_precio_min_c'], 2) : 'N/A', 'align' => 'R'],
-                        ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : 'N/A', 'align' => 'C'],
-                        ['text' => $estado_texto, 'align' => 'C']
-                    ];
-                }
+                // Columnas mínimas: N°, N° LOTE, MEDICAMENTO, CAJAS, UNIDADES, PRECIO VENTA, VENCIMIENTO, ESTADO
+                $cells = [
+                    ['text' => $contador, 'align' => 'C'],
+                    ['text' => $row['lm_numero_lote'] ?? 'N/A', 'align' => 'L'],
+                    ['text' => substr($row['med_nombre_quimico'] ?? 'N/A', 0, 35), 'align' => 'L'],
+                    ['text' => $row['lm_cant_actual_cajas'] ?? 0, 'align' => 'C'],
+                    ['text' => number_format($row['lm_cant_actual_unidades'] ?? 0), 'align' => 'C'],
+                    ['text' => $row['lm_precio_venta'] ? 'Bs. ' . number_format($row['lm_precio_venta'], 2) : '-', 'align' => 'R'],
+                    ['text' => $row['lm_fecha_vencimiento'] ? date('d/m/Y', strtotime($row['lm_fecha_vencimiento'])) : '-', 'align' => 'C'],
+                    ['text' => $estado_texto, 'align' => 'C']
+                ];
 
                 $rows[] = ['cells' => $cells];
+                $contador++;
             }
 
             $resumen = [
@@ -1015,8 +952,8 @@ class loteController extends loteModel
             ];
 
             $datos_pdf = [
-                'titulo' => 'REPORTE DE LOTES DE MEDICAMENTOS',
-                'nombre_archivo' => 'Lotes_Medicamentos_' . date('Y-m-d_His') . '.pdf',
+                'titulo' => 'REPORTE DE LOTES',
+                'nombre_archivo' => 'Lotes_' . date('Y-m-d_His') . '.pdf',
                 'info_superior' => $info_superior,
                 'tabla' => [
                     'headers' => $headers,
@@ -1040,6 +977,163 @@ class loteController extends loteModel
         } catch (Exception $e) {
             error_log("Error exportando PDF lotes: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
+        }
+    }
+
+    public function exportar_excel_lotes_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario == 3) {
+            echo "Acceso denegado";
+            return;
+        }
+
+        $filtros = [];
+
+        // Filtrar por sucursal según rol
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+        $sucursal_usuario = $_SESSION['sucursal_smp'] ?? 1;
+
+        if ($rol_usuario == 1) {
+            if (isset($_GET['select3']) && $_GET['select3'] !== '') {
+                $filtros['su_id'] = (int)$_GET['select3'];
+            }
+        } elseif ($rol_usuario == 2) {
+            $filtros['su_id'] = $sucursal_usuario;
+        }
+
+        // Filtros de búsqueda y estado
+        if (isset($_GET['busqueda']) && !empty($_GET['busqueda'])) {
+            $filtros['busqueda'] = mainModel::limpiar_cadena($_GET['busqueda']);
+        }
+
+        if (isset($_GET['select1']) && $_GET['select1'] !== '') {
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            if (in_array($_GET['select1'], $estados_validos)) {
+                $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
+            }
+        }
+
+        if (isset($_GET['select2']) && is_numeric($_GET['select2'])) {
+            $mes = (int)$_GET['select2'];
+            if ($mes >= 1 && $mes <= 12) {
+                $filtros['mes'] = $mes;
+            }
+        }
+
+        // Filtros de fecha
+        if (isset($_GET['fecha_desde']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['fecha_desde'])) {
+            $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
+        }
+        if (isset($_GET['fecha_hasta']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['fecha_hasta'])) {
+            $filtros['fecha_hasta'] = mainModel::limpiar_cadena($_GET['fecha_hasta']);
+        }
+
+        try {
+            // Obtener datos directamente del modelo para Excel (solo campos necesarios)
+            $consulta = "
+                SELECT DISTINCT
+                    IFNULL(lm.lm_numero_lote, 'Sin lote') AS 'N° Lote',
+                    m.med_nombre_quimico AS 'Medicamento',
+                    lm.lm_cant_actual_cajas AS 'Cajas Actuales',
+                    lm.lm_cant_actual_unidades AS 'Unidades Actuales',
+                    COALESCE(lm.lm_precio_venta, 0) AS 'Precio Venta (Bs)',
+                    IFNULL(DATE_FORMAT(lm.lm_fecha_vencimiento, '%d/%m/%Y'), 'Sin fecha') AS 'Fecha Vencimiento',
+                    UPPER(lm.lm_estado) AS 'Estado'
+                FROM lote_medicamento lm
+                INNER JOIN medicamento m ON lm.med_id = m.med_id
+                INNER JOIN sucursales s ON lm.su_id = s.su_id
+                LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            ";
+
+            $whereParts = [];
+            if (!empty($filtros['busqueda'])) {
+                $whereParts[] = "(
+                    m.med_nombre_quimico LIKE '%{$filtros['busqueda']}%' OR
+                    m.med_principio_activo LIKE '%{$filtros['busqueda']}%' OR
+                    p.pr_razon_social LIKE '%{$filtros['busqueda']}%' OR
+                    lm.lm_numero_lote LIKE '%{$filtros['busqueda']}%'
+                )";
+            }
+            if (!empty($filtros['estado'])) {
+                $whereParts[] = "lm.lm_estado = '{$filtros['estado']}'";
+            }
+            if (!empty($filtros['mes'])) {
+                $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = {$filtros['mes']}";
+            }
+            if (!empty($filtros['su_id'])) {
+                $whereParts[] = "lm.su_id = '{$filtros['su_id']}'";
+            }
+
+            $fecha_desde = $filtros['fecha_desde'] ?? '';
+            $fecha_hasta = $filtros['fecha_hasta'] ?? '';
+
+            if ($fecha_desde && $fecha_hasta) {
+                $timestamp_desde = strtotime($fecha_desde);
+                $timestamp_hasta = strtotime($fecha_hasta);
+                if ($timestamp_desde <= $timestamp_hasta) {
+                    $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '{$fecha_desde}' AND '{$fecha_hasta}'";
+                } else {
+                    $whereParts[] = "DATE(lm.lm_fecha_ingreso) BETWEEN '{$fecha_hasta}' AND '{$fecha_desde}'";
+                }
+            } elseif ($fecha_desde) {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) >= '{$fecha_desde}'";
+            } elseif ($fecha_hasta) {
+                $whereParts[] = "DATE(lm.lm_fecha_ingreso) <= '{$fecha_hasta}'";
+            }
+
+            if (count($whereParts) > 0) {
+                $consulta .= " WHERE " . implode(' AND ', $whereParts);
+            }
+
+            $consulta .= " ORDER BY lm.lm_fecha_ingreso DESC LIMIT 1000";
+
+            $conexion = mainModel::conectar();
+            $stmt = $conexion->query($consulta);
+            $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($datos)) {
+                echo "No hay datos para exportar con los filtros aplicados.";
+                return;
+            }
+
+            $periodo = '';
+            if (!empty($fecha_desde) && !empty($fecha_hasta)) {
+                $periodo = date('d/m/Y', strtotime($fecha_desde)) . ' al ' . date('d/m/Y', strtotime($fecha_hasta));
+            } else {
+                $periodo = 'Todo el período';
+            }
+
+            $info_superior = [
+                'Periodo' => $periodo,
+                'Total de Lotes' => count($datos),
+                'Generado' => date('d/m/Y H:i:s'),
+                'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
+            ];
+
+            // Nombre del archivo
+            $fecha = date('Y-m-d_His');
+            $sucursal_nombre = $filtros['su_id'] ? 'Sucursal_' . $filtros['su_id'] : 'Todas_Sucursales';
+            $filename = "Lotes_{$sucursal_nombre}_{$fecha}.xls";
+
+            mainModel::generar_excel_reporte([
+                'titulo' => 'REPORTE DE LOTES',
+                'datos' => $datos,
+                'headers' => array_keys($datos[0]),
+                'nombre_archivo' => $filename,
+                'formato_columnas' => [
+                    'Cajas Actuales' => 'numero',
+                    'Unidades Actuales' => 'numero',
+                    'Precio Venta (Bs)' => 'moneda'
+                ],
+                'columnas_totales' => ['Cajas Actuales', 'Unidades Actuales'],
+                'info_superior' => $info_superior
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Error exportando Excel lotes: " . $e->getMessage());
+            echo "Error al generar archivo: " . htmlspecialchars($e->getMessage());
         }
     }
 }

@@ -359,40 +359,44 @@ class inventarioModel extends mainModel
     protected static function exportar_inventario_excel_model($filtros = [])
     {
         $sql = "
-            SELECT 
+            SELECT
                 s.su_nombre AS 'Sucursal',
                 m.med_nombre_quimico AS 'Medicamento',
                 m.med_principio_activo AS 'Principio Activo',
                 p.pr_razon_social AS 'Proveedor',
                 ff.ff_nombre AS 'Forma',
-                i.inv_total_cajas AS 'Cajas',
-                i.inv_total_unidades AS 'Unidades',
-                i.inv_total_valorado AS 'Valorado (Bs)',
-                i.inv_minimo AS 'Stock Mínimo',
-                i.inv_maximo AS 'Stock Máximo',
-                CASE 
-                    WHEN i.inv_total_unidades = 0 THEN 'AGOTADO'
-                    WHEN (i.inv_minimo IS NULL OR i.inv_minimo = 0) AND i.inv_total_unidades > 0 THEN 'SIN DEFINIR'
-                    WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 'CRÍTICO'
-                    WHEN i.inv_minimo > 0 AND i.inv_total_unidades < (i.inv_minimo * 1.5) THEN 'BAJO'
-                    WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN 'EXCESO'
-                    ELSE 'NORMAL'
-                END AS 'Estado',
-                i.inv_actualizado_en AS 'Última Actualización'
-            FROM inventarios i
-            INNER JOIN medicamento m ON m.med_id = i.med_id
-            INNER JOIN sucursales s ON s.su_id = i.su_id
-            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo'
+                lm.lm_numero_lote AS 'Número Lote',
+                lm.lm_cant_caja AS 'Cajas Ingresadas',
+                lm.lm_cant_actual_cajas AS 'Cajas Actuales',
+                lm.lm_cant_actual_unidades AS 'Unidades Actuales',
+                lm.lm_costo_lista AS 'Costo Lista (Bs)',
+                lm.lm_precio_compra AS 'Precio Compra (Bs)',
+                lm.lm_precio_venta AS 'Precio Venta (Bs)',
+                lm.lm_margen_u AS 'Margen Unitario (%)',
+                lm.lm_margen_c AS 'Margen Caja (%)',
+                lm.lm_precio_min_u AS 'Precio Min. Unitario (Bs)',
+                lm.lm_precio_min_c AS 'Precio Min. Caja (Bs)',
+                DATE_FORMAT(lm.lm_fecha_ingreso, '%d/%m/%Y') AS 'Fecha Ingreso',
+                DATE_FORMAT(lm.lm_fecha_vencimiento, '%d/%m/%Y') AS 'Fecha Vencimiento',
+                UPPER(lm.lm_estado) AS 'Estado Lote',
+                lm.lm_creado_en AS 'Fecha Creación Lote',
+                lm.lm_actualizado_en AS 'Última Actualización Lote',
+                (lm.lm_cant_actual_unidades * lm.lm_precio_compra) AS 'Valorado Compra (Bs)',
+                (lm.lm_cant_actual_unidades * lm.lm_precio_venta) AS 'Valorado Venta (Bs)'
+            FROM lote_medicamento lm
+            INNER JOIN medicamento m ON m.med_id = lm.med_id
+            INNER JOIN sucursales s ON s.su_id = lm.su_id
             LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
             LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-            WHERE 1=1
+            WHERE lm.lm_estado IN ('activo', 'en_espera', 'bloqueado')
+              AND lm.lm_cant_actual_unidades > 0
         ";
 
         $params = [];
 
         // Filtro por sucursal
         if (!empty($filtros['su_id'])) {
-            $sql .= " AND i.su_id = :su_id";
+            $sql .= " AND lm.su_id = :su_id";
             $params[':su_id'] = (int)$filtros['su_id'];
         }
 
@@ -402,7 +406,8 @@ class inventarioModel extends mainModel
                         m.med_nombre_quimico LIKE :busqueda OR
                         m.med_principio_activo LIKE :busqueda OR
                         m.med_codigo_barras LIKE :busqueda OR
-                        p.pr_razon_social LIKE :busqueda
+                        p.pr_razon_social LIKE :busqueda OR
+                        lm.lm_numero_lote LIKE :busqueda
                     )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -413,41 +418,30 @@ class inventarioModel extends mainModel
             $params[':proveedor'] = (int)$filtros['proveedor'];
         }
 
-        // Filtro por estado de stock
+        // Filtro por estado de lote (simplificado para lotes)
         if (!empty($filtros['estado'])) {
             switch ($filtros['estado']) {
                 case 'agotado':
-                    $sql .= " AND i.inv_total_unidades = 0";
+                    $sql .= " AND lm.lm_cant_actual_unidades = 0";
                     break;
 
                 case 'critico':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
-                    break;
-
                 case 'bajo':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
-                    $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
+                    // Para lotes, consideramos crítico/bajo si unidades son bajas
+                    $sql .= " AND lm.lm_cant_actual_unidades > 0 AND lm.lm_cant_actual_unidades < 10";
                     break;
 
                 case 'normal':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
-                    $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
+                    $sql .= " AND lm.lm_cant_actual_unidades >= 10";
                     break;
 
                 case 'exceso':
-                    $sql .= " AND i.inv_maximo > 0";
-                    $sql .= " AND i.inv_total_unidades > i.inv_maximo";
+                    // Para lotes, consideramos exceso si cajas actuales > cajas ingresadas * 0.8
+                    $sql .= " AND lm.lm_cant_actual_cajas > (lm.lm_cant_caja * 0.8)";
                     break;
 
                 case 'sin_definir':
-                    $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
-                    $sql .= " AND i.inv_total_unidades > 0";
+                    // No aplicable para lotes
                     break;
             }
         }
@@ -458,13 +452,7 @@ class inventarioModel extends mainModel
             $params[':forma'] = (int)$filtros['forma'];
         }
 
-        // Filtro por proveedor
-        if (!empty($filtros['proveedor'])) {
-            $sql .= " AND p.pr_id = :proveedor";
-            $params[':proveedor'] = (int)$filtros['proveedor'];
-        }
-
-        $sql .= " ORDER BY s.su_nombre, m.med_nombre_quimico";
+        $sql .= " ORDER BY s.su_nombre, m.med_nombre_quimico, lm.lm_fecha_vencimiento ASC";
 
         $conexion = mainModel::conectar();
         $stmt = $conexion->prepare($sql);

@@ -115,7 +115,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
             <div class="mf">
                 <button class="btn btn-war" onclick="CajaGestion.cerrarModalCerrar()">Cancelar</button>
-                <button class="btn btn-danger" onclick="CajaGestion.confirmarCierre()"><ion-icon name="checkmark-circle-outline"></ion-icon> Confirmar Cierre</button>
+                <button class="btn btn-dan" onclick="CajaGestion.confirmarCierre()"><ion-icon name="checkmark-circle-outline"></ion-icon> Confirmar Cierre</button>
             </div>
         </div>
     </div>

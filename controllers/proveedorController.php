@@ -44,13 +44,14 @@ class proveedorController extends proveedorModel
             $filtros['estado'] = $f1;
         }
 
-        if ($f2 !== '') {
-            $filtros['con_compras'] = $f2;
-        }
+        // Los filtros de compras están temporalmente deshabilitados hasta implementar la relación compras-proveedores
+        // if ($f2 !== '') {
+        //     $filtros['con_compras'] = $f2;
+        // }
 
-        if ($f3 !== '') {
-            $filtros['ultima_compra'] = $f3;
-        }
+        // if ($f3 !== '') {
+        //     $filtros['ultima_compra'] = $f3;
+        // }
 
         $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
@@ -237,13 +238,14 @@ class proveedorController extends proveedorModel
             $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
         }
 
-        if (isset($_GET['select2']) && !empty($_GET['select2'])) {
-            $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
-        }
+        // Los filtros de compras están temporalmente deshabilitados hasta implementar la relación compras-proveedores
+        // if (isset($_GET['select2']) && !empty($_GET['select2'])) {
+        //     $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
+        // }
 
-        if (isset($_GET['select3']) && !empty($_GET['select3'])) {
-            $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
-        }
+        // if (isset($_GET['select3']) && !empty($_GET['select3'])) {
+        //     $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
+        // }
 
         if (isset($_GET['fecha_desde']) && !empty($_GET['fecha_desde'])) {
             $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
@@ -554,13 +556,14 @@ class proveedorController extends proveedorModel
             $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
         }
 
-        if (isset($_GET['select2']) && !empty($_GET['select2'])) {
-            $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
-        }
+        // Los filtros de compras están temporalmente deshabilitados hasta implementar la relación compras-proveedores
+        // if (isset($_GET['select2']) && !empty($_GET['select2'])) {
+        //     $filtros['con_compras'] = mainModel::limpiar_cadena($_GET['select2']);
+        // }
 
-        if (isset($_GET['select3']) && !empty($_GET['select3'])) {
-            $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
-        }
+        // if (isset($_GET['select3']) && !empty($_GET['select3'])) {
+        //     $filtros['ultima_compra'] = mainModel::limpiar_cadena($_GET['select3']);
+        // }
 
         if (isset($_GET['fecha_desde']) && !empty($_GET['fecha_desde'])) {
             $filtros['fecha_desde'] = mainModel::limpiar_cadena($_GET['fecha_desde']);
@@ -589,8 +592,8 @@ class proveedorController extends proveedorModel
             $info_superior = [
                 'Periodo' => $periodo,
                 'Total de Proveedores' => count($datos),
-                'Proveedores Activos' => count(array_filter($datos, function($p) { return $p['estado'] == 'Activo'; })),
-                'Proveedores Inactivos' => count(array_filter($datos, function($p) { return $p['estado'] == 'Inactivo'; })),
+                'Proveedores Activos' => count(array_filter($datos, function($p) { return $p['Estado'] == 'ACTIVO'; })),
+                'Proveedores Inactivos' => count(array_filter($datos, function($p) { return $p['Estado'] == 'INACTIVO'; })),
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];
@@ -603,13 +606,11 @@ class proveedorController extends proveedorModel
                 ['text' => 'CORREO', 'width' => 30],
                 ['text' => 'NOMBRE COMERCIAL', 'width' => 35],
                 ['text' => 'FECHA REGISTRO', 'width' => 25],
-                ['text' => 'TOTAL COMPRAS', 'width' => 25],
-                ['text' => 'ÚLTIMA COMPRA', 'width' => 25],
+                ['text' => 'LOTES GENERADOS', 'width' => 25],
                 ['text' => 'ESTADO', 'width' => 15]
             ];
 
             $rows = [];
-            $total_compras = 0;
 
             foreach ($datos as $index => $row) {
                 $cells = [
@@ -619,19 +620,17 @@ class proveedorController extends proveedorModel
                     ['text' => $row['Teléfono'] ?? 'N/A', 'align' => 'C'],
                     ['text' => $row['Correo'] ?? '-', 'align' => 'L'],
                     ['text' => $row['Nombre Comercial'] ?? '-', 'align' => 'L'],
-                    ['text' => date('d/m/Y', strtotime($row['Fecha Registro'])), 'align' => 'C'],
-                    ['text' => 'Bs. ' . number_format($row['Total Compras'], 2), 'align' => 'R'],
-                    ['text' => $row['Última Compra'] ? date('d/m/Y', strtotime($row['Última Compra'])) : 'Nunca', 'align' => 'C'],
+                    ['text' => $row['Fecha Registro'], 'align' => 'C'],
+                    ['text' => $row['Lotes Generados'], 'align' => 'C'],
                     ['text' => $row['Estado'], 'align' => 'C']
                 ];
 
                 $rows[] = ['cells' => $cells];
-                $total_compras += $row['Total Compras'];
             }
 
             $resumen = [
                 'Total de Proveedores' => ['text' => count($datos)],
-                'Monto Total de Compras' => ['text' => 'Bs ' . number_format($total_compras, 2), 'color' => [46, 125, 50]]
+                'Lotes Totales Generados' => ['text' => array_sum(array_column($datos, 'Lotes Generados'))]
             ];
 
             $datos_pdf = [

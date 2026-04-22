@@ -339,7 +339,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             <div class="mf">
                 <button class="btn btn-war" onclick="SucursalesModals.cerrarModalDetalle()">Cerrar</button>
                 <button class="btn btn-def" onclick="SucursalesModals.editarDesdeDetalle()"><ion-icon name="create-outline"></ion-icon> Editar</button>
-                <button class="btn btn-danger" id="btnToggleEstadoDetalleSucursal"><ion-icon name="power-outline"></ion-icon> Cambiar Estado</button>
+                <button class="btn btn-out" id="btnToggleEstadoDetalleSucursal"><ion-icon name="power-outline"></ion-icon> Cambiar Estado</button>
             </div>
         </div>
     </div>
@@ -839,7 +839,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     btnToggle.innerHTML = parseInt(suc.su_estado) === 1 ?
                         '<ion-icon name="power-outline"></ion-icon> Desactivar' :
                         '<ion-icon name="power-outline"></ion-icon> Activar';
-                    btnToggle.className = parseInt(suc.su_estado) === 1 ? 'btn danger' : 'btn success';
+                    btnToggle.className = parseInt(suc.su_estado) === 1 ? 'btn btn-war' : 'btn btn-suc';
                 }
             }
 

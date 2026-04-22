@@ -1199,7 +1199,7 @@
             this.tablaBody.innerHTML = '';
 
             if (this.cart.length === 0) {
-                this.tablaBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;padding:12px">no hay medicamentos en la lista</td></tr>';
+                this.tablaBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#666;padding:12px">no hay medicamentos en la lista</td></tr>';
             } else {
                 this.cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
@@ -1231,7 +1231,8 @@
                         '<td><input type="text" class="qty-input-cajas inp" data-index="' + i + '" value="' + cajas + '" style="width: 60px; text-align: center;"></td>' +
                         '<td>' + this.formatMoney(it.precio * (it.unidades_por_caja || 1)) + '</td>' +
                         '<td>' + this.formatMoney(it.precio) + '</td>' +
-                        '<td>' + this.formatMoney(it.precio * it.cantidad) + '</td>';
+                        '<td><input type="number" class="descuento-input inp" data-index="' + i + '" value="' + (it.descuento || 0) + '" min="0" max="100" step="0.01" style="width: 80px; text-align: center;"></td>' +
+                        '<td class="' + ((it.descuento || 0) > 0 ? 'discounted-subtotal' : '') + '">' + this.formatMoney((it.precio * it.cantidad) - (it.descuento || 0)) + '</td>';
 
                     this.tablaBody.appendChild(tr);
                 });
@@ -1247,7 +1248,8 @@
                     cajas: Math.floor(i.cantidad / upc),
                     unidades_por_caja: upc,
                     precio: Number(i.precio),
-                    subtotal: Number((i.precio * i.cantidad).toFixed(2))
+                    descuento: Number(i.descuento || 0),
+                    subtotal: Number(((i.precio * i.cantidad) - (i.descuento || 0)).toFixed(2))
                 };
             }));
 
@@ -1296,6 +1298,20 @@
                 };
                 i.onchange = function() {
                     this.manager.setQtyCajasByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                };
+                i.manager = this;
+            });
+
+            // eventos para descuento
+            this.$all('.descuento-input').forEach(i => {
+                i.oninput = function() {
+                    this.manager.clampDescuento(this);
+                };
+                i.onblur = function() {
+                    this.manager.validarDescuento(this);
+                    const index = parseInt(this.dataset.index);
+                    const descuento = parseFloat(this.value) || 0;
+                    this.manager.setDescuentoByIndex(index, descuento);
                 };
                 i.manager = this;
             });
@@ -1500,13 +1516,50 @@
                 return;
             }
 
-            item.cantidad = val;
+            item.cantidad = nuevaCantidadTotal;
+            this.renderCart();
+        }
+
+        // metodo para clamp descuento (similar a clampMargen)
+        clampDescuento(input) {
+            let valor = parseFloat(input.value);
+            if (isNaN(valor) || valor < 0) {
+                input.value = '0.00';
+            } else if (valor > 100) {
+                input.value = '100.00';
+            } else if (input.value.includes('.')) {
+                let parts = input.value.split('.');
+                if (parts[1].length > 2) {
+                    input.value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
+            }
+        }
+
+        // metodo para validar descuento
+        validarDescuento(input) {
+            this.clampDescuento(input);
+            let valor = parseFloat(input.value);
+            input.value = valor.toFixed(2);
+        }
+
+        // metodo para establecer descuento por indice
+        setDescuentoByIndex(idx, val) {
+            if (idx < 0 || idx >= this.cart.length) return;
+
+            const item = this.cart[idx];
+            let descuento = parseFloat(val);
+            if (isNaN(descuento) || descuento < 0) {
+                descuento = 0;
+            } else if (descuento > 100) {
+                descuento = 100;
+            }
+            item.descuento = descuento;
             this.renderCart();
         }
 
         // metodo para actualizar totales
         updateTotals() {
-            const subtotal = this.cart.reduce((s, i) => s + (i.precio * i.cantidad), 0);
+            const subtotal = this.cart.reduce((s, i) => s + ((i.precio * i.cantidad) - (i.descuento || 0)), 0);
             const total = subtotal;
             this.subtotalHidden.value = subtotal.toFixed(2);
             this.totalHidden.value = total.toFixed(2);
@@ -1563,6 +1616,7 @@
                     proveedor: m.proveedor,
                     precio: parseFloat(m.precio) || 0,
                     cantidad: 0,
+                    descuento: 0,
                     stock: m.stock != null ? Number(m.stock) : null,
                     unidades_por_caja: m.unidades_por_caja || 1
                 });

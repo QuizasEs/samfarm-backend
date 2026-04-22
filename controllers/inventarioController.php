@@ -422,16 +422,23 @@ class inventarioController extends inventarioModel
             ];
 
             mainModel::generar_excel_reporte([
-                'titulo' => 'REPORTE DE INVENTARIO',
+                'titulo' => 'REPORTE DE INVENTARIO POR LOTES',
                 'datos' => $datos,
                 'headers' => $headers,
                 'nombre_archivo' => $filename,
                 'formato_columnas' => [
-                    'Valorado (Bs)' => 'moneda',
-                    'Cajas' => 'numero',
-                    'Unidades' => 'numero'
+                    'Cajas Ingresadas' => 'numero',
+                    'Cajas Actuales' => 'numero',
+                    'Unidades Actuales' => 'numero',
+                    'Costo Lista (Bs)' => 'moneda',
+                    'Precio Compra (Bs)' => 'moneda',
+                    'Precio Venta (Bs)' => 'moneda',
+                    'Precio Min. Unitario (Bs)' => 'moneda',
+                    'Precio Min. Caja (Bs)' => 'moneda',
+                    'Valorado Compra (Bs)' => 'moneda',
+                    'Valorado Venta (Bs)' => 'moneda'
                 ],
-                'columnas_totales' => ['Valorado (Bs)'],
+                'columnas_totales' => ['Valorado Compra (Bs)', 'Valorado Venta (Bs)'],
                 'info_superior' => $info_superior
             ]);
 
@@ -575,70 +582,44 @@ class inventarioController extends inventarioModel
 
             $info_superior = [
                 'Sucursal' => ($su_id ? 'Sucursal ID ' . $su_id : 'Todas las Sucursales'),
-                'Total de Medicamentos' => count($datos),
+                'Total de Lotes' => count($datos),
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];
 
-            $headers = [];
-            if ($rol_usuario == 1) {
-                $headers = [
-                    ['text' => 'N°', 'width' => 10],
-                    ['text' => 'MEDICAMENTO', 'width' => 50],
-                    ['text' => 'LABORATORIO', 'width' => 25],
-                    ['text' => 'SUCURSAL', 'width' => 25],
-                    ['text' => 'CAJAS', 'width' => 15],
-                    ['text' => 'UNIDADES', 'width' => 20],
-                    ['text' => 'VALORADO', 'width' => 30],
-                    ['text' => 'ESTADO', 'width' => 20]
-                ];
-            } else {
-                $headers = [
-                    ['text' => 'N°', 'width' => 10],
-                    ['text' => 'MEDICAMENTO', 'width' => 55],
-                    ['text' => 'LABORATORIO', 'width' => 30],
-                    ['text' => 'CAJAS', 'width' => 15],
-                    ['text' => 'UNIDADES', 'width' => 20],
-                    ['text' => 'VALORADO', 'width' => 30],
-                    ['text' => 'ESTADO', 'width' => 20]
-                ];
-            }
+            $headers = [
+                ['text' => 'N°', 'width' => 8],
+                ['text' => 'MEDICAMENTO', 'width' => 50],
+                ['text' => 'N° LOTE', 'width' => 20],
+                ['text' => 'UNIDADES', 'width' => 15],
+                ['text' => 'PRECIO VENTA', 'width' => 20],
+                ['text' => 'F. VENCIMIENTO', 'width' => 20],
+                ['text' => 'ESTADO', 'width' => 15]
+            ];
 
             $rows = [];
             foreach ($datos as $index => $row) {
-                $estado_texto = $row['Estado'] ?? 'N/A';
-
-                if ($rol_usuario == 1) {
-                    $cells = [
-                        ['text' => ($index + 1), 'align' => 'C'],
-                        ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 35), 'align' => 'L'],
-                        ['text' => substr($row['Proveedor'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                        ['text' => substr($row['Sucursal'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                        ['text' => $row['Cajas'], 'align' => 'C'],
-                        ['text' => number_format($row['Unidades']), 'align' => 'C'],
-                        ['text' => 'Bs. ' . number_format($row['Valorado (Bs)'], 2), 'align' => 'R'],
-                        ['text' => $estado_texto, 'align' => 'C']
-                    ];
-                } else {
-                    $cells = [
-                        ['text' => ($index + 1), 'align' => 'C'],
-                        ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 40), 'align' => 'L'],
-                        ['text' => substr($row['Proveedor'] ?? 'N/A', 0, 20), 'align' => 'L'],
-                        ['text' => $row['Cajas'], 'align' => 'C'],
-                        ['text' => number_format($row['Unidades']), 'align' => 'C'],
-                        ['text' => 'Bs. ' . number_format($row['Valorado (Bs)'], 2), 'align' => 'R'],
-                        ['text' => $estado_texto, 'align' => 'C']
-                    ];
-                }
+                $cells = [
+                    ['text' => ($index + 1), 'align' => 'C'],
+                    ['text' => substr($row['Medicamento'] ?? 'N/A', 0, 40), 'align' => 'L'],
+                    ['text' => $row['Número Lote'] ?? 'N/A', 'align' => 'L'],
+                    ['text' => number_format($row['Unidades Actuales'] ?? 0), 'align' => 'C'],
+                    ['text' => $row['Precio Venta (Bs)'] ? 'Bs. ' . number_format($row['Precio Venta (Bs)'], 2) : '-', 'align' => 'R'],
+                    ['text' => $row['Fecha Vencimiento'] ?? '-', 'align' => 'C'],
+                    ['text' => $row['Estado Lote'] ?? 'N/A', 'align' => 'C']
+                ];
 
                 $rows[] = ['cells' => $cells];
             }
 
-            $total_valorado = array_sum(array_column($datos, 'Valorado (Bs)'));
+            $total_valorado_compra = array_sum(array_column($datos, 'Valorado Compra (Bs)'));
+            $total_valorado_venta = array_sum(array_column($datos, 'Valorado Venta (Bs)'));
+            $total_lotes = count($datos);
 
             $resumen = [
-                'Total de Medicamentos' => ['text' => count($datos)],
-                'Valor Total del Inventario' => ['text' => 'Bs ' . number_format($total_valorado, 2), 'color' => [46, 125, 50]]
+                'Total de Lotes' => ['text' => $total_lotes],
+                'Valor Total Compra' => ['text' => 'Bs ' . number_format($total_valorado_compra, 2)],
+                'Valor Total Venta' => ['text' => 'Bs ' . number_format($total_valorado_venta, 2), 'color' => [46, 125, 50]]
             ];
 
             $datos_pdf = [
@@ -678,6 +659,7 @@ class inventarioController extends inventarioModel
             $sql = mainModel::conectar()->prepare("
                 SELECT
                     lm.lm_costo_lista,
+                    lm.lm_precio_compra,
                     lm.lm_margen_u,
                     lm.lm_margen_c,
                     lm.lm_precio_venta,
@@ -705,6 +687,7 @@ class inventarioController extends inventarioModel
                 return [
                     'success' => true,
                     'costo_lista' => $datos['lm_costo_lista'],
+                    'precio_compra' => $datos['lm_precio_compra'],
                     'margen_u' => $datos['lm_margen_u'],
                     'margen_c' => $datos['lm_margen_c'],
                     'precio_venta' => $datos['lm_precio_venta'],
@@ -731,6 +714,7 @@ class inventarioController extends inventarioModel
                     return [
                         'success' => true,
                         'costo_lista' => null,
+                        'precio_compra' => null,
                         'margen_u' => null,
                         'margen_c' => null,
                         'precio_venta' => null,

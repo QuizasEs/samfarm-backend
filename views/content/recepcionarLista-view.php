@@ -230,11 +230,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 html += '<th>Total Unidades</th>';
                 html += '<th>Valorado</th>';
                 html += '<th>Fecha</th>';
-                html += '<th>Acción</th>';
                 html += '</tr></thead><tbody>';
 
                 transferencias.forEach((transfer, index) => {
-                    html += '<tr>';
+                    html += '<tr class="recepcion-row" data-tr-id="' + transfer.tr_id + '" style="cursor: pointer;">';
                     html += '<td>' + (index + 1) + '</td>';
                     html += '<td><strong>' + escapeHtml(transfer.tr_numero) + '</strong></td>';
                     html += '<td>' + escapeHtml(transfer.sucursal_origen) + '</td>';
@@ -243,16 +242,22 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + transfer.tr_total_unidades + '</strong></td>';
                     html += '<td style="text-align:right;">Bs. ' + formatearNumero(transfer.tr_total_valorado) + '</td>';
                     html += '<td>' + formatearFecha(transfer.tr_fecha_envio) + '</td>';
-                    html += '<td>';
-                    html += '<button type="button" class="btn btn-def" onclick="RecepcionManager.verDetalles(' + transfer.tr_id + ')">';
-                    html += '<ion-icon name="eye-outline"></ion-icon> Ver';
-                    html += '</button>';
-                    html += '</td>';
                     html += '</tr>';
                 });
 
                 html += '</tbody></table></div>';
                 container.innerHTML = html;
+
+                // Agregar event listeners a las filas clickeables
+                const filas = container.querySelectorAll('.recepcion-row');
+                filas.forEach(fila => {
+                    fila.addEventListener('click', function() {
+                        const trId = this.getAttribute('data-tr-id');
+                        if (trId) {
+                            RecepcionManager.verDetalles(parseInt(trId));
+                        }
+                    });
+                });
             }
 
             async function verDetalles(trId) {

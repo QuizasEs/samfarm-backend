@@ -319,7 +319,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 btnExcelProveedor.addEventListener('click', function(e) {
                     e.preventDefault();
 
-                    const form = this.closest('.container').querySelector('.filtro-dinamico');
+                    const form = document.querySelector('.filtro-dinamico');
                     if (!form) {
                         console.warn('No se encontró el formulario de filtros');
                         return;
@@ -377,7 +377,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         document.getElementById('btnExportarPDFProveedor').addEventListener('click', function(e) {
             e.preventDefault();
 
-            const form = this.closest('.container').querySelector('.filtro-dinamico');
+            const form = document.querySelector('.filtro-dinamico');
             if (!form) {
                 console.warn('No se encontró el formulario de filtros');
                 return;

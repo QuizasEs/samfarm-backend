@@ -94,7 +94,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
 
         <div class="stit">Análisis de Margen Bruto (Últimas Ventas)</div>
-        
+
         <div class="grid4 mb16">
             <div class="statc">
                 <div class="siw bl"><ion-icon name="cash-outline"></ion-icon></div>
@@ -128,13 +128,17 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         <div class="fr">
             <div class="card">
-                <div class="ch"><div class="ct">Top 10 Medicamentos por Margen Bruto</div></div>
+                <div class="ch">
+                    <div class="ct">Top 10 Medicamentos por Margen Bruto</div>
+                </div>
                 <div class="cb">
                     <canvas id="chartMedicamentos" style="width: 100%; min-height: 300px;"></canvas>
                 </div>
             </div>
             <div class="card">
-                <div class="ch"><div class="ct">Margen Bruto Diario (Últimos 30 días)</div></div>
+                <div class="ch">
+                    <div class="ct">Margen Bruto Diario (Últimos 30 días)</div>
+                </div>
                 <div class="cb">
                     <canvas id="chartDiario" style="width: 100%; min-height: 300px;"></canvas>
                 </div>
@@ -142,7 +146,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
 
         <div class="card mt16">
-            <div class="ch"><div class="ct">Margen Bruto por Sucursal (Últimos 6 meses)</div></div>
+            <div class="ch">
+                <div class="ct">Margen Bruto por Sucursal (Últimos 6 meses)</div>
+            </div>
             <div class="cb">
                 <canvas id="chartSucursales" style="width: 100%; height: 300px;"></canvas>
             </div>
@@ -173,26 +179,53 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="fr">
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Línea</div><div class="th5" id="detalleLaboral">-</div></div></div>
-                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="detalleSucursal">-</div></div></div>
+                            <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Línea</div>
+                                    <div class="th5" id="detalleLaboral">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Sucursal</div>
+                                    <div class="th5" id="detalleSucursal">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="cube-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Total Cajas</div>
+                                    <div class="th5" id="detalleCajas">-</div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
+                    
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="cube-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Total Cajas</div><div class="th5" id="detalleCajas">-</div></div></div>
-                            <div class="litem"><ion-icon name="file-tray-full-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Total Unidades</div><div class="th5" id="detalleUnidades">-</div></div></div>
+                            <div class="litem"><ion-icon name="file-tray-full-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Total Unidades</div>
+                                    <div class="th5" id="detalleUnidades">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Valor Inventario</div>
+                                    <div class="th5" id="detalleValorado">-</div>
+                                </div>
+                            </div>
+                            <div class="litem"><ion-icon name="shield-checkmark-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                <div class="f1">
+                                    <div class="tc">Estado</div>
+                                    <div id="detalleEstado">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="fr">
-                    <div class="card">
-                        <div class="cb">
-                            <div class="litem"><ion-icon name="cash-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Valor Inventario</div><div class="th5" id="detalleValorado">-</div></div></div>
-                            <div class="litem"><ion-icon name="shield-checkmark-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Estado</div><div id="detalleEstado">-</div></div></div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="stit">Lotes Disponibles</div>
                 <div class="card">
@@ -208,7 +241,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 </tr>
                             </thead>
                             <tbody id="tablaLotesDetalle">
-                                <tr><td colspan="5" class="txctr tmut">Cargando...</td></tr>
+                                <tr>
+                                    <td colspan="5" class="txctr tmut">Cargando...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -226,7 +261,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <!-- Modal Balance de Precios -->
     <div class="mov" id="modalBalanceInventario">
-        <div class="modal ml">
+        <div class="modal mxl">
             <div class="mh">
                 <div>
                     <div class="mt">Balance de Precios</div>
@@ -245,12 +280,27 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="mb" style="max-height: 70vh; overflow-y: auto;">
                     <div class="stit">Información del Producto</div>
 
-                    <div class="fr">
+                    <div class="fr1">
                         <div class="card">
                             <div class="cb">
-                                <div class="litem"><ion-icon name="medical-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Medicamento</div><div class="th5" id="balanceNombreMedicamento">-</div></div></div>
-                                <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Laboratorio</div><div class="th5" id="balanceLaboratorio">-</div></div></div>
-                                <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon><div class="f1"><div class="tc">Sucursal</div><div class="th5" id="balanceSucursal">-</div></div></div>
+                                <div class="litem"><ion-icon name="medical-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                    <div class="f1">
+                                        <div class="tc">Medicamento</div>
+                                        <div class="th5" id="balanceNombreMedicamento">-</div>
+                                    </div>
+                                </div>
+                                <div class="litem"><ion-icon name="business-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                    <div class="f1">
+                                        <div class="tc">Laboratorio</div>
+                                        <div class="th5" id="balanceLaboratorio">-</div>
+                                    </div>
+                                </div>
+                                <div class="litem"><ion-icon name="storefront-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                                    <div class="f1">
+                                        <div class="tc">Sucursal</div>
+                                        <div class="th5" id="balanceSucursal">-</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -258,6 +308,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="stit">Datos de Auditoría</div>
                     <div class="card">
                         <div class="cb">
+                            <div class="fr1">
+                                <div class="fg">
+                                    <label class="fl" for="balancePrecioCompra">Precio de Compra</label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_compra" id="balancePrecioCompra" min="0" readonly>
+                                </div>
+
+                            </div>
                             <div class="fr">
                                 <div class="fg">
                                     <label class="fl" for="balanceCostoLista">Costo Lista</label>
@@ -267,6 +324,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <label class="fl" for="balanceMargenUnitario">Margen Unitario (%)</label>
                                     <input class="inp" type="number" step="0.01" name="lm_margen_u" id="balanceMargenUnitario" min="0">
                                 </div>
+
                             </div>
                             <div class="fr">
                                 <div class="fg">
@@ -289,21 +347,22 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
-                        <div class="cb">
-                            <div class="litem" style="border:none">
-                                <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
-                                <div class="f1">
-                                    <div class="th5" style="color:var(--btn-warning)">Atención</div>
-                                    <div class="tc" style="color:var(--btn-warning)">Este cambio afectará a TODOS los lotes activos de este medicamento en esta sucursal. Verifique los valores antes de guardar.</div>
+                        <div class="card mt16" style="background: var(--btn-warning-pale); border-color: var(--btn-warning);">
+                            <div class="cb">
+                                <div class="litem" style="border:none">
+                                    <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
+                                    <div class="f1">
+                                        <div class="th5" style="color:var(--btn-warning); font-weight:bold; font-size:19px">Atención</div>
+                                        <div class="tc" style="color:var(--btn-warning); font-weight:bold; font-size:16px">Este cambio afectará a TODOS los lotes activos de este medicamento en esta sucursal. Verifique los valores antes de guardar.</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
+
+                </div>
                 <div class="mf">
                     <button type="button" class="btn btn-war" onclick="App.closeM('modalBalanceInventario')">Cancelar</button>
                     <button type="submit" class="btn btn-def">
@@ -311,6 +370,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -346,7 +406,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                 </tr>
                             </thead>
                             <tbody id="tablaHistorialMovimientos">
-                                <tr><td colspan="6" class="txctr tmut">Cargando...</td></tr>
+                                <tr>
+                                    <td colspan="6" class="txctr tmut">Cargando...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -823,6 +885,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     if (data.success) {
                         // Llenar campos con datos actuales
+                        document.getElementById('balancePrecioCompra').value = data.precio_compra || '';
                         document.getElementById('balanceCostoLista').value = data.costo_lista || '';
                         document.getElementById('balanceMargenUnitario').value = data.margen_u || '';
                         document.getElementById('balanceMargenCaja').value = data.margen_c || '';
@@ -869,14 +932,23 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 if (precioMinUnitarioInput) precioMinUnitarioInput.value = precioMinUnitario.toFixed(2);
             }
 
-            function validarMargen(input) {
+            function clampMargen(input) {
                 let valor = parseFloat(input.value);
-                if (isNaN(valor)) {
-                    input.value = '0.00';
-                    return;
+                if (isNaN(valor) || valor < 0) {
+                    input.value = '0';
+                } else if (valor > 100) {
+                    input.value = '100';
+                } else if (input.value.includes('.')) {
+                    let parts = input.value.split('.');
+                    if (parts[1].length > 2) {
+                        input.value = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
                 }
-                if (valor < 0) valor = 0;
-                if (valor > 100) valor = 100;
+            }
+
+            function validarMargen(input) {
+                clampMargen(input);
+                let valor = parseFloat(input.value);
                 input.value = valor.toFixed(2);
             }
 
@@ -894,12 +966,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
 
                 if (margenU) {
-                    margenU.addEventListener('input', () => calcularPrecioVentaBalance());
+                    margenU.addEventListener('input', (e) => {
+                        clampMargen(e.target);
+                        calcularPrecioVentaBalance();
+                    });
                     margenU.addEventListener('blur', (e) => validarMargen(e.target));
                 }
 
                 if (margenC) {
-                    margenC.addEventListener('input', () => {
+                    margenC.addEventListener('input', (e) => {
+                        clampMargen(e.target);
                         calcularPrecioMinCajaBalance();
                         calcularPrecioMinUnitarioBalance();
                     });
@@ -929,26 +1005,26 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 formData.append('maximo', maximo);
 
                 fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        App.closeM('modalConfiguracionInventario');
-                        Swal.fire('Éxito', 'Configuración guardada', 'success');
-                        // Recargar tabla si es necesario
-                        if (window.tableInstance) {
-                            window.tableInstance.reload();
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            App.closeM('modalConfiguracionInventario');
+                            Swal.fire('Éxito', 'Configuración guardada', 'success');
+                            // Recargar tabla si es necesario
+                            if (window.tableInstance) {
+                                window.tableInstance.reload();
+                            }
+                        } else {
+                            Swal.fire('Error', data.error || 'Error al guardar', 'error');
                         }
-                    } else {
-                        Swal.fire('Error', data.error || 'Error al guardar', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Error de conexión', 'error');
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Error de conexión', 'error');
+                    });
             }
 
             return {
@@ -959,8 +1035,26 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
         console.log('InventarioModals after assign:', InventarioModals);
 
+        // Procesar parámetros de URL para filtros
+        function procesarParametrosURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Si hay parámetro 'sucursal', seleccionar esa sucursal en el filtro
+            const sucursalParam = urlParams.get('sucursal');
+            if (sucursalParam) {
+                const selectSucursal = document.querySelector('select[name="select3"]');
+                if (selectSucursal) {
+                    selectSucursal.value = sucursalParam;
+                    // Disparar evento change para que se actualice la tabla
+                    selectSucursal.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(cargarGraficosMargen, 500);
+            // Procesar parámetros de URL después de que se cargue la página
+            setTimeout(procesarParametrosURL, 100);
         });
     </script>
 

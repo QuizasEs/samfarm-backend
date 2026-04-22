@@ -435,12 +435,12 @@ class mainModel
         // Encabezado más compacto
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->SetTextColor(44, 62, 80);
-        $pdf->Cell(0, 6, ($config_empresa['ce_nombre']), 0, 1, 'C');
+        $pdf->Cell(0, 6, utf8_decode($config_empresa['ce_nombre']), 0, 1, 'C');
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetTextColor(100, 100, 100);
-        $pdf->Cell(0, 3, ('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
-        $pdf->Cell(0, 3, ($config_empresa['ce_direccion']), 0, 1, 'C');
+        $pdf->Cell(0, 3, utf8_decode('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
+        $pdf->Cell(0, 3, utf8_decode($config_empresa['ce_direccion']), 0, 1, 'C');
 
         $pdf->SetDrawColor(52, 152, 219);
         $pdf->SetLineWidth(0.2);
@@ -453,7 +453,7 @@ class mainModel
         // Título
         $pdf->SetFont('Arial', 'B', 11);
         $pdf->SetTextColor(44, 62, 80);
-        $pdf->Cell(0, 5, ($datos_pdf['titulo']), 0, 1, 'C');
+        $pdf->Cell(0, 5, utf8_decode($datos_pdf['titulo']), 0, 1, 'C');
         $pdf->Ln(1);
 
         // Información superior compacta
@@ -471,9 +471,9 @@ class mainModel
             foreach ($datos_pdf['info_superior'] as $key => $value) {
                 $pdf->SetXY($x_pos, $y_start);
                 $pdf->SetFont('Arial', 'B', 7);
-                $pdf->Cell(25, 3, ($key . ':'), 0, 0, 'L');
+                $pdf->Cell(25, 3, utf8_decode($key . ':'), 0, 0, 'L');
                 $pdf->SetFont('Arial', '', 7);
-                $pdf->Cell(40, 3, ($value), 0, 0, 'L');
+                $pdf->Cell(40, 3, utf8_decode($value), 0, 0, 'L');
 
                 $count++;
                 $x_pos += 80;
@@ -505,15 +505,14 @@ class mainModel
             }
             $tabla['headers'] = $headers_filtrados;
 
-            // Ajustar anchos de columnas
+            // Ajustar anchos de columnas para ocupar todo el ancho disponible
             $ancho_total_tabla = array_sum(array_column($tabla['headers'], 'width'));
             $ancho_disponible = $ancho_pagina - 20;
 
-            if ($ancho_total_tabla > $ancho_disponible) {
-                $factor_ajuste = $ancho_disponible / $ancho_total_tabla;
-                foreach ($tabla['headers'] as &$header) {
-                    $header['width'] = round($header['width'] * $factor_ajuste);
-                }
+            // Siempre ajustar para ocupar todo el ancho disponible
+            $factor_ajuste = $ancho_disponible / $ancho_total_tabla;
+            foreach ($tabla['headers'] as &$header) {
+                $header['width'] = round($header['width'] * $factor_ajuste);
             }
 
             // Encabezados compactos
@@ -523,7 +522,7 @@ class mainModel
             $pdf->SetDrawColor(52, 73, 94);
 
             foreach ($tabla['headers'] as $header) {
-                $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
+                $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
             }
             $pdf->Ln();
 
@@ -542,11 +541,13 @@ class mainModel
                     $pdf->SetFillColor(52, 73, 94);
                     $pdf->SetTextColor(255, 255, 255);
                     foreach ($tabla['headers'] as $header) {
-                        $pdf->Cell($header['width'], 4, ($header['text']), 1, 0, 'C', true);
+                        $pdf->Cell($header['width'], 4, utf8_decode($header['text']), 1, 0, 'C', true);
                     }
                     $pdf->Ln();
+                    // Resetear configuración para filas
                     $pdf->SetFont('Arial', '', 6);
                     $pdf->SetTextColor(44, 62, 80);
+                    $pdf->SetFillColor(248, 249, 250);
                 }
 
                 if (isset($row['es_total']) && $row['es_total']) {
@@ -560,14 +561,13 @@ class mainModel
                     $fill_total = false;
                 }
 
-                // Filtrar celdas duplicadas también
-                $cells_filtrados = [];
-                $cell_count = 0;
-                foreach ($row['cells'] as $i => $cell) {
-                    if ($cell_count < count($tabla['headers'])) {
-                        $cells_filtrados[] = $cell;
-                        $cell_count++;
-                    }
+                // Asegurar que el número de celdas coincida con el número de encabezados
+                $num_headers = count($tabla['headers']);
+                $cells_filtrados = array_slice($row['cells'], 0, $num_headers);
+
+                // Si hay menos celdas que encabezados, rellenar con celdas vacías
+                while (count($cells_filtrados) < $num_headers) {
+                    $cells_filtrados[] = ['text' => '-', 'align' => 'C'];
                 }
 
                 foreach ($cells_filtrados as $i => $cell) {
@@ -579,11 +579,17 @@ class mainModel
                         $pdf->SetTextColor($cell['color'][0], $cell['color'][1], $cell['color'][2]);
                     }
 
-                    $pdf->Cell($width, 4, $text, 1, 0, $align, $fill_total ? true : $fill);
+                    $pdf->Cell($width, 4, utf8_decode($text), 1, 0, $align, $fill_total ? true : $fill);
 
                     if (isset($cell['color'])) {
                         $pdf->SetTextColor(44, 62, 80);
                     }
+                }
+
+                // Resetear colores después de filas totales
+                if ($fill_total) {
+                    $pdf->SetTextColor(44, 62, 80);
+                    $pdf->SetFillColor(248, 249, 250);
                 }
                 $pdf->Ln();
                 $fill = !$fill;
@@ -607,19 +613,19 @@ class mainModel
             $y_start = $pdf->GetY() + 2;
             $pdf->SetXY(15, $y_start);
             $pdf->SetFont('Arial', 'B', 8);
-            $pdf->Cell(0, 4, ('RESUMEN DEL PERIODO'), 0, 1, 'L');
+            $pdf->Cell(0, 4, utf8_decode('RESUMEN DEL PERIODO'), 0, 1, 'L');
 
             foreach ($datos_pdf['resumen'] as $key => $value) {
                 $pdf->SetX(15);
                 $pdf->SetFont('Arial', 'B', 7);
-                $pdf->Cell(50, 3, ($key . ':'), 0, 0, 'L');
+                $pdf->Cell(50, 3, utf8_decode($key . ':'), 0, 0, 'L');
                 $pdf->SetFont('Arial', '', 7);
 
                 if (isset($value['color'])) {
                     $pdf->SetTextColor($value['color'][0], $value['color'][1], $value['color'][2]);
                 }
 
-                $pdf->Cell(0, 3, ($value['text']), 0, 1, 'L');
+                $pdf->Cell(0, 3, utf8_decode($value['text']), 0, 1, 'L');
 
                 if (isset($value['color'])) {
                     $pdf->SetTextColor(44, 62, 80);
@@ -631,8 +637,8 @@ class mainModel
         $pdf->SetY(-40); // Posición fija desde el fondo
         $pdf->SetFont('Arial', 'I', 6);
         $pdf->SetTextColor(150, 150, 150);
-        $pdf->Cell(0, 2, ('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
-        $pdf->Cell(0, 2, ('Página ') . $pdf->PageNo(), 0, 0, 'C');
+        $pdf->Cell(0, 2, utf8_decode('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
+        $pdf->Cell(0, 2, utf8_decode('Página ') . $pdf->PageNo(), 0, 0, 'C');
 
         // Retornar contenido como string - igual que ventaModel
         return $pdf->Output('S');
@@ -891,22 +897,42 @@ class mainModel
                 if (isset($formato_columnas[$header])) {
                     switch ($formato_columnas[$header]) {
                         case 'moneda':
-                            $valor = 'Bs ' . number_format($valor, 2, ',', '.');
+                            // Verificar si el valor es numérico antes de formatear
+                            if (is_numeric($valor)) {
+                                $valor = 'Bs ' . number_format($valor, 2, ',', '.');
+                            } elseif ($valor === '-' || $valor === null || $valor === '') {
+                                $valor = 'Bs 0,00';
+                            }
                             if (empty($clase)) {
                                 $clase = 'moneda';
                             }
                             break;
                         case 'numero':
-                            $valor = number_format($valor, 2, ',', '.');
+                            // Verificar si el valor es numérico antes de formatear
+                            if (is_numeric($valor)) {
+                                $valor = number_format($valor, 2, ',', '.');
+                            } elseif ($valor === '-' || $valor === null || $valor === '') {
+                                $valor = '0,00';
+                            }
                             if (empty($clase)) {
                                 $clase = 'numero';
                             }
                             break;
                         case 'fecha':
-                            $valor = date('d/m/Y', strtotime($valor));
+                            // Verificar si es una fecha válida
+                            if ($valor === '-' || $valor === null || $valor === '' || strtotime($valor) === false) {
+                                $valor = '-';
+                            } else {
+                                $valor = date('d/m/Y', strtotime($valor));
+                            }
                             break;
                         case 'fecha-hora':
-                            $valor = date('d/m/Y H:i', strtotime($valor));
+                            // Verificar si es una fecha válida
+                            if ($valor === '-' || $valor === null || $valor === '' || strtotime($valor) === false) {
+                                $valor = '-';
+                            } else {
+                                $valor = date('d/m/Y H:i', strtotime($valor));
+                            }
                             break;
                     }
                 }

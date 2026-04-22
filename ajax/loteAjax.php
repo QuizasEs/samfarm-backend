@@ -133,6 +133,10 @@ if (isset($_GET['loteAjax'])) {
     if ($valor == "exportar_pdf") {
         $ins_lote->exportar_pdf_lotes_controller();
     }
+
+    if ($valor == "exportar_excel_lote_controller") {
+        $ins_lote->exportar_excel_lotes_controller();
+    }
 } else if (!isset($_POST['loteAjax'])) {
     //  Petición inválida - cerrar sesión
     session_start(['name' => 'SMP']);

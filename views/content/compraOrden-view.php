@@ -76,7 +76,8 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     }
 
                     if (this.margenUnitario) {
-                        this.margenUnitario.addEventListener('input', () => {
+                        this.margenUnitario.addEventListener('input', (e) => {
+                            this.clampMargen(e.target);
                             this.calcularPrecioVenta();
                             this.calcularPrecioMinUnitario();
                         });
@@ -84,7 +85,10 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     }
 
                     if (this.margenCaja) {
-                        this.margenCaja.addEventListener('input', () => this.calcularPrecioMinCaja());
+                        this.margenCaja.addEventListener('input', (e) => {
+                            this.clampMargen(e.target);
+                            this.calcularPrecioMinCaja();
+                        });
                         this.margenCaja.addEventListener('blur', (e) => this.validarMargen(e.target));
                     }
 
@@ -153,14 +157,23 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     if (this.precioMinUnitario) this.precioMinUnitario.value = precioMinUnitario.toFixed(2);
                 }
 
-                validarMargen(input) {
+                clampMargen(input) {
                     let valor = parseFloat(input.value);
-                    if (isNaN(valor)) {
-                        input.value = '0.00';
-                        return;
+                    if (isNaN(valor) || valor < 0) {
+                        input.value = '0';
+                    } else if (valor > 100) {
+                        input.value = '100';
+                    } else if (input.value.includes('.')) {
+                        let parts = input.value.split('.');
+                        if (parts[1].length > 2) {
+                            input.value = parts[0] + '.' + parts[1].substring(0, 2);
+                        }
                     }
-                    if (valor < 0) valor = 0;
-                    if (valor > 100) valor = 100;
+                }
+
+                validarMargen(input) {
+                    this.clampMargen(input);
+                    let valor = parseFloat(input.value);
                     input.value = valor.toFixed(2);
                 }
             }

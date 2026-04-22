@@ -484,14 +484,23 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 if (precioMinUnitarioInput) precioMinUnitarioInput.value = precioMinUnitario.toFixed(2);
             }
 
-            function validarMargen(input) {
+            function clampMargen(input) {
                 let valor = parseFloat(input.value);
-                if (isNaN(valor)) {
-                    input.value = '0.00';
-                    return;
+                if (isNaN(valor) || valor < 0) {
+                    input.value = '0';
+                } else if (valor > 100) {
+                    input.value = '100';
+                } else if (input.value.includes('.')) {
+                    let parts = input.value.split('.');
+                    if (parts[1].length > 2) {
+                        input.value = parts[0] + '.' + parts[1].substring(0, 2);
+                    }
                 }
-                if (valor < 0) valor = 0;
-                if (valor > 100) valor = 100;
+            }
+
+            function validarMargen(input) {
+                clampMargen(input);
+                let valor = parseFloat(input.value);
                 input.value = valor.toFixed(2);
             }
 
@@ -509,12 +518,16 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
 
                 if (margenU) {
-                    margenU.addEventListener('input', () => calcularPrecioVenta());
+                    margenU.addEventListener('input', (e) => {
+                        clampMargen(e.target);
+                        calcularPrecioVenta();
+                    });
                     margenU.addEventListener('blur', (e) => validarMargen(e.target));
                 }
 
                 if (margenC) {
-                    margenC.addEventListener('input', () => {
+                    margenC.addEventListener('input', (e) => {
+                        clampMargen(e.target);
                         calcularPrecioMinCaja();
                         calcularPrecioMinUnitario();
                     });

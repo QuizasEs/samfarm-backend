@@ -17,15 +17,14 @@ class proveedorModel extends mainModel
                         p.pr_creado_en,
                         p.pr_estado,
 
-                        COALESCE(COUNT(DISTINCT c.co_id), 0) AS total_compras,
-                        COALESCE(SUM(c.co_total), 0) AS monto_total_compras,
-                        MAX(c.co_fecha) AS ultima_compra,
+                        0 AS total_compras,  -- Temporalmente 0 hasta que se implemente la relación compras-proveedores
+                        0 AS monto_total_compras,  -- Temporalmente 0 hasta que se implemente la relación compras-proveedores
+                        NULL AS ultima_compra,  -- Temporalmente NULL hasta que se implemente la relación compras-proveedores
                         COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
 
-                        DATEDIFF(CURDATE(), MAX(c.co_fecha)) AS dias_ultima_compra
+                        NULL AS dias_ultima_compra  -- Temporalmente NULL hasta que se implemente la relación compras-proveedores
 
                     FROM proveedores p
-                    LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
                     LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
                     WHERE 1=1
                 ";
@@ -63,27 +62,28 @@ class proveedorModel extends mainModel
 
         $sql .= " GROUP BY p.pr_id";
 
-        if (!empty($filtros['con_compras'])) {
-            if ($filtros['con_compras'] === 'con_compras') {
-                $sql .= " HAVING total_compras > 0";
-            } elseif ($filtros['con_compras'] === 'sin_compras') {
-                $sql .= " HAVING total_compras = 0";
-            }
-        }
+        // Los filtros de compras están temporalmente deshabilitados hasta implementar la relación compras-proveedores
+        // if (!empty($filtros['con_compras'])) {
+        //     if ($filtros['con_compras'] === 'con_compras') {
+        //         $sql .= " HAVING total_compras > 0";
+        //     } elseif ($filtros['con_compras'] === 'sin_compras') {
+        //         $sql .= " HAVING total_compras = 0";
+        //     }
+        // }
 
-        if (!empty($filtros['ultima_compra'])) {
-            if ($filtros['ultima_compra'] === '7') {
-                $sql .= " HAVING dias_ultima_compra <= 7";
-            } elseif ($filtros['ultima_compra'] === '30') {
-                $sql .= " HAVING dias_ultima_compra <= 30";
-            } elseif ($filtros['ultima_compra'] === '90') {
-                $sql .= " HAVING dias_ultima_compra <= 90";
-            } elseif ($filtros['ultima_compra'] === 'mas_90') {
-                $sql .= " HAVING dias_ultima_compra > 90";
-            } elseif ($filtros['ultima_compra'] === 'nunca') {
-                $sql .= " HAVING ultima_compra IS NULL";
-            }
-        }
+        // if (!empty($filtros['ultima_compra'])) {
+        //     if ($filtros['ultima_compra'] === '7') {
+        //         $sql .= " HAVING dias_ultima_compra <= 7";
+        //     } elseif ($filtros['ultima_compra'] === '30') {
+        //         $sql .= " HAVING dias_ultima_compra <= 30";
+        //     } elseif ($filtros['ultima_compra'] === '90') {
+        //         $sql .= " HAVING dias_ultima_compra <= 90";
+        //     } elseif ($filtros['ultima_compra'] === 'mas_90') {
+        //         $sql .= " HAVING dias_ultima_compra > 90";
+        //     } elseif ($filtros['ultima_compra'] === 'nunca') {
+        //         $sql .= " HAVING ultima_compra IS NULL";
+        //     }
+        // }
 
         $sql .= " ORDER BY p.pr_razon_social ASC";
         $sql .= " LIMIT :inicio, :registros";
@@ -107,7 +107,6 @@ class proveedorModel extends mainModel
         $sql = "
                     SELECT COUNT(DISTINCT p.pr_id) as total
                     FROM proveedores p
-                    LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
                     WHERE 1=1
                 ";
 
@@ -156,7 +155,7 @@ class proveedorModel extends mainModel
     protected static function detalle_proveedor_model($pr_id)
     {
         $sql = "
-            SELECT 
+            SELECT
                 p.pr_id,
                 p.pr_razon_social,
                 p.pr_nombre_comercial,
@@ -166,13 +165,12 @@ class proveedorModel extends mainModel
                 p.pr_estado,
                 p.pr_creado_en,
                 p.pr_actualizado_en,
-                COALESCE(COUNT(DISTINCT c.co_id), 0) AS total_compras,
-                COALESCE(SUM(c.co_total), 0) AS monto_total_compras,
+                0 AS total_compras,  -- Temporalmente 0 hasta implementar relación compras-proveedores
+                0 AS monto_total_compras,  -- Temporalmente 0 hasta implementar relación compras-proveedores
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
-                MAX(c.co_fecha) AS ultima_compra,
+                NULL AS ultima_compra,  -- Temporalmente NULL hasta implementar relación compras-proveedores
                 DATEDIFF(CURDATE(), p.pr_creado_en) AS dias_antiguedad
             FROM proveedores p
-            LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
             LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
             WHERE p.pr_id = :pr_id
             GROUP BY p.pr_id
@@ -187,53 +185,18 @@ class proveedorModel extends mainModel
 
     protected static function ultimas_compras_proveedor_model($pr_id, $limit = 5)
     {
-        $sql = "
-            SELECT 
-                c.co_id,
-                c.co_numero,
-                c.co_fecha,
-                c.co_total,
-                c.co_numero_factura,
-                p.pr_razon_social AS proveedor,
-                COUNT(dc.dc_id) AS total_items
-            FROM compras c
-            LEFT JOIN proveedores p ON p.pr_id = c.pr_id
-            LEFT JOIN detalle_compra dc ON dc.co_id = c.co_id
-            WHERE c.pr_id = :pr_id AND c.co_estado = 1
-            GROUP BY c.co_id
-            ORDER BY c.co_fecha DESC
-            LIMIT :limit
-        ";
-
-        $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt;
+        // Temporalmente retorna una consulta vacía hasta implementar la relación compras-proveedores
+        // La tabla compras actual no tiene relación con proveedores
+        $sql = "SELECT NULL as co_id, NULL as co_numero, NULL as co_fecha, NULL as co_total, NULL as co_numero_factura, NULL as proveedor, NULL as total_items WHERE 1=0";
+        return mainModel::conectar()->prepare($sql);
     }
 
     protected static function top_medicamentos_proveedor_model($pr_id, $limit = 5)
     {
-        $sql = "
-            SELECT 
-                m.med_id,
-                m.med_nombre_quimico,
-                COUNT(dc.dc_id) AS veces_comprado,
-                MAX(c.co_fecha) AS ultima_compra
-            FROM detalle_compra dc
-            INNER JOIN compras c ON c.co_id = dc.co_id
-            INNER JOIN medicamento m ON m.med_id = dc.med_id
-            WHERE c.pr_id = :pr_id AND c.co_estado = 1
-            GROUP BY m.med_id
-            ORDER BY veces_comprado DESC
-            LIMIT :limit
-        ";
-
-        $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt;
+        // Temporalmente retorna una consulta vacía hasta implementar la relación compras-proveedores
+        // La tabla compras actual no tiene relación con proveedores
+        $sql = "SELECT NULL as med_id, NULL as med_nombre_quimico, NULL as veces_comprado, NULL as ultima_compra, NULL as proveedor WHERE 1=0";
+        return mainModel::conectar()->prepare($sql);
     }
 
     protected static function exportar_proveedores_excel_model($filtros = [])
@@ -246,19 +209,15 @@ class proveedorModel extends mainModel
                 p.pr_correo AS 'Correo',
                 p.pr_nombre_comercial AS 'Nombre Comercial',
                 DATE_FORMAT(p.pr_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
-                COALESCE(COUNT(DISTINCT c.co_id), 0) AS 'Total Compras',
-                COALESCE(SUM(c.co_total), 0) AS 'Monto Total (Bs)',
+                0 AS 'Total Compras',  -- Temporalmente 0 hasta implementar relación compras-proveedores
+                0 AS 'Monto Total (Bs)',  -- Temporalmente 0 hasta implementar relación compras-proveedores
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS 'Lotes Generados',
-                CASE
-                    WHEN MAX(c.co_fecha) IS NULL THEN 'Nunca'
-                    ELSE DATE_FORMAT(MAX(c.co_fecha), '%d/%m/%Y')
-                END AS 'Última Compra',
+                'Nunca' AS 'Última Compra',  -- Temporalmente 'Nunca' hasta implementar relación compras-proveedores
                 CASE
                     WHEN p.pr_estado = 1 THEN 'ACTIVO'
                     ELSE 'INACTIVO'
                 END AS 'Estado'
             FROM proveedores p
-            LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
             LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
             WHERE 1=1
         ";
@@ -294,7 +253,7 @@ class proveedorModel extends mainModel
             $params[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
 
-        $sql .= " GROUP BY p.pr_id ORDER BY p.pr_razon_social ASC";
+        $sql .= " GROUP BY p.pr_id, p.pr_razon_social, p.pr_nit, p.pr_telefono, p.pr_correo, p.pr_nombre_comercial, p.pr_creado_en, p.pr_estado ORDER BY p.pr_razon_social ASC";
 
         $stmt = mainModel::conectar()->prepare($sql);
 

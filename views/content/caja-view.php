@@ -61,8 +61,8 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                     <div class="cb">
                                 <div class="tw">
                              <table>
-                                 <thead><tr><th></th><th>Medicamento</th><th>Presentación</th><th>Unidades</th><th>Cajas</th><th>Precio Caja</th><th>Precio</th><th>Subtotal</th></tr></thead>
-                                 <tbody id="tabla_items_venta"><tr><td colspan="8" class="txctr tc">No hay medicamentos en la lista</td></tr></tbody>
+                                  <thead><tr><th></th><th>Medicamento</th><th>Presentación</th><th>Unidades</th><th>Cajas</th><th>Precio Caja</th><th>Precio</th><th>Descuento</th><th>Subtotal</th></tr></thead>
+                                  <tbody id="tabla_items_venta"><tr><td colspan="9" class="txctr tc">No hay medicamentos en la lista</td></tr></tbody>
                              </table>
                          </div>
                     </div>

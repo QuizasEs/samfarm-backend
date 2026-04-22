@@ -964,9 +964,65 @@ img, table, pre, .tw { max-width: 100%; }
   .pginf { font-size: 11px; width: 100%; margin-bottom: 6px; }
   .pb { min-width: 28px; height: 28px; font-size: 12px; }
 
-  /* tablas con scroll horizontal - la tabla no se achica, hace scroll */
-  .tw { -webkit-overflow-scrolling: touch; display: block; }
-  .tw table { min-width: 480px; }
+   /* tablas con scroll horizontal - la tabla no se achica, hace scroll */
+   .tw { -webkit-overflow-scrolling: touch; display: block; }
+   .tw table { min-width: 480px; }
+
+   /* tabla específica de transferencias - scroll horizontal optimizado */
+   .tw-transferencias {
+     overflow-x: auto;
+     -webkit-overflow-scrolling: touch;
+     max-width: 100%;
+     display: block;
+   }
+   .tw-transferencias table {
+     min-width: 800px; /* ancho mínimo para mostrar todas las columnas */
+     border-collapse: collapse;
+     margin-bottom: 0;
+   }
+   .tw-transferencias th {
+     position: sticky;
+     top: 0;
+     background: var(--bg-primary);
+     z-index: 10;
+     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   }
+   .tw-transferencias::-webkit-scrollbar {
+     height: 8px;
+   }
+   .tw-transferencias::-webkit-scrollbar-track {
+     background: var(--bg-secondary);
+     border-radius: 4px;
+   }
+   .tw-transferencias::-webkit-scrollbar-thumb {
+     background: var(--border-strong);
+     border-radius: 4px;
+   }
+   .tw-transferencias::-webkit-scrollbar-thumb:hover {
+     background: var(--accent-primary);
+   }
+
+   /* filas clickeables para recepción */
+   .recepcion-row {
+     transition: background-color 0.2s ease;
+   }
+   .recepcion-row:hover {
+     background-color: var(--bg-hover) !important;
+     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   }
+
+   /* responsive para móviles */
+   @media (max-width: 768px) {
+     .tw-transferencias table {
+       min-width: 900px; /* aún más ancho en móviles para asegurar scroll */
+       font-size: 12px;
+     }
+     .tw-transferencias th,
+     .tw-transferencias td {
+       padding: 8px 6px;
+       white-space: nowrap;
+     }
+   }
   /* columna de acciones: siempre mostrar contenido completo */
   .tda { flex-wrap: nowrap; }
   .tda .btn { flex-shrink: 0; min-width: fit-content; }
@@ -2033,3 +2089,8 @@ img, table, pre, .tw { max-width: 100%; }
     min-width: 180px;
 }
 
+/* Estilos para subtotal con descuento en carrito */
+.discounted-subtotal {
+    color: var(--btn-success);
+    font-weight: bold;
+}

@@ -134,7 +134,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <div class="mov" id="modal-agregar-item-transfer">
-        <div class="modal">
+        <div class="modal mxl">
             <input type="hidden" id="modal-stock-cajas-real-transfer">
             <input type="hidden" id="modal-stock-unidades-real-transfer">
             <div class="mh">
@@ -158,7 +158,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <input type="hidden" id="modal-cant-blister-transfer">
                 <input type="hidden" id="modal-cant-unidad-transfer">
 
-                <div class="fr mb16">
+                <div class="fr1 mb16">
                     <div class="card">
                         <div class="cb">
                             <div class="th4 mb8" id="modal-medicamento-nombre-transfer"></div>
@@ -309,7 +309,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     return;
                 }
 
-                let html = '<div class="tw"><table><thead><tr>';
+                let html = '<div class="tw tw-transferencias"><table><thead><tr>';
                 html += '<th>#</th>';
                 html += '<th>Medicamento</th>';
                 html += '<th>Lote</th>';
@@ -339,6 +339,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     html += '<td>' + (index + 1) + '</td>';
                     html += '<td><strong>' + escapeHtml(lote.med_nombre_quimico) + '</strong><br><small>' + escapeHtml(lote.med_principio_activo) + '</small></td>';
                     html += '<td>' + escapeHtml(lote.lm_numero_lote) + '</td>';
+                    html += '<td>' + escapeHtml(lote.laboratorio || 'Sin laboratorio') + '</td>';
                     html += '<td style="text-align:center;"><strong>' + lote.lm_cant_actual_cajas + '</strong></td>';
                     html += '<td style="text-align:center;"><strong style="color: #1976D2;">' + lote.lm_cant_actual_unidades + '</strong></td>';
                     html += '<td style="color: ' + colorVenc + ';">' + formatearFecha(lote.lm_fecha_vencimiento) + advertencia + '</td>';
