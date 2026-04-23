@@ -85,16 +85,6 @@ if (isset($_POST['loteAjax'])) {
         echo $ins_lote->activar_lote_controller();
     }
     if ($valor == "update") {
-        // 🐛 DEBUG
-        /* $debug = [
-            'Alerta' => 'simple',
-            'Titulo' => 'DEBUG - Datos recibidos',
-            'texto' => '<pre>' . print_r($_POST, true) . '</pre>',
-            'Tipo' => 'info'
-        ];
-        echo json_encode($debug);
-        exit(); */
-
         echo $ins_lote->actualizar_lote_controller();
     }
 }

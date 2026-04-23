@@ -252,9 +252,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalDetalleInventario')">Cerrar</button>
+                <?php if (isset($_SESSION['rol_smp']) && $_SESSION['rol_smp'] == 1) { ?>
                 <button type="button" class="btn btn-def" onclick="console.log('window.InventarioModals:', window.InventarioModals); if(typeof window.InventarioModals.abrirBalance === 'function') { window.InventarioModals.abrirBalance(); } else { console.error('window.InventarioModals.abrirBalance is not a function'); }">
                     <ion-icon name="scale-outline"></ion-icon> Balance de Precios
                 </button>
+                <?php } ?>
             </div>
         </div>
     </div>

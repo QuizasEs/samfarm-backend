@@ -1,0 +1,147 @@
+DEBUG AJAX PASO 1: Recibida petición 'update' con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.80","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"20.00","lm_margen_c":"15.00","lm_precio_min_u":"4.60","lm_precio_min_c":"4.60"}
+DEBUG PASO 1: Iniciando actualizar_lote_controller con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.80","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"20.00","lm_margen_c":"15.00","lm_precio_min_u":"4.60","lm_precio_min_c":"4.60"}
+DEBUG PASO 2: ID desencriptado: 63944
+DEBUG PASO 3: Llamando a loteModel::datos_lote_model con ID: 63944
+DEBUG PASO 4: Resultado de datos_lote_model - rowCount: 1
+DEBUG PASO 5: Datos del lote obtenidos: {"lm_id":"63944","med_id":"14802","su_id":"1","pr_id":"17","lm_numero_lote":"LOTE-20260326102202-450","lm_cant_caja":"1","lm_cant_blister":"1","lm_cant_unidad":"100","lm_total_unidades":"100","lm_cant_actual_cajas":"1","lm_cant_actual_unidades":"100","lm_precio_compra":"3.44","lm_precio_venta":"4.80","lm_fecha_ingreso":"2026-04-22 06:01:15","lm_fecha_vencimiento":"2025-09-01","lm_estado":"activo","lm_creado_en":"2026-04-22 06:01:15","lm_actualizado_en":"2026-04-23 13:52:21","lm_origen_id":"56613","lm_tr_bloqueado":null,"lm_costo_lista":"4.00","lm_margen_u":"20.00","lm_margen_c":"13.00","lm_precio_min_u":"4.52","lm_precio_min_c":"4.52","med_nombre":"ANAMAX NF ACETAMINOFENO 325 MG\/CAFE\u00cdNA 30 MG\/IBUPROFENO 200 MG X 100 C\u00c1PSULAS","med_principio_activo":"N\/A","med_presentacion":null,"med_accion_farmacologica":null,"med_codigo_barras":"7770108101079","med_version_comercial":null,"forma_farmaceutica":"n\/a","uso_farmacologico":"n\/a\u00f1","via_administracion":"n\/a","proveedor_nombres":"SAE S.A.","sucursal_nombre":"Sucursal Central"}
+DEBUG PASO 6: Obteniendo valores del formulario
+DEBUG PASO 7: Valores obtenidos - cant_caja: 1, precio_venta: 4.8, precio_anterior: 4.80
+DEBUG PASO 8: Datos para actualizar: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.8,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":20,"lm_margen_c":15,"lm_precio_min_u":4.6,"lm_precio_min_c":4.6,"lm_origen_id":"56613","ID":"63944"}
+DEBUG PASO 9: Llamando a loteModel::actualizar_lote_model
+DEBUG LOTE MODEL PASO 1: Iniciando actualizar_lote_model con datos: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.8,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":20,"lm_margen_c":15,"lm_precio_min_u":4.6,"lm_precio_min_c":4.6,"lm_origen_id":"56613","ID":"63944"}
+DEBUG LOTE MODEL PASO 3: Set clause: lm_cant_caja = :lm_cant_caja, lm_cant_blister = :lm_cant_blister, lm_cant_unidad = :lm_cant_unidad, lm_cant_actual_cajas = :lm_cant_actual_cajas, lm_cant_actual_unidades = :lm_cant_actual_unidades, lm_precio_compra = :lm_precio_compra, lm_precio_venta = :lm_precio_venta, lm_fecha_vencimiento = :lm_fecha_vencimiento, lm_costo_lista = :lm_costo_lista, lm_margen_u = :lm_margen_u, lm_margen_c = :lm_margen_c, lm_precio_min_u = :lm_precio_min_u, lm_precio_min_c = :lm_precio_min_c, lm_origen_id = :lm_origen_id
+DEBUG LOTE MODEL PASO 4: SQL preparado
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_caja = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_blister = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_unidad = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_cajas = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_unidades = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_compra = 3.44
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_venta = 4.8
+DEBUG LOTE MODEL PASO 5: Bound lm_fecha_vencimiento = 2025-09-01
+DEBUG LOTE MODEL PASO 5: Bound lm_costo_lista = 4
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_u = 20
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_c = 15
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_u = 4.6
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_c = 4.6
+DEBUG LOTE MODEL PASO 5: Bound lm_origen_id = 56613
+DEBUG LOTE MODEL PASO 6: Bound ID = 63944
+DEBUG LOTE MODEL PASO 7: Execute result: TRUE, rowCount: 1
+DEBUG PASO 10: Resultado de actualizar_lote_model - rowCount: 1
+DEBUG PASO 11: Actualización exitosa, verificando cambio de precio
+DEBUG PASO 12: Precio cambió: NO - Anterior: 4.80, Nuevo: 4.8
+DEBUG AJAX PASO 1: Recibida petición 'update' con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.40","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"10.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 1: Iniciando actualizar_lote_controller con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.40","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"10.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 2: ID desencriptado: 63944
+DEBUG PASO 3: Llamando a loteModel::datos_lote_model con ID: 63944
+DEBUG PASO 4: Resultado de datos_lote_model - rowCount: 1
+DEBUG PASO 5: Datos del lote obtenidos: {"lm_id":"63944","med_id":"14802","su_id":"1","pr_id":"17","lm_numero_lote":"LOTE-20260326102202-450","lm_cant_caja":"1","lm_cant_blister":"1","lm_cant_unidad":"100","lm_total_unidades":"100","lm_cant_actual_cajas":"1","lm_cant_actual_unidades":"100","lm_precio_compra":"3.44","lm_precio_venta":"4.80","lm_fecha_ingreso":"2026-04-22 06:01:15","lm_fecha_vencimiento":"2025-09-01","lm_estado":"activo","lm_creado_en":"2026-04-22 06:01:15","lm_actualizado_en":"2026-04-23 14:16:19","lm_origen_id":"56613","lm_tr_bloqueado":null,"lm_costo_lista":"4.00","lm_margen_u":"20.00","lm_margen_c":"15.00","lm_precio_min_u":"4.60","lm_precio_min_c":"4.60","med_nombre":"ANAMAX NF ACETAMINOFENO 325 MG\/CAFE\u00cdNA 30 MG\/IBUPROFENO 200 MG X 100 C\u00c1PSULAS","med_principio_activo":"N\/A","med_presentacion":null,"med_accion_farmacologica":null,"med_codigo_barras":"7770108101079","med_version_comercial":null,"forma_farmaceutica":"n\/a","uso_farmacologico":"n\/a\u00f1","via_administracion":"n\/a","proveedor_nombres":"SAE S.A.","sucursal_nombre":"Sucursal Central"}
+DEBUG PASO 6: Obteniendo valores del formulario
+DEBUG PASO 7: Valores obtenidos - cant_caja: 1, precio_venta: 4.4, precio_anterior: 4.80
+DEBUG PASO 8: Datos para actualizar: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.4,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":10,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG PASO 9: Llamando a loteModel::actualizar_lote_model
+DEBUG LOTE MODEL PASO 1: Iniciando actualizar_lote_model con datos: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.4,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":10,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG LOTE MODEL PASO 3: Set clause: lm_cant_caja = :lm_cant_caja, lm_cant_blister = :lm_cant_blister, lm_cant_unidad = :lm_cant_unidad, lm_cant_actual_cajas = :lm_cant_actual_cajas, lm_cant_actual_unidades = :lm_cant_actual_unidades, lm_precio_compra = :lm_precio_compra, lm_precio_venta = :lm_precio_venta, lm_fecha_vencimiento = :lm_fecha_vencimiento, lm_costo_lista = :lm_costo_lista, lm_margen_u = :lm_margen_u, lm_margen_c = :lm_margen_c, lm_precio_min_u = :lm_precio_min_u, lm_precio_min_c = :lm_precio_min_c, lm_origen_id = :lm_origen_id
+DEBUG LOTE MODEL PASO 4: SQL preparado
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_caja = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_blister = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_unidad = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_cajas = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_unidades = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_compra = 3.44
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_venta = 4.4
+DEBUG LOTE MODEL PASO 5: Bound lm_fecha_vencimiento = 2025-09-01
+DEBUG LOTE MODEL PASO 5: Bound lm_costo_lista = 4
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_u = 10
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_c = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_u = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_c = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_origen_id = 56613
+DEBUG LOTE MODEL PASO 6: Bound ID = 63944
+DEBUG LOTE MODEL PASO 7: Execute result: TRUE, rowCount: 1
+DEBUG PASO 10: Resultado de actualizar_lote_model - rowCount: 1
+DEBUG PASO 11: Actualización exitosa, verificando cambio de precio
+DEBUG PASO 12: Precio cambió: SÍ - Anterior: 4.80, Nuevo: 4.4
+DEBUG PASO 13: Registrando cambio de precio en balance_precios
+DEBUG AJAX PASO 1: Recibida petición 'update' con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.20","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"5.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 1: Iniciando actualizar_lote_controller con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.20","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"5.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 2: ID desencriptado: 63944
+DEBUG PASO 3: Llamando a loteModel::datos_lote_model con ID: 63944
+DEBUG PASO 4: Resultado de datos_lote_model - rowCount: 1
+DEBUG PASO 5: Datos del lote obtenidos: {"lm_id":"63944","med_id":"14802","su_id":"1","pr_id":"17","lm_numero_lote":"LOTE-20260326102202-450","lm_cant_caja":"1","lm_cant_blister":"1","lm_cant_unidad":"100","lm_total_unidades":"100","lm_cant_actual_cajas":"1","lm_cant_actual_unidades":"100","lm_precio_compra":"3.44","lm_precio_venta":"4.40","lm_fecha_ingreso":"2026-04-22 06:01:15","lm_fecha_vencimiento":"2025-09-01","lm_estado":"activo","lm_creado_en":"2026-04-22 06:01:15","lm_actualizado_en":"2026-04-23 14:17:30","lm_origen_id":"56613","lm_tr_bloqueado":null,"lm_costo_lista":"4.00","lm_margen_u":"10.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04","med_nombre":"ANAMAX NF ACETAMINOFENO 325 MG\/CAFE\u00cdNA 30 MG\/IBUPROFENO 200 MG X 100 C\u00c1PSULAS","med_principio_activo":"N\/A","med_presentacion":null,"med_accion_farmacologica":null,"med_codigo_barras":"7770108101079","med_version_comercial":null,"forma_farmaceutica":"n\/a","uso_farmacologico":"n\/a\u00f1","via_administracion":"n\/a","proveedor_nombres":"SAE S.A.","sucursal_nombre":"Sucursal Central"}
+DEBUG PASO 6: Obteniendo valores del formulario
+DEBUG PASO 7: Valores obtenidos - cant_caja: 1, precio_venta: 4.2, precio_anterior: 4.40
+DEBUG PASO 8: Datos para actualizar: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.2,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":5,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG PASO 9: Llamando a loteModel::actualizar_lote_model
+DEBUG LOTE MODEL PASO 1: Iniciando actualizar_lote_model con datos: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.2,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":5,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG LOTE MODEL PASO 3: Set clause: lm_cant_caja = :lm_cant_caja, lm_cant_blister = :lm_cant_blister, lm_cant_unidad = :lm_cant_unidad, lm_cant_actual_cajas = :lm_cant_actual_cajas, lm_cant_actual_unidades = :lm_cant_actual_unidades, lm_precio_compra = :lm_precio_compra, lm_precio_venta = :lm_precio_venta, lm_fecha_vencimiento = :lm_fecha_vencimiento, lm_costo_lista = :lm_costo_lista, lm_margen_u = :lm_margen_u, lm_margen_c = :lm_margen_c, lm_precio_min_u = :lm_precio_min_u, lm_precio_min_c = :lm_precio_min_c, lm_origen_id = :lm_origen_id
+DEBUG LOTE MODEL PASO 4: SQL preparado
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_caja = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_blister = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_unidad = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_cajas = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_unidades = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_compra = 3.44
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_venta = 4.2
+DEBUG LOTE MODEL PASO 5: Bound lm_fecha_vencimiento = 2025-09-01
+DEBUG LOTE MODEL PASO 5: Bound lm_costo_lista = 4
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_u = 5
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_c = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_u = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_c = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_origen_id = 56613
+DEBUG LOTE MODEL PASO 6: Bound ID = 63944
+DEBUG LOTE MODEL PASO 7: Execute result: TRUE, rowCount: 1
+DEBUG PASO 10: Resultado de actualizar_lote_model - rowCount: 1
+DEBUG PASO 11: Actualización exitosa, verificando cambio de precio
+DEBUG PASO 12: Precio cambió: SÍ - Anterior: 4.40, Nuevo: 4.2
+DEBUG PASO 13: Registrando cambio de precio en balance_precios
+DEBUG PRECIOS PASO 1: Iniciando registrar_balance_precio_model - lm_id: 63944, us_id: 1, precio_anterior: 4.40, precio_nuevo: 4.2
+DEBUG PRECIOS PASO 2: SQL preparado
+DEBUG PRECIOS PASO 3: Conexión obtenida
+DEBUG PRECIOS PASO 4: Statement preparado
+DEBUG PRECIOS PASO 5: Parámetros bound - detalle: {"tipo":"cambio_individual_lote","precio_nuevo":4.2}
+DEBUG PRECIOS PASO 6: Execute result: TRUE
+DEBUG PRECIOS PASO 8: Registro exitoso en balance_precios
+DEBUG PASO 14: Resultado de registrar_balance_precio_model: ÉXITO
+DEBUG AJAX PASO 1: Recibida petición 'update' con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.24","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"6.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 1: Iniciando actualizar_lote_controller con POST: {"loteAjax":"update","id":"bi9ESGE2aW1RQnM3U0hCZFN0N0pQZz09","Cantidad_caja_up":"1","Cantidad_unidades_up":"100","Precio_compra_up":"3.44","Precio_venta_up":"4.24","Fecha_vencimiento_up":"2025-09-01","lm_costo_lista":"4.00","lm_margen_u":"6.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04"}
+DEBUG PASO 2: ID desencriptado: 63944
+DEBUG PASO 3: Llamando a loteModel::datos_lote_model con ID: 63944
+DEBUG PASO 4: Resultado de datos_lote_model - rowCount: 1
+DEBUG PASO 5: Datos del lote obtenidos: {"lm_id":"63944","med_id":"14802","su_id":"1","pr_id":"17","lm_numero_lote":"LOTE-20260326102202-450","lm_cant_caja":"1","lm_cant_blister":"1","lm_cant_unidad":"100","lm_total_unidades":"100","lm_cant_actual_cajas":"1","lm_cant_actual_unidades":"100","lm_precio_compra":"3.44","lm_precio_venta":"4.20","lm_fecha_ingreso":"2026-04-22 06:01:15","lm_fecha_vencimiento":"2025-09-01","lm_estado":"activo","lm_creado_en":"2026-04-22 06:01:15","lm_actualizado_en":"2026-04-23 14:19:09","lm_origen_id":"56613","lm_tr_bloqueado":null,"lm_costo_lista":"4.00","lm_margen_u":"5.00","lm_margen_c":"1.00","lm_precio_min_u":"4.04","lm_precio_min_c":"4.04","med_nombre":"ANAMAX NF ACETAMINOFENO 325 MG\/CAFE\u00cdNA 30 MG\/IBUPROFENO 200 MG X 100 C\u00c1PSULAS","med_principio_activo":"N\/A","med_presentacion":null,"med_accion_farmacologica":null,"med_codigo_barras":"7770108101079","med_version_comercial":null,"forma_farmaceutica":"n\/a","uso_farmacologico":"n\/a\u00f1","via_administracion":"n\/a","proveedor_nombres":"SAE S.A.","sucursal_nombre":"Sucursal Central"}
+DEBUG PASO 6: Obteniendo valores del formulario
+DEBUG PASO 7: Valores obtenidos - cant_caja: 1, precio_venta: 4.24, precio_anterior: 4.20
+DEBUG PASO 8: Datos para actualizar: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.24,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":6,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG PASO 9: Llamando a loteModel::actualizar_lote_model
+DEBUG LOTE MODEL PASO 1: Iniciando actualizar_lote_model con datos: {"lm_cant_caja":1,"lm_cant_blister":1,"lm_cant_unidad":100,"lm_cant_actual_cajas":1,"lm_cant_actual_unidades":100,"lm_precio_compra":3.44,"lm_precio_venta":4.24,"lm_fecha_vencimiento":"2025-09-01","lm_costo_lista":4,"lm_margen_u":6,"lm_margen_c":1,"lm_precio_min_u":4.04,"lm_precio_min_c":4.04,"lm_origen_id":"56613","ID":"63944"}
+DEBUG LOTE MODEL PASO 3: Set clause: lm_cant_caja = :lm_cant_caja, lm_cant_blister = :lm_cant_blister, lm_cant_unidad = :lm_cant_unidad, lm_cant_actual_cajas = :lm_cant_actual_cajas, lm_cant_actual_unidades = :lm_cant_actual_unidades, lm_precio_compra = :lm_precio_compra, lm_precio_venta = :lm_precio_venta, lm_fecha_vencimiento = :lm_fecha_vencimiento, lm_costo_lista = :lm_costo_lista, lm_margen_u = :lm_margen_u, lm_margen_c = :lm_margen_c, lm_precio_min_u = :lm_precio_min_u, lm_precio_min_c = :lm_precio_min_c, lm_origen_id = :lm_origen_id
+DEBUG LOTE MODEL PASO 4: SQL preparado
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_caja = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_blister = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_unidad = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_cajas = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_cant_actual_unidades = 100
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_compra = 3.44
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_venta = 4.24
+DEBUG LOTE MODEL PASO 5: Bound lm_fecha_vencimiento = 2025-09-01
+DEBUG LOTE MODEL PASO 5: Bound lm_costo_lista = 4
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_u = 6
+DEBUG LOTE MODEL PASO 5: Bound lm_margen_c = 1
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_u = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_precio_min_c = 4.04
+DEBUG LOTE MODEL PASO 5: Bound lm_origen_id = 56613
+DEBUG LOTE MODEL PASO 6: Bound ID = 63944
+DEBUG LOTE MODEL PASO 7: Execute result: TRUE, rowCount: 1
+DEBUG PASO 10: Resultado de actualizar_lote_model - rowCount: 1
+DEBUG PASO 11: Actualización exitosa, verificando cambio de precio
+DEBUG PASO 12: Precio cambió: SÍ - Anterior: 4.20, Nuevo: 4.24
+DEBUG PASO 13: Registrando cambio de precio en balance_precios
+DEBUG PRECIOS PASO 1: Iniciando registrar_balance_precio_model - lm_id: 63944, us_id: 1, precio_anterior: 4.20, precio_nuevo: 4.24
+DEBUG PRECIOS PASO 2: SQL preparado
+DEBUG PRECIOS PASO 3: Conexión obtenida
+DEBUG PRECIOS PASO 4: Statement preparado
+DEBUG PRECIOS PASO 5: Parámetros bound - detalle: {"tipo":"cambio_individual_lote","precio_nuevo":4.24}
+DEBUG PRECIOS PASO 6: Execute result: TRUE
+DEBUG PRECIOS PASO 8: Registro exitoso en balance_precios
+DEBUG PASO 14: Resultado de registrar_balance_precio_model: ÉXITO

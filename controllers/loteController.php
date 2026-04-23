@@ -276,7 +276,7 @@ class loteController extends loteModel
                         <td>
                             <div class="td-main">' .
                     ($rows['lm_estado'] == "en_espera"
-                        ? '<a href="#" onclick="loteManager.openActivationModal(\'' . mainModel::encryption($rows['lm_id']) . '\', \'' . htmlspecialchars(addslashes($rows['med_nombre_quimico'])) . '\'); return false;" title="Activar lote">Activar</a>'
+                        ? '<a class="btn btn-souc" href="#" onclick="loteManager.openActivationModal(\'' . mainModel::encryption($rows['lm_id']) . '\', \'' . htmlspecialchars(addslashes($rows['med_nombre_quimico'])) . '\'); return false;" title="Activar lote">Activar</a>'
                         : $estado_html)
                     . '</div>
                         </td>
@@ -479,6 +479,23 @@ class loteController extends loteModel
         $actualizado = loteModel::actualizar_lote_model($datos_up);
 
         if ($actualizado->rowCount() == 1) {
+            $precio_cambio = ($precio_venta != ($lote['lm_precio_venta'] ?? 0));
+
+            if ($precio_cambio) {
+                try {
+                    require_once '../models/preciosModel.php'; // Asegurar carga del modelo
+                    preciosModel::registrar_balance_precio_model(
+                        $id,
+                        $_SESSION['id_smp'],
+                        $lote['lm_precio_venta'] ?? 0,
+                        $precio_venta,
+                        json_encode(['tipo' => 'cambio_individual_lote', 'precio_nuevo' => $precio_venta])
+                    );
+                } catch (Exception $e) {
+                    // No fallar la actualización por error en balance
+                }
+            }
+
             // Calcular diferencias para actualizar inventario
             $unidades_anteriores = (int)$lote['lm_cant_actual_unidades'];
             $unidades_nuevas = $cant_caja * $cant_blister * $cant_unidad;

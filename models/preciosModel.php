@@ -189,11 +189,16 @@ class preciosModel extends mainModel
             $sql_inv->execute();
 
             // 4) Registrar en balance_precios
+            $detalle = json_encode([
+                'tipo' => 'cambio_individual',
+                'precio_nuevo' => $precio_nuevo
+            ]);
             self::registrar_balance_precio_model(
                 $lm_id,
                 $usuario_id,
                 $precio_anterior,
-                $precio_nuevo
+                $precio_nuevo,
+                $detalle
             );
 
             $conexion->commit();
@@ -292,11 +297,16 @@ class preciosModel extends mainModel
 
             // 4) Registrar en balance_precios (un registro por cada lote)
             foreach ($lotes as $lote) {
+                $detalle = json_encode([
+                    'tipo' => 'cambio_todos_lotes',
+                    'precio_nuevo' => $precio_nuevo
+                ]);
                 self::registrar_balance_precio_model(
                     $lote['lm_id'],
                     $usuario_id,
                     $lote['lm_precio_venta'],
-                    $precio_nuevo
+                    $precio_nuevo,
+                    $detalle
                 );
             }
 
@@ -319,13 +329,13 @@ class preciosModel extends mainModel
         }
     }
 
-    private static function registrar_balance_precio_model($lm_id, $usuario_id, $precio_anterior, $precio_nuevo)
+    public static function registrar_balance_precio_model($lm_id, $usuario_id, $precio_anterior, $precio_nuevo, $detalle = null)
     {
         $sql = "
-            INSERT INTO balance_precios 
-            (lm_id, us_id, bp_precio_anterior, bp_precio_nuevo, bp_creado_en)
-            VALUES 
-            (:lm_id, :us_id, :bp_precio_anterior, :bp_precio_nuevo, NOW())
+            INSERT INTO balance_precios
+            (lm_id, us_id, bp_precio_anterior, bp_precio_nuevo, bp_detalle, bp_creado_en)
+            VALUES
+            (:lm_id, :us_id, :bp_precio_anterior, :bp_precio_nuevo, :bp_detalle, NOW())
         ";
 
         $conexion = self::conectar();
@@ -334,8 +344,14 @@ class preciosModel extends mainModel
         $stmt->bindParam(':us_id', $usuario_id, PDO::PARAM_INT);
         $stmt->bindParam(':bp_precio_anterior', $precio_anterior, PDO::PARAM_STR);
         $stmt->bindParam(':bp_precio_nuevo', $precio_nuevo, PDO::PARAM_STR);
-        
-        return $stmt->execute();
+        $stmt->bindParam(':bp_detalle', $detalle, PDO::PARAM_STR);
+
+        $result = $stmt->execute();
+        if (!$result) {
+            $errorInfo = $stmt->errorInfo();
+            throw new Exception('Error al registrar en balance_precios: ' . implode(', ', $errorInfo));
+        }
+        return $result;
     }
 
     public static function obtener_informes_cambios_precios_model($inicio = 0, $registros = 10, $filtros = [])

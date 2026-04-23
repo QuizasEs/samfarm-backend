@@ -3,9 +3,11 @@
 if ($peticionAjax) {
     require_once '../models/inventarioModel.php';
     require_once '../models/loteModel.php';
+    require_once '../models/preciosModel.php';
 } else {
     require_once './models/inventarioModel.php';
     require_once './models/loteModel.php';
+    require_once './models/preciosModel.php';
 }
 class inventarioController extends inventarioModel
 {
@@ -738,27 +740,25 @@ class inventarioController extends inventarioModel
         try {
             // Validar permisos
             $rol_usuario = $_SESSION['rol_smp'] ?? 0;
-            if ($rol_usuario != 1 && $rol_usuario != 2) {
+            if ($rol_usuario != 1) {
                 return [
                     'Alerta' => 'simple',
                     'Titulo' => 'Permiso denegado',
-                    'texto' => 'No cuenta con los privilegios necesarios para realizar balance de precios',
+                    'texto' => 'Solo administradores pueden realizar balance de precios',
                     'Tipo' => 'error'
                 ];
             }
 
-            // Obtener todos los lotes activos de este medicamento en esta sucursal
+            // Obtener todos los lotes activos de este medicamento en todas las sucursales
             $sql_lotes = mainModel::conectar()->prepare("
-                SELECT lm_id, lm_numero_lote
+                SELECT lm_id, lm_numero_lote, lm_precio_venta, su_id
                 FROM lote_medicamento
                 WHERE med_id = :med_id
-                  AND su_id = :su_id
                   AND lm_estado = 'activo'
                   AND lm_cant_actual_unidades > 0
             ");
 
             $sql_lotes->bindParam(":med_id", $med_id);
-            $sql_lotes->bindParam(":su_id", $su_id);
             $sql_lotes->execute();
 
             $lotes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
@@ -768,7 +768,7 @@ class inventarioController extends inventarioModel
                 return [
                     'Alerta' => 'simple',
                     'Titulo' => 'Sin lotes activos',
-                    'texto' => 'No hay lotes activos para este medicamento en esta sucursal',
+                    'texto' => 'No hay lotes activos para este medicamento',
                     'Tipo' => 'warning'
                 ];
             }
@@ -803,6 +803,23 @@ class inventarioController extends inventarioModel
                             'hl_descripcion' => 'Balance de precios aplicado a lote ' . $lote['lm_numero_lote']
                         ];
                         loteModel::registrar_historial_lote_model($historial);
+
+                        // Registrar en balance_precios
+                        $detalle = json_encode([
+                            'costo_lista' => $costo_lista,
+                            'margen_u' => $margen_u,
+                            'margen_c' => $margen_c,
+                            'precio_venta' => $precio_venta,
+                            'precio_min_u' => $precio_min_u,
+                            'precio_min_c' => $precio_min_c
+                        ]);
+                        preciosModel::registrar_balance_precio_model(
+                            $lote['lm_id'],
+                            $_SESSION['id_smp'],
+                            $lote['lm_precio_venta'],
+                            $precio_venta,
+                            $detalle
+                        );
                     } else {
                         $errores[] = 'Lote ' . $lote['lm_numero_lote'];
                     }

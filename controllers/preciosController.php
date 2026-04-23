@@ -194,6 +194,7 @@ class preciosController extends preciosModel
                                     <th>Sucursal</th>
                                     <th>Precio Anterior (Bs)</th>
                                     <th>Precio Nuevo (Bs)</th>
+                                    <th>Detalles</th>
                                     <th>Usuario</th>
                                     <th>Fecha/Hora</th>
                                 </tr>
@@ -213,6 +214,19 @@ class preciosController extends preciosModel
                     $precio_anterior = number_format($informe['bp_precio_anterior'] ?? 0, 2, ',', '.');
                     $precio_nuevo = number_format($informe['bp_precio_nuevo'] ?? 0, 2, ',', '.');
 
+                    // Decodificar detalles
+                    $detalles = '';
+                    if (!empty($informe['bp_detalle'])) {
+                        $detalle_json = json_decode($informe['bp_detalle'], true);
+                        if ($detalle_json) {
+                            $detalles_arr = [];
+                            foreach ($detalle_json as $key => $value) {
+                                $detalles_arr[] = ucfirst(str_replace('_', ' ', $key)) . ': ' . (is_numeric($value) ? number_format($value, 2) : $value);
+                            }
+                            $detalles = implode('<br>', $detalles_arr);
+                        }
+                    }
+
                     $html .= '<tr>';
                     $html .= '<td>' . $contador . '</td>';
                     $html .= '<td><strong>' . $lote . '</strong></td>';
@@ -220,6 +234,7 @@ class preciosController extends preciosModel
                     $html .= '<td>' . $sucursal . '</td>';
                     $html .= '<td style="text-align:right;color:#e74c3c;font-weight:600;">Bs ' . $precio_anterior . '</td>';
                     $html .= '<td style="text-align:right;color:#27ae60;font-weight:600;">Bs ' . $precio_nuevo . '</td>';
+                    $html .= '<td style="font-size:11px;">' . $detalles . '</td>';
                     $html .= '<td>' . $usuario . '</td>';
                     $html .= '<td>' . $fecha . '</td>';
                     $html .= '</tr>';
@@ -228,7 +243,7 @@ class preciosController extends preciosModel
                 $reg_final = $contador - 1;
             } else {
                 error_log("No hay informes o no es un array. Total: " . $total_registros);
-                $html .= '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros de cambios de precios</td></tr>';
+                $html .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros de cambios de precios</td></tr>';
             }
 
             $html .= '</tbody></table></div>';
