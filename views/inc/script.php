@@ -2814,12 +2814,6 @@
         // ==================== MODAL HISTORIAL ====================
         const historial = {
             async abrir(medId, suId, medicamento) {
-                console.log({
-                    medId,
-                    suId,
-                    medicamento
-                });
-
                 document.getElementById('modalHistorialMedicamento').textContent = medicamento;
                 document.getElementById('modalHistorialMedId').value = medId;
                 document.getElementById('modalHistorialSuId').value = suId;
@@ -2827,7 +2821,7 @@
                 utils.abrir('modalHistorialInventario');
 
                 document.getElementById('tablaHistorialMovimientos').innerHTML =
-                    '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+                    '<tr><td colspan="7" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
 
                 try {
                     const data = await utils.ajax({
@@ -2855,13 +2849,14 @@
                                 </td>
                                 <td>${utils.formatearNumero(mov.cantidad)} ${mov.unidad}</td>
                                 <td>${mov.lote || 'N/A'}</td>
+                                <td>${mov.sucursal || 'N/A'}</td>
                                 <td>${mov.usuario || 'Sistema'}</td>
                                 <td>${motivoLimpio}</td>
                             </tr>
                         `;
                         }).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin movimientos</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin movimientos</td></tr>';
                     }
 
                 } catch (error) {

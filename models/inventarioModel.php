@@ -6,116 +6,87 @@ class inventarioModel extends mainModel
 {
     protected static function datos_inventario_model($inicio, $registros, $filtros = [])
     {
-        $sql = "
-                    SELECT 
-                        i.inv_id,
-                        i.med_id,
-                        i.su_id,
-                        i.inv_total_cajas,
-                        i.inv_total_unidades,
-                        i.inv_total_valorado,
-                        i.inv_minimo,
-                        i.inv_maximo,
-                        i.inv_actualizado_en,
-                        m.med_nombre_quimico,
-                        m.med_principio_activo,
-                        m.med_presentacion,
-                        COALESCE(ff.ff_nombre, '') AS forma_farmaceutica,
-                        s.su_nombre AS sucursal_nombre,
-                        
-                        -- Estado del stock
-                        CASE 
-                            WHEN i.inv_total_unidades = 0 THEN 'agotado'
-                            WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 'bajo'
-                            WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN 'exceso'
-                            ELSE 'normal'
-                        END AS estado_stock,
-                        
-                        -- Contar lotes activos
-                        (SELECT COUNT(*) 
-                        FROM lote_medicamento lm 
-                        WHERE lm.med_id = i.med_id 
-                        AND lm.su_id = i.su_id 
-                        AND lm.lm_estado = 'activo'
-                        ) AS lotes_activos,
-                        
-                        -- Lote más próximo a vencer
-                        (SELECT MIN(lm.lm_fecha_vencimiento)
-                        FROM lote_medicamento lm
-                        WHERE lm.med_id = i.med_id
-                        AND lm.su_id = i.su_id
-                        AND lm.lm_estado = 'activo'
-                        AND lm.lm_fecha_vencimiento IS NOT NULL
-                        ) AS fecha_vencimiento_proximo
-                        
-                    FROM inventarios i
-                    INNER JOIN medicamento m ON m.med_id = i.med_id
-                    INNER JOIN sucursales s ON s.su_id = i.su_id
-                    LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-                    WHERE 1=1
-                ";
+        // Determinar si es vista agregada
+        $es_agregada = empty($filtros['su_id']);
+
+        if ($es_agregada) {
+            $sql = "
+                SELECT
+                    CONCAT('-', m.med_id) AS inv_id,
+                    m.med_id,
+                    NULL AS su_id,
+                    SUM(i.inv_total_cajas) AS inv_total_cajas,
+                    SUM(i.inv_total_unidades) AS inv_total_unidades,
+                    SUM(i.inv_total_valorado) AS inv_total_valorado,
+                    MIN(i.inv_minimo) AS inv_minimo,
+                    MAX(i.inv_maximo) AS inv_maximo,
+                    MAX(i.inv_actualizado_en) AS inv_actualizado_en,
+                    m.med_nombre_quimico,
+                    m.med_principio_activo,
+                    m.med_presentacion,
+                    COALESCE(ff.ff_nombre, '') AS forma_farmaceutica,
+                    GROUP_CONCAT(DISTINCT s.su_nombre ORDER BY s.su_nombre SEPARATOR ', ') AS sucursal_nombre,
+                    CASE
+                        WHEN SUM(i.inv_total_unidades) = 0 THEN 'agotado'
+                        WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < MIN(i.inv_minimo) THEN 'critico'
+                        WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < (MIN(i.inv_minimo) * 1.5) THEN 'bajo'
+                        WHEN MAX(i.inv_maximo) > 0 AND SUM(i.inv_total_unidades) > MAX(i.inv_maximo) THEN 'exceso'
+                        ELSE 'normal'
+                    END AS estado_stock,
+                    (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.med_id = m.med_id AND lm.lm_estado = 'activo') AS lotes_activos,
+                    (SELECT MIN(lm.lm_fecha_vencimiento) FROM lote_medicamento lm WHERE lm.med_id = m.med_id AND lm.lm_estado = 'activo' AND lm.lm_fecha_vencimiento IS NOT NULL) AS fecha_vencimiento_proximo
+                FROM inventarios i
+                INNER JOIN medicamento m ON m.med_id = i.med_id
+                INNER JOIN sucursales s ON s.su_id = i.su_id
+                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                WHERE 1=1
+            ";
+        } else {
+            $sql = "
+                SELECT
+                    i.inv_id,
+                    i.med_id,
+                    i.su_id,
+                    i.inv_total_cajas,
+                    i.inv_total_unidades,
+                    i.inv_total_valorado,
+                    i.inv_minimo,
+                    i.inv_maximo,
+                    i.inv_actualizado_en,
+                    m.med_nombre_quimico,
+                    m.med_principio_activo,
+                    m.med_presentacion,
+                    COALESCE(ff.ff_nombre, '') AS forma_farmaceutica,
+                    s.su_nombre AS sucursal_nombre,
+                    CASE
+                        WHEN i.inv_total_unidades = 0 THEN 'agotado'
+                        WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 'critico'
+                        WHEN i.inv_minimo > 0 AND i.inv_total_unidades < (i.inv_minimo * 1.5) THEN 'bajo'
+                        WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN 'exceso'
+                        ELSE 'normal'
+                    END AS estado_stock,
+                    (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.med_id = i.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo') AS lotes_activos,
+                    (SELECT MIN(lm.lm_fecha_vencimiento) FROM lote_medicamento lm WHERE lm.med_id = i.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo' AND lm.lm_fecha_vencimiento IS NOT NULL) AS fecha_vencimiento_proximo
+                FROM inventarios i
+                INNER JOIN medicamento m ON m.med_id = i.med_id
+                INNER JOIN sucursales s ON s.su_id = i.su_id
+                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                WHERE 1=1
+            ";
+        }
 
         $params = [];
 
-        // Filtro por sucursal (CRÍTICO para permisos)
-        if (!empty($filtros['su_id'])) {
+        // Filtro por sucursal
+        if (!$es_agregada) {
             $sql .= " AND i.su_id = :su_id";
             $params[':su_id'] = (int)$filtros['su_id'];
         }
 
         // Filtro por búsqueda
         if (!empty($filtros['busqueda'])) {
-            $sql .= " AND (
-                        m.med_nombre_quimico LIKE :busqueda OR
-                        m.med_principio_activo LIKE :busqueda OR
-                        m.med_codigo_barras LIKE :busqueda
-                    )";
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR m.med_principio_activo LIKE :busqueda OR m.med_codigo_barras LIKE :busqueda)";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-
-        // Filtro por estado de stock
-        if (!empty($filtros['estado'])) {
-            switch ($filtros['estado']) {
-                case 'agotado':
-                    $sql .= " AND i.inv_total_unidades = 0";
-                    break;
-
-                case 'critico':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
-                    break;
-
-                case 'bajo':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
-                    $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
-                    break;
-
-                case 'normal':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
-                    $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
-                    break;
-
-                case 'exceso':
-                    $sql .= " AND i.inv_maximo > 0";
-                    $sql .= " AND i.inv_total_unidades > i.inv_maximo";
-                    break;
-
-                case 'sin_definir':
-                    $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    break;
-
-                case 'critico':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
-                    break;
-            }
         }
 
         // Filtro por forma farmacéutica
@@ -124,28 +95,41 @@ class inventarioModel extends mainModel
             $params[':forma'] = (int)$filtros['forma'];
         }
 
-        // Ordenamiento
-        $sql .= " ORDER BY 
-                    CASE 
-                        WHEN i.inv_total_unidades = 0 THEN 1
-                        WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 2
-                        ELSE 3
-                    END,
-                    m.med_nombre_quimico ASC
-                ";
+        // Filtro por estado (No agregada)
+        if (!$es_agregada && !empty($filtros['estado'])) {
+            switch ($filtros['estado']) {
+                case 'agotado': $sql .= " AND i.inv_total_unidades = 0"; break;
+                case 'critico': $sql .= " AND i.inv_total_unidades > 0 AND i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo"; break;
+                case 'bajo': $sql .= " AND i.inv_total_unidades >= i.inv_minimo AND i.inv_total_unidades < (i.inv_minimo * 1.5) AND i.inv_total_unidades > 0 AND i.inv_minimo > 0"; break;
+                case 'normal': $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5) AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo) AND i.inv_total_unidades > 0 AND i.inv_minimo > 0"; break;
+                case 'exceso': $sql .= " AND i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo"; break;
+                case 'sin_definir': $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0) AND i.inv_total_unidades > 0"; break;
+            }
+        }
 
-        $sql .= " LIMIT :inicio, :registros";
+        if ($es_agregada) {
+            $sql .= " GROUP BY m.med_id, m.med_nombre_quimico, m.med_principio_activo, m.med_presentacion, ff.ff_nombre";
+            
+            // Filtro por estado (Agregada - HAVING)
+            if (!empty($filtros['estado'])) {
+                switch ($filtros['estado']) {
+                    case 'agotado': $sql .= " HAVING SUM(i.inv_total_unidades) = 0"; break;
+                    case 'critico': $sql .= " HAVING SUM(i.inv_total_unidades) > 0 AND MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < MIN(i.inv_minimo)"; break;
+                    case 'bajo': $sql .= " HAVING SUM(i.inv_total_unidades) >= MIN(i.inv_minimo) AND SUM(i.inv_total_unidades) < (MIN(i.inv_minimo) * 1.5) AND SUM(i.inv_total_unidades) > 0 AND MIN(i.inv_minimo) > 0"; break;
+                    case 'normal': $sql .= " HAVING SUM(i.inv_total_unidades) >= (MIN(i.inv_minimo) * 1.5) AND (MAX(i.inv_maximo) IS NULL OR MAX(i.inv_maximo) = 0 OR SUM(i.inv_total_unidades) <= MAX(i.inv_maximo)) AND SUM(i.inv_total_unidades) > 0 AND MIN(i.inv_minimo) > 0"; break;
+                    case 'exceso': $sql .= " HAVING MAX(i.inv_maximo) > 0 AND SUM(i.inv_total_unidades) > MAX(i.inv_maximo)"; break;
+                    case 'sin_definir': $sql .= " HAVING (MIN(i.inv_minimo) IS NULL OR MIN(i.inv_minimo) = 0) AND SUM(i.inv_total_unidades) > 0"; break;
+                }
+            }
+        }
+
+        $sql .= " ORDER BY m.med_nombre_quimico ASC LIMIT :inicio, :registros";
 
         $conexion = mainModel::conectar();
         $stmt = $conexion->prepare($sql);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-
+        foreach ($params as $key => $value) { $stmt->bindValue($key, $value); }
         $stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
         $stmt->bindParam(':registros', $registros, PDO::PARAM_INT);
-
         $stmt->execute();
         return $stmt;
     }
@@ -153,24 +137,34 @@ class inventarioModel extends mainModel
 
     protected static function contar_inventarios_model($filtros = [])
     {
-        $sql = "
-                        SELECT COUNT(*) as total
-                        FROM inventarios i
-                        INNER JOIN medicamento m ON m.med_id = i.med_id
-                        INNER JOIN sucursales s ON s.su_id = i.su_id
-                        LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-                        LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id AND lm.su_id = i.su_id AND lm.lm_estado = 'activo'
-                        LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
-                        WHERE 1=1
-                    ";
+        // Determinar si es vista agregada
+        $es_agregada = empty($filtros['su_id']);
+
+        if ($es_agregada) {
+            // Conteo para vista agregada (productos únicos)
+            $sql = "
+                SELECT COUNT(DISTINCT m.med_id) as total
+                FROM inventarios i
+                INNER JOIN medicamento m ON m.med_id = i.med_id
+                INNER JOIN sucursales s ON s.su_id = i.su_id
+                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                WHERE 1=1
+            ";
+        } else {
+            // Conteo para vista normal (registros individuales)
+            $sql = "
+                SELECT COUNT(*) as total
+                FROM inventarios i
+                INNER JOIN medicamento m ON m.med_id = i.med_id
+                INNER JOIN sucursales s ON s.su_id = i.su_id
+                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+                WHERE 1=1
+            ";
+        }
 
         $params = [];
 
-        if (!empty($filtros['su_id'])) {
-            $sql .= " AND i.su_id = :su_id";
-            $params[':su_id'] = (int)$filtros['su_id'];
-        }
-
+        // Aplicar filtros comunes
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
                             m.med_nombre_quimico LIKE :busqueda OR
@@ -180,47 +174,187 @@ class inventarioModel extends mainModel
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
 
-        if (!empty($filtros['estado'])) {
-            switch ($filtros['estado']) {
-                case 'agotado':
-                    $sql .= " AND i.inv_total_unidades = 0";
-                    break;
-
-                case 'critico':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades < i.inv_minimo";
-                    break;
-
-                case 'bajo':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
-                    $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
-                    break;
-
-                case 'normal':
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    $sql .= " AND i.inv_minimo > 0";
-                    $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
-                    $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
-                    break;
-
-                case 'exceso':
-                    $sql .= " AND i.inv_maximo > 0";
-                    $sql .= " AND i.inv_total_unidades > i.inv_maximo";
-                    break;
-
-                case 'sin_definir':
-                    $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
-                    $sql .= " AND i.inv_total_unidades > 0";
-                    break;
-            }
-        }
-
         if (!empty($filtros['forma'])) {
             $sql .= " AND m.ff_id = :forma";
             $params[':forma'] = (int)$filtros['forma'];
+        }
+
+        // Filtro por estado de stock
+        if (!empty($filtros['estado'])) {
+            if ($es_agregada) {
+                // Filtros para vista agregada
+                switch ($filtros['estado']) {
+                    case 'agotado':
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) = 0";
+                        break;
+
+                    case 'critico':
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT MIN(i2.inv_minimo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) < (
+                            SELECT MIN(i2.inv_minimo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        )";
+                        break;
+
+                    case 'bajo':
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT MIN(i2.inv_minimo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) >= (
+                            SELECT MIN(i2.inv_minimo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        )";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) < (
+                            SELECT MIN(i2.inv_minimo) * 1.5
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        )";
+                        break;
+
+                    case 'normal':
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT MIN(i2.inv_minimo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) >= (
+                            SELECT MIN(i2.inv_minimo) * 1.5
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        )";
+                        $sql .= " AND (
+                            SELECT CASE
+                                WHEN MAX(i2.inv_maximo) IS NULL OR MAX(i2.inv_maximo) = 0 THEN 1
+                                WHEN SUM(i2.inv_total_unidades) <= MAX(i2.inv_maximo) THEN 1
+                                ELSE 0
+                            END
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) = 1";
+                        break;
+
+                    case 'exceso':
+                        $sql .= " AND (
+                            SELECT MAX(i2.inv_maximo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > (
+                            SELECT MAX(i2.inv_maximo)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        )";
+                        break;
+
+                    case 'sin_definir':
+                        $sql .= " AND (
+                            (SELECT MIN(i2.inv_minimo) FROM inventarios i2 WHERE i2.med_id = m.med_id) IS NULL 
+                            OR 
+                            (SELECT MIN(i2.inv_minimo) FROM inventarios i2 WHERE i2.med_id = m.med_id) = 0
+                        )";
+                        $sql .= " AND (
+                            SELECT SUM(i2.inv_total_unidades)
+                            FROM inventarios i2
+                            WHERE i2.med_id = m.med_id
+                        ) > 0";
+                        break;
+                }
+            } else {
+                // Filtros para vista normal
+                if (!empty($filtros['su_id'])) {
+                    $sql .= " AND i.su_id = :su_id";
+                    $params[':su_id'] = (int)$filtros['su_id'];
+                }
+
+                switch ($filtros['estado']) {
+                    case 'agotado':
+                        $sql .= " AND i.inv_total_unidades = 0";
+                        break;
+
+                    case 'critico':
+                        $sql .= " AND i.inv_total_unidades > 0";
+                        $sql .= " AND i.inv_minimo > 0";
+                        $sql .= " AND i.inv_total_unidades < i.inv_minimo";
+                        break;
+
+                    case 'bajo':
+                        $sql .= " AND i.inv_total_unidades > 0";
+                        $sql .= " AND i.inv_minimo > 0";
+                        $sql .= " AND i.inv_total_unidades >= i.inv_minimo";
+                        $sql .= " AND i.inv_total_unidades < (i.inv_minimo * 1.5)";
+                        break;
+
+                    case 'normal':
+                        $sql .= " AND i.inv_total_unidades > 0";
+                        $sql .= " AND i.inv_minimo > 0";
+                        $sql .= " AND i.inv_total_unidades >= (i.inv_minimo * 1.5)";
+                        $sql .= " AND (i.inv_maximo IS NULL OR i.inv_maximo = 0 OR i.inv_total_unidades <= i.inv_maximo)";
+                        break;
+
+                    case 'exceso':
+                        $sql .= " AND i.inv_maximo > 0";
+                        $sql .= " AND i.inv_total_unidades > i.inv_maximo";
+                        break;
+
+                    case 'sin_definir':
+                        $sql .= " AND (i.inv_minimo IS NULL OR i.inv_minimo = 0)";
+                        $sql .= " AND i.inv_total_unidades > 0";
+                        break;
+                }
+            }
+        } else {
+            // Si no hay filtro de estado pero sí hay filtro de sucursal
+            if (!$es_agregada) {
+                $sql .= " AND i.su_id = :su_id";
+                $params[':su_id'] = (int)$filtros['su_id'];
+            }
         }
 
         $conexion = mainModel::conectar();
@@ -237,8 +371,13 @@ class inventarioModel extends mainModel
 
     protected static function detalle_inventario_con_lotes_model($inv_id)
     {
+        // Si es un ID negativo, es una vista agregada
+        if ($inv_id < 0) {
+            return self::detalle_inventario_agregado_model(abs($inv_id));
+        }
+
         $sql = "
-            SELECT 
+            SELECT
                 i.*,
                 m.med_nombre_quimico,
                 m.med_principio_activo,
@@ -254,7 +393,7 @@ class inventarioModel extends mainModel
                     SELECT COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor')
                     FROM lote_medicamento lm
                     INNER JOIN proveedores p ON p.pr_id = lm.pr_id
-                    WHERE lm.med_id = i.med_id 
+                    WHERE lm.med_id = i.med_id
                     AND lm.su_id = i.su_id
                     AND lm.lm_estado = 'activo'
                     AND lm.pr_id IS NOT NULL
@@ -277,36 +416,125 @@ class inventarioModel extends mainModel
     }
 
     /**
-     * Obtener lotes activos de un inventario
+     * Obtener detalle de inventario agregado (sin filtro de sucursal)
      */
-    protected static function lotes_por_inventario_model($med_id, $su_id)
+    protected static function detalle_inventario_agregado_model($med_id)
     {
         $sql = "
-            SELECT 
-                lm.lm_id,
-                lm.lm_numero_lote,
-                lm.lm_cant_actual_cajas,
-                lm.lm_cant_actual_unidades,
-                lm.lm_precio_compra,
-                lm.lm_precio_venta,
-                lm.lm_fecha_ingreso,
-                lm.lm_fecha_vencimiento,
-                lm.lm_estado,
-                DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_para_vencer,
-                COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor') AS proveedor
-            FROM lote_medicamento lm
-            LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
-            WHERE lm.med_id = :med_id 
-            AND lm.su_id = :su_id 
-            AND lm.lm_estado IN ('activo', 'terminado')
-            ORDER BY lm.lm_fecha_vencimiento ASC
+            SELECT
+                CONCAT('-', m.med_id) AS inv_id,
+                m.med_id,
+                NULL AS su_id,
+                SUM(i.inv_total_cajas) AS inv_total_cajas,
+                SUM(i.inv_total_unidades) AS inv_total_unidades,
+                SUM(i.inv_total_valorado) AS inv_total_valorado,
+                MIN(i.inv_minimo) AS inv_minimo,
+                MAX(i.inv_maximo) AS inv_maximo,
+                MAX(i.inv_actualizado_en) AS inv_actualizado_en,
+                m.med_nombre_quimico,
+                m.med_principio_activo,
+                m.med_presentacion,
+                m.med_codigo_barras,
+                m.med_accion_farmacologica,
+                ff.ff_nombre AS forma_farmaceutica,
+                uf.uf_nombre AS uso_farmacologico,
+                vd.vd_nombre AS via_administracion,
+                GROUP_CONCAT(DISTINCT s.su_nombre ORDER BY s.su_nombre SEPARATOR ', ') AS sucursal_nombre,
+                -- Obtener proveedor desde los lotes activos
+                (
+                    SELECT COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor')
+                    FROM lote_medicamento lm
+                    INNER JOIN proveedores p ON p.pr_id = lm.pr_id
+                    WHERE lm.med_id = m.med_id
+                    AND lm.lm_estado = 'activo'
+                    AND lm.pr_id IS NOT NULL
+                    GROUP BY lm.pr_id
+                    ORDER BY COUNT(*) DESC
+                    LIMIT 1
+                ) AS proveedor
+            FROM inventarios i
+            INNER JOIN medicamento m ON m.med_id = i.med_id
+            INNER JOIN sucursales s ON s.su_id = i.su_id
+            LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+            LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
+            LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
+            WHERE m.med_id = :med_id
+            GROUP BY m.med_id, m.med_nombre_quimico, m.med_principio_activo, m.med_presentacion,
+                     m.med_codigo_barras, m.med_accion_farmacologica, ff.ff_nombre,
+                     uf.uf_nombre, vd.vd_nombre
+            LIMIT 1
         ";
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-        $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
+    }
+
+    /**
+     * Obtener lotes activos de un inventario
+     */
+    protected static function lotes_por_inventario_model($med_id, $su_id)
+    {
+        // Si su_id es NULL, es vista agregada - mostrar lotes de todas las sucursales
+        if ($su_id === null || $su_id === 0) {
+            $sql = "
+                SELECT
+                    lm.lm_id,
+                    lm.lm_numero_lote,
+                    lm.lm_cant_actual_cajas,
+                    lm.lm_cant_actual_unidades,
+                    lm.lm_precio_compra,
+                    lm.lm_precio_venta,
+                    lm.lm_fecha_ingreso,
+                    lm.lm_fecha_vencimiento,
+                    lm.lm_estado,
+                    s.su_nombre AS sucursal,
+                    DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_para_vencer,
+                    COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor') AS proveedor
+                FROM lote_medicamento lm
+                INNER JOIN sucursales s ON s.su_id = lm.su_id
+                LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+                WHERE lm.med_id = :med_id
+                AND lm.lm_estado IN ('activo', 'terminado')
+                ORDER BY s.su_nombre, lm.lm_fecha_vencimiento ASC
+            ";
+
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt;
+        } else {
+            // Vista normal por sucursal
+            $sql = "
+                SELECT
+                    lm.lm_id,
+                    lm.lm_numero_lote,
+                    lm.lm_cant_actual_cajas,
+                    lm.lm_cant_actual_unidades,
+                    lm.lm_precio_compra,
+                    lm.lm_precio_venta,
+                    lm.lm_fecha_ingreso,
+                    lm.lm_fecha_vencimiento,
+                    lm.lm_estado,
+                    s.su_nombre AS sucursal,
+                    DATEDIFF(lm.lm_fecha_vencimiento, CURDATE()) AS dias_para_vencer,
+                    COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor') AS proveedor
+                FROM lote_medicamento lm
+                INNER JOIN sucursales s ON s.su_id = lm.su_id
+                LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+                WHERE lm.med_id = :med_id
+                AND lm.su_id = :su_id
+                AND lm.lm_estado IN ('activo', 'terminado')
+                ORDER BY lm.lm_fecha_vencimiento ASC
+            ";
+
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
+            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt;
+        }
     }
 
     /**
@@ -314,32 +542,66 @@ class inventarioModel extends mainModel
      */
     protected static function historial_movimientos_inventario_model($med_id, $su_id, $limit = 20)
     {
-        $sql = "
-            SELECT 
-                mi.mi_id,
-                mi.mi_tipo,
-                mi.mi_cantidad,
-                mi.mi_unidad,
-                mi.mi_referencia_tipo,
-                mi.mi_referencia_id,
-                mi.mi_motivo,
-                mi.mi_creado_en,
-                lm.lm_numero_lote,
-                u.us_nombres,
-                u.us_apellido_paterno
-            FROM movimiento_inventario mi
-            LEFT JOIN lote_medicamento lm ON lm.lm_id = mi.lm_id
-            LEFT JOIN usuarios u ON u.us_id = mi.us_id
-            WHERE mi.med_id = :med_id 
-            AND mi.su_id = :su_id
-            ORDER BY mi.mi_creado_en DESC
-            LIMIT :limit
-        ";
+        if ($su_id === null) {
+            // Vista agregada - mostrar movimientos de todas las sucursales
+            $sql = "
+                SELECT
+                    mi.mi_id,
+                    mi.mi_tipo,
+                    mi.mi_cantidad,
+                    mi.mi_unidad,
+                    mi.mi_referencia_tipo,
+                    mi.mi_referencia_id,
+                    mi.mi_motivo,
+                    mi.mi_creado_en,
+                    lm.lm_numero_lote,
+                    u.us_nombres,
+                    u.us_apellido_paterno,
+                    s.su_nombre as sucursal
+                FROM movimiento_inventario mi
+                INNER JOIN sucursales s ON s.su_id = mi.su_id
+                LEFT JOIN lote_medicamento lm ON lm.lm_id = mi.lm_id
+                LEFT JOIN usuarios u ON u.us_id = mi.us_id
+                WHERE mi.med_id = :med_id
+                ORDER BY mi.mi_creado_en DESC
+                LIMIT :limit
+            ";
 
-        $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
-        $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        } else {
+            // Vista por sucursal
+            $sql = "
+                SELECT
+                    mi.mi_id,
+                    mi.mi_tipo,
+                    mi.mi_cantidad,
+                    mi.mi_unidad,
+                    mi.mi_referencia_tipo,
+                    mi.mi_referencia_id,
+                    mi.mi_motivo,
+                    mi.mi_creado_en,
+                    lm.lm_numero_lote,
+                    u.us_nombres,
+                    u.us_apellido_paterno,
+                    s.su_nombre as sucursal
+                FROM movimiento_inventario mi
+                INNER JOIN sucursales s ON s.su_id = mi.su_id
+                LEFT JOIN lote_medicamento lm ON lm.lm_id = mi.lm_id
+                LEFT JOIN usuarios u ON u.us_id = mi.us_id
+                WHERE mi.med_id = :med_id
+                AND mi.su_id = :su_id
+                ORDER BY mi.mi_creado_en DESC
+                LIMIT :limit
+            ";
+
+            $stmt = mainModel::conectar()->prepare($sql);
+            $stmt->bindParam(':med_id', $med_id, PDO::PARAM_INT);
+            $stmt->bindParam(':su_id', $su_id, PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        }
+
         $stmt->execute();
         return $stmt;
     }

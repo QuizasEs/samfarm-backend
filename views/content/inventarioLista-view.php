@@ -253,7 +253,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalDetalleInventario')">Cerrar</button>
                 <?php if (isset($_SESSION['rol_smp']) && $_SESSION['rol_smp'] == 1) { ?>
-                <button type="button" class="btn btn-def" onclick="console.log('window.InventarioModals:', window.InventarioModals); if(typeof window.InventarioModals.abrirBalance === 'function') { window.InventarioModals.abrirBalance(); } else { console.error('window.InventarioModals.abrirBalance is not a function'); }">
+                <button type="button" class="btn btn-def" onclick="if(typeof window.InventarioModals.abrirBalance === 'function') { window.InventarioModals.abrirBalance(); } else { console.error('window.InventarioModals.abrirBalance is not a function'); }">
                     <ion-icon name="scale-outline"></ion-icon> Balance de Precios
                 </button>
                 <?php } ?>
@@ -356,7 +356,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--btn-warning)"></ion-icon>
                                     <div class="f1">
                                         <div class="th5" style="color:var(--btn-warning); font-weight:bold; font-size:19px">Atención</div>
-                                        <div class="tc" style="color:var(--btn-warning); font-weight:bold; font-size:16px">Este cambio afectará a TODOS los lotes activos de este medicamento en esta sucursal. Verifique los valores antes de guardar.</div>
+                                        <div class="tc" style="color:var(--btn-warning); font-weight:bold; font-size:16px">Este cambio afectará a TODOS los lotes activos de este medicamento en TODAS las sucursales. Verifique los valores antes de guardar.</div>
                                     </div>
                                 </div>
                             </div>
@@ -403,13 +403,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <th>Tipo</th>
                                     <th>Cantidad</th>
                                     <th>Lote</th>
+                                    <th>Sucursal</th>
                                     <th>Usuario</th>
                                     <th>Motivo</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaHistorialMovimientos">
                                 <tr>
-                                    <td colspan="6" class="txctr tmut">Cargando...</td>
+                                    <td colspan="7" class="txctr tmut">Cargando...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -518,8 +519,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 url += '&select4=' + encodeURIComponent(select4.value);
             }
 
-            console.log(' Generando Excel de inventario:', url);
-
             window.open(url, '_blank');
 
             Swal.fire({
@@ -560,8 +559,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             if (select4 && select4.value) {
                 url += '&select4=' + encodeURIComponent(select4.value);
             }
-
-            console.log(' Generando PDF de inventario:', url);
 
             window.open(url, '_blank');
 
@@ -764,11 +761,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         // Función para cargar datos del detalle de inventario
         async function cargarDetalleInventario(invId, medId, suId) {
             try {
+                // Convertir 'null' string a null
+                const suIdValue = suId === 'null' ? null : suId;
+
                 // Cargar información general
                 const formData1 = new FormData();
                 formData1.append('inventarioAjax', 'detalle_general');
                 formData1.append('med_id', medId);
-                formData1.append('su_id', suId);
+                formData1.append('su_id', suIdValue);
 
                 const response1 = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
                     method: 'POST',
@@ -790,7 +790,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const formData2 = new FormData();
                 formData2.append('inventarioAjax', 'lotes_disponibles');
                 formData2.append('med_id', medId);
-                formData2.append('su_id', suId);
+                formData2.append('su_id', suIdValue);
 
                 const response2 = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
                     method: 'POST',
@@ -800,9 +800,11 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 const data2 = await response2.json();
                 const tablaLotes = document.getElementById('tablaLotesDetalle');
                 if (data2 && data2.length > 0) {
+                    const esAgregado = suIdValue === null;
                     const filas = data2.map(lote => `
                         <tr>
                             <td>${lote.numero_lote || 'N/A'}</td>
+                            ${esAgregado ? `<td>${lote.sucursal || 'N/A'}</td>` : ''}
                             <td>${lote.cant_actual_unidades || 0}</td>
                             <td>Bs. ${lote.precio_venta || 0}</td>
                             <td>${lote.fecha_vencimiento || 'N/A'}</td>
@@ -810,8 +812,19 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </tr>
                     `).join('');
                     tablaLotes.innerHTML = filas;
+
+                    // Actualizar encabezado de la tabla si es necesario
+                    const thead = tablaLotes.closest('table').querySelector('thead tr');
+                    if (esAgregado && thead.children.length === 5) {
+                        const sucursalHeader = document.createElement('th');
+                        sucursalHeader.textContent = 'Sucursal';
+                        thead.insertBefore(sucursalHeader, thead.children[1]);
+                    } else if (!esAgregado && thead.children.length === 6) {
+                        thead.removeChild(thead.children[1]);
+                    }
                 } else {
-                    tablaLotes.innerHTML = '<tr><td colspan="5" class="txctr tmut">No hay lotes disponibles</td></tr>';
+                    const colspan = suIdValue === null ? 6 : 5;
+                    tablaLotes.innerHTML = `<tr><td colspan="${colspan}" class="txctr tmut">No hay lotes disponibles</td></tr>`;
                 }
 
             } catch (error) {
@@ -823,15 +836,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             'use strict';
 
             function abrirBalance() {
-                console.log('abrirBalance called');
                 const medId = document.getElementById('modalDetalleMedId').value;
                 const suId = document.getElementById('modalDetalleSuId').value;
                 const medicamento = document.getElementById('modalDetalleMedicamento').textContent;
                 const sucursal = document.getElementById('detalleSucursal').textContent;
 
-                console.log('medId:', medId, 'suId:', suId);
-                if (!medId || !suId) {
-                    console.error('medId or suId missing');
+                if (!medId) {
+                    console.error('medId missing');
                     Swal.fire('Error', 'No se pudo identificar el producto', 'error');
                     return;
                 }
@@ -847,7 +858,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 obtenerDatosActualesBalance(medId, suId);
 
                 // Abrir modal
-                console.log('Opening modal');
                 const modal = document.getElementById('modalBalanceInventario');
                 if (!modal) {
                     console.error('Modal modalBalanceInventario not found');
@@ -865,17 +875,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     const formData = new FormData();
                     formData.append('inventarioAjax', 'obtener_datos_balance');
                     formData.append('med_id', medId);
-                    formData.append('su_id', suId);
 
                     const response = await fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
                         method: 'POST',
                         body: formData
                     });
 
-                    console.log('Response status:', response.status, 'ok:', response.ok);
-
                     const text = await response.text();
-                    console.log('Raw response:', text);
 
                     if (!response.ok) {
                         console.error('Response not ok, text:', text);
@@ -883,7 +889,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     }
 
                     const data = JSON.parse(text);
-                    console.log('Parsed data:', data);
 
                     if (data.success) {
                         // Llenar campos con datos actuales
@@ -999,12 +1004,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
 
                 const formData = new FormData();
-                formData.append('inventarioAjax', 'guardar_configuracion');
+                formData.append('inventarioAjax', 'configurar');
                 formData.append('inv_id', invId);
                 formData.append('med_id', medId);
                 formData.append('su_id', suId);
-                formData.append('minimo', minimo);
-                formData.append('maximo', maximo);
+                formData.append('inv_minimo', minimo);
+                formData.append('inv_maximo', maximo);
 
                 fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
                         method: 'POST',
@@ -1012,15 +1017,15 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     })
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.Alerta === 'recargar') {
                             App.closeM('modalConfiguracionInventario');
-                            Swal.fire('Éxito', 'Configuración guardada', 'success');
+                            Swal.fire('Éxito', data.texto, 'success');
                             // Recargar tabla si es necesario
                             if (window.tableInstance) {
                                 window.tableInstance.reload();
                             }
                         } else {
-                            Swal.fire('Error', data.error || 'Error al guardar', 'error');
+                            Swal.fire('Error', data.texto || 'Error al guardar', 'error');
                         }
                     })
                     .catch(error => {
@@ -1034,8 +1039,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 guardarConfiguracion
             };
         })());
-
-        console.log('InventarioModals after assign:', InventarioModals);
 
         // Procesar parámetros de URL para filtros
         function procesarParametrosURL() {

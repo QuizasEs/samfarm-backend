@@ -37,7 +37,6 @@ if ($_SESSION['rol_smp'] == 1) {
                 <a href="<?php echo SERVER_URL ?>devolucionLista/" class="ni <?php echo $current_view == 'devolucionLista' ? 'ac' : ''; ?>" data-tip="Devoluciones"><ion-icon class="nic" name="repeat-outline"></ion-icon><span class="ntxt">Devoluciones</span></a>
                 <a href="<?php echo SERVER_URL ?>mermaRegistrar/" class="ni <?php echo $current_view == 'mermaRegistrar' ? 'ac' : ''; ?>" data-tip="Mermas"><ion-icon class="nic" name="warning-outline"></ion-icon><span class="ntxt">Mermas</span></a>
                 <a href="<?php echo SERVER_URL ?>clienteLista/" class="ni <?php echo $current_view == 'clienteLista' ? 'ac' : ''; ?>" data-tip="Clientes"><ion-icon class="nic" name="person-outline"></ion-icon><span class="ntxt">Clientes</span></a>
-                <a href="<?php echo SERVER_URL ?>preciosBalance/" class="ni <?php echo $current_view == 'preciosBalance' ? 'ac' : ''; ?>" data-tip="Balances"><ion-icon class="nic" name="calculator-outline"></ion-icon><span class="ntxt">Balances</span></a>
             </div>
             <div class="nsec">
                 <div class="nl">Catálogo e Inventario</div>
@@ -109,7 +108,10 @@ if ($_SESSION['rol_smp'] == 1) {
                         <ion-icon class="smd" name="swap-horizontal-outline"></ion-icon>Movimientos
                     </a>
                     <a href="<?php echo SERVER_URL ?>mermaLista/" class="smi <?php echo $current_view == 'mermaLista' ? 'ac' : ''; ?>">
-                        <ion-icon class="smd" name="warning-outline"></ion-icon>Merma
+                        <ion-icon class="smd" name="warning-outline"></ion-icon>Mermas
+                    </a>
+                    <a href="<?php echo SERVER_URL ?>preciosBalance/" class="smi <?php echo $current_view == 'mermaLista' ? 'ac' : ''; ?>">
+                        <ion-icon class="smd" name="warning-outline"></ion-icon>Balances
                     </a>
                 </div>
             </div>
@@ -148,7 +150,7 @@ if ($_SESSION['rol_smp'] == 1) {
         </a>
     </aside>
 
- <?php } elseif ($_SESSION['rol_smp'] == 2) {
+<?php } elseif ($_SESSION['rol_smp'] == 2) {
     $current_view = isset($_GET['views']) ? explode("/", $_GET['views'])[0] : '';
 
     // Fetch empresa config
@@ -203,7 +205,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     </a>
                 </div>
                 <!-- almacen -->
-                 <div class="ni <?php echo $is_alm ? 'open pac' : ''; ?>" id="nii" data-tip="Almacen" onclick="App.toggleSub('si_alm_v',this)">
+                <div class="ni <?php echo $is_alm ? 'open pac' : ''; ?>" id="nii" data-tip="Almacen" onclick="App.toggleSub('si_alm_v',this)">
                     <ion-icon class="nic" name="cube-outline"></ion-icon>
                     <span class="ntxt">Almacen</span>
                     <ion-icon class="narr" name="chevron-forward"></ion-icon>

@@ -14,11 +14,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 <div class="ptit">Informes de Cambios de Precios</div>
                 <div class="psub">Historial de modificaciones de precios por medicamento</div>
             </div>
-            <div class="tbr">
-                <a href="<?php echo SERVER_URL; ?>preciosLista" class="btn btn-def">
-                    <ion-icon name="arrow-back-outline"></ion-icon> Volver a Balance
-                </a>
-            </div>
+
         </div>
 
         <div class="card mb16">

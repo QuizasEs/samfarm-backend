@@ -173,15 +173,14 @@ if (isset($_POST['inventarioAjax'])) {
     /* ===== OBTENER DATOS PARA BALANCE ===== */
     if ($valor === "obtener_datos_balance") {
         $med_id = mainModel::limpiar_cadena($_POST['med_id']);
-        $su_id = mainModel::limpiar_cadena($_POST['su_id']);
 
-        if (empty($med_id) || empty($su_id)) {
+        if (empty($med_id)) {
             echo json_encode(['success' => false, 'error' => 'Datos incompletos']);
             exit();
         }
 
         // Obtener datos actuales de precios del medicamento en la sucursal
-        $resultado = $ins_inventario->obtener_datos_balance_controller($med_id, $su_id);
+        $resultado = $ins_inventario->obtener_datos_balance_controller($med_id);
         echo json_encode($resultado);
         exit();
     }
@@ -189,7 +188,6 @@ if (isset($_POST['inventarioAjax'])) {
     /* ===== APLICAR BALANCE DE PRECIOS ===== */
     if ($valor === "balance_precios") {
         $med_id = mainModel::limpiar_cadena($_POST['med_id']);
-        $su_id = mainModel::limpiar_cadena($_POST['su_id']);
         $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : null;
         $margen_u = isset($_POST['lm_margen_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u']) : null;
         $margen_c = isset($_POST['lm_margen_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c']) : null;
@@ -197,7 +195,7 @@ if (isset($_POST['inventarioAjax'])) {
         $precio_min_u = isset($_POST['lm_precio_min_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_u']) : null;
         $precio_min_c = isset($_POST['lm_precio_min_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_c']) : null;
 
-        if (empty($med_id) || empty($su_id)) {
+        if (empty($med_id)) {
             echo json_encode([
                 'Alerta' => 'simple',
                 'Titulo' => 'Datos incompletos',
@@ -207,7 +205,7 @@ if (isset($_POST['inventarioAjax'])) {
             exit();
         }
 
-        $resultado = $ins_inventario->balance_precios_controller($med_id, $su_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c);
+        $resultado = $ins_inventario->balance_precios_controller($med_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c);
         echo json_encode($resultado);
         exit();
     }

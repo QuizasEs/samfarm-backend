@@ -60,7 +60,7 @@ class inventarioController extends inventarioModel
         }
 
         if ($f2 !== '') {
-            $estados_validos = ['agotado', 'bajo', 'normal', 'exceso', 'sin_definir'];
+            $estados_validos = ['agotado', 'critico', 'bajo', 'normal', 'exceso', 'sin_definir'];
             if (in_array($f2, $estados_validos)) {
                 $filtros['estado'] = $f2;
             }
@@ -96,8 +96,8 @@ class inventarioController extends inventarioModel
 
         $Npaginas = ceil($total / $registros);
 
-        // Determinar si mostrar columna sucursal
-        $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f3));
+        // Determinar si es vista agregada (sin filtro de sucursal)
+        $es_vista_agregada = ($rol_usuario == 1 && empty($f3));
         $colspan_total = 5;
 
         /* ===== CONSTRUIR TABLA ===== */
@@ -106,9 +106,8 @@ class inventarioController extends inventarioModel
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>MEDICAMENTO</th>' .
-            ($mostrar_columna_sucursal ? '' : '') .
-            '<th>STOCK</th>
+                                 <th>MEDICAMENTO</th>
+                                <th>STOCK</th>
                                 <th>ESTADO</th>
                                 <th>DETALLES</th>
                                 <th>ACCIONES</th>
@@ -147,11 +146,11 @@ class inventarioController extends inventarioModel
                 }
 
                 $tabla .= '
-                        <tr class="tr-click" onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
+                        <tr class="tr-click" onclick="InventarioModals.verDetalle(' . $row['inv_id'] . ', ' . $row['med_id'] . ', ' . ($row['su_id'] ?: 'null') . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                             <td>
                                 <div class="td-main"><strong>' . htmlspecialchars($row['med_nombre_quimico']) . '</strong></div>
                                 <div class="td-sub">' . htmlspecialchars($row['med_principio_activo']) .
-                    ($mostrar_columna_sucursal ? ' · ' . htmlspecialchars($row['sucursal_nombre']) : '') . '</div>
+                    ($es_vista_agregada && $row['sucursal_nombre'] ? ' · ' . htmlspecialchars($row['sucursal_nombre']) : '') . '</div>
                             </td>
                             <td>
                                 <div class="td-main"><strong style="color:#1976D2;">' . number_format($row['inv_total_unidades']) . '</strong> unidades</div>
@@ -166,7 +165,7 @@ class inventarioController extends inventarioModel
                                 <div class="td-sub">Min: ' . number_format($row['inv_minimo'] ?? 0) . ' / Max: ' . ($row['inv_maximo'] !== null ? number_format($row['inv_maximo']) : 'Sin límite') . '</div>
                             </td>
                             <td class="buttons">
-                                ' . ($rol_usuario == 1 ? '
+                                ' . ($rol_usuario == 1 && $row['su_id'] !== null ? '
                                 <a href="javascript:void(0)"
                                 class="btn btn-douc"
                                 title="Configurar minimo y maximo"
@@ -177,7 +176,7 @@ class inventarioController extends inventarioModel
                                 <a href="javascript:void(0)"
                                 class="btn btn-out"
                                 title="Ver historial"
-                                onclick="event.stopPropagation(); InventarioModals.verHistorial(' . $row['med_id'] . ', ' . $row['su_id'] . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
+                                onclick="event.stopPropagation(); InventarioModals.verHistorial(' . $row['med_id'] . ', ' . ($row['su_id'] ?? 'null') . ', \'' . addslashes($row['med_nombre_quimico']) . '\')">
                                     <ion-icon name="time-outline"></ion-icon>
                                 </a>
                             </td>
@@ -230,7 +229,14 @@ class inventarioController extends inventarioModel
         $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
         $su_id = isset($_POST['su_id']) ? (int)$_POST['su_id'] : 0;
 
-        if ($inv_id <= 0 || $med_id <= 0 || $su_id <= 0) {
+        // Validar parámetros - para vista agregada, su_id puede ser 0 o null
+        if ($inv_id == 0 || $med_id <= 0) {
+            return json_encode(['error' => 'Parámetros inválidos']);
+        }
+
+        // Si inv_id es negativo, es vista agregada
+        $es_agregado = $inv_id < 0;
+        if (!$es_agregado && $su_id <= 0) {
             return json_encode(['error' => 'Parámetros inválidos']);
         }
 
@@ -243,8 +249,11 @@ class inventarioController extends inventarioModel
                 return json_encode(['error' => 'Inventario no encontrado']);
             }
 
+            // Para vista agregada, usar su_id = null para obtener lotes de todas las sucursales
+            $su_id_para_lotes = $es_agregado ? null : $su_id;
+
             // Obtener lotes activos
-            $lotesStmt = self::lotes_por_inventario_model($med_id, $su_id);
+            $lotesStmt = self::lotes_por_inventario_model($med_id, $su_id_para_lotes);
             $lotes = $lotesStmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Formatear lotes
@@ -256,6 +265,7 @@ class inventarioController extends inventarioModel
                     'vencimiento' => $lote['lm_fecha_vencimiento'],
                     'estado' => ucfirst($lote['lm_estado']),
                     'dias_vencer' => $lote['dias_para_vencer'],
+                    'sucursal' => $lote['sucursal'] ?? '',
                     'proveedor' => $lote['proveedor'] ?? 'Sin proveedor'
                 ];
             }, $lotes);
@@ -274,7 +284,8 @@ class inventarioController extends inventarioModel
                 'unidades' => $inv['inv_total_unidades'],
                 'valorado' => $inv['inv_total_valorado'],
                 'estado_html' => $estado_html,
-                'lotes' => $lotesFormateados
+                'lotes' => $lotesFormateados,
+                'es_agregado' => $es_agregado
             ];
 
             return json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -322,9 +333,16 @@ class inventarioController extends inventarioModel
     public function historial_movimientos_controller()
     {
         $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
-        $su_id = isset($_POST['su_id']) ? (int)$_POST['su_id'] : 0;
+        $su_id = isset($_POST['su_id']) ? $_POST['su_id'] : null;
 
-        if ($med_id <= 0 || $su_id <= 0) {
+        // Convertir string 'null' a null
+        if ($su_id === 'null') {
+            $su_id = null;
+        } elseif (is_numeric($su_id)) {
+            $su_id = (int)$su_id;
+        }
+
+        if ($med_id <= 0) {
             return json_encode(['error' => 'Parámetros inválidos']);
         }
 
@@ -339,6 +357,7 @@ class inventarioController extends inventarioModel
                     'cantidad' => $mov['mi_cantidad'],
                     'unidad' => $mov['mi_unidad'],
                     'lote' => $mov['lm_numero_lote'],
+                    'sucursal' => $mov['sucursal'] ?? '',
                     'usuario' => trim(($mov['us_nombres'] ?? '') . ' ' . ($mov['us_apellido_paterno'] ?? '')),
                     'motivo' => $mov['mi_motivo']
                 ];
@@ -654,7 +673,7 @@ class inventarioController extends inventarioModel
     }
 
     /* ===== OBTENER DATOS PARA BALANCE ===== */
-    public function obtener_datos_balance_controller($med_id, $su_id)
+    public function obtener_datos_balance_controller($med_id)
     {
         try {
             // Obtener datos actuales de precios desde un lote activo representativo
@@ -673,7 +692,6 @@ class inventarioController extends inventarioModel
                 LEFT JOIN medicamento m ON lm.med_id = m.med_id
                 LEFT JOIN proveedores mp ON m.pr_id = mp.pr_id
                 WHERE lm.med_id = :med_id
-                  AND lm.su_id = :su_id
                   AND lm.lm_estado = 'activo'
                   AND lm.lm_cant_actual_unidades > 0
                 ORDER BY lm.lm_fecha_ingreso DESC
@@ -681,7 +699,6 @@ class inventarioController extends inventarioModel
             ");
 
             $sql->bindParam(":med_id", $med_id);
-            $sql->bindParam(":su_id", $su_id);
             $sql->execute();
 
             if ($sql->rowCount() > 0) {
@@ -735,7 +752,7 @@ class inventarioController extends inventarioModel
     }
 
     /* ===== APLICAR BALANCE DE PRECIOS ===== */
-    public function balance_precios_controller($med_id, $su_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
+    public function balance_precios_controller($med_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
     {
         try {
             // Validar permisos
@@ -865,50 +882,101 @@ class inventarioController extends inventarioModel
     public function detalle_general_controller($med_id, $su_id)
     {
         try {
-            $sql = mainModel::conectar()->prepare("
-                SELECT
-                    i.inv_total_cajas,
-                    i.inv_total_unidades,
-                    i.inv_total_valorado,
-                    CASE
-                        WHEN i.inv_total_unidades <= 0 THEN 'agotado'
-                        WHEN i.inv_total_unidades <= (i.inv_minimo * 1.5) THEN 'critico'
-                        WHEN i.inv_total_unidades <= (i.inv_minimo * 3) THEN 'bajo'
-                        WHEN i.inv_total_unidades >= (i.inv_maximo * 0.9) THEN 'exceso'
-                        ELSE 'normal'
-                    END as estado,
-                    CASE
-                        WHEN i.inv_total_unidades <= 0 THEN '<span class=\"badge badge-error\">Agotado</span>'
-                        WHEN i.inv_total_unidades <= (i.inv_minimo * 1.5) THEN '<span class=\"badge badge-warning\">Crítico</span>'
-                        WHEN i.inv_total_unidades <= (i.inv_minimo * 3) THEN '<span class=\"badge badge-info\">Bajo</span>'
-                        WHEN i.inv_total_unidades >= (i.inv_maximo * 0.9) THEN '<span class=\"badge badge-purple\">Exceso</span>'
-                        ELSE '<span class=\"badge badge-success\">Normal</span>'
-                    END as estado_html,
-                    m.med_nombre_quimico as medicamento,
-                    m.med_presentacion,
-                    ff.ff_nombre as forma_farmaceutica,
-                    uf.uf_nombre as uso_farmacologico,
-                    p.pr_razon_social as laboral,
-                    s.su_nombre as sucursal
-                FROM inventarios i
-                LEFT JOIN medicamento m ON i.med_id = m.med_id
-                LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
-                LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
-                LEFT JOIN proveedores p ON m.pr_id = p.pr_id
-                LEFT JOIN sucursales s ON i.su_id = s.su_id
-                WHERE i.med_id = :med_id AND i.su_id = :su_id
-                LIMIT 1
-            ");
+            // Si su_id es null o 0, es vista agregada
+            if ($su_id === null || $su_id === 0) {
+                $sql = mainModel::conectar()->prepare("
+                    SELECT
+                        SUM(i.inv_total_cajas) as total_cajas,
+                        SUM(i.inv_total_unidades) as total_unidades,
+                        SUM(i.inv_total_valorado) as total_valorado,
+                        CASE
+                            WHEN SUM(i.inv_total_unidades) <= 0 THEN 'agotado'
+                            WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < MIN(i.inv_minimo) THEN 'critico'
+                            WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < (MIN(i.inv_minimo) * 1.5) THEN 'bajo'
+                            WHEN MAX(i.inv_maximo) > 0 AND SUM(i.inv_total_unidades) > MAX(i.inv_maximo) THEN 'exceso'
+                            ELSE 'normal'
+                        END as estado,
+                        CASE
+                            WHEN SUM(i.inv_total_unidades) <= 0 THEN '<span class=\"badge bdan\"><ion-icon name=\"close-circle-outline\"></ion-icon> AGOTADO</span>'
+                            WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < MIN(i.inv_minimo) THEN '<span class=\"badge bdan\"><ion-icon name=\"alert-circle-outline\"></ion-icon> CRÍTICO</span>'
+                            WHEN MIN(i.inv_minimo) > 0 AND SUM(i.inv_total_unidades) < (MIN(i.inv_minimo) * 1.5) THEN '<span class=\"badge bwar\"><ion-icon name=\"warning-outline\"></ion-icon> BAJO</span>'
+                            WHEN MAX(i.inv_maximo) > 0 AND SUM(i.inv_total_unidades) > MAX(i.inv_maximo) THEN '<span class=\"badge bdan\"><ion-icon name=\"trending-up-outline\"></ion-icon> EXCESO</span>'
+                            ELSE '<span class=\"badge bgr\"><ion-icon name=\"checkmark-circle-outline\"></ion-icon> NORMAL</span>'
+                        END as estado_html,
+                        m.med_nombre_quimico as medicamento,
+                        m.med_presentacion,
+                        ff.ff_nombre as forma_farmaceutica,
+                        uf.uf_nombre as uso_farmacologico,
+                        p.pr_razon_social as laboral,
+                        GROUP_CONCAT(DISTINCT s.su_nombre ORDER BY s.su_nombre SEPARATOR ', ') as sucursal
+                    FROM inventarios i
+                    LEFT JOIN medicamento m ON i.med_id = m.med_id
+                    LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
+                    LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
+                    LEFT JOIN proveedores p ON m.pr_id = p.pr_id
+                    LEFT JOIN sucursales s ON i.su_id = s.su_id
+                    WHERE i.med_id = :med_id
+                    GROUP BY m.med_id, m.med_nombre_quimico, m.med_presentacion,
+                             ff.ff_nombre, uf.uf_nombre, p.pr_razon_social
+                    LIMIT 1
+                ");
 
-            $sql->bindParam(":med_id", $med_id);
-            $sql->bindParam(":su_id", $su_id);
-            $sql->execute();
+                $sql->bindParam(":med_id", $med_id);
+                $sql->execute();
 
-            if ($sql->rowCount() > 0) {
-                $datos = $sql->fetch(PDO::FETCH_ASSOC);
-                return $datos;
+                if ($sql->rowCount() > 0) {
+                    $datos = $sql->fetch(PDO::FETCH_ASSOC);
+                    return $datos;
+                } else {
+                    return null;
+                }
             } else {
-                return null;
+                // Vista normal por sucursal
+                $sql = mainModel::conectar()->prepare("
+                    SELECT
+                        i.inv_total_cajas,
+                        i.inv_total_unidades,
+                        i.inv_total_valorado,
+                        CASE
+                            WHEN i.inv_total_unidades <= 0 THEN 'agotado'
+                            WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN 'critico'
+                            WHEN i.inv_minimo > 0 AND i.inv_total_unidades < (i.inv_minimo * 1.5) THEN 'bajo'
+                            WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN 'exceso'
+                            ELSE 'normal'
+                        END as estado,
+                        CASE
+                            WHEN i.inv_total_unidades <= 0 THEN '<span class=\"badge bdan\"><ion-icon name=\"close-circle-outline\"></ion-icon> AGOTADO</span>'
+                            WHEN i.inv_minimo > 0 AND i.inv_total_unidades < i.inv_minimo THEN '<span class=\"badge bdan\"><ion-icon name=\"alert-circle-outline\"></ion-icon> CRÍTICO</span>'
+                            WHEN i.inv_minimo > 0 AND i.inv_total_unidades < (i.inv_minimo * 1.5) THEN '<span class=\"badge bwar\"><ion-icon name=\"warning-outline\"></ion-icon> BAJO</span>'
+                            WHEN i.inv_maximo > 0 AND i.inv_total_unidades > i.inv_maximo THEN '<span class=\"badge bdan\"><ion-icon name=\"trending-up-outline\"></ion-icon> EXCESO</span>'
+                            ELSE '<span class=\"badge bgr\"><ion-icon name=\"checkmark-circle-outline\"></ion-icon> NORMAL</span>'
+                        END as estado_html,
+                        m.med_nombre_quimico as medicamento,
+                        m.med_presentacion,
+                        ff.ff_nombre as forma_farmaceutica,
+                        uf.uf_nombre as uso_farmacologico,
+                        p.pr_razon_social as laboral,
+                        s.su_nombre as sucursal
+                    FROM inventarios i
+                    LEFT JOIN medicamento m ON i.med_id = m.med_id
+                    LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
+                    LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
+                    LEFT JOIN proveedores p ON m.pr_id = p.pr_id
+                    LEFT JOIN sucursales s ON i.su_id = s.su_id
+                    WHERE i.med_id = :med_id AND i.su_id = :su_id
+                    LIMIT 1
+                ");
+
+                $sql->bindParam(":med_id", $med_id);
+                $sql->bindParam(":su_id", $su_id);
+                $sql->execute();
+
+                if ($sql->rowCount() > 0) {
+                    $datos = $sql->fetch(PDO::FETCH_ASSOC);
+                    return $datos;
+                } else {
+                    return null;
+                }
             }
         } catch (Exception $e) {
             error_log("Error obteniendo detalle general: " . $e->getMessage());
@@ -920,32 +988,65 @@ class inventarioController extends inventarioModel
     public function lotes_disponibles_controller($med_id, $su_id)
     {
         try {
-            $sql = mainModel::conectar()->prepare("
-                SELECT
-                    lm.lm_numero_lote,
-                    lm.lm_cant_actual_unidades,
-                    lm.lm_precio_venta,
-                    lm.lm_fecha_vencimiento,
-                    CASE
-                        WHEN lm.lm_estado = 'activo' THEN 'Activo'
-                        WHEN lm.lm_estado = 'en_espera' THEN 'En Espera'
-                        WHEN lm.lm_estado = 'terminado' THEN 'Terminado'
-                        WHEN lm.lm_estado = 'caducado' THEN 'Caducado'
-                        ELSE lm.lm_estado
-                    END as estado
-                FROM lote_medicamento lm
-                WHERE lm.med_id = :med_id
-                  AND lm.su_id = :su_id
-                  AND lm.lm_estado = 'activo'
-                  AND lm.lm_cant_actual_unidades > 0
-                ORDER BY lm.lm_fecha_vencimiento ASC
-            ");
+            // Si su_id es null o 0, mostrar lotes de todas las sucursales
+            if ($su_id === null || $su_id === 0) {
+                $sql = mainModel::conectar()->prepare("
+                    SELECT
+                        lm.lm_numero_lote,
+                        lm.lm_cant_actual_unidades,
+                        lm.lm_precio_venta,
+                        lm.lm_fecha_vencimiento,
+                        s.su_nombre as sucursal,
+                        CASE
+                            WHEN lm.lm_estado = 'activo' THEN 'Activo'
+                            WHEN lm.lm_estado = 'en_espera' THEN 'En Espera'
+                            WHEN lm.lm_estado = 'terminado' THEN 'Terminado'
+                            WHEN lm.lm_estado = 'caducado' THEN 'Caducado'
+                            ELSE lm.lm_estado
+                        END as estado
+                    FROM lote_medicamento lm
+                    INNER JOIN sucursales s ON lm.su_id = s.su_id
+                    WHERE lm.med_id = :med_id
+                      AND lm.lm_estado = 'activo'
+                      AND lm.lm_cant_actual_unidades > 0
+                    ORDER BY s.su_nombre, lm.lm_fecha_vencimiento ASC
+                ");
 
-            $sql->bindParam(":med_id", $med_id);
-            $sql->bindParam(":su_id", $su_id);
-            $sql->execute();
+                $sql->bindParam(":med_id", $med_id);
+                $sql->execute();
 
-            return $sql->fetchAll(PDO::FETCH_ASSOC);
+                return $sql->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                // Vista normal por sucursal
+                $sql = mainModel::conectar()->prepare("
+                    SELECT
+                        lm.lm_numero_lote,
+                        lm.lm_cant_actual_unidades,
+                        lm.lm_precio_venta,
+                        lm.lm_fecha_vencimiento,
+                        s.su_nombre as sucursal,
+                        CASE
+                            WHEN lm.lm_estado = 'activo' THEN 'Activo'
+                            WHEN lm.lm_estado = 'en_espera' THEN 'En Espera'
+                            WHEN lm.lm_estado = 'terminado' THEN 'Terminado'
+                            WHEN lm.lm_estado = 'caducado' THEN 'Caducado'
+                            ELSE lm.lm_estado
+                        END as estado
+                    FROM lote_medicamento lm
+                    INNER JOIN sucursales s ON lm.su_id = s.su_id
+                    WHERE lm.med_id = :med_id
+                      AND lm.su_id = :su_id
+                      AND lm.lm_estado = 'activo'
+                      AND lm.lm_cant_actual_unidades > 0
+                    ORDER BY lm.lm_fecha_vencimiento ASC
+                ");
+
+                $sql->bindParam(":med_id", $med_id);
+                $sql->bindParam(":su_id", $su_id);
+                $sql->execute();
+
+                return $sql->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (Exception $e) {
             error_log("Error obteniendo lotes disponibles: " . $e->getMessage());
             return [];

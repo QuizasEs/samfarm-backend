@@ -38,7 +38,6 @@
                 "mermaRevision",
                 "perfilEditar",
                 "empresaEditar",
-                "preciosLista",
                 "preciosBalance",
                 "cajaLista",
                 "cajaHistorialTotales",

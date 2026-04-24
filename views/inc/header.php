@@ -4,6 +4,52 @@
         <ion-icon name="menu-outline" id="sbIcon"></ion-icon>
     </button>
 
+    <?php
+    $current_view = isset($_GET['views']) ? explode("/", $_GET['views'])[0] : '';
+
+    $page_titles = [
+        // Operaciones Principales
+        'dashboard' => 'Inicio',
+        'caja' => 'Ventas',
+        'compraOrden' => 'Registrar Compra',
+        'devolucionLista' => 'Devoluciones',
+        'mermaRegistrar' => 'Mermas',
+        'clienteLista' => 'Clientes',
+
+        // Catálogo
+        'medicamentoLista' => 'Medicamentos',
+        'categoriaLista' => 'Categorías',
+
+        // Almacén
+        'loteLista' => 'Lotes',
+        'inventarioLista' => 'Inventario',
+        'ajusteInventarioCompleto' => 'Ajuste de Inventario',
+        'proveedorLista' => 'Proveedores',
+        'transferirLista' => 'Transferencias',
+        'recepcionarLista' => 'Recepcionar',
+
+        // Reportes
+        'ventasHistorialLista' => 'Historial de Ventas',
+        'cajaHistorialLista' => 'Historial de Caja',
+        'cajaHistorialTotales' => 'Cajas Cerradas',
+        'comprasHistorialLista' => 'Historial de Compras',
+        'transferirHistorialLista' => 'Movimientos de Inventario',
+        'mermaLista' => 'Mermas',
+        'preciosBalance' => 'Balances de Precios',
+
+        // Configuración
+        'usuarioLista' => 'Usuarios',
+        'sucursalLista' => 'Sucursales',
+        'cajaLista' => 'Gestión de Cajas',
+        'empresaEditar' => 'Configuración de Empresa',
+
+        // Perfil
+        'perfilEditar' => 'Editar Perfil',
+    ];
+
+    $page_title = isset($page_titles[$current_view]) ? $page_titles[$current_view] : 'SamFarm';
+    ?>
+
     <div class="bc">
         <a href="<?php echo SERVER_URL ?>dashboard/" class="link">Inicio</a>
         <span class="sep">/</span>
