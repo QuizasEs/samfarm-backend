@@ -297,7 +297,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
 
                 <div class="fr2">
                     <div class="fg">
-                        <div id="graficoVentasSucursal" style="width:100%;height:300px;background:#f9f9f9;border-radius:8px;"></div>
+                        <div id="graficoVentasSucursal" style="width:100%;height:300px;background:var(--bg-primary);border-radius:8px;"></div>
                     </div>
                     <div class="fg">
                         <div class="statc">
@@ -390,7 +390,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 });
 
                 try {
-                    console.log('Solicitando datos para período:', periodo);
+                    
 
                     const response = await fetch(API_URL, {
                         method: 'POST',
@@ -404,7 +404,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                     });
 
                     const data = await response.json();
-                    console.log('Datos recibidos:', data);
+                    
 
                     chart.hideLoading();
 
@@ -884,6 +884,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
                 if (!container) return;
 
                 const chart = echarts.init(container);
+                chart.clear();
 
                 if (!ventasUsuarios || ventasUsuarios.length === 0) {
                     chart.setOption({

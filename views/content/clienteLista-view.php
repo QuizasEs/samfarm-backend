@@ -301,7 +301,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </div>
 
                 <div class="stit">Estadísticas de Compra</div>
-                <div class="grid5">
+                <div class="fr3">
                     <div class="statc">
                         <div class="siw gr"><ion-icon name="cart-outline"></ion-icon></div>
                         <div>
@@ -711,7 +711,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             },
                             legend: {
                                 data: ['Cantidad de Compras', 'Monto Total (Bs.)'],
-                                top: 20,
+                                top: 220,
                                 textStyle: {
                                     fontSize: 12
                                 }

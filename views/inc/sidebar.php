@@ -23,7 +23,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub">Sistema</div>
+                <div class="lsub">Version: 1.2.0</div>
             </div>
         </div>
 
@@ -83,7 +83,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     </a>
                 </div>
             </div>
-            <?php $is_rep = in_array($current_view, ['ventasHistorialLista', 'cajaHistorialLista', 'cajaHistorialTotales', 'comprasHistorialLista', 'transferirHistorialLista', 'mermaLista']); ?>
+            <?php $is_rep = in_array($current_view, ['ventasHistorialLista', 'cajaHistorialLista', 'cajaHistorialTotales', 'comprasHistorialLista', 'transferirHistorialLista', 'mermaLista', 'preciosBalance']); ?>
             <div class="nsec">
                 <div class="nl">Reportes</div>
                 <div class="ni <?php echo $is_rep ? 'open pac' : ''; ?>" id="nii" data-tip="Reportes" onclick="App.toggleSub('si_rep',this)">
@@ -110,7 +110,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     <a href="<?php echo SERVER_URL ?>mermaLista/" class="smi <?php echo $current_view == 'mermaLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="warning-outline"></ion-icon>Mermas
                     </a>
-                    <a href="<?php echo SERVER_URL ?>preciosBalance/" class="smi <?php echo $current_view == 'mermaLista' ? 'ac' : ''; ?>">
+                    <a href="<?php echo SERVER_URL ?>preciosBalance/" class="smi <?php echo $current_view == 'preciosBalance' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="warning-outline"></ion-icon>Balances
                     </a>
                 </div>

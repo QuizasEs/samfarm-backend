@@ -21,14 +21,14 @@
                 <div class="sf-login-group">
                     <label class="sf-login-label">Nombre de Usuario</label>
                     <div class="sf-login-input-wrapper">
-                        <input type="text" name="Usuario_log" class="sf-login-input" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}" maxlength="100" placeholder="Tu usuario" required>
+                        <input class="inp" type="text" name="Usuario_log" class="sf-login-input" pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]{3,100}" maxlength="100" placeholder="Tu usuario" required>
                     </div>
                 </div>
                 
                 <div class="sf-login-group">
                     <label class="sf-login-label">Contraseña</label>
                     <div class="sf-login-input-wrapper">
-                        <input type="password" name="Password_log" class="sf-login-input" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ0-9@$!%*?&._#\]{3,100}" maxlength="100" placeholder="Tu contraseña" required>
+                        <input class="inp" type="password" name="Password_log" class="sf-login-input" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ0-9@$!%*?&._#\]{3,100}" maxlength="100" placeholder="Tu contraseña" required>
                     </div>
                 </div>
                 

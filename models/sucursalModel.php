@@ -379,8 +379,8 @@ class sucursalModel extends mainModel
                 COALESCE(SUM(v.ve_total), 0) AS total_ingresos,
                 (COALESCE(SUM(v.ve_total), 0) - COALESCE(SUM(c.co_total), 0)) AS beneficio_neto
             FROM sucursales s
-            LEFT JOIN compras c ON c.su_id = s.su_id 
-                AND c.co_fecha >= DATE_SUB(NOW(), INTERVAL :meses MONTH)
+            LEFT JOIN compras c ON c.su_id = s.su_id
+                AND c.co_creado_en >= DATE_SUB(NOW(), INTERVAL :meses MONTH)
                 AND c.co_estado = 1
             LEFT JOIN ventas v ON v.su_id = s.su_id 
                 AND v.ve_fecha_emision >= DATE_SUB(NOW(), INTERVAL :meses MONTH)

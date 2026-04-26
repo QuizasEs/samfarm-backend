@@ -103,7 +103,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
     <!-- Modal Detalle de Venta -->
     <div id="modalDetalleVenta" class="mov">
-        <div class="modal mlg">
+        <div class="modal mxl">
             <div class="mh">
                 <div>
                     <div class="mt">

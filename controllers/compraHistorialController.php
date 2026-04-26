@@ -62,8 +62,8 @@ class compraHistorialController extends compraHistorialModel
 
 
 
-        if ($f4 !== '' && is_numeric($f4)) {
-            $filtros['usuario'] = (int)$f4;
+        if ($f2 !== '' && is_numeric($f2)) {
+            $filtros['usuario'] = (int)$f2;
         }
 
         if ($f5 !== '') {

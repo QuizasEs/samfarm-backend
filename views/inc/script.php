@@ -1522,24 +1522,49 @@
 
         // metodo para clamp descuento (similar a clampMargen)
         clampDescuento(input) {
-            let valor = parseFloat(input.value);
-            if (isNaN(valor) || valor < 0) {
-                input.value = '0.00';
-            } else if (valor > 100) {
-                input.value = '100.00';
-            } else if (input.value.includes('.')) {
-                let parts = input.value.split('.');
-                if (parts[1].length > 2) {
-                    input.value = parts[0] + '.' + parts[1].substring(0, 2);
-                }
+            let value = input.value;
+            
+            // Permitir vacío para que el usuario pueda borrar todo
+            if (value === "") return;
+
+            // Eliminar cualquier caracter que no sea número o punto
+            value = value.replace(/[^0-9.]/g, "");
+
+            // Asegurar solo un punto decimal
+            const parts = value.split(".");
+            if (parts.length > 2) {
+                value = parts[0] + "." + parts.slice(1).join("").replace(/\./g, "");
+            }
+
+            // Limitar a 2 decimales
+            if (parts.length > 1 && parts[1].length > 2) {
+                value = parts[0] + "." + parts[1].substring(0, 2);
+            }
+
+            // Evitar que el 0 inicial interfiera con otros números, a menos que sea 0.
+            if (value.length > 1 && value.startsWith("0") && value[1] !== ".") {
+                value = value.substring(1);
+            }
+
+            // No superar el límite de 100
+            if (parseFloat(value) > 100) {
+                value = "100";
+            }
+
+            if (input.value !== value) {
+                input.value = value;
             }
         }
 
         // metodo para validar descuento
         validarDescuento(input) {
-            this.clampDescuento(input);
             let valor = parseFloat(input.value);
-            input.value = valor.toFixed(2);
+            if (isNaN(valor) || valor < 0) {
+                input.value = "0.00";
+            } else {
+                if (valor > 100) valor = 100;
+                input.value = valor.toFixed(2);
+            }
         }
 
         // metodo para establecer descuento por indice

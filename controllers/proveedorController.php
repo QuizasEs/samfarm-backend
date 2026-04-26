@@ -44,14 +44,13 @@ class proveedorController extends proveedorModel
             $filtros['estado'] = $f1;
         }
 
-        // Los filtros de compras están temporalmente deshabilitados hasta implementar la relación compras-proveedores
-        // if ($f2 !== '') {
-        //     $filtros['con_compras'] = $f2;
-        // }
+        if ($f2 !== '') {
+            $filtros['con_compras'] = $f2;
+        }
 
-        // if ($f3 !== '') {
-        //     $filtros['ultima_compra'] = $f3;
-        // }
+        if ($f3 !== '') {
+            $filtros['ultima_compra'] = $f3;
+        }
 
         $fecha_desde = isset($_POST['fecha_desde']) ? mainModel::limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? mainModel::limpiar_cadena($_POST['fecha_hasta']) : '';
