@@ -217,14 +217,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="hidden" name="proveedoresAjax" value="registrar">
 
                     <div class="fg">
-                        <label class="fl req">Nombres / Razón Social</label>
-                        <input class="inp" type="text" name="Nombres_pr" id="registroNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
+                        <label class="fl required">Nombres / Razón Social</label>
+                        <input class="inp" type="text" name="Nombres_pr" id="registroNombres"  maxlength="100" requireduired>
                     </div>
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">NIT</label>
-                            <input class="inp" type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,30}" maxlength="30" required>
+                            <label class="fl required">NIT</label>
+                            <input class="inp" type="text" name="Nit_pr" id="registroNit" pattern="[0-9]{6,30}" maxlength="30" requireduired>
                         </div>
                         <div class="fg">
                             <label class="fl">Teléfono</label>
@@ -273,14 +273,14 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="hidden" name="PrId_up" id="edicionPrId">
 
                     <div class="fg">
-                        <label class="fl req">Nombres / Razón Social</label>
-                        <input class="inp" type="text" name="Nombres_pr_up" id="edicionNombres" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,120}" maxlength="120" required>
+                        <label class="fl required">Nombres / Razón Social</label>
+                        <input class="inp" type="text" name="Nombres_pr_up" id="edicionNombres"  maxlength="120" requireduired>
                     </div>
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">NIT</label>
-                            <input class="inp" type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,30}" maxlength="30" required>
+                            <label class="fl required">NIT</label>
+                            <input class="inp" type="text" name="Nit_pr_up" id="edicionNit" pattern="[0-9]{6,30}" maxlength="30" requireduired>
                         </div>
                         <div class="fg">
                             <label class="fl">Teléfono</label>

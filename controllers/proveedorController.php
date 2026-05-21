@@ -316,16 +316,7 @@ class proveedorController extends proveedorModel
             exit();
         }
         /* verificar la integridad de los datos  */
-        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
-            $alerta = [
-                "Alerta" => "simple",
-                "Titulo" => "ocurrio un error inesperado",
-                "texto" => "El NOMBRE no coincide con el formato solicitado!",
-                "Tipo" => "error"
-            ];
-            echo json_encode($alerta);
-            exit();
-        };
+        
         if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
             $alerta = [
                 "Alerta" => "simple",
@@ -445,16 +436,7 @@ class proveedorController extends proveedorModel
         }
 
         /* verificar la integridad de los datos  */
-        if (mainModel::verificar_datos("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}", $nombres)) {
-            $alerta = [
-                "Alerta" => "simple",
-                "Titulo" => "ocurrio un error inesperado",
-                "texto" => "El NOMBRE no coincide con el formato solicitado!",
-                "Tipo" => "error"
-            ];
-            echo json_encode($alerta);
-            exit();
-        };
+        
         if (mainModel::verificar_datos("[0-9]{6,30}", $nit)) {
             $alerta = [
                 "Alerta" => "simple",

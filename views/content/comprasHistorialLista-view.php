@@ -252,9 +252,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             <div class="mf">
                 <button class="btn btn-war" onclick="ComprasHistorialModals.cerrar('modalDetalleCompra')">Cerrar</button>
-                <button class="btn btn-def" onclick="ComprasHistorialModals.imprimirPDF()" id="btnImprimirPDF">
-                    <ion-icon name="print-outline"></ion-icon> Imprimir PDF
-                </button>
+
             </div>
         </div>
     </div>
@@ -388,45 +386,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 }
             };
 
-            async function imprimirPDF() {
-                const coId = document.getElementById('modalCompraId').value;
-                if (!coId) {
-                    Swal.fire('Error', 'No se ha podido obtener el ID de la compra.', 'error');
-                    return;
-                }
 
-                Swal.fire({
-                    title: 'Generando PDF...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
-
-                try {
-                    const data = await utils.ajax({
-                        comprasHistorialAjax: 'exportar_pdf_detalle',
-                        co_id: coId
-                    });
-
-                    Swal.close();
-
-                    if (data.success && data.pdf_base64) {
-                        window.abrirPDFDesdeBase64(data.pdf_base64, `Compra_${coId}.pdf`);
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'PDF generado',
-                            text: 'El PDF se ha abierto en una nueva ventana',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire('Error', 'No se pudo generar el PDF', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'No se pudo generar el PDF', 'error');
-                }
-            }
 
             async function cargarGrafico() {
                 const graficoContainer = document.getElementById('grafico-compras-periodo');
@@ -666,8 +626,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             return {
                 cerrar: utils.cerrar,
-                verDetalle: detalle.abrir,
-                imprimirPDF: imprimirPDF
+                verDetalle: detalle.abrir
             };
         })();
     </script>

@@ -34,20 +34,20 @@ class compraHistorialModel extends mainModel
             $estado = $filtros['estado_lotes'];
             if ($estado === 'pendientes') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             } elseif ($estado === 'activos') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'activo'
                 )";
             } elseif ($estado === 'completado') {
                 $whereParts[] = "NOT EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             }
@@ -63,8 +63,8 @@ class compraHistorialModel extends mainModel
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre,
                 (SELECT COUNT(*) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS total_items,
-                (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id) AS total_lotes,
-                (SELECT COUNT(*) FROM lote_medicamento lm WHERE lm.pr_id_compra = c.co_id AND lm.lm_estado = 'en_espera') AS lotes_pendientes
+                (SELECT COUNT(DISTINCT lm.lm_id) FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id WHERE dc.co_id = c.co_id) AS total_lotes,
+                (SELECT COUNT(DISTINCT lm.lm_id) FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id WHERE dc.co_id = c.co_id AND lm.lm_estado = 'en_espera') AS lotes_pendientes
             FROM compras c
             INNER JOIN sucursales s ON c.su_id = s.su_id
             INNER JOIN usuarios u ON c.us_id = u.us_id
@@ -105,20 +105,20 @@ class compraHistorialModel extends mainModel
             $estado = $filtros['estado_lotes'];
             if ($estado === 'pendientes') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             } elseif ($estado === 'activos') {
                 $whereParts[] = "EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'activo'
                 )";
             } elseif ($estado === 'completado') {
                 $whereParts[] = "NOT EXISTS (
-                    SELECT 1 FROM lote_medicamento lm
-                    WHERE lm.pr_id_compra = c.co_id
+                    SELECT 1 FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+                    WHERE dc.co_id = c.co_id
                     AND lm.lm_estado = 'en_espera'
                 )";
             }
@@ -178,12 +178,12 @@ class compraHistorialModel extends mainModel
 
     protected static function resumen_lotes_compra_model($co_id)
     {
-        $sql = "SELECT 
-                COUNT(*) as total_lotes,
-                SUM(CASE WHEN lm_estado = 'activo' THEN 1 ELSE 0 END) as lotes_activos,
-                SUM(CASE WHEN lm_estado = 'en_espera' THEN 1 ELSE 0 END) as lotes_espera
-            FROM lote_medicamento
-            WHERE pr_id_compra = :co_id";
+        $sql = "SELECT
+                COUNT(DISTINCT lm.lm_id) as total_lotes,
+                SUM(CASE WHEN lm.lm_estado = 'activo' THEN 1 ELSE 0 END) as lotes_activos,
+                SUM(CASE WHEN lm.lm_estado = 'en_espera' THEN 1 ELSE 0 END) as lotes_espera
+            FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id
+            WHERE dc.co_id = :co_id";
 
         $conexion = mainModel::conectar();
         $stmt = $conexion->prepare($sql);

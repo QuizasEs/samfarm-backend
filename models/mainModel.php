@@ -10,7 +10,7 @@ if ($peticionAjax) {
 class mainModel
 {
 
-    /* ------------------funcion de conexion a la base de datos usandos variables de SERVER.php ----------------*/
+    
     // Variable estática para guardar la conexión
     private static $conexion = null;
 

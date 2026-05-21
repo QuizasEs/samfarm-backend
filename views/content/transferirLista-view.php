@@ -678,13 +678,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
             document.addEventListener('DOMContentLoaded', init);
 
-            document.addEventListener('click', (e) => {
-                const modal = document.getElementById('modal-agregar-item-transfer');
-                if (e.target === modal) {
-                    cerrarModalAgregar();
-                }
-            });
-
             return {
                 abrirModalAgregar,
                 cerrarModalAgregar,

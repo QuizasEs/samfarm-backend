@@ -218,7 +218,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <style>
             /* Estilos para la lista de lotes en compra */
             .lote-card {
-                border: 1px solid #ddd;
+                border: 1px solid   var(--bg-secondary);
                 border-radius: 8px;
                 margin-bottom: 15px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -226,9 +226,9 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 overflow: hidden;
             }
             .lote-card-header {
-                background-color: #f8f9fa;
+                background-color: var(--bg-primary);
                 padding: 15px;
-                border-bottom: 1px solid #eee;
+                border-bottom: 1px solid var(--bg-secondary);
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-start;

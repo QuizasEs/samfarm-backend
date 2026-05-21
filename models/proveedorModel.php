@@ -17,15 +17,14 @@ class proveedorModel extends mainModel
                         p.pr_creado_en,
                         p.pr_estado,
 
-                        COALESCE(COUNT(DISTINCT c.co_id), 0) AS total_compras,
-                        COALESCE(SUM(c.co_total), 0) AS monto_total_compras,
-                        MAX(c.co_creado_en) AS ultima_compra,
+                        COUNT(DISTINCT lm.lm_id) AS total_compras,
+                        0 AS monto_total_compras,
+                        MAX(lm.lm_fecha_ingreso) AS ultima_compra,
                         COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
-                        DATEDIFF(NOW(), MAX(c.co_creado_en)) AS dias_ultima_compra
+                        DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) AS dias_ultima_compra
 
                     FROM proveedores p
                     LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
-                    LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
                     WHERE 1=1
                 ";
 
@@ -62,26 +61,34 @@ class proveedorModel extends mainModel
 
         $sql .= " GROUP BY p.pr_id";
 
+        $having = "";
         if (!empty($filtros['con_compras'])) {
             if ($filtros['con_compras'] === 'con_compras') {
-                $sql .= " HAVING total_compras > 0";
+                $having .= "total_compras > 0";
             } elseif ($filtros['con_compras'] === 'sin_compras') {
-                $sql .= " HAVING total_compras = 0";
+                $having .= "total_compras = 0";
             }
         }
 
         if (!empty($filtros['ultima_compra'])) {
-            if ($filtros['ultima_compra'] === '7') {
-                $sql .= " HAVING dias_ultima_compra <= 7";
-            } elseif ($filtros['ultima_compra'] === '30') {
-                $sql .= " HAVING dias_ultima_compra <= 30";
-            } elseif ($filtros['ultima_compra'] === '90') {
-                $sql .= " HAVING dias_ultima_compra <= 90";
-            } elseif ($filtros['ultima_compra'] === 'mas_90') {
-                $sql .= " HAVING dias_ultima_compra > 90";
-            } elseif ($filtros['ultima_compra'] === 'nunca') {
-                $sql .= " HAVING ultima_compra IS NULL";
+            if ($having !== "") {
+                $having .= " AND ";
             }
+            if ($filtros['ultima_compra'] === '7') {
+                $having .= "dias_ultima_compra <= 7";
+            } elseif ($filtros['ultima_compra'] === '30') {
+                $having .= "dias_ultima_compra <= 30";
+            } elseif ($filtros['ultima_compra'] === '90') {
+                $having .= "dias_ultima_compra <= 90";
+            } elseif ($filtros['ultima_compra'] === 'mas_90') {
+                $having .= "dias_ultima_compra > 90";
+            } elseif ($filtros['ultima_compra'] === 'nunca') {
+                $having .= "ultima_compra IS NULL";
+            }
+        }
+
+        if ($having !== "") {
+            $sql .= " HAVING $having";
         }
 
         $sql .= " ORDER BY p.pr_razon_social ASC";
@@ -108,7 +115,6 @@ class proveedorModel extends mainModel
                         SELECT p.pr_id
                         FROM proveedores p
                         LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
-                        LEFT JOIN compras c ON c.pr_id = p.pr_id AND c.co_estado = 1
                         WHERE 1=1
                     ";
 
@@ -145,30 +151,34 @@ class proveedorModel extends mainModel
 
         $sql .= " GROUP BY p.pr_id";
 
+        $having = "";
         if (!empty($filtros['con_compras'])) {
             if ($filtros['con_compras'] === 'con_compras') {
-                $sql .= " HAVING COALESCE(COUNT(DISTINCT c.co_id), 0) > 0";
+                $having .= "COALESCE(COUNT(DISTINCT lm.lm_id), 0) > 0";
             } elseif ($filtros['con_compras'] === 'sin_compras') {
-                $sql .= " HAVING COALESCE(COUNT(DISTINCT c.co_id), 0) = 0";
+                $having .= "COALESCE(COUNT(DISTINCT lm.lm_id), 0) = 0";
             }
         }
 
         if (!empty($filtros['ultima_compra'])) {
-            $having_condition = "";
+            if ($having !== "") {
+                $having .= " AND ";
+            }
             if ($filtros['ultima_compra'] === '7') {
-                $having_condition = "DATEDIFF(NOW(), MAX(c.co_creado_en)) <= 7";
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 7";
             } elseif ($filtros['ultima_compra'] === '30') {
-                $having_condition = "DATEDIFF(NOW(), MAX(c.co_creado_en)) <= 30";
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 30";
             } elseif ($filtros['ultima_compra'] === '90') {
-                $having_condition = "DATEDIFF(NOW(), MAX(c.co_creado_en)) <= 90";
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 90";
             } elseif ($filtros['ultima_compra'] === 'mas_90') {
-                $having_condition = "DATEDIFF(NOW(), MAX(c.co_creado_en)) > 90";
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) > 90";
             } elseif ($filtros['ultima_compra'] === 'nunca') {
-                $having_condition = "MAX(c.co_creado_en) IS NULL";
+                $having .= "MAX(lm.lm_fecha_ingreso) IS NULL";
             }
-            if (!empty($having_condition)) {
-                $sql .= (!empty($filtros['con_compras']) ? " AND " : " HAVING ") . $having_condition;
-            }
+        }
+
+        if ($having !== "") {
+            $sql .= " HAVING $having";
         }
 
         $sql .= ") AS subquery";
