@@ -16,7 +16,7 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel
     }
 
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
-    if ($rol_usuario == 3) {
+    if (!in_array($rol_usuario, [1, 2])) {
         echo "No tiene permisos para exportar inventario.";
         exit();
     }
@@ -39,7 +39,7 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_pdf")
     }
 
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
-    if ($rol_usuario == 3) {
+    if (!in_array($rol_usuario, [1, 2])) {
         echo "No tiene permisos para exportar inventario.";
         exit();
     }

@@ -140,12 +140,12 @@ if (isset($_POST['cajaHistorialAjax'])) {
     }
 
     if ($valor === "obtener_referencia") {
-        echo $ins_historial->obtener_referencia_movimiento_controller();
+         $ins_historial->obtener_referencia_movimiento_controller();
         exit();
     }
 
     if ($valor === "exportar_movimiento_pdf") {
-        echo $ins_historial->exportar_movimiento_individual_pdf_controller();
+         $ins_historial->exportar_movimiento_individual_pdf_controller();
         exit();
     }
 } else {

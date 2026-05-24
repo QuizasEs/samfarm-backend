@@ -52,7 +52,8 @@ if (isset($_POST['compraAjax'])) {
             'termino' => $_POST['termino'] ?? '',
             'forma' => $_POST['forma'] ?? '',
             'via' => $_POST['via'] ?? '',
-            'uso' => $_POST['uso'] ?? ''
+            'uso' => $_POST['uso'] ?? '',
+            'proveedor' => $_POST['proveedor'] ?? ''
         ];
         $resultados = $ins_compra->buscar_medicamento_controller($filtros);
         echo json_encode($resultados->fetchAll(PDO::FETCH_ASSOC));

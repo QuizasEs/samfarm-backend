@@ -42,6 +42,6 @@
     if(isset($_POST['Usuario_log']) && isset($_POST['Password_log'])){
         require_once "./controllers/loginController.php";
         $ins_login = new loginController();
-        echo $ins_login->iniciar_sesion_controller();
+        $ins_login->iniciar_sesion_controller();
     }
 ?>

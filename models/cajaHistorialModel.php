@@ -36,7 +36,8 @@ class cajaHistorialModel extends mainModel
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
                 mc.mc_concepto LIKE :busqueda OR
-                CONCAT(mc.mc_referencia_tipo, ' #', mc.mc_referencia_id) LIKE :busqueda
+                CONCAT(mc.mc_referencia_tipo, ' #', mc.mc_referencia_id) LIKE :busqueda OR
+                u.us_username LIKE :busqueda
             )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }
@@ -103,7 +104,8 @@ class cajaHistorialModel extends mainModel
         if (!empty($filtros['busqueda'])) {
             $sql .= " AND (
                 mc.mc_concepto LIKE :busqueda OR
-                CONCAT(mc.mc_referencia_tipo, ' #', mc.mc_referencia_id) LIKE :busqueda
+                CONCAT(mc.mc_referencia_tipo, ' #', mc.mc_referencia_id) LIKE :busqueda OR
+                u.us_username LIKE :busqueda
             )";
             $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
         }

@@ -443,7 +443,7 @@ class inventarioController extends inventarioModel
             ];
 
             mainModel::generar_excel_reporte([
-                'titulo' => 'REPORTE DE INVENTARIO POR LOTES',
+                'titulo' => 'REPORTE DE INVENTARIO POR PRODUCTO',
                 'datos' => $datos,
                 'headers' => $headers,
                 'nombre_archivo' => $filename,
@@ -603,7 +603,7 @@ class inventarioController extends inventarioModel
 
             $info_superior = [
                 'Sucursal' => ($su_id ? 'Sucursal ID ' . $su_id : 'Todas las Sucursales'),
-                'Total de Lotes' => count($datos),
+                'Total de Productos' => count($datos),
                 'Generado' => date('d/m/Y H:i:s'),
                 'Usuario' => $_SESSION['nombre_smp'] ?? 'Sistema'
             ];

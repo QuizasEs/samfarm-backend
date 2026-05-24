@@ -9,6 +9,17 @@ if (!isset($_SESSION['id_smp'])) {
    exit();
 }
 
+// Validación de parámetro $pagina (viene del enrutador en plantilla.php)
+if (!isset($pagina) || !isset($pagina[1]) || empty($pagina[1])) {
+?>
+   <div style="text-align: center; padding: 60px;">
+       <h2><ion-icon name="alert-circle-outline"></ion-icon> Error de Parámetro</h2>
+       <p>No se especificó el usuario que desea editar.</p>
+   </div>
+<?php
+   exit();
+}
+
 $id_solicitado = mainModel::decryption($pagina[1]);
 
 if ($_SESSION['rol_smp'] != 1) {

@@ -990,17 +990,10 @@
         let initialized = false;
 
         function initIfNeeded() {
-            if (initialized) return;
+            if (initialized && modal) return;
             modal = document.getElementById('modalCliente');
-            // Si todavía no existe, esperar al DOMContentLoaded
             if (!modal) {
-                document.addEventListener('DOMContentLoaded', () => {
-                    modal = document.getElementById('modalCliente');
-                    setupModal();
-                }, {
-                    once: true
-                });
-                initialized = true; // marcaremos inicializado para no agregar más listeners aquí
+                // No marcar initialized si todavía no existe, para que futuros clicks re-intenten
                 return;
             }
             setupModal();
@@ -1009,12 +1002,17 @@
         function setupModal() {
             if (!modal) return; // nada que hacer si no existe
 
-            // Si tienes un botón con clase .close dentro, lo conectamos si existe
-            const closeBtns = modal.querySelectorAll('.close, [data-close="modalCliente"]');
-            closeBtns.forEach(btn => btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                api.cerrarModal();
-            }));
+            // Conectar botones de cierre estándar (.mcl es el usado en este modal, .close y data-close para compatibilidad)
+            const closeBtns = modal.querySelectorAll('.close, .mcl, [data-close="modalCliente"]');
+            closeBtns.forEach(btn => {
+                // Evitar duplicar listeners si ya tiene onclick inline
+                if (!btn.hasAttribute('onclick')) {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        api.cerrarModal();
+                    });
+                }
+            });
 
             initialized = true;
         }
@@ -1026,17 +1024,27 @@
                 return;
             }
             modal.style.display = 'flex';
+            // Usar el sistema estándar .mov + .open para la transición
+            setTimeout(() => {
+                modal.classList.add('open');
+            }, 10);
         }
 
         function cerrarModal() {
             initIfNeeded();
             if (!modal) {
                 // intento fallback: cerrar cualquier modal visible
-                const visible = Array.from(document.querySelectorAll('.modal')).find(m => window.getComputedStyle(m).display !== 'none');
-                if (visible) visible.style.display = 'none';
+                const visible = Array.from(document.querySelectorAll('.mov')).find(m => m.classList.contains('open'));
+                if (visible) {
+                    visible.classList.remove('open');
+                    setTimeout(() => { visible.style.display = 'none'; }, 300);
+                }
                 return;
             }
-            modal.style.display = 'none';
+            modal.classList.remove('open');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
         }
 
         // API que exponemos
@@ -1286,7 +1294,8 @@
                     this.value = this.value.replace(/[^0-9]/g, '');
                 };
                 i.onchange = function() {
-                    this.manager.setQtyUnidadesByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
+                    // Usamos la versión inteligente: permite ingresar cantidad total en el campo Unidades
+                    this.manager.setSmartQtyUnidadesByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
                 };
                 i.manager = this; // referencia a la instancia
             });
@@ -1407,34 +1416,54 @@
         }
 
         // metodo para establecer cantidad de unidades por indice
+        // NOTA: Este método ahora delega a la versión inteligente para evitar que se "borren"
+        // cantidades grandes que el usuario ingresa en el campo Unidades.
         setQtyUnidadesByIndex(idx, val) {
+            // Redirigimos al nuevo comportamiento inteligente
+            this.setSmartQtyUnidadesByIndex(idx, val);
+        }
+
+        /**
+         * Versión inteligente para el campo Unidades.
+         * - Si el usuario ingresa un número >= unidades_por_caja, lo interpreta como "cantidad total deseada".
+         * - Si ingresa un número pequeño (< upc), se comporta como antes (reemplaza solo la parte de unidades).
+         * - El input de Cajas permanece 100% sin cambios.
+         */
+        setSmartQtyUnidadesByIndex(idx, enteredVal) {
             if (idx < 0 || idx >= this.cart.length) return;
 
             const item = this.cart[idx];
             const unidadesPorCaja = item.unidades_por_caja || 1;
-            const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
 
-            // validar rango de unidades
-            if (val < 0) val = 0;
-            if (val >= unidadesPorCaja) val = unidadesPorCaja - 1;
+            let finalCantidad;
 
-            const nuevaCantidadTotal = (cajasActuales * unidadesPorCaja) + val;
+            if (enteredVal >= unidadesPorCaja) {
+                // Usuario ingresó cantidad total directamente (ej: 25 cuando upc=10)
+                finalCantidad = enteredVal;
+            } else {
+                // Comportamiento tradicional: mantener las cajas actuales + nuevas unidades
+                const cajasActuales = Math.floor(item.cantidad / unidadesPorCaja);
+                finalCantidad = (cajasActuales * unidadesPorCaja) + enteredVal;
+            }
 
-            // validar stock total
-            if (item.stock != null && nuevaCantidadTotal > item.stock) {
+            // Validación de stock (igual que en el resto del sistema)
+            if (item.stock != null && finalCantidad > item.stock) {
                 Swal.fire({
                     title: 'sin stock suficiente',
                     html: `<p><strong>${this.escapeHtml(item.nombre)}</strong></p>
                        ${item.lote ? '<p>lote: <strong>' + this.escapeHtml(item.lote) + '</strong></p>' : ''}
                        <p>stock disponible: <strong>${item.stock}</strong> unidades</p>
-                       <p>intentando agregar: <strong>${nuevaCantidadTotal}</strong> unidades</p>`,
+                       <p>intentando agregar: <strong>${finalCantidad}</strong> unidades</p>`,
                     icon: 'warning',
                     confirmButtonText: 'entendido'
                 });
                 return;
             }
 
-            item.cantidad = nuevaCantidadTotal;
+            // Validación de negativo (seguridad adicional)
+            if (finalCantidad < 0) finalCantidad = 0;
+
+            item.cantidad = finalCantidad;
             this.renderCart();
         }
 
@@ -1516,7 +1545,8 @@
                 return;
             }
 
-            item.cantidad = nuevaCantidadTotal;
+            // Corregido: usamos 'val' directamente (esta función espera cantidad total en unidades)
+            item.cantidad = val;
             this.renderCart();
         }
 
@@ -1728,14 +1758,14 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>numero de lote</th>
-                                        <th>descripcion</th>
-                                        <th>presentacion</th>
-                                        <th>codigo de barras</th>
-                                        <th>cantidad unidad actual</th>
-                                        <th>precio de compra</th>
-                                        <th>precio de venta unitario</th>
-                                        <th>precio de venta caja</th>
+                                        <th style="width:5%;">n° lote</th>
+                                        <th style="width:40%;">descripcion</th>
+                                        <th>medicamento</th>
+                                        <th>c. barras</th>
+                                        <th>c. unidad actual</th>
+                                        <th>p. compra</th>
+                                        <th>p. venta unitario</th>
+                                        <th>p. venta caja</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1784,8 +1814,8 @@
 
                                         return `
                                             <tr class="tr-cart ${sinStock}" data-med-id="${it.med_id}" data-lote-id="${it.lm_id || ''}" data-nombre="${this.escapeHtml(it.nombre)}" data-presentacion="${this.escapeHtml(it.presentacion)}" data-proveedor="${this.escapeHtml(it.proveedor)}" data-precio="${it.precio_venta || 0}" data-stock="${stock}" data-unidades-caja="${unidadesPorCaja}" data-lote="${this.escapeHtml(it.lm_numero_lote || '')}">
-                                                <td>${lote}</td>
-                                                <td class="tdp">${descripcion}</td>
+                                                <td >${lote}</td>
+                                                <td  class="tdp">${descripcion}</td>
                                                 <td>${presentacion}</td>
                                                 <td>${this.escapeHtml(it.med_codigo_barras || 'n/a')}</td>
                                                 <td>${stock}</td>
@@ -2107,10 +2137,10 @@
                     <table>
                         <thead>
                             <tr style="background: var(--bg-secondary);">
-                                <th>numero de lote</th>
-                                <th>descripcion</th>
-                                <th>precio unitario</th>
-                                <th>precio caja</th>
+                                <th style="width: 18%">n° lote</th>
+                                <th>medicamento</th>
+                                <th style="width: 18%">p. unitario</th>
+                                <th style="width: 18%">p. caja</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2674,7 +2704,7 @@
 <!-- funciones para inventario -->
 
 <script>
-    const InventarioModals = (function() {
+    window.InventarioModals = (function() {
         'use strict';
 
         const API_URL = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php';

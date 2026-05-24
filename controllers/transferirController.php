@@ -23,11 +23,27 @@ class transferirController extends transferirModel
 
         $busqueda = mainModel::limpiar_cadena($_POST['busqueda'] ?? '');
         $fecha_venc_max = mainModel::limpiar_cadena($_POST['fecha_venc_max'] ?? '');
+        $pagina = isset($_POST['pagina']) ? max(1, (int)$_POST['pagina']) : 1;
+        $registros = 15; // Límite de registros por página para lotes disponibles
 
         try {
-            $stmt = transferirModel::buscar_lotes_disponibles_model($su_origen, $busqueda, $fecha_venc_max);
+            $total = transferirModel::contar_lotes_disponibles_model($su_origen, $busqueda, $fecha_venc_max);
+            $Npaginas = $total > 0 ? ceil($total / $registros) : 1;
+
+            $stmt = transferirModel::buscar_lotes_disponibles_model($su_origen, $busqueda, $fecha_venc_max, $pagina, $registros);
             $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return json_encode($datos, JSON_UNESCAPED_UNICODE);
+
+            // Reutilizamos la función de paginación del proyecto
+            $html_paginacion = mainModel::paginador_tablas_main($pagina, $Npaginas, '#', 5);
+
+            return json_encode([
+                'lotes' => $datos,
+                'pagina' => $pagina,
+                'total_paginas' => $Npaginas,
+                'total_registros' => $total,
+                'html_paginacion' => $html_paginacion
+            ], JSON_UNESCAPED_UNICODE);
+
         } catch (Exception $e) {
             error_log("Error en buscar_lotes: " . $e->getMessage());
             return json_encode(['error' => 'Error al buscar lotes']);

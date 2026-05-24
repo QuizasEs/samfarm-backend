@@ -4,7 +4,7 @@ require_once "mainModel.php";
 class transferirModel extends mainModel
 {
 
-    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $fecha_venc_max, $mostrar_todos = false)
+    protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $fecha_venc_max, $pagina = 1, $registros = 10)
     {
         $sql = "
                     SELECT
@@ -53,9 +53,52 @@ class transferirModel extends mainModel
 
         $sql .= " ORDER BY lm.lm_fecha_vencimiento ASC, lm.lm_numero_lote ASC";
 
+        if ($registros > 0) {
+            $inicio = ($pagina - 1) * $registros;
+            $sql .= " LIMIT :inicio, :registros";
+            $params[':inicio'] = $inicio;
+            $params[':registros'] = $registros;
+        }
+
+        $stmt = mainModel::conectar()->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            if (strpos($key, 'inicio') !== false || strpos($key, 'registros') !== false) {
+                $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
+        }
+
+        $stmt->execute();
+        return $stmt;
+    }
+
+    protected static function contar_lotes_disponibles_model($su_id, $busqueda, $fecha_venc_max)
+    {
+        $sql = "SELECT COUNT(*) as total
+                FROM lote_medicamento lm
+                INNER JOIN medicamento m ON m.med_id = lm.med_id
+                WHERE lm.su_id = :su_id
+                AND lm.lm_estado = 'activo'
+                AND lm.lm_cant_actual_unidades > 0";
+
+        $params = [':su_id' => $su_id];
+
+        if ($busqueda) {
+            $sql .= " AND (m.med_nombre_quimico LIKE :busqueda OR lm.lm_numero_lote LIKE :busqueda)";
+            $params[':busqueda'] = "%{$busqueda}%";
+        }
+
+        if ($fecha_venc_max) {
+            $sql .= " AND lm.lm_fecha_vencimiento <= :fecha_max";
+            $params[':fecha_max'] = $fecha_venc_max;
+        }
+
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute($params);
-        return $stmt;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($row['total'] ?? 0);
     }
 
     protected static function crear_transferencia_model($datos)

@@ -275,7 +275,7 @@ class mainModel
                 SELECT * FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC
             ");
         $sql_pr = self::conectar()->prepare("SELECT pr_id, pr_razon_social, pr_telefono, pr_nit, pr_estado FROM proveedores WHERE pr_estado = 1 ORDER BY pr_razon_social ASC");
-        $sql_caja = self::conectar()->prepare("SELECT * FROM `usuarios` WHERE ro_id != 1 ORDER BY us_nombres ASC");
+        $sql_usuarios = self::conectar()->prepare("SELECT * FROM `usuarios` ORDER BY us_nombres ASC");
 
         /* ejecutamos todas las consultas */
         $sql_uf->execute();
@@ -283,7 +283,7 @@ class mainModel
         $sql_vd->execute();
         $sql_su->execute();
         $sql_pr->execute();
-        $sql_caja->execute();
+        $sql_usuarios->execute();
         /* retornamos el resultado de consultas */
         return [
             'uso_farmacologico' => $sql_uf->fetchAll(),
@@ -291,7 +291,7 @@ class mainModel
             'via_administracion' => $sql_vd->fetchAll(),
             'proveedores' => $sql_pr->fetchAll(),
             'sucursales' => $sql_su->fetchAll(),
-            'caja' => $sql_caja->fetchAll()
+            'usuarios' => $sql_usuarios->fetchAll()
         ];
     }
     /* ----------------------------------------- funcion para guardar imagenes--------------------------------------------- */

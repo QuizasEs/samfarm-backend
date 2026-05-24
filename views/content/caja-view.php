@@ -37,20 +37,20 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                     <div class="card">
                         <div class="ch"><span class="ct">Buscar para Venta</span></div>
                         <div class="cb">
-                            <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label><div class="inpg"><input class="inp med_search" placeholder="¿Qué medicamento busca?"><button type="button" class="btn btn_buscar_med"><ion-icon name="search"></ion-icon></button></div></div>
                             <div class="grid4">
                                 <div class="fg"><label class="fl">Proveedor</label><select class="sel" id="filtro_proveedor"><option value="">Proveedor</option><?php foreach ($datos_select['proveedores'] as $prov) { ?><option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option><?php } ?></select></div>
                                 <div class="fg"><label class="fl">Presentación</label><select class="sel" id="filtro_presentacion"><option value="">Presentación</option><?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?><option value="<?php echo $forma['ff_id'] ?>"><?php echo $forma['ff_nombre'] ?></option><?php } ?></select></div>
                                 <div class="fg"><label class="fl">Función</label><select class="sel" id="filtro_funcion"><option value="">Función</option><?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?><option value="<?php echo $uso['uf_id'] ?>"><?php echo $uso['uf_nombre'] ?></option><?php } ?></select></div>
                                 <div class="fg"><label class="fl">Vía</label><select class="sel" id="filtro_via"><option value="">Vía</option><?php foreach ($datos_select['via_administracion'] as $via) { ?><option value="<?php echo $via['vd_id'] ?>"><?php echo $via['vd_nombre'] ?></option><?php } ?></select></div>
                             </div>
+                            <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label><div class="inpg"><input class="inp med_search" placeholder="¿Qué medicamento busca?"><button type="button" class="btn btn_buscar_med"><ion-icon name="search"></ion-icon></button></div></div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="ch"><span class="ct">Cotizar</span></div>
                         <div class="cb">
-                            <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label><div class="inpg"><input class="inp med_search_quote" placeholder="¿Qué medicamento cotizar?"><button type="button" class="btn btn_buscar_med_quote"><ion-icon name="search"></ion-icon></button></div></div>
                             <div class="fg"><label class="fl">Proveedor</label><select class="sel" id="filtro_proveedor_quote"><option value="">Proveedor</option><?php foreach ($datos_select['proveedores'] as $prov) { ?><option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option><?php } ?></select></div>
+                            <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label><div class="inpg"><input class="inp med_search_quote" placeholder="¿Qué medicamento cotizar?"><button type="button" class="btn btn_buscar_med_quote"><ion-icon name="search"></ion-icon></button></div></div>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                     <div class="card">
                         <div class="ch"><span class="ct">Cliente y Pago</span></div>
                         <div class="cb">
-                            <div class="fg" style="position: relative;"><label class="fl">Buscar Cliente</label><div class="inpw"><ion-icon class="iil" name="search-outline"></ion-icon><input class="inp" id="buscar_cliente_venta" placeholder="Buscar Cliente"><ion-icon class="iir" name="person-add-outline" style="cursor:pointer" onclick="ModalCliente.abrirModal()"></ion-icon></div></div>
+                            <div class="fg" style="position: relative;"><label class="fl">Buscar Cliente</label><div class="inpw"><ion-icon class="iil" name="search-outline"></ion-icon><input class="inp" id="buscar_cliente_venta" placeholder="Buscar Cliente"><button type="button" class="iir" onclick="ModalCliente.abrirModal()"><ion-icon name="person-add-outline"></ion-icon></button></div></div>
                             <div id="resultado_clientes" class="resultado-busqueda"></div>
                             <div id="cliente_seleccionado_container" class="cliente-seleccionado-container" style="display: none;">
                                 <div class="flx g8 flxc">

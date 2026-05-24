@@ -274,11 +274,11 @@ class medicamentoController extends medicamentoModel
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>N°</th>
-                                <th>NOMBRE Y PRINCIPIO</th>
-                                <th>FORMA VÍA USO</th>
-                                <th>PRESENTACIÓN</th>
-                                <th>CÓDIGO DE BARRAS</th>
+                                <th style="width: 5%;">N°</th>
+                                <th style="width: 35%;">NOMBRE Y PRINCIPIO</th>
+                                <th style="width: 20%;">FORMA VÍA USO</th>
+                                <th style="width: 20%;">PRESENTACIÓN</th>
+                                <th style="width: 20%;">CÓDIGO DE BARRAS</th>
                             </tr>
                         </thead>
                         <tbody>

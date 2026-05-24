@@ -253,10 +253,13 @@ class proveedorModel extends mainModel
                 p.pr_correo AS 'Correo',
                 p.pr_nombre_comercial AS 'Nombre Comercial',
                 DATE_FORMAT(p.pr_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
-                0 AS 'Total Compras',  -- Temporalmente 0 hasta implementar relación compras-proveedores
-                0 AS 'Monto Total (Bs)',  -- Temporalmente 0 hasta implementar relación compras-proveedores
+                COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS 'Total Compras',
+                0 AS 'Monto Total (Bs)',
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS 'Lotes Generados',
-                'Nunca' AS 'Última Compra',  -- Temporalmente 'Nunca' hasta implementar relación compras-proveedores
+                CASE 
+                    WHEN MAX(lm.lm_fecha_ingreso) IS NULL THEN 'Nunca'
+                    ELSE DATE_FORMAT(MAX(lm.lm_fecha_ingreso), '%d/%m/%Y')
+                END AS 'Última Compra',
                 CASE
                     WHEN p.pr_estado = 1 THEN 'ACTIVO'
                     ELSE 'INACTIVO'
@@ -297,7 +300,40 @@ class proveedorModel extends mainModel
             $params[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
 
-        $sql .= " GROUP BY p.pr_id, p.pr_razon_social, p.pr_nit, p.pr_telefono, p.pr_correo, p.pr_nombre_comercial, p.pr_creado_en, p.pr_estado ORDER BY p.pr_razon_social ASC";
+        $sql .= " GROUP BY p.pr_id, p.pr_razon_social, p.pr_nit, p.pr_telefono, p.pr_correo, p.pr_nombre_comercial, p.pr_creado_en, p.pr_estado";
+
+        /* === Filtros avanzados vía HAVING (igual que en el listado) === */
+        $having = "";
+        if (!empty($filtros['con_compras'])) {
+            if ($filtros['con_compras'] === 'con_compras') {
+                $having .= "COUNT(DISTINCT lm.lm_id) > 0";
+            } elseif ($filtros['con_compras'] === 'sin_compras') {
+                $having .= "COUNT(DISTINCT lm.lm_id) = 0";
+            }
+        }
+
+        if (!empty($filtros['ultima_compra'])) {
+            if ($having !== "") {
+                $having .= " AND ";
+            }
+            if ($filtros['ultima_compra'] === '7') {
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 7";
+            } elseif ($filtros['ultima_compra'] === '30') {
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 30";
+            } elseif ($filtros['ultima_compra'] === '90') {
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) <= 90";
+            } elseif ($filtros['ultima_compra'] === 'mas_90') {
+                $having .= "DATEDIFF(NOW(), MAX(lm.lm_fecha_ingreso)) > 90";
+            } elseif ($filtros['ultima_compra'] === 'nunca') {
+                $having .= "MAX(lm.lm_fecha_ingreso) IS NULL";
+            }
+        }
+
+        if ($having !== "") {
+            $sql .= " HAVING $having";
+        }
+
+        $sql .= " ORDER BY p.pr_razon_social ASC";
 
         $stmt = mainModel::conectar()->prepare($sql);
 
