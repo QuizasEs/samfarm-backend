@@ -717,8 +717,11 @@ tr.tr-cart:hover td { background: var(--btn-success-pale); }
 }
 .table-popup {
   position: fixed;
-  width: 80%;
-  max-width: calc(100vw - 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  max-width: calc(100vw - 32px);
+  max-height: 50vh;
   background: var(--bg-primary);
   border: 1px solid var(--border-light);
   border-radius: var(--rlg);
@@ -726,12 +729,10 @@ tr.tr-cart:hover td { background: var(--btn-success-pale); }
   z-index: 700;
   overflow: hidden;
   opacity: 0; pointer-events: none;
-  transform: translateY(-4px);
-  transition: opacity var(--tr), transform var(--tr);
-  max-height: 320px;
+  transition: opacity var(--tr);
   display: flex; flex-direction: column;
 }
-.table-popup.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.table-popup.open { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
 .tp-header {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-light);
@@ -741,8 +742,16 @@ tr.tr-cart:hover td { background: var(--btn-success-pale); }
 .tp-label { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); }
 .tp-close { cursor: pointer; color: var(--text-faint); font-size: 16px; }
 .tp-close:hover { color: var(--text-primary); }
-.tp-scroll { overflow-y: auto; flex: 1; }
-.tp-scroll table td { padding: 9px 14px; font-size: 13px; }
+.tp-scroll { overflow-y: auto; overflow-x: hidden; flex: 1; max-width: 100%; }
+.table-popup .tp-scroll table th,
+.table-popup .tp-scroll table td { padding: 9px 14px; font-size: 13px; min-width: 0; word-wrap: break-word; white-space: normal; }
+.table-popup table { width: 100%; border-collapse: collapse; max-width: 100%; table-layout: fixed; }
+.table-popup table th:first-child,
+.table-popup table td:first-child { min-width: 50px; }
+.table-popup table th:nth-child(2),
+.table-popup table td:nth-child(2) { width: 35%; }
+.table-popup table th:nth-child(n+3):nth-child(-n+9),
+.table-popup table td:nth-child(n+3):nth-child(-n+9) { min-width: 45px; }
 .tp-empty { padding: 24px; text-align: center; color: var(--text-faint); font-size: 13px; }
 
 /* pagination */

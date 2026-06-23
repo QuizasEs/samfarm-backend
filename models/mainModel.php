@@ -974,6 +974,63 @@ class mainModel
         exit();
     }
 
+    /* --------------------------------------validar eliminacion------------------------------------------- */
+    protected static function validar_eliminacion($tabla, $campo_id, $id, $condiciones = [])
+    {
+        $conexion = self::conectar();
+        $errores = [];
+        
+        foreach ($condiciones as $condicion) {
+            $sql = $conexion->prepare($condicion['sql']);
+            $sql->execute($condicion['params']);
+            if ($sql->fetchColumn() > 0) {
+                $errores[] = $condicion['mensaje'];
+            }
+        }
+        
+        return $errores;
+    }
+
+    /* --------------------------------------eliminar registro generico------------------------------------------- */
+    protected static function eliminar_registro_model($tabla, $campo_id, $id)
+    {
+        $sql = self::conectar()->prepare("
+            DELETE FROM {$tabla} 
+            WHERE {$campo_id} = :id
+        ");
+        $sql->bindParam(":id", $id, PDO::PARAM_INT);
+        $sql->execute();
+        return $sql;
+    }
+
+    /* --------------------------------------verificar stock activo de medicamento------------------------------------------- */
+    protected static function verificar_stock_activo_medicamento($med_id)
+    {
+        $sql = self::conectar()->prepare("
+            SELECT COUNT(*) as cantidad
+            FROM lote_medicamento 
+            WHERE med_id = :med_id 
+            AND lm_estado = 'activo' 
+            AND (lm_cant_actual_cajas > 0 OR lm_cant_actual_unidades > 0)
+        ");
+        $sql->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+        $sql->execute();
+        return (int)$sql->fetchColumn();
+    }
+
+    /* --------------------------------------verificar movimientos de medicamento------------------------------------------- */
+    protected static function verificar_movimientos_medicamento($med_id)
+    {
+        $sql = self::conectar()->prepare("
+            SELECT COUNT(*) as cantidad
+            FROM movimiento_inventario 
+            WHERE med_id = :med_id
+        ");
+        $sql->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+        $sql->execute();
+        return (int)$sql->fetchColumn();
+    }
+
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */

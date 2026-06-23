@@ -275,10 +275,10 @@ class medicamentoController extends medicamentoModel
                         <thead>
                             <tr>
                                 <th style="width: 5%;">N°</th>
-                                <th style="width: 35%;">NOMBRE Y PRINCIPIO</th>
+                                <th style="width: 30%;">NOMBRE Y PRINCIPIO</th>
                                 <th style="width: 20%;">FORMA VÍA USO</th>
-                                <th style="width: 20%;">PRESENTACIÓN</th>
-                                <th style="width: 20%;">CÓDIGO DE BARRAS</th>
+                                <th style="width: 15%;">PRESENTACIÓN</th>
+                                <th style="width: 15%;">CÓDIGO DE BARRAS</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -310,15 +310,15 @@ class medicamentoController extends medicamentoModel
                                 <div class="td-sub">' . htmlspecialchars($rows['via_administracion'] ?? 'Sin vía') . ' - ' . htmlspecialchars($rows['uso_farmacologico'] ?? 'Sin uso') . '</div>
                             </td>
                             <td>' . htmlspecialchars($rows['med_presentacion']) . '</td>
-                            <td>' . $barcodeDisplay . '</td>
-                        </tr>
+                             <td>' . $barcodeDisplay . '</td>
+                         </tr>
                     ';
                 $contador++;
             }
             $reg_final = $contador - 1;
         } else {
             if ($total >= 1) {
-                $tabla .= '<tr><td colspan="10"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
+                $tabla .= '<tr><td colspan="5"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
                     } else {
                         $tabla .= '<tr><td colspan="5" style="text-align:center;"><ion-icon name="medical-outline"></ion-icon> Sin medicamentos registrados</td></tr>';
                     }
@@ -521,6 +521,61 @@ class medicamentoController extends medicamentoModel
         echo json_encode($alerta);
     }
 
+    public function eliminar_medicamento_controller()
+    {
+        $privilegio = $_SESSION['rol_smp'] ?? 0;
+        
+        if ($privilegio == 3) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Acceso denegado",
+                "texto" => "Solo administradores y gerentes pueden eliminar medicamentos",
+                "Tipo" => "error"
+            ]);
+            exit();
+        }
+        
+        $med_id = mainModel::limpiar_cadena($_POST['med_id'] ?? 0);
+        
+        if (empty($med_id) || !is_numeric($med_id)) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "ID de medicamento no válido",
+                "Tipo" => "error"
+            ]);
+            exit();
+        }
+        
+        $check_med = mainModel::ejecutar_consulta_simple("SELECT med_id FROM medicamento WHERE med_id = '$med_id'");
+        if ($check_med->rowCount() <= 0) {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "El medicamento no existe",
+                "Tipo" => "error"
+            ]);
+            exit();
+        }
+        
+        $eliminado = medicamentoModel::eliminar_medicamento_model($med_id);
+        
+        if ($eliminado->rowCount() > 0) {
+            echo json_encode([
+                "Alerta" => "recargar",
+                "Titulo" => "Eliminado",
+                "texto" => "Medicamento eliminado correctamente",
+                "Tipo" => "success"
+            ]);
+        } else {
+            echo json_encode([
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo eliminar el medicamento",
+                "Tipo" => "error"
+            ]);
+        }
+    }
 
     /* -----------------------------------controlador para agregar usuarios------------------------------------------ */
     public function paginado_medicamento_via_controller($pagina, $registros, $privilegio, $url, $busqueda)

@@ -55,6 +55,10 @@ if (isset($_POST['MedicamentoAjax'])) {
         echo $ins_med->datos_medicamento_controller($med_id);
     }
 
+    if ($valor == "eliminar") {
+        echo $ins_med->eliminar_medicamento_controller();
+    }
+
     if ($valor === "listar") {
         $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
         $registros = isset($_POST['registros']) ? (int)$_POST['registros'] : 10;

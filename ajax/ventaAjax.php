@@ -76,6 +76,18 @@ if (isset($_POST['ventaAjax'])) {
         echo $ins_venta->buscar_medicamento_controller($termino, $filtros);
         exit();
     }
+    if ($valor === 'buscar_agrupado') {
+        $termino = $_POST['termino'] ?? '';
+        $filtros = [
+            'linea' => $_POST['linea'] ?? null,
+            'presentacion' => $_POST['presentacion'] ?? null,
+            'funcion' => $_POST['funcion'] ?? null,
+            'via' => $_POST['via'] ?? null,
+            'proveedor' => $_POST['proveedor'] ?? null
+        ];
+        echo $ins_venta->buscar_medicamento_agrupado_controller($termino, null, $filtros);
+        exit();
+    }
     if ($valor === 'mas_vendidos') {
         $limit = $_POST['limit'] ?? 5;
         echo $ins_venta->mas_vendidos_controller($limit);

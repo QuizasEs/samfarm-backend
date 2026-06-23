@@ -186,7 +186,7 @@ function procesarFilasIngresoCorregido($datosExcel, $sucursal_id, $us_id) {
                     'Via' => $categoria_default,
                     'Proveedor' => !empty($filaLimpia['proveedor_id']) ? $filaLimpia['proveedor_id'] : null,
                     'Descripcion' => 'Creado desde ingreso masivo corregido',
-                    'CodigoBarras' => null
+                    'CodigoBarras' => !empty($filaLimpia['codigo_barras']) ? $filaLimpia['codigo_barras'] : null
                 ];
 
                 $med_id = ingresoMasivoModel::crear_medicamento_model($datosMedicamento);
@@ -239,20 +239,36 @@ function procesarFilasIngresoCorregido($datosExcel, $sucursal_id, $us_id) {
             $numero_lote = 'LOTE-CORREGIDO-' . date('YmdHis') . '-' . ($index + 1);
 
             // 4. CREAR LOTE CON VALORES CORRECTOS
+            $costo_lista = !empty($filaLimpia['costo_lista']) ? (float)$filaLimpia['costo_lista'] : 0;
+
+            // Márgenes fijos en 0 según configuración actual
+            $margen_u = 0;
+            $margen_c = 0;
+
+            // Precios mínimos calculados con márgenes = 0 (precio mínimo = precio de compra)
+            $precio_min_u = $precio_compra;
+            $precio_min_c = $precio_venta * $lm_cant_unidad;
+
             $datosLote = [
                 'med_id' => $med_id,
                 'su_id' => $sucursal_id,
                 'pr_id' => $pr_id,
+                'pr_id_compra' => null,
                 'lm_numero_lote' => $numero_lote,
                 'lm_cant_caja' => $lm_cant_caja,
                 'lm_cant_blister' => $lm_cant_blister,
                 'lm_cant_unidad' => $lm_cant_unidad,
-                'lm_cant_actual_cajas' => $lm_cant_caja, // Todas las cajas disponibles
-                'lm_cant_actual_unidades' => $lm_total_unidades, // Todas las unidades disponibles
+                'lm_cant_actual_cajas' => $lm_cant_caja,
+                'lm_cant_actual_unidades' => $lm_total_unidades,
+                'lm_costo_lista' => $costo_lista,
                 'lm_precio_compra' => $precio_compra,
                 'lm_precio_venta' => $precio_venta,
+                'lm_margen_u' => $margen_u,
+                'lm_margen_c' => $margen_c,
+                'lm_precio_min_u' => $precio_min_u,
+                'lm_precio_min_c' => $precio_min_c,
                 'lm_fecha_vencimiento' => $fecha_vencimiento,
-                'lm_estado' => 'activo' // Lotés activos listos para usar
+                'lm_estado' => 'activo'
             ];
 
             $lm_id = ingresoMasivoModel::crear_lote_model($datosLote);
@@ -310,5 +326,73 @@ function procesarFilasIngresoCorregido($datosExcel, $sucursal_id, $us_id) {
     }
 
     return $resultados;
+}
+
+/**
+ * Limpiar fila de Excel para el archivo corregido
+ * Usa el layout real del prueva.xlsx + soporte para Costo lista
+ */
+function limpiarFilaExcelParaCorreccion($fila)
+{
+    $values = array_values($fila);
+
+    $resultado = [
+        'descripcion' => '',
+        'proveedor_id' => null,
+        'cantidad' => 0,
+        'cantidad_caja' => 1,
+        'precio_compra' => 0,
+        'precio_venta' => 0,
+        'fecha_vencimiento' => null,
+        'costo_lista' => 0,
+        'codigo_barras' => ''
+    ];
+
+    // Índice 0: Código de Barra (solo para medicamento)
+    if (isset($values[0]) && !empty(trim(strval($values[0])))) {
+        $resultado['codigo_barras'] = trim(strval($values[0]));
+    }
+
+    // Índice 1: Descripción
+    if (isset($values[1]) && !empty(trim(strval($values[1])))) {
+        $resultado['descripcion'] = ingresoMasivoModel::limpiar_cadena_especial(trim(strval($values[1])));
+    }
+
+    // Índice 2: Proveedor (ID numérico)
+    if (isset($values[2]) && is_numeric($values[2])) {
+        $resultado['proveedor_id'] = (int)$values[2];
+    }
+
+    // Índice 3: Unidades por caja
+    if (isset($values[3]) && is_numeric($values[3]) && (int)$values[3] > 0) {
+        $resultado['cantidad_caja'] = (int)$values[3];
+    }
+
+    // Índice 4: Costo lista (nuevo)
+    if (isset($values[4]) && is_numeric($values[4])) {
+        $resultado['costo_lista'] = (float)$values[4];
+    }
+
+    // Índice 6: Costo Unitario - Precio compra
+    if (isset($values[6]) && is_numeric($values[6])) {
+        $resultado['precio_compra'] = (float)$values[6];
+    }
+
+    // Índice 8: Precio Unitario - Precio venta
+    if (isset($values[8]) && is_numeric($values[8])) {
+        $resultado['precio_venta'] = (float)$values[8];
+    }
+
+    // Índice 10: Total Unidades - Cantidad
+    if (isset($values[10]) && is_numeric($values[10])) {
+        $resultado['cantidad'] = (int)$values[10];
+    }
+
+    // Índice 11: Vencimiento
+    if (isset($values[11]) && !empty(trim(strval($values[11])))) {
+        $resultado['fecha_vencimiento'] = trim(strval($values[11]));
+    }
+
+    return $resultado;
 }
 ?>

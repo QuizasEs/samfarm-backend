@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 if ($peticionAjax) {
     require_once '../models/inventarioModel.php';
@@ -676,24 +676,24 @@ class inventarioController extends inventarioModel
     public function obtener_datos_balance_controller($med_id)
     {
         try {
-            // Obtener datos actuales de precios desde un lote activo representativo
             $sql = mainModel::conectar()->prepare("
                 SELECT
                     lm.lm_costo_lista,
+                    lm.lm_precio_costo,
                     lm.lm_precio_compra,
                     lm.lm_margen_u,
                     lm.lm_margen_c,
                     lm.lm_precio_venta,
                     lm.lm_precio_min_u,
                     lm.lm_precio_min_c,
-                    COALESCE(lp.pr_razon_social, mp.pr_razon_social, 'Sin proveedor') AS proveedor
+                    lm.lm_cant_unidad AS unidades_caja,
+                    COALESCE(lp.pr_razon_social, mp.pr_razon_social, 'Sin proveedor') AS proveedor,
+                    m.med_nombre_quimico AS medicamento
                 FROM lote_medicamento lm
                 LEFT JOIN proveedores lp ON lm.pr_id = lp.pr_id
                 LEFT JOIN medicamento m ON lm.med_id = m.med_id
                 LEFT JOIN proveedores mp ON m.pr_id = mp.pr_id
                 WHERE lm.med_id = :med_id
-                  AND lm.lm_estado = 'activo'
-                  AND lm.lm_cant_actual_unidades > 0
                 ORDER BY lm.lm_fecha_ingreso DESC
                 LIMIT 1
             ");
@@ -706,19 +706,22 @@ class inventarioController extends inventarioModel
                 return [
                     'success' => true,
                     'costo_lista' => $datos['lm_costo_lista'],
+                    'precio_costo' => $datos['lm_precio_costo'],
                     'precio_compra' => $datos['lm_precio_compra'],
+                    'unidades_caja' => $datos['unidades_caja'] ?? 1,
                     'margen_u' => $datos['lm_margen_u'],
                     'margen_c' => $datos['lm_margen_c'],
                     'precio_venta' => $datos['lm_precio_venta'],
                     'precio_min_u' => $datos['lm_precio_min_u'],
                     'precio_min_c' => $datos['lm_precio_min_c'],
-                    'proveedor' => $datos['proveedor']
+                    'proveedor' => $datos['proveedor'],
+                    'medicamento' => $datos['medicamento']
                 ];
             } else {
-                // Si no hay lotes activos, obtener datos del medicamento
                 $sql_med = mainModel::conectar()->prepare("
                     SELECT
                         m.med_id,
+                        m.med_nombre_quimico,
                         COALESCE(p.pr_razon_social, 'Sin proveedor') AS proveedor
                     FROM medicamento m
                     LEFT JOIN proveedores p ON m.pr_id = p.pr_id
@@ -733,26 +736,28 @@ class inventarioController extends inventarioModel
                     return [
                         'success' => true,
                         'costo_lista' => null,
+                        'precio_costo' => null,
                         'precio_compra' => null,
+                        'unidades_caja' => 1,
                         'margen_u' => null,
                         'margen_c' => null,
                         'precio_venta' => null,
                         'precio_min_u' => null,
                         'precio_min_c' => null,
-                        'proveedor' => $datos_med['proveedor']
+                        'proveedor' => $datos_med['proveedor'],
+                        'medicamento' => $datos_med['med_nombre_quimico']
                     ];
                 } else {
                     return ['success' => false, 'error' => 'Medicamento no encontrado'];
                 }
             }
         } catch (Exception $e) {
-            error_log("Error obteniendo datos balance: " . $e->getMessage());
             return ['success' => false, 'error' => 'Error interno del servidor: ' . $e->getMessage()];
         }
     }
 
     /* ===== APLICAR BALANCE DE PRECIOS ===== */
-    public function balance_precios_controller($med_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
+    public function balance_precios_controller($med_id, $costo_lista, $precio_costo, $unidades_caja, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
     {
         try {
             // Validar permisos
@@ -765,6 +770,13 @@ class inventarioController extends inventarioModel
                     'Tipo' => 'error'
                 ];
             }
+
+            // Validar márgenes: 0-100, máximo 2 decimales
+            $margen_u = round(max(0, min(100, floatval($margen_u ?? 0))), 2);
+            $margen_c = round(max(0, min(100, floatval($margen_c ?? 0))), 2);
+            $costo_lista = round(max(0, floatval($costo_lista ?? 0)), 2);
+            $precio_costo = round(max(0, floatval($precio_costo ?? 0)), 2);
+            $unidades_caja = max(1, intval($unidades_caja ?? 1));
 
             // Obtener todos los lotes activos de este medicamento en todas las sucursales
             $sql_lotes = mainModel::conectar()->prepare("
@@ -793,6 +805,8 @@ class inventarioController extends inventarioModel
             // Preparar datos de actualización
             $datos_up = [
                 'lm_costo_lista' => $costo_lista,
+                'lm_precio_costo' => $precio_costo,
+                'lm_cant_unidad' => $unidades_caja,
                 'lm_margen_u' => $margen_u,
                 'lm_margen_c' => $margen_c,
                 'lm_precio_venta' => $precio_venta,
@@ -824,6 +838,8 @@ class inventarioController extends inventarioModel
                         // Registrar en balance_precios
                         $detalle = json_encode([
                             'costo_lista' => $costo_lista,
+                            'precio_costo' => $precio_costo,
+                            'unidades_caja' => $unidades_caja,
                             'margen_u' => $margen_u,
                             'margen_c' => $margen_c,
                             'precio_venta' => $precio_venta,
@@ -868,7 +884,6 @@ class inventarioController extends inventarioModel
             }
 
         } catch (Exception $e) {
-            error_log("Error en balance_precios_controller: " . $e->getMessage());
             return [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error interno',
@@ -1045,11 +1060,72 @@ class inventarioController extends inventarioModel
                 $sql->bindParam(":su_id", $su_id);
                 $sql->execute();
 
-                return $sql->fetchAll(PDO::FETCH_ASSOC);
+                $lotes = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+                return $lotes;
             }
         } catch (Exception $e) {
             error_log("Error obteniendo lotes disponibles: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function guardar_balance_controller($med_id, $su_id, $costo_lista, $precio_costo, $unidades_caja, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c)
+    {
+        try {
+            $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+            if ($rol_usuario != 1) {
+                return ['success' => false, 'error' => 'Solo administradores pueden realizar balance de precios'];
+            }
+
+            // Validar márgenes: 0-100, máximo 2 decimales
+            $margen_u = round(max(0, min(100, floatval($margen_u ?? 0))), 2);
+            $margen_c = round(max(0, min(100, floatval($margen_c ?? 0))), 2);
+            $costo_lista = round(max(0, floatval($costo_lista ?? 0)), 2);
+            $precio_costo = round(max(0, floatval($precio_costo ?? 0)), 2);
+            $unidades_caja = max(1, intval($unidades_caja ?? 1));
+
+            $sql_lotes = mainModel::conectar()->prepare("
+                SELECT lm_id, lm_numero_lote, lm_precio_venta
+                FROM lote_medicamento
+                WHERE med_id = :med_id
+                  AND lm_estado = 'activo'
+                  AND lm_cant_actual_unidades > 0
+            ");
+            $sql_lotes->bindParam(":med_id", $med_id);
+            $sql_lotes->execute();
+            $lotes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($lotes)) {
+                return ['success' => false, 'error' => 'No hay lotes activos para este medicamento'];
+            }
+
+            $lotes_actualizados = 0;
+            foreach ($lotes as $lote) {
+                $datos_up = [
+                    'ID' => $lote['lm_id'],
+                    'lm_costo_lista' => $costo_lista,
+                    'lm_precio_costo' => $precio_costo,
+                    'lm_cant_unidad' => $unidades_caja,
+                    'lm_margen_u' => $margen_u,
+                    'lm_margen_c' => $margen_c,
+                    'lm_precio_venta' => $precio_venta,
+                    'lm_precio_min_u' => $precio_min_u,
+                    'lm_precio_min_c' => $precio_min_c
+                ];
+                $resultado = loteModel::actualizar_lote_model($datos_up);
+                if ($resultado->rowCount() >= 0) {
+                    $lotes_actualizados++;
+                }
+            }
+
+            if ($lotes_actualizados > 0) {
+                return ['success' => true, 'lotes_actualizados' => $lotes_actualizados];
+            } else {
+                return ['success' => false, 'error' => 'No se pudo actualizar ningún lote'];
+            }
+        } catch (Exception $e) {
+            return ['success' => false, 'error' => 'Error interno del servidor'];
         }
     }
 }

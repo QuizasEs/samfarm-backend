@@ -127,15 +127,9 @@ class ingresoMasivoController extends ingresoMasivoModel
                     // Total Unidades viene del Excel (es la cantidad total de unidades)
                     $total_unidades = !empty($filaLimpia['cantidad']) ? (int)$filaLimpia['cantidad'] : 0;
                     
-                    // Si la cantidad es 0, omitir la creación del lote pero el medicamento YA fue creado antes
+                    // Si la cantidad es 0 o nula, usar valor por defecto 999
                     if ($total_unidades <= 0) {
-                        // El medicamento ya fue creado en la línea anterior, solo se omite el lote
-                        $resultados['exitosos']++;  // Contar como exitoso, no como error
-                        $resultados['detalles'][] = [
-                            'fila' => $index + 2,
-                            'mensaje' => 'OK (sin stock): ' . $filaLimpia['descripcion'] . ' - Medicamento registrado sin lote'
-                        ];
-                        continue;
+                        $total_unidades = 999;
                     }
                     
         // Obtener cantidad por caja (unidades contenidas en cada caja)
@@ -157,29 +151,45 @@ class ingresoMasivoController extends ingresoMasivoModel
                     $precio_compra = !empty($filaLimpia['precio_compra']) ? (float)$filaLimpia['precio_compra'] : 0;
                     $precio_venta = !empty($filaLimpia['precio_venta']) ? (float)$filaLimpia['precio_venta'] : 0;
 
-                    // Fecha de vencimiento
-                    $fecha_vencimiento = null;
+                    // Fecha de vencimiento - valor por defecto 2040-12-31
+                    $fecha_vencimiento = '2040-12-31';
                     if (!empty($filaLimpia['fecha_vencimiento'])) {
                         $fecha_vencimiento = $this->formatearFecha($filaLimpia['fecha_vencimiento']);
                     }
 
-                    // Número de lote - se genera automáticamente como en módulo de compras
-                    $numero_lote = 'LOTE-' . date('YmdHis') . '-' . ($index + 1);
+                    // Número de lote - se genera automáticamente con formato MED-XXXX
+                    $numero_lote = $this->generarNumeroLote();
                     $numero_lote = mainModel::limpiar_cadena($numero_lote);
 
                     // Crear lote
+                    $costo_lista = !empty($filaLimpia['costo_lista']) ? (float)$filaLimpia['costo_lista'] : 0;
+
+                    // Márgenes fijos en 0
+                    $margen_u = 0;
+                    $margen_c = 0;
+
+                    // Precios mínimos calculados (márgenes = 0 → precio_min = precio_compra)
+                    $precio_min_u = $precio_compra;
+                    $precio_min_c = $precio_venta * $cant_unidad;
+
                     $datosLote = [
                         'med_id' => $med_id,
                         'su_id' => $sucursal_id,
                         'pr_id' => $pr_id,
+                        'pr_id_compra' => null,
                         'lm_numero_lote' => $numero_lote,
                         'lm_cant_caja' => $cant_caja,
                         'lm_cant_blister' => $cant_blister,
                         'lm_cant_unidad' => $cant_unidad,
                         'lm_cant_actual_cajas' => $cant_actual_cajas,
                         'lm_cant_actual_unidades' => $cant_actual_unidades,
+                        'lm_costo_lista' => $costo_lista,
                         'lm_precio_compra' => $precio_compra,
                         'lm_precio_venta' => $precio_venta,
+                        'lm_margen_u' => $margen_u,
+                        'lm_margen_c' => $margen_c,
+                        'lm_precio_min_u' => $precio_min_u,
+                        'lm_precio_min_c' => $precio_min_c,
                         'lm_fecha_vencimiento' => $fecha_vencimiento,
                         'lm_estado' => 'activo'
                     ];
@@ -304,7 +314,7 @@ class ingresoMasivoController extends ingresoMasivoModel
         try {
             $excel = new ExcelReader($filePath);
             $excel->read(); // Cargar los datos primero
-            $datos = $excel->toAssociativeArray();
+            $datos = $excel->toArray();
 
             return $datos;
 
@@ -315,6 +325,15 @@ class ingresoMasivoController extends ingresoMasivoModel
 
     /**
      * Mapear columnas del Excel a nombres conocidos
+     * Estructura del Excel (sin código de barras):
+     * Índice 0: Descripción (obligatorio)
+     * Índice 1: Proveedor (opcional)
+     * Índice 2: Unidades por caja (opcional)
+     * Índice 3: Costo lista (opcional)
+     * Índice 4: Precio compra (obligatorio)
+     * Índice 5: Precio venta (obligatorio)
+     * Índice 6: Total Unidades (obligatorio)
+     * Índice 7: Vencimiento (opcional)
      */
     private function mapearColumnas($headers)
     {
@@ -399,19 +418,17 @@ class ingresoMasivoController extends ingresoMasivoModel
         return $mapeo;
     }
 
-    /**
+/**
      * Limpiar fila de Excel - versión por índice (más literal)
-     * Estructura del Excel:
-     * Índice 0: Código de Barra (ignorar)
-     * Índice 1: Descripción (obligatorio)
-     * Índice 2: Proveedor (opcional)
-     * Índice 3: Unidades por caja (opcional)
-     * Índice 4: Costo Caja (ignorar)
-     * Índice 5: Costo Unitario (obligatorio)
-     * Índice 6: Precio Caja (ignorar)
-     * Índice 7: Precio Unitario (obligatorio)
-     * Índice 8: Total Unidades (obligatorio)
-     * Índice 9: Vencimiento (opcional)
+     * Estructura del Excel (sin código de barras):
+     * Índice 0: Descripción (obligatorio)
+     * Índice 1: Proveedor (opcional)
+     * Índice 2: Unidades por caja (opcional)
+     * Índice 3: Costo lista (opcional)
+     * Índice 4: Precio compra (obligatorio)
+     * Índice 5: Precio venta (obligatorio)
+     * Índice 6: Total Unidades (obligatorio)
+     * Índice 7: Vencimiento (opcional)
      */
     private function limpiarFilaExcel($fila)
     {
@@ -428,45 +445,52 @@ class ingresoMasivoController extends ingresoMasivoModel
             'precio_compra' => 0,
             'precio_venta' => 0,
             'fecha_vencimiento' => null,
+            'costo_lista' => 0,
+            'codigo_barras' => '',
             'numero_lote' => ''
         ];
 
-        // Índice 1: Descripción (obligatorio)
-        if (isset($values[1]) && !empty(trim(strval($values[1])))) {
-            $resultado['descripcion'] = ingresoMasivoModel::limpiar_cadena_especial(trim(strval($values[1])));
+        // Índice 0: Descripción (obligatorio)
+        if (isset($values[0]) && !empty(trim(strval($values[0])))) {
+            $resultado['descripcion'] = ingresoMasivoModel::limpiar_cadena_especial(trim(strval($values[0])));
         }
 
-        // Índice 2: Proveedor (opcional)
-        if (isset($values[2]) && is_numeric($values[2])) {
-            $resultado['proveedor_id'] = (int)$values[2];
+        // Índice 1: Proveedor (opcional)
+        if (isset($values[1]) && is_numeric($values[1])) {
+            $resultado['proveedor_id'] = (int)$values[1];
         }
 
-        // Índice 3: Unidades por caja (opcional)
-        if (isset($values[3]) && is_numeric($values[3]) && (int)$values[3] > 0) {
-            $resultado['cantidad_caja'] = (int)$values[3];
+        // Índice 2: Unidades por caja (opcional)
+        if (isset($values[2]) && is_numeric($values[2]) && (int)$values[2] > 0) {
+            $resultado['cantidad_caja'] = (int)$values[2];
         }
 
-        // Índice 5: Costo Unitario - Precio compra (obligatorio)
+        // Índice 3: Costo lista (opcional)
+        if (isset($values[3]) && is_numeric($values[3])) {
+            $resultado['costo_lista'] = (float)$values[3];
+        }
+
+        // Índice 4: Precio compra (obligatorio)
+        if (isset($values[4]) && is_numeric($values[4])) {
+            $resultado['precio_compra'] = (float)$values[4];
+        }
+
+        // Índice 5: Precio venta (obligatorio)
         if (isset($values[5]) && is_numeric($values[5])) {
-            $resultado['precio_compra'] = (float)$values[5];
+            $resultado['precio_venta'] = (float)$values[5];
         }
 
-        // Índice 7: Precio Unitario - Precio venta (obligatorio)
-        if (isset($values[7]) && is_numeric($values[7])) {
-            $resultado['precio_venta'] = (float)$values[7];
+        // Índice 6: Total Unidades - Cantidad (obligatorio)
+        if (isset($values[6]) && is_numeric($values[6])) {
+            $resultado['cantidad'] = (int)$values[6];
         }
 
-        // Índice 8: Total Unidades - Cantidad (obligatorio)
-        if (isset($values[8]) && is_numeric($values[8])) {
-            $resultado['cantidad'] = (int)$values[8];
+        // Índice 7: Vencimiento (opcional)
+        if (isset($values[7]) && !empty(trim(strval($values[7])))) {
+            $resultado['fecha_vencimiento'] = trim(strval($values[7]));
         }
 
-        // Índice 9: Vencimiento (opcional)
-        if (isset($values[9]) && !empty(trim(strval($values[9])))) {
-            $resultado['fecha_vencimiento'] = trim(strval($values[9]));
-        }
-
-        return $resultado;
+return $resultado;
     }
 
     /**
@@ -475,7 +499,7 @@ class ingresoMasivoController extends ingresoMasivoModel
     private function formatearFecha($valor)
     {
         // Fecha predeterminada si no hay fecha
-        $fechaDefault = '2029-12-31';
+        $fechaDefault = '2040-12-31';
         
         if (empty($valor)) {
             return $fechaDefault;
@@ -509,5 +533,29 @@ class ingresoMasivoController extends ingresoMasivoModel
         }
 
         return $fechaDefault;
+    }
+
+    /**
+     * Generar número de lote con formato MED-XXXX
+     */
+    private function generarNumeroLote()
+    {
+        $sql = mainModel::ejecutar_consulta_simple("
+            SELECT lm_numero_lote FROM `lote_medicamento` 
+            WHERE lm_numero_lote REGEXP '^MED-[0-9]+$' 
+            ORDER BY CAST(SUBSTRING_INDEX(lm_numero_lote, '-', -1) AS UNSIGNED) DESC 
+            LIMIT 1
+        ");
+        
+        $data = $sql->fetch();
+        $ultimoNumero = $data['lm_numero_lote'] ?? 0;
+        
+        if ($ultimoNumero && preg_match('/^MED-(\d+)$/', $ultimoNumero, $matches)) {
+            $nuevoNumero = (int)$matches[1] + 1;
+        } else {
+            $nuevoNumero = 1;
+        }
+        
+        return 'MED-' . str_pad($nuevoNumero, 4, '0', STR_PAD_LEFT);
     }
 }

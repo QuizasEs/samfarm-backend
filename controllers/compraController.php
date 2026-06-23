@@ -2,8 +2,12 @@
 
 if ($peticionAjax) {
     require_once "../models/compraModel.php";
+    require_once "../models/loteModel.php";
+    require_once "../models/preciosModel.php";
 } else {
     require_once "./models/compraModel.php";
+    require_once "./models/loteModel.php";
+    require_once "./models/preciosModel.php";
 }
 
 class compraController extends compraModel
@@ -21,12 +25,13 @@ class compraController extends compraModel
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
                 m.med_presentacion,
-                m.med_descripcion,
+                pr.pr_razon_social AS proveedor,
                 m.med_codigo_barras,
                 ff.ff_nombre AS forma,
                 vd.vd_nombre AS via,
                 uf.uf_nombre AS uso
             FROM medicamento AS m
+            LEFT JOIN proveedores AS pr ON m.pr_id = pr.pr_id
             LEFT JOIN forma_farmaceutica AS ff ON m.ff_id = ff.ff_id
             LEFT JOIN via_de_administracion AS vd ON m.vd_id = vd.vd_id
             LEFT JOIN uso_farmacologico AS uf ON m.uf_id = uf.uf_id
@@ -58,7 +63,8 @@ class compraController extends compraModel
                     m.med_nombre_quimico LIKE '$busqueda' OR
                     m.med_presentacion LIKE '$busqueda' OR
                     m.med_descripcion LIKE '$busqueda' OR
-                    m.med_codigo_barras LIKE '$busqueda'
+                    m.med_codigo_barras LIKE '$busqueda' OR
+                    pr.pr_razon_social LIKE '$busqueda'
                 )
             ";
         }
@@ -74,7 +80,7 @@ class compraController extends compraModel
         /* validamos y limpiamos cadena entrante */
         $numero_compra = mainModel::limpiar_cadena($_POST['Numero_compra_reg'] ?? '');
         $usuario_id = mainModel::limpiar_cadena($_SESSION['id_smp']);
-        $sucursal_id = mainModel::limpiar_cadena($_SESSION['sucursal_smp']);
+        $sucursal_id = mainModel::limpiar_cadena($_POST['sucursal_reg'] ?? $_SESSION['sucursal_smp']);
 
         $lotes_json = trim($_POST['lotes_json'] ?? '[]');
         $totales_json = trim($_POST['totales_json'] ?? '{}');
@@ -158,9 +164,12 @@ class compraController extends compraModel
             $cantidad_blister = isset($lote['cantidad_blister']) && (int)$lote['cantidad_blister'] > 0 ? (int)$lote['cantidad_blister'] : 1;
             $cantidad_unidades = isset($lote['cantidad_unidades']) && (int)$lote['cantidad_unidades'] > 0 ? (int)$lote['cantidad_unidades'] : 1;
             $fecha_vencimiento = mainModel::limpiar_cadena($lote['vencimiento'] ?? null);
-            $precio_compra = is_numeric($lote['precioCompra']) ? (float)$lote['precioCompra'] : 0;
+            $precio_compra_caja = is_numeric($lote['precioCompra']) ? (float)$lote['precioCompra'] : 0;
             $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
+
+            /* Convertir precio de compra de caja a unitario */
+            $precio_compra = ($cantidad_unidades > 0) ? $precio_compra_caja / $cantidad_unidades : $precio_compra_caja;
 
             /* obtener pr_id del medicamento y validar existencia */
             $conexion = mainModel::conectar();
@@ -192,7 +201,7 @@ class compraController extends compraModel
             }
 
             /* Validar datos del lote */
-            if (empty($medicamento_id) || $cantidad_cajas <= 0 || $precio_compra <= 0) {
+            if (empty($medicamento_id) || $cantidad_cajas <= 0 || $precio_compra_caja <= 0) {
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Datos incompletos',
@@ -204,11 +213,11 @@ class compraController extends compraModel
             }
 
             /* cálculos de cantidades */
-            $lm_cant_caja = $cantidad_cajas * $cantidad_unidades; // total unidades
+            $lm_cant_caja = $cantidad_cajas;
             $lm_cant_blister = 1;
-            $lm_cant_unidad = 1;
-            $lm_total_unidades = $lm_cant_caja;
-            $lm_cant_actual_cajas = $cantidad_cajas; // número de cajas disponibles
+            $lm_cant_unidad = $cantidad_unidades;
+            $lm_total_unidades = $cantidad_cajas * $cantidad_unidades;
+            $lm_cant_actual_cajas = $cantidad_cajas;
             $lm_cant_actual_unidades = $lm_total_unidades;
             $subtotal_lote = $lm_total_unidades * $precio_compra;
             $lm_estado = $activar_lote ? 'activo' : 'en_espera';
@@ -227,6 +236,7 @@ class compraController extends compraModel
                 "lm_cant_actual_cajas" => $lm_cant_actual_cajas,
                 "lm_cant_actual_unidades" => $lm_cant_actual_unidades,
                 "lm_precio_compra" => $precio_compra,
+                "lm_precio_costo" => $precio_compra_caja,
                 "lm_precio_venta" => $precio_venta,
                 "lm_fecha_vencimiento" => $fecha_vencimiento,
                 "lm_estado" => $lm_estado,
@@ -249,6 +259,68 @@ class compraController extends compraModel
                 ];
                 echo json_encode($alerta);
                 exit();
+            }
+
+            /* propagar precios a todos los lotes activos del mismo medicamento */
+            $sql_lotes = $conexion->prepare("
+                SELECT lm_id, lm_numero_lote, lm_precio_venta, su_id
+                FROM lote_medicamento
+                WHERE med_id = :med_id
+                  AND lm_estado = 'activo'
+                  AND lm_cant_actual_unidades > 0
+                  AND lm_id != :lote_id_excluir
+            ");
+            $sql_lotes->bindParam(":med_id", $medicamento_id);
+            $sql_lotes->bindParam(":lote_id_excluir", $lote_id);
+            $sql_lotes->execute();
+            $lotes_existentes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($lotes_existentes as $lote_existente) {
+                $datos_up = [
+                    'ID' => $lote_existente['lm_id'],
+                    'lm_costo_lista' => $datos_lote['lm_costo_lista'],
+                    'lm_precio_costo' => $datos_lote['lm_precio_costo'],
+                    'lm_precio_compra' => $datos_lote['lm_precio_compra'],
+                    'lm_cant_unidad' => $datos_lote['lm_cant_unidad'],
+                    'lm_margen_u' => $datos_lote['lm_margen_u'],
+                    'lm_margen_c' => $datos_lote['lm_margen_c'],
+                    'lm_precio_venta' => $datos_lote['lm_precio_venta'],
+                    'lm_precio_min_u' => $datos_lote['lm_precio_min_u'],
+                    'lm_precio_min_c' => $datos_lote['lm_precio_min_c']
+                ];
+
+                $resultado_update = loteModel::actualizar_lote_model($datos_up);
+
+                if ($resultado_update->rowCount() == 1) {
+                    $historial_balance = [
+                        'lm_id' => $lote_existente['lm_id'],
+                        'us_id' => $usuario_id,
+                        'hl_accion' => 'balance',
+                        'hl_descripcion' => "Balance de precios por compra #{$numero_compra} - Lote {$lote_existente['lm_numero_lote']}"
+                    ];
+                    loteModel::registrar_historial_lote_model($historial_balance);
+
+                    $detalle_balance = json_encode([
+                        'costo_lista' => $datos_lote['lm_costo_lista'],
+                        'precio_costo' => $datos_lote['lm_precio_costo'],
+                        'precio_compra' => $datos_lote['lm_precio_compra'],
+                        'unidades_caja' => $datos_lote['lm_cant_unidad'],
+                        'margen_u' => $datos_lote['lm_margen_u'],
+                        'margen_c' => $datos_lote['lm_margen_c'],
+                        'precio_venta' => $datos_lote['lm_precio_venta'],
+                        'precio_min_u' => $datos_lote['lm_precio_min_u'],
+                        'precio_min_c' => $datos_lote['lm_precio_min_c'],
+                        'origen' => 'compra',
+                        'compra_numero' => $numero_compra
+                    ]);
+                    preciosModel::registrar_balance_precio_model(
+                        $lote_existente['lm_id'],
+                        $usuario_id,
+                        $lote_existente['lm_precio_venta'],
+                        $datos_lote['lm_precio_venta'],
+                        $detalle_balance
+                    );
+                }
             }
 
             /* historial de creación del lote */

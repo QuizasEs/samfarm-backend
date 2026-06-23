@@ -87,6 +87,41 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
+    public function buscar_medicamento_agrupado_controller($termino, $sucursal_id, $filtros = [])
+    {
+        if (!isset($_SESSION['sucursal_smp'])) {
+            return json_encode([
+                "error" => true,
+                "mensaje" => "No se ha asignado una sucursal"
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        $sucursal_id = (int)$_SESSION['sucursal_smp'];
+        $termino = mainModel::limpiar_cadena($termino);
+
+        if (strlen($termino) < 1) {
+            return json_encode([], JSON_UNESCAPED_UNICODE);
+        }
+
+        $filtros_limpios = [];
+
+        if (!empty($filtros['presentacion'])) {
+            $filtros_limpios['presentacion'] = (int)mainModel::limpiar_cadena($filtros['presentacion']);
+        }
+        if (!empty($filtros['funcion'])) {
+            $filtros_limpios['funcion'] = (int)mainModel::limpiar_cadena($filtros['funcion']);
+        }
+        if (!empty($filtros['via'])) {
+            $filtros_limpios['via'] = (int)mainModel::limpiar_cadena($filtros['via']);
+        }
+        if (!empty($filtros['proveedor'])) {
+            $filtros_limpios['proveedor'] = (int)mainModel::limpiar_cadena($filtros['proveedor']);
+        }
+
+        $rows = self::buscar_medicamento_agrupado_model($termino, $sucursal_id, $filtros_limpios);
+        return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
+    }
+
 
     public function mas_vendidos_controller($limit = 5)
     {

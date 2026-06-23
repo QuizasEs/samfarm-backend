@@ -218,7 +218,7 @@
             <td>${index + 1}</td>
             <td>${escapeHtml(item.nombre || 'N/A')}</td>
             <td>${escapeHtml(item.med_presentacion || 'N/A')}</td>
-            <td>${escapeHtml(item.med_descripcion || 'N/A')}</td>
+            <td>${escapeHtml(item.proveedor || 'N/A')}</td>
             <td>${escapeHtml(item.med_codigo_barras || 'N/A')}</td>
             <td>
                 <span style="color: #27ae60; font-size: 12px;">Click para agregar</span>
@@ -374,28 +374,8 @@
 
         /** 🧮 Inicializa el contador de lote */
         function inicializarContador() {
-            const ultimoLoteInput = document.getElementById("ultimo_lote_valor");
-            const valor = ultimoLoteInput ? ultimoLoteInput.value.trim() : "";
-
-            if (!valor || valor === "0") {
-                contadorLote = 0;
-                return;
-            }
-
-            const patron = /^MED-(\d+)$/;
-            const match = valor.match(patron);
-
-            if (!match) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Número de lote inválido",
-                    text: "El número de lote anterior no tiene un formato válido. Se iniciará desde MED-0000.",
-                    timer: 4000,
-                    showConfirmButton: false
-                });
-                contadorLote = 0;
-                return;
-            }
+            contadorLote = 0;
+        }
 
             contadorLote = parseInt(match[1]) || 0;
         }
@@ -463,8 +443,14 @@
             const vencimiento = document.getElementById("fecha_vencimiento").value;
             const precioCompra = parseFloat(document.getElementById("precio_compra").value);
             const precioVenta = parseFloat(document.getElementById("precio_venta_reg").value);
-            const cb5El = document.getElementById("cb5");
-            const activar = cb5El ? (cb5El.checked ? 1 : 0) : 0;
+            const activar = 1;
+
+            // Campos de auditoría (costo lista y márgenes por caja)
+            const costoLista = parseFloat(document.getElementById("costo_lista").value) || null;
+            const margenUnitario = parseFloat(document.getElementById("margen_unitario").value) || null;
+            const margenCaja = parseFloat(document.getElementById("margen_caja").value) || null;
+            const precioMinUnitario = parseFloat(document.getElementById("precio_min_unitario").value) || null;
+            const precioMinCaja = parseFloat(document.getElementById("precio_min_caja").value) || null;
 
             if (!numero) {
                 Swal.fire('Error', 'No se pudo generar el número de lote.', 'error');
@@ -504,7 +490,12 @@
                 vencimiento,
                 precioCompra,
                 precioVenta,
-                activar_lote: activar
+                activar_lote: activar,
+                costo_lista: costoLista,
+                margen_unitario: margenUnitario,
+                margen_caja: margenCaja,
+                precio_min_unitario: precioMinUnitario,
+                precio_min_caja: precioMinCaja
             };
         }
 
@@ -1233,14 +1224,14 @@
                         '<ion-icon name="trash-outline" style="font-size: 20px; color: red;"></ion-icon>' +
                         '</button>' +
                         '</td>' +
-                        '<td>' + nombreDisplay + '</td>' +
-                        '<td>' + this.escapeHtml(it.presentacion || '') + '</td>' +
-                        '<td><input type="text" class="qty-input-unidades inp" data-index="' + i + '" value="' + unidadesRestantes + '" style="width: 60px; text-align: center;"></td>' +
-                        '<td><input type="text" class="qty-input-cajas inp" data-index="' + i + '" value="' + cajas + '" style="width: 60px; text-align: center;"></td>' +
-                        '<td>' + this.formatMoney(it.precio * (it.unidades_por_caja || 1)) + '</td>' +
-                        '<td>' + this.formatMoney(it.precio) + '</td>' +
-                        '<td><input type="number" class="descuento-input inp" data-index="' + i + '" value="' + (it.descuento || 0) + '" min="0" max="100" step="0.01" style="width: 80px; text-align: center;"></td>' +
-                        '<td class="' + ((it.descuento || 0) > 0 ? 'discounted-subtotal' : '') + '">' + this.formatMoney((it.precio * it.cantidad) - (it.descuento || 0)) + '</td>';
+                        '<td><span style="color:#1565C0;font-weight:700;">' + nombreDisplay + '</span></td>' +
+                        '<td><span style="color:#00897B;font-weight:600;">' + this.escapeHtml(it.presentacion || '') + '</span></td>' +
+                        '<td><input type="text" class="qty-input-unidades inp" data-index="' + i + '" value="' + unidadesRestantes + '" style="width: 60px; text-align: center; color:#6A1B9A;font-weight:700;"></td>' +
+                        '<td><input type="text" class="qty-input-cajas inp" data-index="' + i + '" value="' + cajas + '" style="width: 60px; text-align: center; color:#00695C;font-weight:700;"></td>' +
+                        '<td><span style="color:#00BFA5;font-weight:700;">' + this.formatMoney(it.precio * (it.unidades_por_caja || 1)) + '</span></td>' +
+                        '<td><span style="color:#00BFA5;font-weight:700;">' + this.formatMoney(it.precio) + '</span></td>' +
+                        '<td><input type="number" class="descuento-input inp" data-index="' + i + '" value="' + (it.descuento || 0) + '" min="0" max="100" step="0.01" style="width: 80px; text-align: center; color:#7B1FA2;font-weight:700;"></td>' +
+                        '<td class="' + ((it.descuento || 0) > 0 ? 'discounted-subtotal' : '') + '"><span style="color:#2E7D32;font-weight:700;">' + this.formatMoney((it.precio * it.cantidad) - (it.descuento || 0)) + '</span></td>';
 
                     this.tablaBody.appendChild(tr);
                 });
@@ -1703,7 +1694,13 @@
             }
 
             const body = new URLSearchParams();
-            body.append('ventaAjax', 'buscar');
+            const agrupar = document.getElementById('chk_agrupar_lotes')?.checked ?? false;
+            
+            if (agrupar) {
+                body.append('ventaAjax', 'buscar_agrupado');
+            } else {
+                body.append('ventaAjax', 'buscar');
+            }
             body.append('termino', term);
             if (this.filtro_presentacion && this.filtro_presentacion.value) body.append('presentacion', this.filtro_presentacion.value);
             if (this.filtro_funcion && this.filtro_funcion.value) body.append('funcion', this.filtro_funcion.value);
@@ -1751,24 +1748,23 @@
                 return;
             }
 
-            const tableHtml = `
+const tableHtml = `
                 <div class="table-popup-wrap">
                     <div class="table-popup open">
                         <div class="tp-scroll">
-                            <table>
+                            <table style="font-size:11px; width:100%;">
                                 <thead>
                                     <tr>
                                         <th style="width:5%;">n° lote</th>
-                                        <th style="width:40%;">descripcion</th>
-                                        <th>medicamento</th>
-                                        <th>c. barras</th>
+                                        <th style="width:35%;">descripcion</th>
+                                        <th style="width:12%;">proveedor</th>
+                                        <th>codigo barras</th>
                                         <th>c. unidad actual</th>
-                                        <th>p. compra</th>
-                                        <th>p. venta unitario</th>
-                                        <th>p. venta caja</th>
+                                        <th>Precio unitario</th>
+                                        <th>Precio caja</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody style="font-size:18px;">
                                     ${items.map((it, index) => {
                                         const nombre = this.escapeHtml(it.nombre || '');
                                         const lote = this.escapeHtml(it.lm_numero_lote || '');
@@ -1807,23 +1803,21 @@
 
                                         const sinStock = stock <= 0 ? 'sin-stock' : '';
 
-                                        const descripcion = `${nombre} - ${presentacion}`;
-                                        const precioCompra = 'n/a'; // no disponible en respuesta
+const descripcion = `${nombre} - ${presentacion}`;
                                         const precioVentaUnitario = this.formatMoney(it.precio_venta || 0);
                                         const precioVentaCaja = this.formatMoney((it.precio_venta || 0) * unidadesPorCaja);
 
-                                        return `
-                                            <tr class="tr-cart ${sinStock}" data-med-id="${it.med_id}" data-lote-id="${it.lm_id || ''}" data-nombre="${this.escapeHtml(it.nombre)}" data-presentacion="${this.escapeHtml(it.presentacion)}" data-proveedor="${this.escapeHtml(it.proveedor)}" data-precio="${it.precio_venta || 0}" data-stock="${stock}" data-unidades-caja="${unidadesPorCaja}" data-lote="${this.escapeHtml(it.lm_numero_lote || '')}">
-                                                <td >${lote}</td>
-                                                <td  class="tdp">${descripcion}</td>
-                                                <td>${presentacion}</td>
-                                                <td>${this.escapeHtml(it.med_codigo_barras || 'n/a')}</td>
-                                                <td>${stock}</td>
-                                                <td>${precioCompra}</td>
-                                                <td>bs. ${precioVentaUnitario}</td>
-                                                <td>bs. ${precioVentaCaja}</td>
-                                            </tr>
-                                        `;
+                                         return `
+                                             <tr class="tr-cart ${sinStock}" data-med-id="${it.med_id}" data-lote-id="${it.lm_id || ''}" data-nombre="${this.escapeHtml(it.nombre)}" data-presentacion="${this.escapeHtml(it.presentacion)}" data-proveedor="${this.escapeHtml(it.proveedor)}" data-precio="${it.precio_venta || 0}" data-stock="${stock}" data-unidades-caja="${unidadesPorCaja}" data-lote="${this.escapeHtml(it.lm_numero_lote || '')}">
+<td style="font-size:11px;"><span style="color:#7C4DFF;font-weight:700;">${lote}</span></td>
+                                                  <td style="font-size:15px;" class="tdp" style="font-size:13px;"><span style="color:#1565C0;font-weight:600;">${nombre}</span> <span style="color:#546E7A;">- ${presentacion}</span></td>
+<td style="font-size:13px;"><span style="color:#00897B;font-weight:600;">${proveedor}</span></td>
+                                                <td style="font-size:18px;"><span style="color:#455A64;font-family:monospace;">${this.escapeHtml(it.med_codigo_barras || 'n/a')}</span></td>
+                                                <td style="font-size:18px;">${stockText}</td>
+                                                <td style="font-size:18px;"><span style="color:#0097A7;font-weight:700;">bs. ${precioVentaUnitario}</span></td>
+                                                <td style="font-size:18px;"><span style="color:#03e1ff;font-weight:700;">bs. ${precioVentaCaja}</span></td>
+                                             </tr>
+                                         `;
                                     }).join('')}
                                 </tbody>
                             </table>
@@ -2993,6 +2987,159 @@
             }
         };
 
+        // ==================== MODAL BALANCE ====================
+        const balance = {
+            async abrir(medId, suId, medicamento, sucursal) {
+                document.getElementById('balanceMedId').value = medId;
+                document.getElementById('balanceSuId').value = suId;
+                document.getElementById('modalBalanceMedicamento').textContent = medicamento;
+                document.getElementById('balanceNombreMedicamento').textContent = medicamento;
+                document.getElementById('balanceSucursal').textContent = sucursal;
+
+                await balance.obtenerDatosActuales(medId, suId);
+
+                utils.abrir('modalBalanceInventario');
+                balance.bindCalculationEvents();
+            },
+
+            async obtenerDatosActuales(medId, suId) {
+                try {
+                    const data = await utils.ajax({
+                        inventarioAjax: 'obtener_datos_balance',
+                        med_id: medId,
+                        su_id: suId
+                    });
+
+                    if (data.success) {
+                        document.getElementById('balanceCostoLista').value = data.costo_lista || '';
+                        document.getElementById('balancePrecioCosto').value = data.precio_costo || '';
+                        document.getElementById('balanceUnidadesCaja').value = data.unidades_caja || 1;
+                        document.getElementById('balanceMargenUnitario').value = data.margen_u || '';
+                        document.getElementById('balanceMargenCaja').value = data.margen_c || '';
+                        document.getElementById('balanceLaboratorio').textContent = data.proveedor || 'Sin proveedor';
+
+                        balance.calcularTodo();
+                    }
+                } catch (error) {
+                    console.error('Error obteniendo datos balance:', error);
+                }
+            },
+
+            calcularTodo() {
+                const costoListaCaja = parseFloat(document.getElementById('balanceCostoLista')?.value) || 0;
+                const unidadesCaja = parseInt(document.getElementById('balanceUnidadesCaja')?.value) || 1;
+                const margenU = parseFloat(document.getElementById('balanceMargenUnitario')?.value) || 0;
+                const margenC = parseFloat(document.getElementById('balanceMargenCaja')?.value) || 0;
+
+                const costoUnitario = unidadesCaja > 0 ? costoListaCaja / unidadesCaja : 0;
+                const precioVenta = costoUnitario * (1 + margenU / 100);
+                const precioMinU = costoUnitario * (1 + margenU / 100);
+                const precioMinC = costoListaCaja * (1 + margenC / 100);
+
+                document.getElementById('balanceCostoUnitario').value = costoUnitario.toFixed(2);
+                document.getElementById('balancePrecioVenta').value = precioVenta.toFixed(2);
+                document.getElementById('balancePrecioMinUnitario').value = precioMinU.toFixed(2);
+                document.getElementById('balancePrecioMinCaja').value = precioMinC.toFixed(2);
+            },
+
+            clampMargen(input) {
+                let value = input.value;
+
+                if (value === "") return;
+
+                value = value.replace(/[^0-9.]/g, "");
+
+                const parts = value.split(".");
+                if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("").replace(/\./g, "");
+                }
+
+                if (parts.length > 1 && parts[1].length > 2) {
+                    value = parts[0] + "." + parts[1].substring(0, 2);
+                }
+
+                if (value.length > 1 && value.startsWith("0") && value[1] !== ".") {
+                    value = value.substring(1);
+                }
+
+                if (parseFloat(value) > 100) {
+                    value = "100";
+                }
+
+                if (input.value !== value) {
+                    input.value = value;
+                }
+            },
+
+            validarMargen(input) {
+                let valor = parseFloat(input.value);
+                if (isNaN(valor) || valor < 0) {
+                    input.value = "0.00";
+                } else {
+                    if (valor > 100) valor = 100;
+                    input.value = valor.toFixed(2);
+                }
+            },
+
+            bindCalculationEvents() {
+                const margenU = document.getElementById('balanceMargenUnitario');
+                const margenC = document.getElementById('balanceMargenCaja');
+
+                if (margenU) {
+                    margenU.addEventListener('input', (e) => {
+                        balance.clampMargen(e.target);
+                        balance.calcularTodo();
+                    });
+                    margenU.addEventListener('blur', (e) => balance.validarMargen(e.target));
+                }
+                if (margenC) {
+                    margenC.addEventListener('input', (e) => {
+                        balance.clampMargen(e.target);
+                        balance.calcularTodo();
+                    });
+                    margenC.addEventListener('blur', (e) => balance.validarMargen(e.target));
+                }
+            },
+
+            async guardar() {
+                const medId = document.getElementById('balanceMedId').value;
+                const suId = document.getElementById('balanceSuId').value;
+                const costoLista = document.getElementById('balanceCostoLista').value;
+                const precioCosto = document.getElementById('balancePrecioCosto').value;
+                const unidadesCaja = document.getElementById('balanceUnidadesCaja').value;
+                const margenU = document.getElementById('balanceMargenUnitario').value;
+                const margenC = document.getElementById('balanceMargenCaja').value;
+                const precioVenta = document.getElementById('balancePrecioVenta').value;
+                const precioMinU = document.getElementById('balancePrecioMinUnitario').value;
+                const precioMinC = document.getElementById('balancePrecioMinCaja').value;
+
+                const formData = new FormData();
+                formData.append('inventarioAjax', 'guardar_balance');
+                formData.append('med_id', medId);
+                formData.append('su_id', suId);
+                formData.append('lm_costo_lista', costoLista);
+                formData.append('lm_precio_costo', precioCosto);
+                formData.append('lm_unidades_caja', unidadesCaja);
+                formData.append('lm_margen_u', margenU);
+                formData.append('lm_margen_c', margenC);
+                formData.append('lm_precio_venta', precioVenta);
+                formData.append('lm_precio_min_u', precioMinU);
+                formData.append('lm_precio_min_c', precioMinC);
+
+                try {
+                    const data = await utils.ajax(formData);
+                    if (data.success) {
+                        Swal.fire('Éxito', 'Balance de precios guardado', 'success');
+                        utils.cerrar('modalBalanceInventario');
+                    } else {
+                        Swal.fire('Error', data.error || 'Error al guardar', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Error de conexión', 'error');
+                }
+            }
+        };
+
         // ==================== LISTENER PARA ACTUALIZAR STOCK ==================== 
         document.addEventListener('DOMContentLoaded', function() {
             const selectLote = document.getElementById('transferirLote');
@@ -3020,7 +3167,9 @@
             procesarTransferencia: transferir.procesar,
             verHistorial: historial.abrir,
             abrirConfiguracion: configuracion.abrir,
-            guardarConfiguracion: configuracion.guardar
+            guardarConfiguracion: configuracion.guardar,
+            abrirBalance: balance.abrir,
+            guardarBalance: balance.guardar
         };
     })(); //  Cierre correcto del IIFE
 

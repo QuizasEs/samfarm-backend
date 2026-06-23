@@ -87,6 +87,12 @@ if (isset($_POST['loteAjax'])) {
     if ($valor == "update") {
         echo $ins_lote->actualizar_lote_controller();
     }
+
+    if ($valor == "obtener_ultimo_lote_medicamento") {
+        $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
+        echo $ins_lote->obtener_ultimo_lote_medicamento_controller($med_id);
+        exit();
+    }
 }
 
 // Manejar exportaciones GET (PDF/excel)

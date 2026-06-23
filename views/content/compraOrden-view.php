@@ -11,10 +11,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] != 1 && $_SESSION['rol_s
 require_once "./controllers/medicamentoController.php";
 $ins_med = new medicamentoController();
 $datos_select = $ins_med->datos_extras_controller();
-$ultimo_lote = $ins_med->ultimo_lote_controller();
 $ultima_compra = $ins_med->ultima_compra_controller();
-
-
 ?>
 <div class="">
     <div class="ph">
@@ -31,7 +28,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" name="lotes_json" id="lotes_json" value="[]">
         <input type="hidden" name="totales_json" id="totales_json" value="{}">
         <input type="hidden" name="Proveedor_reg" id="Proveedor_reg" value="">
-        <input type="hidden" id="ultimo_lote_valor" value="<?php echo $ultimo_lote ?? 0; ?>">
         <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
 
         <script src="<?php echo SERVER_URL; ?>views/script/compraOrden-view.js"></script>
@@ -139,6 +135,22 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     margin-left: 0;
                 }
             }
+
+            .tabla-resultado-container {
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            .tabla-resultado {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .tabla-resultado-container::-webkit-scrollbar {
+                width: 6px;
+            }
+            .tabla-resultado-container::-webkit-scrollbar-thumb {
+                background: var(--border-strong);
+                border-radius: 3px;
+            }
         </style>
 
         <!-- DATOS ESENCIALES -->
@@ -156,6 +168,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
         </div>
 
+        
 
         <!-- FILTRAR MEDICAMENTO -->
         <div class="card mb16">
@@ -224,21 +237,23 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
             <div class="cb">
                 <div class="tw">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>Producto</th>
-                                <th>Presentación</th>
-                                <th>Descripción</th>
-                                <th>Código de Barras</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaMedicamentos">
-                            <!-- Resultados de búsqueda -->
-                        </tbody>
-                    </table>
+                    <div class="tabla-resultado-container">
+                        <table class="tabla-resultado">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Producto</th>
+                                    <th>Presentación</th>
+                                    <th>Proveedor</th>
+                                    <th>Código de Barras</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaMedicamentos">
+                                <!-- Resultados de búsqueda -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,6 +268,26 @@ $ultima_compra = $ins_med->ultima_compra_controller();
             </div>
         </div>
 
+        <!-- Sucursal -->
+        <div class="card mb16">
+            <div class="ch">
+                <span class="ct">¿En que sucursal se registrara la compra? </span>
+            </div>
+            <div class="cb">
+                <div class="fr">
+                    <div class="fg">
+                        <label class="fl" for="sucursal_reg">Sucursal*</label>
+                        <select class="sel" name="sucursal_reg" id="sucursal_reg">
+                            <?php foreach ($datos_select['sucursales'] as $suc) { ?>
+                                <option value="<?php echo $suc['su_id']; ?>" <?php echo ($suc['su_id'] == $_SESSION['id_smp']) ? 'selected' : ''; ?>>
+                                    <?php echo $suc['su_nombre']; ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- TOTALES -->
         <div class="card">
             <div class="ch">
@@ -364,20 +399,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                     <div class="fg">
                         <label class="fl" for="precio_min_caja">Precio Min. Caja</label>
                         <input class="inp" type="number" id="precio_min_caja" step="0.01" min="0">
-                    </div>
-                </div>
-
-                <div class="stit">Opciones</div>
-                <div class="fr">
-                    <div class="fg">
-                        <label class="fl">Activar este Lote?</label>
-                        <div class="swg">
-                            <div></div>
-                            <label class="sw">
-                                <input type="checkbox" id="cb5">
-                                    <span class="swt"></span>
-                            </label>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -76,14 +76,20 @@ class ingresoMasivoModel extends mainModel
                 med_id,
                 su_id,
                 pr_id,
+                pr_id_compra,
                 lm_numero_lote,
                 lm_cant_caja,
                 lm_cant_blister,
                 lm_cant_unidad,
                 lm_cant_actual_cajas,
                 lm_cant_actual_unidades,
+                lm_costo_lista,
                 lm_precio_compra,
                 lm_precio_venta,
+                lm_margen_u,
+                lm_margen_c,
+                lm_precio_min_u,
+                lm_precio_min_c,
                 lm_fecha_vencimiento,
                 lm_estado,
                 lm_fecha_ingreso
@@ -91,14 +97,20 @@ class ingresoMasivoModel extends mainModel
                 :med_id,
                 :su_id,
                 :pr_id,
+                :pr_id_compra,
                 :lm_numero_lote,
                 :lm_cant_caja,
                 :lm_cant_blister,
                 :lm_cant_unidad,
                 :lm_cant_actual_cajas,
                 :lm_cant_actual_unidades,
+                :lm_costo_lista,
                 :lm_precio_compra,
                 :lm_precio_venta,
+                :lm_margen_u,
+                :lm_margen_c,
+                :lm_precio_min_u,
+                :lm_precio_min_c,
                 :lm_fecha_vencimiento,
                 :lm_estado,
                 NOW()
@@ -108,14 +120,20 @@ class ingresoMasivoModel extends mainModel
         $sql->bindParam(":med_id", $datos['med_id']);
         $sql->bindParam(":su_id", $datos['su_id']);
         $sql->bindParam(":pr_id", $datos['pr_id']);
+        $sql->bindParam(":pr_id_compra", $datos['pr_id_compra']);
         $sql->bindParam(":lm_numero_lote", $datos['lm_numero_lote']);
         $sql->bindParam(":lm_cant_caja", $datos['lm_cant_caja']);
         $sql->bindParam(":lm_cant_blister", $datos['lm_cant_blister']);
         $sql->bindParam(":lm_cant_unidad", $datos['lm_cant_unidad']);
         $sql->bindParam(":lm_cant_actual_cajas", $datos['lm_cant_actual_cajas']);
         $sql->bindParam(":lm_cant_actual_unidades", $datos['lm_cant_actual_unidades']);
+        $sql->bindParam(":lm_costo_lista", $datos['lm_costo_lista']);
         $sql->bindParam(":lm_precio_compra", $datos['lm_precio_compra']);
         $sql->bindParam(":lm_precio_venta", $datos['lm_precio_venta']);
+        $sql->bindParam(":lm_margen_u", $datos['lm_margen_u']);
+        $sql->bindParam(":lm_margen_c", $datos['lm_margen_c']);
+        $sql->bindParam(":lm_precio_min_u", $datos['lm_precio_min_u']);
+        $sql->bindParam(":lm_precio_min_c", $datos['lm_precio_min_c']);
         $sql->bindParam(":lm_fecha_vencimiento", $datos['lm_fecha_vencimiento']);
         $sql->bindParam(":lm_estado", $datos['lm_estado']);
 

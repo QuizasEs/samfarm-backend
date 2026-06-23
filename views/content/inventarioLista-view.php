@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();
@@ -253,7 +253,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             <div class="mf">
                 <button type="button" class="btn btn-war" onclick="App.closeM('modalDetalleInventario')">Cerrar</button>
                 <?php if (isset($_SESSION['rol_smp']) && $_SESSION['rol_smp'] == 1) { ?>
-                <button type="button" class="btn btn-def" onclick="if(typeof window.InventarioModals.abrirBalance === 'function') { window.InventarioModals.abrirBalance(); } else { console.error('window.InventarioModals.abrirBalance is not a function'); }">
+                <button type="button" class="btn btn-def" onclick="InventarioModals.abrirBalance(document.getElementById('modalDetalleMedId').value, document.getElementById('modalDetalleSuId').value, document.getElementById('modalDetalleMedicamento').textContent, document.getElementById('detalleSucursal').textContent)">
                     <ion-icon name="scale-outline"></ion-icon> Balance de Precios
                 </button>
                 <?php } ?>
@@ -307,45 +307,59 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="stit">Datos de Auditoría</div>
+                    <div class="stit">Precios por Caja (Entrada del Usuario)</div>
                     <div class="card">
                         <div class="cb">
-                            <div class="fr1">
+                            <div class="fr">
                                 <div class="fg">
-                                    <label class="fl" for="balancePrecioCompra">Precio de Compra</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_precio_compra" id="balancePrecioCompra" min="0" readonly>
+                                    <label class="fl" for="balanceCostoLista">Costo Lista <small>(por caja)</small></label>
+                                    <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="balanceCostoLista" min="0" placeholder="0.00" readonly style="background: var(--bg-soft);">
                                 </div>
-
+                                <div class="fg">
+                                    <label class="fl" for="balancePrecioCosto">Precio Costo <small>(por caja)</small></label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_costo" id="balancePrecioCosto" min="0" placeholder="0.00" readonly style="background: var(--bg-soft);">
+                                </div>
                             </div>
                             <div class="fr">
                                 <div class="fg">
-                                    <label class="fl" for="balanceCostoLista">Costo Lista</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="balanceCostoLista" min="0">
+                                    <label class="fl" for="balanceUnidadesCaja">Unidades por Caja</label>
+                                    <input class="inp" type="number" step="1" name="lm_unidades_caja" id="balanceUnidadesCaja" min="1" value="1" placeholder="1" readonly style="background: var(--bg-soft);">
                                 </div>
                                 <div class="fg">
                                     <label class="fl" for="balanceMargenUnitario">Margen Unitario (%)</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_margen_u" id="balanceMargenUnitario" min="0">
+                                    <input class="inp" type="number" step="0.01" name="lm_margen_u" id="balanceMargenUnitario" min="0" placeholder="0.00">
                                 </div>
-
                             </div>
                             <div class="fr">
                                 <div class="fg">
                                     <label class="fl" for="balanceMargenCaja">Margen Caja (%)</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_margen_c" id="balanceMargenCaja" min="0">
+                                    <input class="inp" type="number" step="0.01" name="lm_margen_c" id="balanceMargenCaja" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stit">Precios Derivados (Calculados Automáticamente)</div>
+                    <div class="card">
+                        <div class="cb">
+                            <div class="fr">
+                                <div class="fg">
+                                     <label class="fl">Costo Unitario <small>(costo lista ÷ unidades por caja)</small></label>
+                                    <input class="inp" type="number" step="0.01" id="balanceCostoUnitario" min="0" readonly style="background: var(--bg-soft);">
                                 </div>
                                 <div class="fg">
-                                    <label class="fl" for="balancePrecioVenta">Precio Venta Unitario</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_precio_venta" id="balancePrecioVenta" min="0" readonly>
+                                    <label class="fl">Precio Venta Unitario <small>(costo unitario + margen U%)</small></label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_venta" id="balancePrecioVenta" min="0" readonly style="background: var(--bg-soft);">
                                 </div>
                             </div>
                             <div class="fr">
                                 <div class="fg">
-                                    <label class="fl" for="balancePrecioMinUnitario">Precio Min. Unitario</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="balancePrecioMinUnitario" min="0">
+                                    <label class="fl">Precio Min. Unitario <small>(costo unitario + margen U%)</small></label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="balancePrecioMinUnitario" min="0" readonly style="background: var(--bg-soft);">
                                 </div>
                                 <div class="fg">
-                                    <label class="fl" for="balancePrecioMinCaja">Precio Min. Caja</label>
-                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="balancePrecioMinCaja" min="0">
+                                    <label class="fl">Precio Min. Caja <small>(precio costo + margen C%)</small></label>
+                                    <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="balancePrecioMinCaja" min="0" readonly style="background: var(--bg-soft);">
                                 </div>
                             </div>
                         </div>
@@ -466,7 +480,300 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="<?php echo SERVER_URL; ?>views/script/inventarioLista-view.js"></script>
+    <script>
+        
+        let chartMedicamentos, chartDiario, chartSucursales;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función para el botón PDF
+            const btnPDFInventario = document.getElementById('btnExportarPDFInventario');
+            if (btnPDFInventario) {
+                btnPDFInventario.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    exportarPDFInventario();
+                });
+            }
+
+            // Función para el botón Excel
+            const btnExcelInventario = document.getElementById('btnExportarExcel');
+            if (btnExcelInventario) {
+                btnExcelInventario.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    exportarExcelInventario();
+                });
+            }
+        });
+
+        function exportarExcelInventario() {
+            const form = document.querySelector('.filtro-dinamico');
+            if (!form) {
+                console.warn('No se encontró el formulario de filtros');
+                return;
+            }
+
+            const busqueda = form.querySelector('input[name="busqueda"]');
+            const select2 = form.querySelector('select[name="select2"]');
+            const select3 = form.querySelector('select[name="select3"]');
+            const select4 = form.querySelector('select[name="select4"]');
+
+            let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_excel';
+
+            if (busqueda && busqueda.value.trim()) {
+                url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
+            }
+
+            if (select2 && select2.value) {
+                url += '&select2=' + encodeURIComponent(select2.value);
+            }
+
+            if (select3 && select3.value) {
+                url += '&select3=' + encodeURIComponent(select3.value);
+            }
+
+            if (select4 && select4.value) {
+                url += '&select4=' + encodeURIComponent(select4.value);
+            }
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando Excel',
+                text: 'El archivo se está generado...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function exportarPDFInventario() {
+            const form = document.querySelector('.filtro-dinamico');
+            if (!form) {
+                console.warn('No se encontró el formulario de filtros');
+                return;
+            }
+
+            const busqueda = form.querySelector('input[name="busqueda"]');
+            const select2 = form.querySelector('select[name="select2"]');
+            const select3 = form.querySelector('select[name="select3"]');
+            const select4 = form.querySelector('select[name="select4"]');
+
+            let url = '<?php echo SERVER_URL; ?>ajax/inventarioAjax.php?inventarioAjax=exportar_pdf';
+
+            if (busqueda && busqueda.value.trim()) {
+                url += '&busqueda=' + encodeURIComponent(busqueda.value.trim());
+            }
+
+            if (select2 && select2.value) {
+                url += '&select2=' + encodeURIComponent(select2.value);
+            }
+
+            if (select3 && select3.value) {
+                url += '&select3=' + encodeURIComponent(select3.value);
+            }
+
+            if (select4 && select4.value) {
+                url += '&select4=' + encodeURIComponent(select4.value);
+            }
+
+            window.open(url, '_blank');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Generando PDF',
+                text: 'El reporte se está generando...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function cargarGraficosMargen() {
+            const formData1 = new FormData();
+            formData1.append('inventarioAjax', 'margen_medicamentos');
+
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData1
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const labels = data.map(d => d.med_nombre_quimico.substring(0, 25));
+                        const margenes = data.map(d => parseFloat(d.margen_bruto_pct) || 0);
+                        const ingresos = data.map(d => parseFloat(d.ingresos_totales) || 0);
+                        const costos = data.map(d => parseFloat(d.costo_ventas) || 0);
+
+                        const totalIngresos = ingresos.reduce((a, b) => a + b, 0);
+                        const totalCostos = costos.reduce((a, b) => a + b, 0);
+                        const totalMargen = totalIngresos - totalCostos;
+                        const pctMargen = totalIngresos > 0 ? ((totalMargen / totalIngresos) * 100).toFixed(2) : 0;
+
+                        document.getElementById('totalIngresos').textContent = totalIngresos.toFixed(2) + ' Bs';
+                        document.getElementById('totalCostos').textContent = totalCostos.toFixed(2) + ' Bs';
+                        document.getElementById('margenBrutoBs').textContent = totalMargen.toFixed(2) + ' Bs';
+                        document.getElementById('margenBrutoPct').textContent = pctMargen + '%';
+
+                        const ctx1 = document.getElementById('chartMedicamentos');
+                        if (chartMedicamentos) chartMedicamentos.destroy();
+                        chartMedicamentos = new Chart(ctx1, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Margen (%)',
+                                    data: margenes,
+                                    backgroundColor: '#667eea',
+                                    borderRadius: 4
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'bottom'
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {
+                                            callback: v => v + '%'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+
+            const formData2 = new FormData();
+            formData2.append('inventarioAjax', 'margen_diario');
+
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData2
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const labels = data.map(d => d.fecha);
+                        const margenes = data.map(d => parseFloat(d.margen_pct) || 0);
+
+                        const ctx2 = document.getElementById('chartDiario');
+                        if (chartDiario) chartDiario.destroy();
+                        chartDiario = new Chart(ctx2, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Margen % Diario',
+                                    data: margenes,
+                                    borderColor: '#43e97b',
+                                    backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointRadius: 3,
+                                    pointBackgroundColor: '#43e97b'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'bottom'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {
+                                            callback: v => v + '%'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+
+            const formData3 = new FormData();
+            formData3.append('inventarioAjax', 'margen_sucursal');
+
+            fetch('<?php echo SERVER_URL; ?>ajax/inventarioAjax.php', {
+                    method: 'POST',
+                    body: formData3
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const labels = data.map(d => d.su_nombre + ' (' + d.mes + ')');
+                        const margenes = data.map(d => parseFloat(d.margen_bruto_pct) || 0);
+
+                        const ctx3 = document.getElementById('chartSucursales');
+                        if (chartSucursales) chartSucursales.destroy();
+                        chartSucursales = new Chart(ctx3, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Margen Bruto %',
+                                    data: margenes,
+                                    backgroundColor: '#f093fb',
+                                    borderRadius: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'bottom'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {
+                                            callback: v => v + '%'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+        }
+
+        // Procesar parámetros de URL para filtros
+        function procesarParametrosURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Si hay parámetro 'sucursal', seleccionar esa sucursal en el filtro
+            const sucursalParam = urlParams.get('sucursal');
+            if (sucursalParam) {
+                const selectSucursal = document.querySelector('select[name="select3"]');
+                if (selectSucursal) {
+                    selectSucursal.value = sucursalParam;
+                    // Disparar evento change para que se actualice la tabla
+                    selectSucursal.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(cargarGraficosMargen, 500);
+            // Procesar parámetros de URL después de que se cargue la página
+            setTimeout(procesarParametrosURL, 100);
+        });
+    </script>
 
 
 

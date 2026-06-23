@@ -280,8 +280,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </form>
             </div>
             <div class="mf">
-                <button type="button" class="btn btn-sec" onclick="MedicamentosModals.cerrarModalEditar()">Cancelar</button>
-                <button type="button" class="btn btn-def" onclick="MedicamentosModals.guardarEditar()">Actualizar</button>
+                <button type="button" class="btn btn-war" onclick="MedicamentosModals.eliminarMedicamento(document.querySelector('#formEditarMedicamento input[name=med_id]').value)">
+                    <ion-icon name="trash-outline"></ion-icon> Eliminar
+                </button>
+                <div class="mf-right">
+                    <button type="button" class="btn btn-sec" onclick="MedicamentosModals.cerrarModalEditar()">Cancelar</button>
+                    <button type="button" class="btn btn-def" onclick="MedicamentosModals.guardarEditar()">Actualizar</button>
+                </div>
             </div>
         </div>
     </div>

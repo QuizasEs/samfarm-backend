@@ -143,6 +143,50 @@ const MedicamentosModals = (function() {
         }
     }
 
+    async function eliminarMedicamento(med_id) {
+        const result = await Swal.fire({
+            title: '¿Eliminar medicamento?',
+            text: "Esto eliminará el medicamento. No se puede revertir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar'
+        });
+        
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('MedicamentoAjax', 'eliminar');
+            formData.append('med_id', med_id);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.Alerta === 'recargar') {
+                    Swal.fire({
+                        icon: data.Tipo,
+                        title: data.Titulo,
+                        text: data.texto
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: data.Tipo,
+                        title: data.Titulo,
+                        text: data.texto
+                    });
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Ocurrió un error de conexión', 'error');
+            }
+        }
+    }
+
     // Función global para cerrar modales (compatibilidad)
     window.closeM = function(id) {
         const modal = document.getElementById(id);
@@ -158,6 +202,7 @@ const MedicamentosModals = (function() {
         abrirModalEditar,
         cerrarModalEditar,
         guardarNuevo,
-        guardarEditar
+        guardarEditar,
+        eliminarMedicamento
     };
 })();

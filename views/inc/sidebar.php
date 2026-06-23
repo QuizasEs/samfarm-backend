@@ -23,7 +23,7 @@ if ($_SESSION['rol_smp'] == 1) {
             </div>
             <div>
                 <div class="ltxt"><?php echo htmlspecialchars($program_name); ?></div>
-                <div class="lsub">Version: 1.3.0</div>
+                <div class="lsub">Version: alfa 1.5.0</div>
             </div>
         </div>
 

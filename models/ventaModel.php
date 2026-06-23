@@ -74,6 +74,7 @@ class ventaModel extends mainModel
             m.med_codigo_barras,
             lm.lm_precio_venta AS precio_venta,
             lm.lm_precio_compra AS precio_compra,
+            lm.lm_costo_lista AS costo_lista,
             lm.lm_cant_actual_unidades AS stock,
             lm.lm_cant_blister,
             lm.lm_cant_unidad,
@@ -126,6 +127,89 @@ class ventaModel extends mainModel
                 lm.lm_precio_venta ASC,
                 lm.lm_fecha_vencimiento ASC
               LIMIT 50";
+
+        $stmt = $conexion->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /* Buscar medicamento agrupado por nombre (1 fila por medicamento) */
+    protected static function buscar_medicamento_agrupado_model($termino, $sucursal_id, $filtros = [])
+    {
+        if (!$sucursal_id) {
+            return [];
+        }
+
+        $termino = "%$termino%";
+        $conexion = mainModel::conectar();
+
+        $sql = "
+        SELECT 
+            m.med_id,
+            m.med_nombre_quimico AS nombre,
+            COALESCE(ff.ff_nombre, '') AS presentacion,
+            COALESCE(p.pr_razon_social, '') AS proveedor,
+            MIN(lm.lm_precio_venta) AS precio_venta,
+            SUM(lm.lm_cant_actual_unidades) AS stock,
+            MIN(lm.lm_numero_lote) AS lm_numero_lote,
+            (
+                SELECT lm2.lm_id 
+                FROM lote_medicamento lm2 
+                WHERE lm2.med_id = m.med_id 
+                  AND lm2.su_id = :sucursal_id 
+                  AND lm2.lm_estado = 'activo' 
+                  AND lm2.lm_cant_actual_unidades > 0
+                ORDER BY lm2.lm_fecha_vencimiento ASC, lm2.lm_id ASC
+                LIMIT 1
+            ) AS lm_id,
+            m.med_codigo_barras,
+            COALESCE(lm.lm_cant_blister, 1) AS lm_cant_blister,
+            COALESCE(lm.lm_cant_unidad, 1) AS lm_cant_unidad
+        FROM lote_medicamento lm
+        INNER JOIN medicamento m ON m.med_id = lm.med_id
+        LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
+        LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
+        WHERE lm.su_id = :sucursal_id
+          AND lm.lm_estado = 'activo'
+          AND lm.lm_cant_actual_unidades > 0
+          AND lm.lm_precio_venta <= 900
+          AND (
+              m.med_nombre_quimico LIKE :termino
+              OR m.med_codigo_barras LIKE :termino
+              OR m.med_version_comercial LIKE :termino
+          )
+        ";
+
+        $params = [
+            ":termino" => $termino,
+            ":sucursal_id" => $sucursal_id
+        ];
+
+        if (!empty($filtros['proveedor'])) {
+            $sql .= " AND lm.pr_id = :pr_id";
+            $params[":pr_id"] = (int)$filtros['proveedor'];
+        }
+        if (!empty($filtros['presentacion'])) {
+            $sql .= " AND m.ff_id = :ff_id";
+            $params[":ff_id"] = (int)$filtros['presentacion'];
+        }
+        if (!empty($filtros['funcion'])) {
+            $sql .= " AND m.uf_id = :uf_id";
+            $params[":uf_id"] = (int)$filtros['funcion'];
+        }
+        if (!empty($filtros['via'])) {
+            $sql .= " AND m.vd_id = :vd_id";
+            $params[":vd_id"] = (int)$filtros['via'];
+        }
+
+        $sql .= " GROUP BY m.med_id, ff.ff_nombre, p.pr_razon_social";
+        $sql .= " ORDER BY m.med_nombre_quimico ASC";
+        $sql .= " LIMIT 50";
 
         $stmt = $conexion->prepare($sql);
 

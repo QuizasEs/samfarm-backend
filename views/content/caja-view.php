@@ -44,6 +44,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                 <div class="fg"><label class="fl">Vía</label><select class="sel" id="filtro_via"><option value="">Vía</option><?php foreach ($datos_select['via_administracion'] as $via) { ?><option value="<?php echo $via['vd_id'] ?>"><?php echo $via['vd_nombre'] ?></option><?php } ?></select></div>
                             </div>
                             <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label><div class="inpg"><input class="inp med_search" placeholder="¿Qué medicamento busca?"><button type="button" class="btn btn_buscar_med"><ion-icon name="search"></ion-icon></button></div></div>
+                        <div class="fg" style="margin-bottom:0"><label class="fl">&nbsp;</label><div class="inpg"><label style="display:flex;align-items:center;gap:8px;padding-top:25px;"><input type="checkbox" id="chk_agrupar_lotes" checked> <span>Agrupar por medicamento</span></label></div></div>
                         </div>
                     </div>
                     <div class="card">

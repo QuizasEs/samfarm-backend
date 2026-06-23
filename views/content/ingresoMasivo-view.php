@@ -29,17 +29,19 @@ $datos_iniciales = $ins_ingreso->obtener_datos_iniciales_controlador();
             </h3>
             <ul style="margin-bottom: 0; padding-left: 20px; color: #333;">
                 <li>Seleccione la sucursal donde se realizará el ingreso</li>
-                <li>El archivo Excel debe contener las siguientes columnas:</li>
-                <ul>
-                    <li><strong>Descripción</strong> - Nombre del medicamento (obligatorio)</li>
-                    <li><strong>Proveedor</strong> - ID del proveedor (opcional)</li>
-                    <li><strong>Total Unidades</strong> - Cantidad total de unidades (obligatorio)</li>
-                    <li><strong>Unidades por caja</strong> - Cantidad de unidades por caja (opcional, por defecto 1)</li>
-                    <li><strong>Costo Unitario</strong> - Precio de adquisición por unidad (obligatorio)</li>
-                    <li><strong>Precio Unitario</strong> - Precio de venta al público por unidad (obligatorio)</li>
-                    <li><strong>Vencimiento</strong> - Fecha de vencimiento (opcional, formato: YYYY-MM-DD)</li>
-                    <li><strong>Número de Lote</strong> - Número de lote del producto (opcional)</li>
-                </ul>
+                <li>El archivo Excel debe contener las columnas en el siguiente orden:</li>
+                <ol style="margin-bottom: 8px; padding-left: 22px;">
+                    <li><strong>Código de Barra</strong> (opcional) — se guarda solo en el medicamento</li>
+                    <li><strong>Descripción</strong> — Nombre del medicamento <strong>(obligatorio)</strong></li>
+                    <li><strong>Proveedor</strong> — ID numérico del proveedor (opcional)</li>
+                    <li><strong>Unidades por caja</strong> (opcional, por defecto 1)</li>
+                    <li><strong>Costo lista</strong> (opcional)</li>
+                    <li><strong>Costo Unitario</strong> — Precio de adquisición por unidad <strong>(obligatorio)</strong></li>
+                    <li><strong>Precio Unitario</strong> — Precio de venta al público por unidad <strong>(obligatorio)</strong></li>
+                    <li><strong>Total Unidades</strong> — Cantidad total a ingresar <strong>(obligatorio)</strong></li>
+                    <li><strong>Vencimiento</strong> — Fecha de vencimiento (opcional)</li>
+                </ol>
+                <li>El orden de las columnas es importante. Usa exactamente estos encabezados.</li>
                 <li>Los medicamentos que no existan se crearán automáticamente</li>
                 <li>Las categorías (Uso, Forma, Vía) se asignarán como "N/A" (ID: 10)</li>
                 <li>El principio activo se asignará como "N/A"</li>

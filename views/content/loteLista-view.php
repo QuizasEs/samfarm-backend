@@ -164,7 +164,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                     </div>
 
-                    <div class="stit">Datos Editables</div>
+                    <div class="stit">Datos Editables (Cantidades y Vencimiento)</div>
                     <div class="card">
                         <div class="cb">
                             <div class="fr3">
@@ -173,54 +173,62 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                      <input class="inp" type="number" name="Cantidad_caja_up" id="editarCantidadCaja" min="0">
                                  </div>
                                  <div class="fg">
-                                     <label class="fl">Unidades individuales por empaque</label>
-                                     <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="0">
+                                     <label class="fl">Unidades por caja</label>
+                                     <input class="inp" type="number" name="Cantidad_unidades_up" id="editarCantidadUnidades" min="1" value="1">
                                  </div>
-                            </div>
-                             <div class="fr3">
-                                 <div class="fg">
-                                     <label class="fl">Precio de compra</label>
-                                     <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" required>
-                                 </div>
-                                  <div class="fg">
-                                      <label class="fl">Precio venta por unidad</label>
-                                      <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" readonly>
-                                  </div>
                                  <div class="fg">
                                      <label class="fl">Fecha de vencimiento</label>
                                      <input class="inp" type="date" name="Fecha_vencimiento_up" id="editarFechaVencimiento" required>
                                  </div>
-                             </div>
+                            </div>
                          </div>
                      </div>
 
-                     <div class="stit">Datos de Auditoría</div>
+                     <div class="stit">Precios por Caja (lógica Costo Lista / Precio Costo)</div>
                      <div class="card">
                          <div class="cb">
-                             <div class="fr">
+                             <div class="fr3">
                                  <div class="fg">
-                                     <label class="fl" for="costo_lista">Costo Lista</label>
-                                     <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="editarCostoLista" min="0">
+                                     <label class="fl" for="costo_lista">Costo Lista <small>(por caja)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="lm_costo_lista" id="editarCostoLista" min="0" placeholder="0.00">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl" for="precio_costo">Precio Costo <small>(por caja)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="lm_precio_costo" id="editarPrecioCosto" min="0" placeholder="0.00">
                                  </div>
                                  <div class="fg">
                                      <label class="fl" for="margen_unitario">Margen Unitario (%)</label>
-                                     <input class="inp" type="number" step="0.01" name="lm_margen_u" id="editarMargenU" min="0">
+                                     <input class="inp" type="number" step="0.01" name="lm_margen_u" id="editarMargenU" min="0" max="100" value="0">
                                  </div>
                              </div>
-                             <div class="fr">
+                             <div class="fr3">
                                  <div class="fg">
                                      <label class="fl" for="margen_caja">Margen Caja (%)</label>
-                                     <input class="inp" type="number" step="0.01" name="lm_margen_c" id="editarMargenC" min="0">
+                                     <input class="inp" type="number" step="0.01" name="lm_margen_c" id="editarMargenC" min="0" max="100" value="0">
                                  </div>
                                  <div class="fg">
-                                     <label class="fl" for="precio_min_unitario">Precio Min. Unitario</label>
-                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="editarPrecioMinU" min="0">
+                                     <label class="fl">Precio Compra <small>(unitario, derivado)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="Precio_compra_up" id="editarPrecioCompra" min="0" readonly style="background: var(--bg-soft);">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl">Precio Venta <small>(por unidad, derivado)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="Precio_venta_up" id="editarPrecioVenta" min="0" readonly style="background: var(--bg-soft);">
                                  </div>
                              </div>
-                             <div class="fr">
+                             <div class="fr3">
                                  <div class="fg">
-                                     <label class="fl" for="precio_min_caja">Precio Min. Caja</label>
-                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="editarPrecioMinC" min="0">
+                                     <label class="fl" for="precio_min_caja">Precio Mín. por Caja <small>(derivado)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_c" id="editarPrecioMinC" min="0" readonly style="background: var(--bg-soft);">
+                                 </div>
+                                 <div class="fg">
+                                     <label class="fl" for="precio_min_unitario">Precio Mín. Unitario <small>(derivado)</small></label>
+                                     <input class="inp" type="number" step="0.01" name="lm_precio_min_u" id="editarPrecioMinU" min="0" readonly style="background: var(--bg-soft);">
+                                 </div>
+                                 <div class="fg" style="display:flex;align-items:flex-end;">
+                                     <small style="color:#666;line-height:1.4;">
+                                         <ion-icon name="information-circle-outline"></ion-icon>
+                                         El sistema convierte los precios de caja a precios unitarios para almacenar.
+                                     </small>
                                  </div>
                              </div>
                          </div>

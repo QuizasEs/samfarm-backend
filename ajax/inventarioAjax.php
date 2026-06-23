@@ -172,7 +172,7 @@ if (isset($_POST['inventarioAjax'])) {
 
     /* ===== OBTENER DATOS PARA BALANCE ===== */
     if ($valor === "obtener_datos_balance") {
-        $med_id = mainModel::limpiar_cadena($_POST['med_id']);
+        $med_id = mainModel::limpiar_cadena($_POST['med_id'] ?? '');
 
         if (empty($med_id)) {
             echo json_encode(['success' => false, 'error' => 'Datos incompletos']);
@@ -181,7 +181,13 @@ if (isset($_POST['inventarioAjax'])) {
 
         // Obtener datos actuales de precios del medicamento en la sucursal
         $resultado = $ins_inventario->obtener_datos_balance_controller($med_id);
-        echo json_encode($resultado);
+
+        // Verificar que el resultado es un array válido
+        if (!is_array($resultado)) {
+            echo json_encode(['success' => false, 'error' => 'Respuesta inválida del servidor']);
+        } else {
+            echo json_encode($resultado);
+        }
         exit();
     }
 
@@ -189,6 +195,8 @@ if (isset($_POST['inventarioAjax'])) {
     if ($valor === "balance_precios") {
         $med_id = mainModel::limpiar_cadena($_POST['med_id']);
         $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : null;
+        $precio_costo = isset($_POST['lm_precio_costo']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_costo']) : null;
+        $unidades_caja = isset($_POST['lm_unidades_caja']) ? (int)mainModel::limpiar_cadena($_POST['lm_unidades_caja']) : 1;
         $margen_u = isset($_POST['lm_margen_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u']) : null;
         $margen_c = isset($_POST['lm_margen_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c']) : null;
         $precio_venta = isset($_POST['lm_precio_venta']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_venta']) : null;
@@ -205,7 +213,30 @@ if (isset($_POST['inventarioAjax'])) {
             exit();
         }
 
-        $resultado = $ins_inventario->balance_precios_controller($med_id, $costo_lista, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c);
+        $resultado = $ins_inventario->balance_precios_controller($med_id, $costo_lista, $precio_costo, $unidades_caja, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c);
+        echo json_encode($resultado);
+        exit();
+    }
+
+    /* ===== GUARDAR BALANCE DE PRECIOS ===== */
+    if ($valor === "guardar_balance") {
+        $med_id = mainModel::limpiar_cadena($_POST['med_id']);
+        $su_id = mainModel::limpiar_cadena($_POST['su_id']);
+        $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : null;
+        $precio_costo = isset($_POST['lm_precio_costo']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_costo']) : null;
+        $unidades_caja = isset($_POST['lm_unidades_caja']) ? (int)mainModel::limpiar_cadena($_POST['lm_unidades_caja']) : 1;
+        $margen_u = isset($_POST['lm_margen_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u']) : null;
+        $margen_c = isset($_POST['lm_margen_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c']) : null;
+        $precio_venta = isset($_POST['lm_precio_venta']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_venta']) : null;
+        $precio_min_u = isset($_POST['lm_precio_min_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_u']) : null;
+        $precio_min_c = isset($_POST['lm_precio_min_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_c']) : null;
+
+        if (empty($med_id) || empty($su_id)) {
+            echo json_encode(['success' => false, 'error' => 'Datos incompletos']);
+            exit();
+        }
+
+        $resultado = $ins_inventario->guardar_balance_controller($med_id, $su_id, $costo_lista, $precio_costo, $unidades_caja, $margen_u, $margen_c, $precio_venta, $precio_min_u, $precio_min_c);
         echo json_encode($resultado);
         exit();
     }

@@ -222,6 +222,11 @@ class medicamentoModel extends mainModel
         return $stmt;
     }
 
+    protected static function eliminar_medicamento_model($med_id)
+    {
+        return self::eliminar_registro_model('medicamento', 'med_id', $med_id);
+    }
+
     /* ------------------------------- medicamentos----------------------------------- */
     /* ------------------------------- medicamentos----------------------------------- */
     /* ------------------------------- medicamentos----------------------------------- */

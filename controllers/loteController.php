@@ -360,15 +360,28 @@ class loteController extends loteModel
         $cant_caja    = (int)mainModel::limpiar_cadena($_POST['Cantidad_caja_up'] ?? $lote['lm_cant_caja']);
         $cant_blister = 1; // Mantener valor fijo de 1 para lm_cant_blister (ya no se usa)
         $cant_unidad  = (int)mainModel::limpiar_cadena($_POST['Cantidad_unidades_up'] ?? $lote['lm_cant_unidad']);
-        $precio_compra = (float)mainModel::limpiar_cadena($_POST['Precio_compra_up'] ?? $lote['lm_precio_compra']);
-        $precio_venta = (float)mainModel::limpiar_cadena($_POST['Precio_venta_up'] ?? $lote['lm_precio_venta']);
+
+
+        $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : (float)($lote['lm_costo_lista'] ?? 0);
+        $precio_costo_caja = isset($_POST['lm_precio_costo']) && $_POST['lm_precio_costo'] !== ''
+            ? (float)mainModel::limpiar_cadena($_POST['lm_precio_costo'])
+            : (float)($lote['lm_precio_costo'] ?? 0);
+        $margen_u = isset($_POST['lm_margen_u']) && $_POST['lm_margen_u'] !== ''
+            ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u'])
+            : (float)($lote['lm_margen_u'] ?? 0);
+        $margen_c = isset($_POST['lm_margen_c']) && $_POST['lm_margen_c'] !== ''
+            ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c'])
+            : (float)($lote['lm_margen_c'] ?? 0);
+
+        /* Cálculo de precios unitarios a partir del Precio Costo por Caja */
+        $unidades_por_caja = $cant_unidad > 0 ? $cant_unidad : 1;
+        $costo_unitario    = $precio_costo_caja / $unidades_por_caja;   // precio de compra por unidad
+        $precio_compra     = $costo_unitario;
+        $precio_venta      = $costo_unitario * (1 + ($margen_u / 100)); // precio de venta por unidad
+        $precio_min_u      = $costo_unitario * (1 + ($margen_u / 100)); // precio mínimo por unidad
+        $precio_min_c      = $precio_costo_caja * (1 + ($margen_c / 100)); // precio mínimo por caja
+
         $fecha_vencimiento = mainModel::limpiar_cadena($_POST['Fecha_vencimiento_up'] ?? $lote['lm_fecha_vencimiento']);
-        /* campos de auditoria */
-        $costo_lista = isset($_POST['lm_costo_lista']) ? (float)mainModel::limpiar_cadena($_POST['lm_costo_lista']) : $lote['lm_costo_lista'];
-        $margen_u = isset($_POST['lm_margen_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_u']) : $lote['lm_margen_u'];
-        $margen_c = isset($_POST['lm_margen_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_margen_c']) : $lote['lm_margen_c'];
-        $precio_min_u = isset($_POST['lm_precio_min_u']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_u']) : $lote['lm_precio_min_u'];
-        $precio_min_c = isset($_POST['lm_precio_min_c']) ? (float)mainModel::limpiar_cadena($_POST['lm_precio_min_c']) : $lote['lm_precio_min_c'];
 
         /* Validación de datos requeridos */
         if (empty($fecha_vencimiento)) {
@@ -468,6 +481,7 @@ class loteController extends loteModel
             'lm_precio_venta' => $precio_venta,
             'lm_fecha_vencimiento' => $fecha_vencimiento,
             'lm_costo_lista' => $costo_lista,
+            'lm_precio_costo' => $precio_costo_caja,
             'lm_margen_u' => $margen_u,
             'lm_margen_c' => $margen_c,
             'lm_precio_min_u' => $precio_min_u,
@@ -1152,5 +1166,49 @@ class loteController extends loteModel
             error_log("Error exportando Excel lotes: " . $e->getMessage());
             echo "Error al generar archivo: " . htmlspecialchars($e->getMessage());
         }
+    }
+
+    public function obtener_ultimo_lote_medicamento_controller($med_id)
+    {
+        $med_id = (int)$med_id;
+        if ($med_id <= 0) {
+            return json_encode(['error' => 'ID inválido']);
+        }
+
+        $sql = mainModel::conectar()->prepare("
+            SELECT 
+                lm_id,
+                lm_numero_lote,
+                lm_precio_compra,
+                lm_precio_venta,
+                lm_cant_caja,
+                lm_cant_unidad,
+                lm_cant_blister,
+                lm_precio_min_u,
+                lm_precio_min_c
+            FROM lote_medicamento 
+            WHERE med_id = :med_id AND lm_estado = 'activo'
+            ORDER BY lm_creado_en DESC 
+            LIMIT 1
+        ");
+        $sql->bindParam(':med_id', $med_id);
+        $sql->execute();
+        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+
+        if (!$resultado) {
+            return json_encode(['error' => 'No hay lote anterior para este medicamento']);
+        }
+
+        $costoUnitario = floatval($resultado['lm_precio_compra'] ?? 0);
+        $unidadesPorCaja = intval($resultado['lm_cant_unidad'] ?? 1);
+        $cantCajas = intval($resultado['lm_cant_caja'] ?? 0);
+
+        $costoLista = $cantCajas > 0 ? $costoUnitario * $unidadesPorCaja * $cantCajas : 0;
+        $precioCaja = $cantCajas > 0 ? $costoLista / $cantCajas : 0;
+
+        $resultado['lm_costo_lista'] = $costoLista;
+        $resultado['lm_precio_caja'] = $precioCaja;
+
+        return json_encode($resultado, JSON_UNESCAPED_UNICODE);
     }
 }

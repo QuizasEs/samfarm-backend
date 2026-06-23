@@ -60,7 +60,11 @@ class CompraOrdenManager {
         }
 
         if (this.cantidadUnidades) {
-            this.cantidadUnidades.addEventListener('input', () => this.calcularPrecioMinCaja());
+            this.cantidadUnidades.addEventListener('input', () => {
+                this.calcularPrecioVenta();
+                this.calcularPrecioMinCaja();
+                this.calcularPrecioMinUnitario();
+            });
         }
 
         // Set JSON data on form submit
@@ -98,25 +102,38 @@ class CompraOrdenManager {
         input.value = value;
     }
 
+    /**
+     * costo_lista = precio por CAJA (catálogo del proveedor)
+     * Se deriva el costo unitario dividiendo entre unidades por caja
+     */
     calcularPrecioVenta() {
-        const costo = parseFloat(this.costoLista?.value) || 0;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
-        const precioVenta = costo + (costo * margen / 100);
+        const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
+        const costoUnitario = costoCaja / unidadesPorCaja;
+        const precioVenta = costoUnitario + (costoUnitario * margen / 100);
         if (this.precioVentaReg) this.precioVentaReg.value = precioVenta.toFixed(2);
     }
 
+    /**
+     * Precio mínimo por caja = costo_lista por caja * (1 + margen_caja)
+     */
     calcularPrecioMinCaja() {
-        const costo = parseFloat(this.costoLista?.value) || 0;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenCaja?.value) || 0;
-        const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
-        const precioMinCaja = costo * unidadesPorCaja * (1 + margen / 100);
+        const precioMinCaja = costoCaja * (1 + margen / 100);
         if (this.precioMinCaja) this.precioMinCaja.value = precioMinCaja.toFixed(2);
     }
 
+    /**
+     * Precio mínimo unitario = costo unitario derivado * (1 + margen_unitario)
+     */
     calcularPrecioMinUnitario() {
-        const costo = parseFloat(this.costoLista?.value) || 0;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
-        const precioMinUnitario = costo * (1 + margen / 100);
+        const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
+        const costoUnitario = costoCaja / unidadesPorCaja;
+        const precioMinUnitario = costoUnitario * (1 + margen / 100);
         if (this.precioMinUnitario) this.precioMinUnitario.value = precioMinUnitario.toFixed(2);
     }
 
