@@ -51,6 +51,12 @@ class ventaController extends ventaModel
         return json_encode(array_values($rows), JSON_UNESCAPED_UNICODE);
     }
 
+    public function select_v2_controller($tabla, $campos, $termino) {
+        $termino = mainModel::limpiar_cadena($termino);
+        if (strlen($termino) < 2) return json_encode([], JSON_UNESCAPED_UNICODE);
+        return json_encode(mainModel::select_v2_model($tabla, $campos, $termino), JSON_UNESCAPED_UNICODE);
+    }
+
 
     public function buscar_medicamento_controller($termino, $filtros = [])
     {

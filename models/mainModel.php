@@ -11,24 +11,36 @@ class mainModel
 {
 
     
-    // Variable estática para guardar la conexión
-    private static $conexion = null;
+    // Variable estática para almacenar múltiples conexiones (pool por sesión)
+    private static $conexiones = [];
 
-    protected static function Conectar()
+    protected static function Conectar($session_id = null)
     {
-        // Si ya existe la conexión, la retorna
-        if (self::$conexion !== null) {
-            return self::$conexion;
+        // Si no recibe parámetro, usa session_id() automáticamente
+        if ($session_id === null) {
+            $session_id = session_id() ?: 'default';
         }
-
-        // Si no existe, la crea una sola vez
-        try {
-            self::$conexion = new PDO(SGBD . ";charset=utf8", USER, PASS);
-            self::$conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return self::$conexion;
-        } catch (PDOException $e) {
-            die("  Error de conexión: " . $e->getMessage());
+        
+        // Si la conexión para esta sesión no existe, la creamos
+        if (!isset(self::$conexiones[$session_id])) {
+            try {
+                self::$conexiones[$session_id] = new PDO(
+                    SGBD . ";charset=utf8", 
+                    USER, 
+                    PASS,
+                    [
+                        PDO::ATTR_PERSISTENT => true,
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_TIMEOUT => 30,
+                        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                    ]
+                );
+            } catch (PDOException $e) {
+                die("Error de conexión: " . $e->getMessage());
+            }
         }
+        
+        return self::$conexiones[$session_id];
     }
 
 
@@ -1035,4 +1047,19 @@ class mainModel
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
+
+    public static function select_v2_model($tabla, $campos, $termino, $limite = 20) {
+        $sql = "SELECT " . implode(', ', $campos) . " FROM $tabla WHERE ";
+        $condiciones = [];
+        foreach ($campos as $campo) {
+            $condiciones[] = "$campo LIKE :termino";
+        }
+        $sql .= implode(' OR ', $condiciones);
+        $sql .= " ORDER BY " . $campos[0] . " ASC LIMIT $limite";
+        
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindValue(":termino", "%$termino%");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

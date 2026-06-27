@@ -100,6 +100,13 @@ if (isset($_POST['ventaAjax'])) {
         echo $ins_venta->buscar_cliente_controller($termino);
         exit();
     }
+if ($valor === "select_v2") {
+    $tabla = $_POST['tabla'] ?? '';
+    $campos = json_decode($_POST['campos'] ?? '[]', true);
+    $termino = $_POST['termino'] ?? '';
+    echo $ins_venta->select_v2_controller($tabla, $campos, $termino);
+    exit();
+}
     if ($valor === "new-caja"){
         echo $ins_venta->abrir_caja_controller();
     }

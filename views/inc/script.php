@@ -1682,10 +1682,10 @@
 
             const cacheKey = JSON.stringify({
                 term,
-                presentacion: this.filtro_presentacion ? this.filtro_presentacion.value : null,
-                funcion: this.filtro_funcion ? this.filtro_funcion.value : null,
-                via: this.filtro_via ? this.filtro_via.value : null,
-                proveedor: this.filtro_proveedor ? this.filtro_proveedor.value : null
+                presentacion: this.filtro_presentacion ? this.filtro_presentacion.dataset.selectedId : null,
+                funcion: this.filtro_funcion ? this.filtro_funcion.dataset.selectedId : null,
+                via: this.filtro_via ? this.filtro_via.dataset.selectedId : null,
+                proveedor: this.filtro_proveedor ? this.filtro_proveedor.dataset.selectedId : null
             });
 
             if (this.medicamentosCache[cacheKey]) {
@@ -1702,10 +1702,10 @@
                 body.append('ventaAjax', 'buscar');
             }
             body.append('termino', term);
-            if (this.filtro_presentacion && this.filtro_presentacion.value) body.append('presentacion', this.filtro_presentacion.value);
-            if (this.filtro_funcion && this.filtro_funcion.value) body.append('funcion', this.filtro_funcion.value);
-            if (this.filtro_via && this.filtro_via.value) body.append('via', this.filtro_via.value);
-            if (this.filtro_proveedor && this.filtro_proveedor.value) body.append('proveedor', this.filtro_proveedor.value);
+            if (this.filtro_presentacion && this.filtro_presentacion.dataset.selectedId) body.append('presentacion', this.filtro_presentacion.dataset.selectedId);
+            if (this.filtro_funcion && this.filtro_funcion.dataset.selectedId) body.append('funcion', this.filtro_funcion.dataset.selectedId);
+            if (this.filtro_via && this.filtro_via.dataset.selectedId) body.append('via', this.filtro_via.dataset.selectedId);
+            if (this.filtro_proveedor && this.filtro_proveedor.dataset.selectedId) body.append('proveedor', this.filtro_proveedor.dataset.selectedId);
 
             fetch(this.URL_MED, {
                 method: 'POST',
@@ -1979,11 +1979,17 @@ const descripcion = `${nombre} - ${presentacion}`;
                 btnBuscarMed.addEventListener('click', () => this.performSearch());
             }
 
-            [this.filtro_presentacion, this.filtro_funcion, this.filtro_via, this.filtro_proveedor].forEach(sel => {
-                if (sel) sel.addEventListener('change', () => {
+            [this.filtro_presentacion, this.filtro_funcion, this.filtro_via].forEach(input => {
+                if (input) input.addEventListener('input', () => {
                     if (this.medSearch && this.medSearch.value) this.doSearch(this.medSearch.value);
                 });
             });
+            
+            if (this.filtro_proveedor) {
+                this.filtro_proveedor.addEventListener('input', () => {
+                    if (this.medSearch && this.medSearch.value) this.doSearch(this.medSearch.value);
+                });
+            }
 
             // limpiar cache cada 5 minutos
             setInterval(() => {
@@ -2096,7 +2102,7 @@ const descripcion = `${nombre} - ${presentacion}`;
             const body = new URLSearchParams();
             body.append('ventaAjax', 'buscar');
             body.append('termino', term);
-            body.append('proveedor', this.filtroProveedorQuote ? this.filtroProveedorQuote.value : '');
+            body.append('proveedor', this.filtroProveedorQuote ? this.filtroProveedorQuote.dataset.selectedId : '');
             // otros filtros vacios para cotizacion
 
             fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
@@ -2203,7 +2209,7 @@ const descripcion = `${nombre} - ${presentacion}`;
             }
 
             if (this.filtroProveedorQuote) {
-                this.filtroProveedorQuote.addEventListener('change', () => {
+                this.filtroProveedorQuote.addEventListener('input', () => {
                     if (this.medSearchQuote && this.medSearchQuote.value) this.doSearch(this.medSearchQuote.value);
                 });
             }
@@ -2230,12 +2236,139 @@ const descripcion = `${nombre} - ${presentacion}`;
             }
             this.doSearch(term);
         }
+}
+
+    class ProviderSearchManager {
+        constructor(inputId, resultsId, tabla = 'proveedores', campos = ['pr_id', 'pr_razon_social', 'pr_nit']) {
+            this.input = document.getElementById(inputId);
+            this.resultsContainer = document.getElementById(resultsId);
+            this.tabla = tabla;
+            this.campos = campos;
+            this.debounce = null;
+            this.init();
+        }
+        
+        escapeHtml(text) {
+            return String(text).replace(/[&<>"'`]/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+        
+        async search(term) {
+            if (term.length < 2) { this.hide(); return; }
+            try {
+                const body = new URLSearchParams();
+                body.append('ventaAjax', 'select_v2');
+                body.append('tabla', this.tabla);
+                body.append('campos', JSON.stringify(this.campos));
+                body.append('termino', term);
+                
+                const response = await fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
+                    method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: body.toString()
+                });
+                const providers = await response.json();
+                this.renderResults(providers);
+            } catch (err) { this.renderResults([]); }
+        }
+        
+        renderResults(items) {
+            if (!this.resultsContainer) return;
+            if (!items.length) {
+                this.resultsContainer.innerHTML = '<div class="search-results-item no-results">No se encontraron resultados</div>';
+            } else {
+                this.resultsContainer.innerHTML = items.map(item => {
+                    const id = item[this.campos[0]];
+                    const name = item[this.campos[1]] || item[this.campos[1].replace('_id', '_nombre')];
+                    const extra = item[this.campos[2]] || '';
+                    return `
+                        <div class="search-results-item" data-id="${id}" data-name="${this.escapeHtml(name)}" style="cursor: pointer; padding: 8px; border-bottom: 1px solid var(--border-light, #eee);">
+                            <div><strong>${this.escapeHtml(name)}</strong></div>
+                            ${extra ? `<small style="color: var(--text-secondary, #666);">${this.escapeHtml(extra)}</small>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                this.attachListeners();
+            }
+            this.applyStyles();
+            this.show();
+        }
+        
+        applyStyles() {
+            if (!this.resultsContainer) return;
+            this.resultsContainer.style.cssText = `
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                max-height: 300px;
+                overflow-y: auto;
+                background: var(--bg-primary, #fff);
+                border: 1px solid var(--border-light, #ddd);
+                border-top: none;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                border-radius: 0 0 4px 4px;
+                margin-top: 0;
+            `;
+        }
+        
+        attachListeners() {
+            this.resultsContainer.querySelectorAll('.search-results-item').forEach(item => {
+                item.addEventListener('click', () => this.selectProvider(item));
+            });
+        }
+        
+        selectProvider(item) {
+            this.input.value = item.dataset.name;
+            this.input.dataset.selectedId = item.dataset.id;
+            this.hide();
+        }
+        
+        show() { this.resultsContainer.style.display = 'block'; }
+        hide() { this.resultsContainer.style.display = 'none'; }
+        
+        init() {
+            this.input.addEventListener('input', (e) => {
+                clearTimeout(this.debounce);
+                this.debounce = setTimeout(() => this.search(e.target.value.trim()), 300);
+            });
+            
+            this.input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') this.hide();
+                if (e.key === 'Enter') {
+                    const first = this.resultsContainer?.querySelector('.search-results-item[data-id]');
+                    if (first) this.selectProvider(first);
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!this.input.contains(e.target) && !this.resultsContainer?.contains(e.target)) {
+                    this.hide();
+                }
+            });
+        }
     }
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        .search-results-item:hover {
+            background: var(--bg-secondary, #f5f5f5);
+        }
+        .search-results-item.no-results {
+            color: var(--text-secondary, #666);
+        }
+    `;
+    document.head.appendChild(style);
 
     // instanciar las clases cuando el dom este listo
     document.addEventListener('DOMContentLoaded', () => {
         new CajaManager();
         new CotizarManager();
+        new ProviderSearchManager('filtro_proveedor', 'provider_results_venta', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']);
+        new ProviderSearchManager('filtro_proveedor_quote', 'provider_results_quote', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']);
+        new ProviderSearchManager('filtro_presentacion', 'presentation_results', 'forma_farmaceutica', ['ff_id', 'ff_nombre']);
+        new ProviderSearchManager('filtro_funcion', 'function_results', 'uso_farmacologico', ['uf_id', 'uf_nombre']);
+        new ProviderSearchManager('filtro_via', 'via_results', 'via_de_administracion', ['vd_id', 'vd_nombre']);
     });
 </script>
 
