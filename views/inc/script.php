@@ -374,8 +374,28 @@
 
         /** 🧮 Inicializa el contador de lote */
         function inicializarContador() {
-            contadorLote = 0;
-        }
+            const ultimoLoteInput = document.getElementById("ultimo_lote_valor");
+            const valor = ultimoLoteInput ? ultimoLoteInput.value.trim() : "";
+
+            if (!valor || valor === "0") {
+                contadorLote = 0;
+                return;
+            }
+
+            const patron = /^MED-(\d+)$/;
+            const match = valor.match(patron);
+
+            if (!match) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Número de lote inválido",
+                    text: "El número de lote anterior no tiene un formato válido. Se iniciará desde MED-0000.",
+                    timer: 4000,
+                    showConfirmButton: false
+                });
+                contadorLote = 0;
+                return;
+            }
 
             contadorLote = parseInt(match[1]) || 0;
         }
@@ -1080,6 +1100,53 @@
 
 <!-- script que maneja la busqueda de medicamentos lista de compras y envio por post -->
 <script>
+    // Funciones de tooltip para medicamentos
+    function mostrarTooltip(e, item, row) {
+        let tooltip = document.getElementById('medicamento-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'medicamento-tooltip';
+            tooltip.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                max-width: 300px;
+                padding: 12px;
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+            `;
+            document.body.appendChild(tooltip);
+        }
+        
+        const nombre = item.nombre || 'N/A';
+        const lote = item.lote || 'N/A';
+        const precio = item.precio_venta || 0;
+        const stock = item.stock || 0;
+        
+        tooltip.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 8px;">${nombre}</div>
+            <div style="margin-bottom: 4px;">Lote: ${lote}</div>
+            <div style="margin-bottom: 4px;">Precio: Bs. ${precio.toFixed(2)}</div>
+            <div>Stock: ${stock}</div>
+        `;
+        
+        const rect = row.getBoundingClientRect();
+        tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+        tooltip.style.left = (rect.left + window.scrollX) + 'px';
+    }
+
+    function ocultarTooltip() {
+        const tooltip = document.getElementById('medicamento-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    }
+
     // clase para manejar el carrito de caja
     class CajaManager {
         constructor() {
@@ -1981,13 +2048,15 @@ const descripcion = `${nombre} - ${presentacion}`;
 
             [this.filtro_presentacion, this.filtro_funcion, this.filtro_via].forEach(input => {
                 if (input) input.addEventListener('input', () => {
-                    if (this.medSearch && this.medSearch.value) this.doSearch(this.medSearch.value);
+                    // Solo buscar medicamentos si el input de busqueda tiene valor
+                    // y el dropdown no está siendo usado para seleccionar
+                    if (this.medSearch && this.medSearch.value && !this.medSearch.dataset.isDropdown) this.doSearch(this.medSearch.value);
                 });
             });
             
             if (this.filtro_proveedor) {
                 this.filtro_proveedor.addEventListener('input', () => {
-                    if (this.medSearch && this.medSearch.value) this.doSearch(this.medSearch.value);
+                    if (this.medSearch && this.medSearch.value && !this.medSearch.dataset.isDropdown) this.doSearch(this.medSearch.value);
                 });
             }
 
@@ -2210,7 +2279,7 @@ const descripcion = `${nombre} - ${presentacion}`;
 
             if (this.filtroProveedorQuote) {
                 this.filtroProveedorQuote.addEventListener('input', () => {
-                    if (this.medSearchQuote && this.medSearchQuote.value) this.doSearch(this.medSearchQuote.value);
+                    if (this.medSearchQuote && this.medSearchQuote.value && !this.medSearchQuote.dataset.isDropdown) this.doSearch(this.medSearchQuote.value);
                 });
             }
 
@@ -2364,11 +2433,21 @@ const descripcion = `${nombre} - ${presentacion}`;
     document.addEventListener('DOMContentLoaded', () => {
         new CajaManager();
         new CotizarManager();
-        new ProviderSearchManager('filtro_proveedor', 'provider_results_venta', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']);
-        new ProviderSearchManager('filtro_proveedor_quote', 'provider_results_quote', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']);
-        new ProviderSearchManager('filtro_presentacion', 'presentation_results', 'forma_farmaceutica', ['ff_id', 'ff_nombre']);
-        new ProviderSearchManager('filtro_funcion', 'function_results', 'uso_farmacologico', ['uf_id', 'uf_nombre']);
-        new ProviderSearchManager('filtro_via', 'via_results', 'via_de_administracion', ['vd_id', 'vd_nombre']);
+        
+        // Solo inicializar ProviderSearchManager si los elementos existen (evita error en páginas sin esos elementos)
+        const providerSearchConfigs = [
+            ['filtro_proveedor', 'provider_results_venta', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']],
+            ['filtro_proveedor_quote', 'provider_results_quote', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']],
+            ['filtro_presentacion', 'presentation_results', 'forma_farmaceutica', ['ff_id', 'ff_nombre']],
+            ['filtro_funcion', 'function_results', 'uso_farmacologico', ['uf_id', 'uf_nombre']],
+            ['filtro_via', 'via_results', 'via_de_administracion', ['vd_id', 'vd_nombre']]
+        ];
+        
+        providerSearchConfigs.forEach(([inputId, resultsId, tabla, campos]) => {
+            if (document.getElementById(inputId) && document.getElementById(resultsId)) {
+                new ProviderSearchManager(inputId, resultsId, tabla, campos);
+            }
+        });
     });
 </script>
 
@@ -3853,6 +3932,326 @@ const descripcion = `${nombre} - ${presentacion}`;
 <script src="<?php echo SERVER_URL; ?>views/script/notificaciones.js"></script>
 
 <script src="<?php echo SERVER_URL; ?>views/script/script-base.js"></script>
+
+    <script>
+    // =====================================================
+    // NUEVO SISTEMA DE DROPDOWNS - Vista Caja (sin afectar selects)
+    // =====================================================
+    class DropdownCajaManager {
+        constructor() {
+            this.dropdowns = new Map();
+        }
+
+        create(inputId, resultsId, tabla, campos) {
+            const input = document.getElementById(inputId);
+            const results = document.getElementById(resultsId);
+            
+            if (!input || !results) return null;
+
+            const config = {
+                input,
+                results,
+                tabla,
+                campos,
+                debounce: null,
+                cache: {}
+            };
+
+            this.dropdowns.set(inputId, config);
+            this.attachEvents(config);
+            return config;
+        }
+
+        attachEvents(config) {
+            const { input, results } = config;
+            
+            input.addEventListener('input', () => {
+                clearTimeout(config.debounce);
+                config.debounce = setTimeout(() => {
+                    this.search(config, input.value.trim());
+                }, 300);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.hide(config);
+                }
+                if (e.key === 'Enter') {
+                    const first = results.querySelector('.dd-item[data-id]');
+                    if (first) {
+                        e.preventDefault();
+                        this.select(config, first.dataset.id, first.dataset.name);
+                    }
+                }
+            });
+
+            // Solo cerrar este dropdown específico, no afectar otros
+            const closeHandler = (e) => {
+                if (!input.contains(e.target) && !results.contains(e.target)) {
+                    this.hide(config);
+                }
+            };
+            document.addEventListener('click', closeHandler);
+            config.closeHandler = closeHandler;
+        }
+
+        async search(config, term) {
+            if (term.length < 2) {
+                this.hide(config);
+                return;
+            }
+
+            const cacheKey = term;
+            if (config.cache[cacheKey]) {
+                this.render(config, config.cache[cacheKey]);
+                return;
+            }
+
+            try {
+                const body = new URLSearchParams();
+                body.append('ventaAjax', 'select_v2');
+                body.append('tabla', config.tabla);
+                body.append('campos', JSON.stringify(config.campos));
+                body.append('termino', term);
+
+                const response = await fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString()
+                });
+                const data = await response.json();
+                config.cache[cacheKey] = data;
+                this.render(config, data);
+            } catch (err) {
+                this.render(config, []);
+            }
+        }
+
+        render(config, items) {
+            const { results } = config;
+            
+            if (!items || items.length === 0) {
+                results.innerHTML = '<div class="dd-empty">Sin resultados</div>';
+                this.show(config);
+                return;
+            }
+
+            results.innerHTML = items.map(item => {
+                const id = item[config.campos[0]];
+                const name = item[config.campos[1]] || '';
+                const extra = item[config.campos[2]] || '';
+                
+                return `
+                    <div class="dd-item" data-id="${id}" data-name="${this.escapeHtml(name)}" style="cursor: pointer; padding: 8px; border-bottom: 1px solid #eee;">
+                        <div><strong>${this.escapeHtml(name)}</strong></div>
+                        ${extra ? `<small style="color: #666;">${this.escapeHtml(extra)}</small>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            this.attachSelectListener(config);
+            this.show(config);
+        }
+
+        attachSelectListener(config) {
+            config.results.querySelectorAll('.dd-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    this.select(config, item.dataset.id, item.dataset.name);
+                });
+            });
+        }
+
+        select(config, id, name) {
+            config.input.value = name;
+            config.input.dataset.selectedId = id;
+            this.hide(config);
+        }
+
+        show(config) {
+            config.results.style.display = 'block';
+        }
+
+        hide(config) {
+            config.results.style.display = 'none';
+        }
+
+        escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        clearCache(inputId) {
+            const config = this.dropdowns.get(inputId);
+            if (config) {
+                config.cache = {};
+            }
+        }
+    }
+
+    // Clase específica para búsqueda de clientes en caja
+    class ClienteDropdownCaja {
+        constructor() {
+            this.input = document.getElementById('buscar_cliente_venta');
+            this.results = document.getElementById('resultado_clientes');
+            this.debounce = null;
+            
+            if (!this.input) return;
+            this.init();
+        }
+
+        init() {
+            this.input.addEventListener('input', () => {
+                clearTimeout(this.debounce);
+                this.debounce = setTimeout(() => {
+                    this.search(this.input.value.trim());
+                }, 300);
+            });
+
+            this.input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') this.hide();
+                if (e.key === 'Enter') {
+                    const first = this.results?.querySelector('.dd-cliente-item[data-id]');
+                    if (first) {
+                        e.preventDefault();
+                        this.select(first);
+                    }
+                }
+            });
+
+            // Solo cerrar este dropdown específico
+            const closeHandler = (e) => {
+                if (this.results && !this.input.contains(e.target) && !this.results.contains(e.target)) {
+                    this.hide();
+                }
+            };
+            document.addEventListener('click', closeHandler);
+            this.closeHandler = closeHandler;
+        }
+
+        async search(term) {
+            if (term.length < 1) {
+                this.hide();
+                return;
+            }
+
+            try {
+                const form = new FormData();
+                form.append('ventaAjax', 'buscar_cliente');
+                form.append('termino', term);
+
+                const response = await fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
+                    method: 'POST',
+                    body: form
+                });
+                const data = await response.json();
+                this.render(data);
+            } catch (err) {
+                this.render([]);
+            }
+        }
+
+        render(clientes) {
+            if (!this.results) return;
+
+            if (!clientes || clientes.length === 0) {
+                this.results.innerHTML = '<div class="dd-empty">Sin clientes</div>';
+                this.show();
+                return;
+            }
+
+            this.results.innerHTML = clientes.map(cli => {
+                const nombre = `${cli.cl_nombres || ''} ${cli.cl_apellido_paterno || ''} ${cli.cl_apellido_materno || ''}`.trim();
+                return `
+                    <div class="dd-cliente-item" data-id="${cli.cl_id}" data-name="${this.escapeHtml(nombre)}" 
+                         style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;">
+                        <div><strong>${this.escapeHtml(nombre)}</strong></div>
+                        <small style="color: #666;">CI: ${this.escapeHtml(cli.cl_carnet || 'N/A')}</small>
+                    </div>
+                `;
+            }).join('');
+
+            this.attachListeners();
+            this.show();
+        }
+
+        attachListeners() {
+            this.results.querySelectorAll('.dd-cliente-item').forEach(item => {
+                item.addEventListener('click', () => this.select(item));
+            });
+        }
+
+        select(item) {
+            const id = item.dataset.id;
+            const name = item.dataset.name;
+
+            this.input.value = name;
+            const hiddenId = document.getElementById('cliente_id_seleccionado');
+            if (hiddenId) hiddenId.value = id;
+
+            const container = document.getElementById('cliente_seleccionado_container');
+            const nombreTexto = document.getElementById('cliente_nombre_texto');
+            if (container) container.style.display = 'flex';
+            if (nombreTexto) nombreTexto.textContent = name;
+
+            this.hide();
+        }
+
+        hide() {
+            if (this.results) this.results.style.display = 'none';
+        }
+
+        show() {
+            if (this.results) this.results.style.display = 'block';
+        }
+
+        escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+    }
+
+    // Inicialización cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar dropdowns de la vista caja
+        const dropdownManager = new DropdownCajaManager();
+        
+        dropdownManager.create(
+            'filtro_proveedor', 
+            'provider_results_venta', 
+            'proveedores', 
+            ['pr_id', 'pr_razon_social', 'pr_nit']
+        );
+        
+        dropdownManager.create(
+            'filtro_presentacion', 
+            'presentation_results', 
+            'forma_farmaceutica', 
+            ['ff_id', 'ff_nombre']
+        );
+        
+        dropdownManager.create(
+            'filtro_funcion', 
+            'function_results', 
+            'uso_farmacologico', 
+            ['uf_id', 'uf_nombre']
+        );
+        
+        dropdownManager.create(
+            'filtro_via', 
+            'via_results', 
+            'via_de_administracion', 
+            ['vd_id', 'vd_nombre']
+        );
+
+        // Dropdown de cliente
+        new ClienteDropdownCaja();
+    });
+    </script>
+
     <script>
     // Navbar scroll behavior - Hide on scroll down, show on scroll up
     (function() {
@@ -3878,3 +4277,23 @@ const descripcion = `${nombre} - ${presentacion}`;
         }, { passive: true });
     })();
     </script>
+
+    <style>
+    /* Estilos para nuevos dropdowns de caja */
+    .dd-item {
+        transition: background-color 0.2s;
+    }
+    .dd-item:hover {
+        background-color: #f5f5f5;
+    }
+    .dd-empty {
+        color: #666;
+        font-style: italic;
+    }
+    .dd-cliente-item {
+        transition: background-color 0.2s;
+    }
+    .dd-cliente-item:hover {
+        background-color: #f5f5f5;
+    }
+    </style>
