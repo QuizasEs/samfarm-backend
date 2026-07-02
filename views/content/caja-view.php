@@ -65,6 +65,9 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                             <!-- <div class="fg" style="margin-bottom:0"><label class="fl">&nbsp;</label>
                                 <div class="inpg"><label style="display:flex;align-items:center;gap:8px;padding-top:25px;"><input type="checkbox" id="chk_agrupar_lotes" checked> <span>Agrupar por medicamento</span></label></div>
                             </div> -->
+
+
+
                         </div>
                     </div>
                     <div class="card">
@@ -80,6 +83,11 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                             </div>
                         </div>
                     </div>
+                </div>
+                <div style="margin-top: 16px; text-align: left;">
+                    <button type="button" id="btn_limpiar_busquedas_caja" class="btn btn-suc btn-sm">
+                        <ion-icon name="trash-outline"></ion-icon> Limpiar Búsquedas
+                    </button>
                 </div>
 
                 <div class="th1">Carrito de Compras</div>

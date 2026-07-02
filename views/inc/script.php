@@ -4297,3 +4297,38 @@ const descripcion = `${nombre} - ${presentacion}`;
         background-color: #f5f5f5;
     }
     </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btnLimpiar = document.getElementById('btn_limpiar_busquedas_caja');
+    if (!btnLimpiar) return;
+
+    btnLimpiar.addEventListener('click', function() {
+        // Limpiar inputs de búsqueda venta
+        var idsVenta = ['filtro_proveedor', 'filtro_presentacion', 'filtro_funcion', 'filtro_via'];
+        idsVenta.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        var medSearchVenta = document.querySelector('.med_search');
+        if (medSearchVenta) medSearchVenta.value = '';
+
+        // Limpiar inputs de cotización
+        var medSearchQuote = document.querySelector('.med_search_quote');
+        if (medSearchQuote) medSearchQuote.value = '';
+        var proveedorQuote = document.getElementById('filtro_proveedor_quote');
+        if (proveedorQuote) proveedorQuote.value = '';
+
+        // Limpiar resultados desplegables
+        var resultsVenta = document.getElementById('provider_results_venta');
+        var resultsQuote = document.getElementById('provider_results_quote');
+        var medResults = document.getElementById('med_search_results');
+        var quoteResults = document.getElementById('quote_search_results');
+        
+        if (resultsVenta) { resultsVenta.innerHTML = ''; resultsVenta.style.display = 'none'; }
+        if (resultsQuote) { resultsQuote.innerHTML = ''; resultsQuote.style.display = 'none'; }
+        if (medResults) { medResults.innerHTML = ''; medResults.style.display = 'none'; }
+        if (quoteResults) { quoteResults.innerHTML = ''; quoteResults.style.display = 'none'; }
+    });
+});
+</script>
