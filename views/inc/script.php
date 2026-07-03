@@ -493,12 +493,14 @@
                 return false;
             }
 
-            if (!precioCompra || precioCompra <= 0) {
-                Swal.fire('Error', 'Precio de compra inválido.', 'error');
-                return false;
-            }
             if (!precioVenta || precioVenta <= 0) {
                 Swal.fire('Error', 'Precio de venta inválido.', 'error');
+                return false;
+            }
+
+            // Validar que costo_lista sea el valor principal
+            if (!costoLista || costoLista <= 0) {
+                Swal.fire('Error', 'Costo lista debe ser mayor a 0.', 'error');
                 return false;
             }
 

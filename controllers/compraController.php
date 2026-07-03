@@ -164,7 +164,7 @@ class compraController extends compraModel
             $cantidad_blister = isset($lote['cantidad_blister']) && (int)$lote['cantidad_blister'] > 0 ? (int)$lote['cantidad_blister'] : 1;
             $cantidad_unidades = isset($lote['cantidad_unidades']) && (int)$lote['cantidad_unidades'] > 0 ? (int)$lote['cantidad_unidades'] : 1;
             $fecha_vencimiento = mainModel::limpiar_cadena($lote['vencimiento'] ?? null);
-            $precio_compra_caja = is_numeric($lote['precioCompra']) ? (float)$lote['precioCompra'] : 0;
+            $precio_compra_caja = ($lote['costo_lista'] ?? 0) / ($lote['cantidad'] ?? 1);
             $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
 

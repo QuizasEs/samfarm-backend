@@ -103,35 +103,41 @@ class CompraOrdenManager {
     }
 
     /**
-     * costo_lista = precio por CAJA (catálogo del proveedor)
-     * Se deriva el costo unitario dividiendo entre unidades por caja
+     * costo_lista = precio TOTAL de la lista de compra
+     * Se deriva el costo por caja dividiendo entre número de cajas
      */
     calcularPrecioVenta() {
-        const costoCaja = parseFloat(this.costoLista?.value) || 0;
+        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
+        const numCajas = parseInt(this.cantidad?.value) || 1;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
         const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
+        const costoCaja = precioListaTotal / numCajas;
         const costoUnitario = costoCaja / unidadesPorCaja;
         const precioVenta = costoUnitario + (costoUnitario * margen / 100);
         if (this.precioVentaReg) this.precioVentaReg.value = precioVenta.toFixed(2);
     }
 
     /**
-     * Precio mínimo por caja = costo_lista por caja * (1 + margen_caja)
+     * Precio mínimo por caja = (precio lista total / cajas) * (1 + margen_caja)
      */
     calcularPrecioMinCaja() {
-        const costoCaja = parseFloat(this.costoLista?.value) || 0;
+        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
+        const numCajas = parseInt(this.cantidad?.value) || 1;
         const margen = parseFloat(this.margenCaja?.value) || 0;
+        const costoCaja = precioListaTotal / numCajas;
         const precioMinCaja = costoCaja * (1 + margen / 100);
         if (this.precioMinCaja) this.precioMinCaja.value = precioMinCaja.toFixed(2);
     }
 
     /**
-     * Precio mínimo unitario = costo unitario derivado * (1 + margen_unitario)
+     * Precio mínimo unitario = (precio lista total / cajas / unidades) * (1 + margen_unitario)
      */
     calcularPrecioMinUnitario() {
-        const costoCaja = parseFloat(this.costoLista?.value) || 0;
+        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
+        const numCajas = parseInt(this.cantidad?.value) || 1;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
         const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
+        const costoCaja = precioListaTotal / numCajas;
         const costoUnitario = costoCaja / unidadesPorCaja;
         const precioMinUnitario = costoUnitario * (1 + margen / 100);
         if (this.precioMinUnitario) this.precioMinUnitario.value = precioMinUnitario.toFixed(2);
