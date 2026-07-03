@@ -1761,13 +1761,7 @@
             }
 
             const body = new URLSearchParams();
-            const agrupar = document.getElementById('chk_agrupar_lotes')?.checked ?? false;
-            
-            if (agrupar) {
-                body.append('ventaAjax', 'buscar_agrupado');
-            } else {
-                body.append('ventaAjax', 'buscar');
-            }
+            body.append('ventaAjax', 'buscar_agrupado');
             body.append('termino', term);
             if (this.filtro_presentacion && this.filtro_presentacion.dataset.selectedId) body.append('presentacion', this.filtro_presentacion.dataset.selectedId);
             if (this.filtro_funcion && this.filtro_funcion.dataset.selectedId) body.append('funcion', this.filtro_funcion.dataset.selectedId);

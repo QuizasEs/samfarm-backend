@@ -2103,3 +2103,12 @@ img, table, pre, .tw { max-width: 100%; }
     color: var(--btn-success);
     font-weight: bold;
 }
+
+/* Solución para dropdowns en caja - permitir overflow visible en todos los contenedores */
+#form-venta-caja .card,
+#form-venta-caja .cb,
+#form-venta-caja .fg,
+#form-venta-caja .grid4,
+#form-venta-caja .search-wrapper {
+    overflow: visible !important;
+}

@@ -156,7 +156,16 @@ class ventaModel extends mainModel
             COALESCE(p.pr_razon_social, '') AS proveedor,
             MIN(lm.lm_precio_venta) AS precio_venta,
             SUM(lm.lm_cant_actual_unidades) AS stock,
-            MIN(lm.lm_numero_lote) AS lm_numero_lote,
+            (
+                SELECT lm2.lm_numero_lote 
+                FROM lote_medicamento lm2 
+                WHERE lm2.med_id = m.med_id 
+                  AND lm2.su_id = :sucursal_id 
+                  AND lm2.lm_estado = 'activo' 
+                  AND lm2.lm_cant_actual_unidades > 0
+                ORDER BY lm2.lm_fecha_vencimiento ASC, lm2.lm_id ASC
+                LIMIT 1
+            ) AS lm_numero_lote,
             (
                 SELECT lm2.lm_id 
                 FROM lote_medicamento lm2 
@@ -207,7 +216,7 @@ class ventaModel extends mainModel
             $params[":vd_id"] = (int)$filtros['via'];
         }
 
-        $sql .= " GROUP BY m.med_id, ff.ff_nombre, p.pr_razon_social";
+        $sql .= " GROUP BY m.med_id, ff.ff_nombre";
         $sql .= " ORDER BY m.med_nombre_quimico ASC";
         $sql .= " LIMIT 50";
 
