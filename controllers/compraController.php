@@ -219,7 +219,13 @@ class compraController extends compraModel
             $lm_total_unidades = $cantidad_cajas * $cantidad_unidades;
             $lm_cant_actual_cajas = $cantidad_cajas;
             $lm_cant_actual_unidades = $lm_total_unidades;
-            $subtotal_lote = $lm_total_unidades * $precio_compra;
+            
+            // costo_lista es el TOTAL del lote (precio con descuento)
+            $subtotal_lote = $lote['costo_lista'] ?? 0;
+            
+            // Calcular precio unitario a partir del total del lote
+            $precio_compra_caja = $subtotal_lote / $cantidad_cajas;
+            $precio_compra = ($cantidad_unidades > 0) ? $precio_compra_caja / $cantidad_unidades : $precio_compra_caja;
             $lm_estado = $activar_lote ? 'activo' : 'en_espera';
 
             /* datos de lote medicamento */
@@ -261,19 +267,41 @@ class compraController extends compraModel
                 exit();
             }
 
+            /* Validaciones antes de propagar precios */
+            $propagarPrecio = true;
+            $mensajePropagacion = '';
+            
+            if (empty($datos_lote['lm_precio_venta']) || $datos_lote['lm_precio_venta'] <= 0) {
+                $propagarPrecio = false;
+                $mensajePropagacion .= " Precio venta inválido.";
+            }
+            
+            if (empty($datos_lote['lm_precio_compra']) || $datos_lote['lm_precio_compra'] <= 0) {
+                $propagarPrecio = false;
+                $mensajePropagacion .= " Precio compra inválido.";
+            }
+            
+            if ($datos_lote['lm_precio_venta'] < $datos_lote['lm_precio_compra']) {
+                $propagarPrecio = false;
+                $mensajePropagacion .= " Precio venta menor que precio compra.";
+            }
+
             /* propagar precios a todos los lotes activos del mismo medicamento */
-            $sql_lotes = $conexion->prepare("
-                SELECT lm_id, lm_numero_lote, lm_precio_venta, su_id
-                FROM lote_medicamento
-                WHERE med_id = :med_id
-                  AND lm_estado = 'activo'
-                  AND lm_cant_actual_unidades > 0
-                  AND lm_id != :lote_id_excluir
-            ");
-            $sql_lotes->bindParam(":med_id", $medicamento_id);
-            $sql_lotes->bindParam(":lote_id_excluir", $lote_id);
-            $sql_lotes->execute();
-            $lotes_existentes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+            $lotes_existentes = [];
+            if ($propagarPrecio) {
+                $sql_lotes = $conexion->prepare("
+                    SELECT lm_id, lm_numero_lote, lm_precio_venta, su_id
+                    FROM lote_medicamento
+                    WHERE med_id = :med_id
+                      AND lm_estado = 'activo'
+                      AND lm_cant_actual_unidades > 0
+                      AND lm_id != :lote_id_excluir
+                ");
+                $sql_lotes->bindParam(":med_id", $medicamento_id);
+                $sql_lotes->bindParam(":lote_id_excluir", $lote_id);
+                $sql_lotes->execute();
+                $lotes_existentes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+            }
 
             foreach ($lotes_existentes as $lote_existente) {
                 $datos_up = [
@@ -447,10 +475,15 @@ class compraController extends compraModel
 
 
         /* respuesta exitosa */
+        $textoRespuesta = "La compra {$numero_compra} se registró correctamente con " . count($lotes) . " lote(s).";
+        if (!empty($mensajePropagacion)) {
+            $textoRespuesta .= "<br><br><strong>Advertencia:</strong> $mensajePropagacion";
+        }
+        
         $alerta = [
             'Alerta' => 'recargar',
             'Titulo' => 'Compra registrada',
-            'texto' => "La compra {$numero_compra} se registró correctamente con " . count($lotes) . " lote(s).",
+            'texto' => $textoRespuesta,
             'Tipo' => 'success'
         ];
         echo json_encode($alerta);

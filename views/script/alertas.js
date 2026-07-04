@@ -290,14 +290,14 @@ function alertas_ajax(alerta) {
     if (alerta.Alerta === "simple") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.texto,
+            html: alerta.texto,
             icon: alerta.Tipo,
             confirmButtonText: "Aceptar",
         });
     } else if (alerta.Alerta === "recargar") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.texto,
+            html: alerta.texto,
             icon: alerta.Tipo,
             confirmButtonText: "Aceptar",
         }).then((result) => {
@@ -306,7 +306,7 @@ function alertas_ajax(alerta) {
     } else if (alerta.Alerta === "limpiar") {
         Swal.fire({
             title: alerta.Titulo,
-            text: alerta.texto,
+            html: alerta.texto,
             icon: alerta.Tipo,
             confirmButtonText: "Aceptar",
         }).then((result) => {
@@ -317,7 +317,7 @@ function alertas_ajax(alerta) {
     } else if (alerta.Alerta === "redireccionar") {
         Swal.fire({
             title: alerta.Titulo || "Redirigiendo...",
-            text: alerta.texto,
+            html: alerta.texto,
             icon: alerta.Tipo || "info",
             confirmButtonText: "Aceptar",
         }).then(() => {
