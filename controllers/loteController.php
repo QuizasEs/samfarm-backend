@@ -1185,7 +1185,9 @@ class loteController extends loteModel
                 lm_cant_unidad,
                 lm_cant_blister,
                 lm_precio_min_u,
-                lm_precio_min_c
+                lm_precio_min_c,
+                lm_costo_lista,
+                lm_precio_costo
             FROM lote_medicamento 
             WHERE med_id = :med_id AND lm_estado = 'activo'
             ORDER BY lm_creado_en DESC 
@@ -1203,10 +1205,9 @@ class loteController extends loteModel
         $unidadesPorCaja = intval($resultado['lm_cant_unidad'] ?? 1);
         $cantCajas = intval($resultado['lm_cant_caja'] ?? 0);
 
-        $costoLista = $cantCajas > 0 ? $costoUnitario * $unidadesPorCaja * $cantCajas : 0;
-        $precioCaja = $cantCajas > 0 ? $costoLista / $cantCajas : 0;
+        $costoLista = floatval($resultado['lm_costo_lista'] ?? 0);
+        $precioCaja = floatval($resultado['lm_precio_costo'] ?? 0);
 
-        $resultado['lm_costo_lista'] = $costoLista;
         $resultado['lm_precio_caja'] = $precioCaja;
 
         return json_encode($resultado, JSON_UNESCAPED_UNICODE);

@@ -74,6 +74,88 @@ class compraController extends compraModel
         $respuesta = mainModel::ejecutar_consulta_simple($sql);
         return $respuesta;
     }
+    /* -----------------------------------controlador para precargar valores del ultimo lote del producto----------------------------------------- */
+    public function ultimo_lote_por_medicamento_controller($med_id)
+    {
+        if ($med_id <= 0) {
+            return ['error' => 'ID inválido'];
+        }
+
+        try {
+            $sql = mainModel::conectar()->prepare("
+                SELECT
+                    lm.lm_id,
+                    lm.med_id,
+                    lm.su_id,
+                    lm.pr_id,
+                    lm.pr_id_compra,
+                    lm.lm_numero_lote,
+                    lm.lm_cant_caja,
+                    lm.lm_cant_blister,
+                    lm.lm_cant_unidad,
+                    lm.lm_total_unidades,
+                    lm.lm_cant_actual_cajas,
+                    lm.lm_cant_actual_unidades,
+                    lm.lm_costo_lista,
+                    lm.lm_precio_costo,
+                    lm.lm_precio_venta,
+                    lm.lm_margen_u,
+                    lm.lm_margen_c,
+                    lm.lm_precio_min_u,
+                    lm.lm_precio_min_c,
+                    lm.lm_fecha_ingreso,
+                    lm.lm_fecha_vencimiento,
+                    lm.lm_estado,
+                    lm.lm_creado_en,
+                    lm.lm_actualizado_en,
+                    lm.lm_origen_id,
+                    lm.lm_tr_bloqueado
+                FROM lote_medicamento lm
+                WHERE lm.med_id = :med_id
+                ORDER BY lm.lm_id DESC
+                LIMIT 1
+            ");
+            $sql->bindParam(':med_id', $med_id);
+            $sql->execute();
+
+            $data = $sql->fetch(PDO::FETCH_ASSOC);
+            if (!$data) {
+                return [];
+            }
+
+            $data['lm_cant_caja'] = (int)($data['lm_cant_caja'] ?? 0);
+            $data['lm_cant_blister'] = max(1, (int)($data['lm_cant_blister'] ?? 1));
+            $data['lm_cant_unidad'] = max(1, (int)($data['lm_cant_unidad'] ?? 1));
+            $data['lm_total_unidades'] = (int)($data['lm_total_unidades'] ?? 0);
+            $data['lm_cant_actual_cajas'] = (int)($data['lm_cant_actual_cajas'] ?? 0);
+            $data['lm_cant_actual_unidades'] = (int)($data['lm_cant_actual_unidades'] ?? 0);
+
+            $data['lm_costo_lista'] = (float)($data['lm_costo_lista'] ?? 0);
+            $data['lm_precio_costo'] = (float)($data['lm_precio_costo'] ?? 0);
+
+            $data['lm_precio_venta'] = (float)($data['lm_precio_venta'] ?? 0);
+            $data['lm_margen_u'] = isset($data['lm_margen_u']) ? (float)$data['lm_margen_u'] : null;
+            $data['lm_margen_c'] = isset($data['lm_margen_c']) ? (float)$data['lm_margen_c'] : null;
+            $data['lm_precio_min_u'] = (float)($data['lm_precio_min_u'] ?? 0);
+            $data['lm_precio_min_c'] = (float)($data['lm_precio_min_c'] ?? 0);
+
+            if ($data['lm_total_unidades'] <= 0 && $data['lm_cant_caja'] > 0 && $data['lm_cant_unidad'] > 0) {
+                $data['lm_total_unidades'] = $data['lm_cant_caja'] * $data['lm_cant_unidad'];
+            }
+            if ($data['lm_cant_actual_unidades'] <= 0 && $data['lm_total_unidades'] > 0) {
+                $data['lm_cant_actual_unidades'] = $data['lm_total_unidades'];
+            }
+            if ($data['lm_cant_actual_cajas'] <= 0 && $data['lm_cant_caja'] > 0) {
+                $data['lm_cant_actual_cajas'] = $data['lm_cant_caja'];
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            error_log("Error en ultimo_lote_por_medicamento_controller: " . $e->getMessage());
+            return ['error' => 'Error al cargar datos del último lote'];
+        }
+    }
+
     /* agegar compra nueva controlador */
     public function agregar_compra_controller()
     {
@@ -164,7 +246,7 @@ class compraController extends compraModel
             $cantidad_blister = isset($lote['cantidad_blister']) && (int)$lote['cantidad_blister'] > 0 ? (int)$lote['cantidad_blister'] : 1;
             $cantidad_unidades = isset($lote['cantidad_unidades']) && (int)$lote['cantidad_unidades'] > 0 ? (int)$lote['cantidad_unidades'] : 1;
             $fecha_vencimiento = mainModel::limpiar_cadena($lote['vencimiento'] ?? null);
-            $precio_compra_caja = ($lote['costo_lista'] ?? 0) / ($lote['cantidad'] ?? 1);
+            $precio_compra_caja = $lote['costo_lista'] ?? 0;
             $precio_venta = is_numeric($lote['precioVenta']) ? (float)$lote['precioVenta'] : 0;
             $activar_lote = isset($lote['activar_lote']) && ($lote['activar_lote'] == 1 || $lote['activar_lote'] === true);
 
@@ -220,12 +302,10 @@ class compraController extends compraModel
             $lm_cant_actual_cajas = $cantidad_cajas;
             $lm_cant_actual_unidades = $lm_total_unidades;
             
-            // costo_lista es el TOTAL del lote (precio con descuento)
-            $subtotal_lote = $lote['costo_lista'] ?? 0;
+            // costo_lista es el precio por caja
+            $subtotal_lote = ($lote['costo_lista'] ?? 0) * $cantidad_cajas;
             
-            // Calcular precio unitario a partir del total del lote
-            $precio_compra_caja = $subtotal_lote / $cantidad_cajas;
-            $precio_compra = ($cantidad_unidades > 0) ? $precio_compra_caja / $cantidad_unidades : $precio_compra_caja;
+            // precio_compra_caja y precio_compra ya calculados en lineas 249-254
             $lm_estado = $activar_lote ? 'activo' : 'en_espera';
 
             /* datos de lote medicamento */
@@ -247,7 +327,7 @@ class compraController extends compraModel
                 "lm_fecha_vencimiento" => $fecha_vencimiento,
                 "lm_estado" => $lm_estado,
                 /* campos de auditoría */
-                "lm_costo_lista" => $lote['costo_lista'] ?? null,
+                "lm_costo_lista" => $precio_compra_caja,
                 "lm_margen_u" => $lote['margen_unitario'] ?? null,
                 "lm_margen_c" => $lote['margen_caja'] ?? null,
                 "lm_precio_min_u" => $lote['precio_min_unitario'] ?? null,

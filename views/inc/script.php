@@ -569,7 +569,7 @@
                             <div class="lote-detalles fila-2">
                                 <span class="text-success"><ion-icon name="cash-outline"></ion-icon> <strong>Compra:</strong> Bs. ${(lote.costo_lista || 0).toFixed(2)}</span>
                                 <span class="espacio text-info"><ion-icon name="pricetag-outline"></ion-icon> <strong>Venta:</strong> Bs. ${lote.precioVenta.toFixed(2)}</span>
-                                <span class="espacio text-warning"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${(lote.costo_lista || 0).toFixed(2)}</span>
+                                <span class="espacio text-warning"><ion-icon name="card-outline"></ion-icon> <strong>Subtotal:</strong> Bs. ${((lote.costo_lista || 0) * (lote.cantidad || 1)).toFixed(2)}</span>
                             </div>
                         </div>
 
@@ -591,7 +591,7 @@
 
         /** 💰 Actualiza totales */
         function actualizarTotales() {
-            const subtotal = listaLotes.reduce((t, l) => t + (l.costo_lista || 0), 0);
+            const subtotal = listaLotes.reduce((t, l) => t + ((l.costo_lista || 0) * (l.cantidad || 1)), 0);
             const total = subtotal; // Impuestos en 0%
 
             document.getElementById("total").textContent = `Bs. ${total.toFixed(2)}`;
@@ -636,7 +636,7 @@
             eliminarLote,
             obtenerLotes: () => listaLotes,
             obtenerTotales: () => {
-                const subtotal = listaLotes.reduce((t, l) => t + (l.costo_lista || 0), 0);
+                const subtotal = listaLotes.reduce((t, l) => t + ((l.costo_lista || 0) * (l.cantidad || 1)), 0);
                 return {
                     subtotal: subtotal.toFixed(2),
                     total: subtotal.toFixed(2),

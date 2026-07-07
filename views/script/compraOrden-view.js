@@ -14,6 +14,7 @@ class CompraOrdenManager {
         this.cacheElements();
         this.bindEvents();
         this.initContadores();
+        this.initPrecargaLote();
     }
 
     cacheElements() {
@@ -26,6 +27,9 @@ class CompraOrdenManager {
         this.precioVentaReg = document.getElementById('precio_venta_reg');
         this.precioMinCaja = document.getElementById('precio_min_caja');
         this.precioMinUnitario = document.getElementById('precio_min_unitario');
+        this.numeroLote = document.getElementById('numero_lote');
+        this.fechaVencimiento = document.getElementById('fecha_vencimiento');
+        this.precioCompra = document.getElementById('precio_compra');
     }
 
     bindEvents() {
@@ -88,7 +92,96 @@ class CompraOrdenManager {
         };
     }
 
+    initPrecargaLote() {
+        if (typeof ModalManager === 'undefined' || typeof ModalManager.abrirModal !== 'function') {
+            return;
+        }
 
+        const originalAbrirModal = ModalManager.abrirModal.bind(ModalManager);
+        const form = document.getElementById('formCompra');
+        const ajaxUrl = form ? form.getAttribute('action') : 'ajax/compraAjax.php';
+
+        ModalManager.abrirModal = (medId, nombre) => {
+            originalAbrirModal(medId, nombre);
+            this.precargarUltimoLote(medId, ajaxUrl);
+        };
+    }
+
+    precargarUltimoLote(medId, ajaxUrl) {
+        if (!medId) return;
+
+        fetch(ajaxUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                compraAjax: 'ultimo_lote_producto',
+                med_id: medId
+            })
+        })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(data => {
+            if (!data || data.error || !this.esLoteUtil(data)) return;
+            this.pintarDatosLote(data);
+        })
+        .catch(() => {});
+    }
+
+    esLoteUtil(data) {
+        if (!data || typeof data !== 'object') return false;
+        return !!data.lm_numero_lote ||
+               data.lm_costo_lista > 0 ||
+               data.lm_precio_costo > 0 ||
+               data.lm_cant_caja > 0 ||
+               data.lm_cant_unidad > 0 ||
+               data.lm_precio_venta > 0;
+    }
+
+    pintarDatosLote(data) {
+        if (this.numeroLote) this.numeroLote.value = data.lm_numero_lote || '';
+
+        const cantCajas = data.lm_cant_caja || '';
+        const cantUnidades = data.lm_cant_unidad || '';
+        if (this.cantidad) this.cantidad.value = cantCajas;
+        if (this.cantidadUnidades) this.cantidadUnidades.value = cantUnidades;
+        if (this.fechaVencimiento) this.fechaVencimiento.value = data.lm_fecha_vencimiento || '';
+
+        const costoLista = data.lm_costo_lista || 0;
+
+        if (this.precioCompra) this.precioCompra.value = costoLista > 0 ? costoLista : '';
+        if (this.costoLista) this.costoLista.value = costoLista || '';
+
+        const tieneMargenU = data.lm_margen_u !== null && data.lm_margen_u !== undefined;
+        const tieneMargenC = data.lm_margen_c !== null && data.lm_margen_c !== undefined;
+
+        if (this.margenUnitario) this.margenUnitario.value = tieneMargenU ? data.lm_margen_u : '';
+        if (this.margenCaja) this.margenCaja.value = tieneMargenC ? data.lm_margen_c : '';
+        if (this.precioVentaReg) this.precioVentaReg.value = data.lm_precio_venta || '';
+
+        if (tieneMargenU) {
+            if (this.precioMinUnitario) this.precioMinUnitario.value = data.lm_precio_min_u || '';
+            this.calcularPrecioMinUnitario();
+        } else {
+            if (this.precioMinUnitario) this.precioMinUnitario.value = '';
+            if (this.margenUnitario) this.margenUnitario.value = '';
+        }
+
+        if (tieneMargenC) {
+            if (this.precioMinCaja) this.precioMinCaja.value = data.lm_precio_min_c || '';
+            this.calcularPrecioMinCaja();
+        } else {
+            if (this.precioMinCaja) this.precioMinCaja.value = '';
+            if (this.margenCaja) this.margenCaja.value = '';
+        }
+
+        const tieneCostoBase = costoLista > 0 && (cantCajas || 0) > 0 && (cantUnidades || 0) > 0;
+
+        if (tieneCostoBase) {
+            this.calcularPrecioVenta();
+        }
+    }
 
     setHiddenInput(id, value) {
         let input = document.getElementById(id);
@@ -103,41 +196,35 @@ class CompraOrdenManager {
     }
 
     /**
-     * costo_lista = precio TOTAL de la lista de compra
-     * Se deriva el costo por caja dividiendo entre número de cajas
+     * costo_lista = precio por caja
+     * Se deriva el costo unitario dividiendo entre unidades por caja
      */
     calcularPrecioVenta() {
-        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
-        const numCajas = parseInt(this.cantidad?.value) || 1;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
         const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
-        const costoCaja = precioListaTotal / numCajas;
         const costoUnitario = costoCaja / unidadesPorCaja;
         const precioVenta = costoUnitario + (costoUnitario * margen / 100);
         if (this.precioVentaReg) this.precioVentaReg.value = precioVenta.toFixed(2);
     }
 
     /**
-     * Precio mínimo por caja = (precio lista total / cajas) * (1 + margen_caja)
+     * Precio mínimo por caja = costo_lista * (1 + margen_caja)
      */
     calcularPrecioMinCaja() {
-        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
-        const numCajas = parseInt(this.cantidad?.value) || 1;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenCaja?.value) || 0;
-        const costoCaja = precioListaTotal / numCajas;
         const precioMinCaja = costoCaja * (1 + margen / 100);
         if (this.precioMinCaja) this.precioMinCaja.value = precioMinCaja.toFixed(2);
     }
 
     /**
-     * Precio mínimo unitario = (precio lista total / cajas / unidades) * (1 + margen_unitario)
+     * Precio mínimo unitario = (costo_lista / unidades) * (1 + margen_unitario)
      */
     calcularPrecioMinUnitario() {
-        const precioListaTotal = parseFloat(this.costoLista?.value) || 0;
-        const numCajas = parseInt(this.cantidad?.value) || 1;
+        const costoCaja = parseFloat(this.costoLista?.value) || 0;
         const margen = parseFloat(this.margenUnitario?.value) || 0;
         const unidadesPorCaja = parseInt(this.cantidadUnidades?.value) || 1;
-        const costoCaja = precioListaTotal / numCajas;
         const costoUnitario = costoCaja / unidadesPorCaja;
         const precioMinUnitario = costoUnitario * (1 + margen / 100);
         if (this.precioMinUnitario) this.precioMinUnitario.value = precioMinUnitario.toFixed(2);

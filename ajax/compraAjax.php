@@ -35,7 +35,7 @@ if (isset($_POST['compraAjax'])) {
         $ins_compra = new compraController();
         
         if ($valor == "save") {
-            echo $ins_compra->agregar_compra_controller();
+            echo json_encode($ins_compra->agregar_compra_controller());
         }
     } catch (Throwable $e) {
         echo json_encode([
@@ -57,6 +57,12 @@ if (isset($_POST['compraAjax'])) {
         ];
         $resultados = $ins_compra->buscar_medicamento_controller($filtros);
         echo json_encode($resultados->fetchAll(PDO::FETCH_ASSOC));
+        exit();
+    }
+
+    if ($valor == "ultimo_lote_producto") {
+        $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
+        echo json_encode($ins_compra->ultimo_lote_por_medicamento_controller($med_id));
         exit();
     }
 } else {
