@@ -371,6 +371,8 @@
         const listaLotes = [];
 
         let contadorLote = 0;
+        let modoEdicion = false;
+        let indiceEdicion = null;
 
         /** 🧮 Inicializa el contador de lote */
         function inicializarContador() {
@@ -431,9 +433,11 @@
             if (check) check.checked = false;
         }
 
-        /** 🔓 Abre el modal de lote */
+        /** 🔓 Abre el modal de lote (modo agregar) */
         function abrirModal(id, nombre) {
             if (!modal) return;
+            modoEdicion = false;
+            indiceEdicion = null;
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('open'), 10);
             modalId.value = id;
@@ -444,6 +448,52 @@
             if (numeroLoteInput) {
                 numeroLoteInput.value = generarNumeroLote();
             }
+            const info = document.getElementById("modalLoteNumeroInfo");
+            if (info) info.textContent = numeroLoteInput ? numeroLoteInput.value : "";
+            const subtitulo = document.getElementById("modalLoteSubtitle");
+            if (subtitulo) subtitulo.textContent = "Complete los datos del lote";
+            const btn = document.getElementById("btnGuardarLote");
+            if (btn) btn.textContent = "Agregar";
+        }
+
+        /** 🔧 Abre el modal en modo edición para un lote ya agregado */
+        function abrirEdicion(i) {
+            if (!modal) return;
+            const lote = listaLotes[i];
+            if (!lote) return;
+
+            modoEdicion = true;
+            indiceEdicion = i;
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add('open'), 10);
+            modalId.value = lote.id_medicamento;
+            modalNombre.textContent = lote.nombre;
+
+            // El número de lote es informativo y NO se regenera en edición
+            const numeroLoteInput = document.getElementById("numero_lote");
+            if (numeroLoteInput) numeroLoteInput.value = lote.numero;
+            const info = document.getElementById("modalLoteNumeroInfo");
+            if (info) info.textContent = lote.numero;
+            const subtitulo = document.getElementById("modalLoteSubtitle");
+            if (subtitulo) subtitulo.textContent = "Edite los datos del lote";
+            const btn = document.getElementById("btnGuardarLote");
+            if (btn) btn.textContent = "Guardar";
+
+            setValor("cantidad", lote.cantidad);
+            setValor("cantidad_unidades", lote.cantidad_unidades);
+            setValor("fecha_vencimiento", lote.vencimiento);
+            setValor("precio_compra", lote.precioCompra);
+            setValor("precio_venta_reg", lote.precioVenta);
+            setValor("costo_lista", lote.costo_lista);
+            setValor("margen_unitario", lote.margen_unitario);
+            setValor("margen_caja", lote.margen_caja);
+            setValor("precio_min_unitario", lote.precio_min_unitario);
+            setValor("precio_min_caja", lote.precio_min_caja);
+        }
+
+        function setValor(id, val) {
+            const el = document.getElementById(id);
+            if (el && val !== null && val !== undefined) el.value = val;
         }
 
         /** 🔒 Cierra modal */
@@ -453,6 +503,12 @@
                 setTimeout(() => modal.style.display = "none", 300);
             }
             limpiarCampos();
+            modoEdicion = false;
+            indiceEdicion = null;
+            const btn = document.getElementById("btnGuardarLote");
+            if (btn) btn.textContent = "Agregar";
+            const subtitulo = document.getElementById("modalLoteSubtitle");
+            if (subtitulo) subtitulo.textContent = "Complete los datos del lote";
         }
 
         /**  Valida datos antes de agregar lote */
@@ -521,7 +577,7 @@
             };
         }
 
-        /** ➕ Agrega un nuevo lote */
+        /** ➕ Agrega un nuevo lote o guarda la edición de uno existente */
         function agregarLote() {
             const datos = validarCampos();
             if (!datos) {
@@ -532,16 +588,30 @@
             const id = modalId.value;
             const nombre = modalNombre.textContent;
 
-            listaLotes.push({
-                id_medicamento: id,
-                nombre,
-                ...datos
-            });
+            if (modoEdicion && indiceEdicion !== null && listaLotes[indiceEdicion]) {
+                const numeroOriginal = listaLotes[indiceEdicion].numero;
+                listaLotes[indiceEdicion] = {
+                    id_medicamento: id,
+                    nombre,
+                    ...datos,
+                    numero: numeroOriginal
+                };
+                Swal.fire('Éxito', 'Lote editado correctamente', 'success');
+            } else {
+                listaLotes.push({
+                    id_medicamento: id,
+                    nombre,
+                    ...datos
+                });
+                Swal.fire('Éxito', 'Lote agregado correctamente', 'success');
+            }
+
+            modoEdicion = false;
+            indiceEdicion = null;
             recalcularNumerosLote();
             renderizarLista();
             actualizarTotales();
             cerrarModal();
-            Swal.fire('Éxito', 'Lote agregado correctamente', 'success');
         }
 
         /** 🧾 Renderiza todos los lotes */
@@ -574,6 +644,9 @@
                         </div>
 
                         <div>
+                            <button type="button" class="btn btn-dan btn-sm lote-btn-editar" onclick="ModalManager.abrirEdicion(${i})">
+                                <ion-icon name="create-outline"></ion-icon> Editar
+                            </button>
                             <button type="button" class="btn btn-danger btn-sm lote-btn-eliminar" onclick="ModalManager.eliminarLote(${i})">
                                 <ion-icon name="trash-outline"></ion-icon> Eliminar
                             </button>
@@ -631,6 +704,7 @@
 
         return {
             abrirModal,
+            abrirEdicion,
             cerrarModal,
             agregarLote,
             eliminarLote,
@@ -2394,6 +2468,7 @@ const descripcion = `${nombre} - ${presentacion}`;
         
         init() {
             this.input.addEventListener('input', (e) => {
+                this.input.dataset.selectedId = '';
                 clearTimeout(this.debounce);
                 this.debounce = setTimeout(() => this.search(e.target.value.trim()), 300);
             });
@@ -3962,6 +4037,7 @@ const descripcion = `${nombre} - ${presentacion}`;
             const { input, results } = config;
             
             input.addEventListener('input', () => {
+                input.dataset.selectedId = '';
                 clearTimeout(config.debounce);
                 config.debounce = setTimeout(() => {
                     this.search(config, input.value.trim());

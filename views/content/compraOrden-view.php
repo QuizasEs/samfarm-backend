@@ -324,8 +324,10 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <div class="modal mxl">
             <div class="mh">
                 <div>
-                    <div class="mt">Agregar Lote - <span id="modalMedicamentoNombre">Paracetamol</span></div>
-                    <div class="ms">Complete los datos del lote</div>
+                    <div class="mt">Agregar Lote - <span id="modalMedicamentoNombre">Paracetamol</span>
+                        <span class="badge badge-secondary" id="modalLoteNumeroInfo" style="margin-left:8px;"></span>
+                    </div>
+                    <div class="ms" id="modalLoteSubtitle">Complete los datos del lote</div>
                 </div>
                 <button class="mcl" onclick="cerrarModal()"><ion-icon name="close-outline"></ion-icon></button>
             </div>
@@ -334,12 +336,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 
             <div class="mb">
                 <div class="stit">Información Básica</div>
-                <div class="fr">
-                    <div class="fg">
-                        <label class="fl" for="numero_lote">Número de Lote</label>
-                        <input class="inp" type="text" id="numero_lote" readonly>
-                    </div>
-                </div>
+                <input type="hidden" id="numero_lote">
 
                 <div class="stit">Cantidades</div>
                 <div class="fr">
@@ -404,7 +401,7 @@ $ultima_compra = $ins_med->ultima_compra_controller();
 
             <div class="mf">
                 <button class="btn btn-war" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn btn-suc" onclick="agregarLote()">Agregar</button>
+                <button class="btn btn-suc" id="btnGuardarLote" onclick="agregarLote()">Agregar</button>
             </div>
         </div>
     </div>

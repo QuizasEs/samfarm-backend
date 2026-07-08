@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: "Segoe UI", Arial, sans-serif;
+                            font-size: 11pt;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            margin: 0;
+                            padding: 20px;
+                        }
+
+                        .container {
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            margin: 0 auto;
+                            max-width: 1400px;
+                        }
+
+                        .header {
+                            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                            color: black;
+                            font-size: 20pt;
+                            font-weight: 300;
+                            text-align: center;
+                            padding: 25px;
+                            margin-bottom: 0;
+                            letter-spacing: 1px;
+                            position: relative;
+                        }
+
+                        .header::after {
+                            content: "";
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            right: 0;
+                            height: 4px;
+                            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71, #3498db);
+                        }
+
+                        .info {
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            padding: 20px;
+                            border-bottom: 1px solid #dee2e6;
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                            gap: 15px;
+                            font-size: 10pt;
+                        }
+
+                        .info-item {
+                            background: white;
+                            padding: 12px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                            border-left: 4px solid #3498db;
+                        }
+
+                        .info-item strong {
+                            color: #2c3e50;
+                            display: block;
+                            margin-bottom: 5px;
+                            font-size: 9pt;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+
+                        table {
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            width: 100%;
+                            font-size: 10pt;
+                            background: white;
+                        }
+
+                        th {
+                            background: #D1EBFF;
+                            color: #2B2B2B;
+                            font-weight: 600;
+                            text-align: center;
+                            padding: 14px 10px;
+                            border: none;
+                            position: relative;
+                            font-size: 11pt;
+                            text-transform: uppercase;
+                        }
+
+                        th::after {
+                            content: "";
+                            position: absolute;
+                            right: 0;
+                            top: 25%;
+                            height: 50%;
+                            width: 1px;
+                            background: rgba(255,255,255,0.3);
+                        }
+
+                        th:last-child::after {
+                            display: none;
+                        }
+
+                        td {
+                            padding: 12px 10px;
+                            border-bottom: 1px solid #f8f9fa;
+                            text-align: left;
+                            transition: all 0.2s ease;
+                        }
+
+                        tr:hover td {
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+                            transform: translateY(-1px);
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        }
+
+                        .numero {
+                            text-align: right;
+                            font-weight: 600;
+                            font-family: "Courier New", monospace;
+                            color: #2c3e50;
+                        }
+
+                        .moneda {
+                            text-align: right;
+                            font-weight: 700;
+                            font-family: "Courier New", monospace;
+                            color: #27ae60;
+                            background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
+                            border-left: 3px solid #27ae60;
+                        }
+
+                        .moneda-egreso {
+                            text-align: right;
+                            font-weight: 700;
+                            font-family: "Courier New", monospace;
+                            color: #c62828;
+                            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+                            border-left: 3px solid #c62828;
+                        }
+
+                        .total-row {
+                            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+                            color: white;
+                            font-weight: 600;
+                            font-size: 11pt;
+                        }
+
+                        .total-row td {
+                            border: none;
+                            padding: 16px 10px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+
+                        .total-row .numero, .total-row .moneda, .total-row .moneda-egreso {
+                            color: white;
+                            background: none;
+                            border-left: none;
+                        }
+
+                        .footer {
+                            margin-top: 0;
+                            padding: 25px;
+                            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                            border-top: 1px solid #dee2e6;
+                            font-size: 9pt;
+                            color: #6c757d;
+                            text-align: center;
+                        }
+
+                        .footer strong {
+                            color: #2c3e50;
+                            display: block;
+                            margin-bottom: 8px;
+                            font-size: 10pt;
+                        }
+                    </style>
+                </head>
+                <body><div class="container">
+                                <div class="header">HISTORIAL DE VENTAS - Sasuke</div><div class="info"><div class="info-item">
+                                        <strong>Fecha de Generación</strong>
+                                        26/04/2026 06:01:48
+                                    </div><div class="info-item">
+                                        <strong>Usuario</strong>
+                                        admin
+                                    </div><div class="info-item">
+                                        <strong>Total de Registros</strong>
+                                        5
+                                    </div><div class="info-item">
+                                        <strong>Sucursal</strong>
+                                        Todas las Sucursales
+                                    </div></div><table><thead><tr><th>N° DOCUMENTO</th><th>FECHA</th><th>CLIENTE</th><th>VENDEDOR</th><th>SUCURSAL</th><th>ITEMS</th><th>SUBTOTAL (BS)</th><th>IMPUESTOS (BS)</th><th>TOTAL (BS)</th><th>TIPO DOCUMENTO</th><th>N° FACTURA</th></tr></thead><tbody><tr><td class="">SU1-1777101843</td><td class="">25/04/2026 03:24</td><td class="">juanito peres juanitoperes juanitoperes</td><td class="">caja caja</td><td class="">Sucursal Central</td><td class="numero">1,00</td><td class="moneda">Bs 422,00</td><td class="moneda">Bs 0,00</td><td class="moneda">Bs 422,00</td><td class="">nota de venta</td><td class="">F-1-20260425032403-852</td></tr><tr><td class="">SU7-1776853810</td><td class="">22/04/2026 06:30</td><td class=""></td><td class="">admin admin</td><td class="">222</td><td class="numero">1,00</td><td class="moneda">Bs 2,40</td><td class="moneda">Bs 0,00</td><td class="moneda">Bs 2,40</td><td class="">nota de venta</td><td class="">F-7-20260422063010-946</td></tr><tr><td class="">SU7-1776847502</td><td class="">22/04/2026 04:45</td><td class=""></td><td class="">admin admin</td><td class="">222</td><td class="numero">1,00</td><td class="moneda">Bs 13,00</td><td class="moneda">Bs 0,00</td><td class="moneda">Bs 13,00</td><td class="">nota de venta</td><td class="">F-7-20260422044502-898</td></tr><tr><td class="">SU1-1776193875</td><td class="">14/04/2026 15:11</td><td class="">asdasd asdasd asdasddd</td><td class="">admin admin</td><td class="">Sucursal Central</td><td class="numero">1,00</td><td class="moneda">Bs 5,00</td><td class="moneda">Bs 0,00</td><td class="moneda">Bs 5,00</td><td class="">nota de venta</td><td class="">F-1-20260414151115-356</td></tr><tr><td class="">SU1-1776146172</td><td class="">14/04/2026 01:56</td><td class=""></td><td class="">admin admin</td><td class="">Sucursal Central</td><td class="numero">1,00</td><td class="moneda">Bs 10,00</td><td class="moneda">Bs 0,00</td><td class="moneda">Bs 10,00</td><td class="">nota de venta</td><td class="">F-1-20260414015612-904</td></tr><tr class="total-row"><td colspan="10" style="text-align: right; padding-right: 20px; color: black; font-weight: 600;">TOTAL:</td><td class="numero" style="color:black; text-align:left;">Bs 452,40</td></tr></tbody></table><div class="footer">
+                                <strong>Sasuke</strong>
+                                Este reporte fue generado automáticamente el 26/04/2026 a las 06:01:48. Para consultas contacte al administrador del sistema.
+                            </div></div></body></html>
