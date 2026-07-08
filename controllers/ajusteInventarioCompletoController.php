@@ -71,22 +71,18 @@ class ajusteInventarioCompletoController extends ajusteInventarioCompletoModel
         $ff_id = mainModel::limpiar_cadena($_POST['ff_id'] ?? 0);
         $uf_id = mainModel::limpiar_cadena($_POST['uf_id'] ?? 0);
         $via_administracion = mainModel::limpiar_cadena($_POST['via_administracion'] ?? '');
-        $cant_caja = mainModel::limpiar_cadena($_POST['cant_caja'] ?? 0);
-        $cant_blister = mainModel::limpiar_cadena($_POST['cant_blister'] ?? 0);
 
         if (empty($medicamento_id) || empty($nombre) || empty($principio)) {
             return json_encode(["error" => "Datos del medicamento incompletos."]);
         }
 
         $actualizacion = ajusteInventarioCompletoModel::actualizar_medicamento_modelo(
-            $medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id,
-            0, 0, 0, $via_administracion
+            $medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id, $via_administracion
         );
 
         if ($actualizacion && $actualizacion->rowCount() > 0) {
             return json_encode(["success" => "Medicamento actualizado exitosamente."]);
         } else {
-            // Puede que no haya cambios, pero igual retornamos éxito si la consulta no falló
             return json_encode(["success" => "Datos del medicamento procesados."]);
         }
     }
@@ -116,8 +112,12 @@ class ajusteInventarioCompletoController extends ajusteInventarioCompletoModel
             return json_encode(["error" => "Lote no encontrado."]);
         }
 
+        // Calcular precio_costo_caja: si el formulario envía precio_compra unitario, 
+        // multiplicar por cant_unidad para obtener precio por caja
+        $precio_costo_caja = floatval($precio_compra) * intval($cant_unidad);
+
         $actualizacion = ajusteInventarioCompletoModel::actualizar_lote_modelo(
-            $lote_id, $numero_lote, $cant_caja, $cant_blister, $cant_unidad, $cant_actual_cajas, $cant_actual_unidades, $precio_compra, $precio_venta, $fecha_vencimiento
+            $lote_id, $numero_lote, $cant_caja, $cant_blister, $cant_unidad, $cant_actual_cajas, $cant_actual_unidades, $precio_compra, $precio_venta, $fecha_vencimiento, $precio_costo_caja
         );
 
         // Recalcular inventario siempre para asegurar sincronización

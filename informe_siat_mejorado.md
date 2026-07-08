@@ -2,38 +2,95 @@
 
 ## Documento Mejorado y Validado vs Base de Datos samfarm_db.sql
 
+> **Última actualización:** 08-07-2026. Validado contra el volcado real `samfarm_db.sql`
+> (generado el 23-06-2026, MariaDB 10.4.32, PHP 8.0.30).
+>
+> **Hallazgo principal de esta revisión:** en la versión anterior del informe se indicaba que las
+> 4 tablas SIAT y la columna `fe_tipo_emision` **no existían** y debían crearse. En el estado
+> actual de la base de datos **ya existen**, por lo que el Paso 2 está COMPLETADO. Solo falta
+> implementar la lógica PHP (Pasos 3 a 13). Además se agregó la sección de **repositorios y
+> recursos oficiales** del SIN y SDKs de la comunidad.
+
 ---
 
 ## RESUMEN DE VALIDACIÓN
 
-### ✅ Tablas que YA EXISTEN en la base de datos:
+### ✅ Tablas que YA EXISTEN en la base de datos (verificado en volcado real):
 
-| Tabla | Estado en BD | Uso en Facturación Electrónica |
-|-------|---------------|-------------------------------|
-| [`configuracion_empresa`](samfarm_db.sql:94) | ✅ EXISTE | NIT, nombre y datos del emisor |
-| [`sucursales`](samfarm_db.sql:470) | ✅ EXISTE | Código de sucursal para CUIS/CUFD |
-| [`clientes`](samfarm_db.sql:56) | ✅ EXISTE | Datos del comprador (nombre, carnet/NIT) |
-| [`ventas`](samfarm_db.sql:557) | ✅ EXISTE | Cabecera de cada transacción facturable |
-| [`detalle_venta`](samfarm_db.sql:167) | ✅ EXISTE | Items/productos de cada venta |
-| [`factura`](samfarm_db.sql:197) | ✅ EXISTE | fa_cuf, fa_codigo_control, fa_numero |
-| [`facturacion_electronica`](samfarm_db.sql:212) | ✅ EXISTE | fe_cuf, fe_qr, fe_estado_siat, fe_ticket, fe_payload |
-| [`devoluciones`](samstock_db.sql:182) | ✅ EXISTE | fa_id y dev_motivo para anulaciones |
-| [`usuarios`](basedatos muestra) | ✅ EXISTE | us_id, us_nombre para el XML |
+| Tabla | Estado en BD | Línea en `samfarm_db.sql` | Uso en Facturación Electrónica |
+|-------|---------------|---------------------------|-------------------------------|
+| [`configuracion_empresa`](samfarm_db.sql:173) | ✅ EXISTE | 173 | `ce_nit`, `ce_nombre`, `ce_direccion`, `ce_telefono` del emisor |
+| [`sucursales`](samfarm_db.sql:124637) | ✅ EXISTE | 124637 | `su_id`, `su_nombre` para CUIS/CUFD por sucursal |
+| [`clientes`](samfarm_db.sql:93) | ✅ EXISTE | 93 | `cl_nombres`, `cl_apellido_paterno`, `cl_carnet` (CI/NIT) del comprador |
+| [`ventas`](samfarm_db.sql:124760) | ✅ EXISTE | 124760 | Cabecera de cada transacción (`ve_total`, `ve_fecha_emision`, `ve_metodo_pago`) |
+| [`detalle_venta`](samfarm_db.sql:262) | ✅ EXISTE | 262 | Items/productos de cada venta (`dv_cantidad`, `dv_precio_unitario`, `dv_subtotal`) |
+| [`factura`](samfarm_db.sql:309) | ✅ EXISTE | 309 | `fa_cuf`, `fa_codigo_control`, `fa_numero`, `fa_estado`, `fa_monto_total` |
+| [`facturacion_electronica`](samfarm_db.sql:345) | ✅ EXISTE | 345 | `fe_cuf`, `fe_qr`, `fe_estado_siat`, `fe_ticket`, `fe_payload`, **`fe_tipo_emision`** |
+| [`devoluciones`](samfarm_db.sql:281) | ✅ EXISTE | 281 | `fa_id` y `dev_motivo` para anulaciones |
+| [`usuarios`](samfarm_db.sql:124723) | ✅ EXISTE | 124723 | `us_id`, `us_nombres` para el XML |
+| [`siat_configuracion`](samfarm_db.sql:124586) | ✅ EXISTE | 124586 | Token, CUIS, CUFD y caducidades por sucursal |
+| [`siat_actividades`](samfarm_db.sql:124573) | ✅ EXISTE | 124573 | Catálogo CAEB (vacío, requiere sincronización) |
+| [`siat_productos`](samfarm_db.sql:124624) | ✅ EXISTE | 124624 | Catálogo productos/servicios SIN (vacío, requiere sincronización) |
+| [`siat_leyendas`](samfarm_db.sql:124612) | ✅ EXISTE | 124612 | Leyendas por actividad (vacío, requiere sincronización) |
 
 ### ❌ Tablas que FALTAN (CREAR):
 
-| Tabla | Estado | Acción Requerida |
-|-------|--------|------------------|
-| [`siat_configuracion`](doc:165) | ❌ NO EXISTE | **CREAR** - Requiere script SQL |
-| [`siat_actividades`](doc:197) | ❌ NO EXISTE | **CREAR** - Requiere script SQL |
-| [`siat_productos`](doc:213) | ❌ NO EXISTE | **CREAR** - Requiere script SQL |
-| [`siat_leyendas`](doc:229) | ❌ NO EXISTE | **CREAR** - Requiere script SQL |
+> **NINGUNA.** Las 4 tablas SIAT y la columna `fe_tipo_emision` ya están creadas en el
+> volcado actual. El script del Paso 2 se conserva como referencia para reconstruir la BD
+> desde cero, pero **no debe ejecutarse tal cual** (las tablas ya existen; usar `CREATE TABLE IF NOT EXISTS`).
 
-### ⚠️ Columnas que FALTAN en tablas existentes:
+### ⚠️ Observaciones de datos actuales (importantes antes de certificar):
 
-| Tabla | Columna Faltante | Acción |
-|-------|-----------------|--------|
-| [`facturacion_electronica`](samfarm_db.sql:212) | `fe_tipo_emision` | **ALTER TABLE** - Agregar columna |
+| Ítem | Estado actual | Acción requerida |
+|------|---------------|------------------|
+| [`configuracion_empresa.ce_nit`](samfarm_db.sql:190) | Valor de prueba `'123456789dfg'` (no son 13 dígitos) | Reemplazar por el **NIT real de 13 dígitos** del contribuyente |
+| [`siat_configuracion`](samfarm_db.sql:124603) | Fila para `su_id=1` con `sc_token`, `sc_cuis`, `sc_cufd` en `NULL` | Completar con Token Delegado y obtener CUIS/CUFD en runtime |
+| Catálogos SIAT (`siat_actividades`, `siat_productos`, `siat_leyendas`) | **Vacíos** | Ejecutar sincronización (Paso 5) contra el SIN |
+| Código PHP de integración SIAT | **No existe** en el proyecto (`grep` de `siat`/`cuis`/`cufd` sin resultados) | Implementar Pasos 3 a 13 |
+
+---
+
+# REPOSITORIOS Y RECURSOS OFICIALES (SIAT - Impuestos Nacionales Bolivia)
+
+> ⚠️ **Nota importante:** El Servicio de Impuestos Nacionales (SIN) **no mantiene un repositorio
+> oficial de código en GitHub**. Lo que publica oficialmente son: el **Anexo Técnico**, los
+> **WSDL/servicios SOAP** y el **Portal SIAT**. Todo el código listado a continuación es de
+> **terceros / comunidad** y debe usarse como referencia, no como fuente "oficial" certificada.
+
+## 1. Recursos oficiales del SIN (gob.bo)
+
+| Recurso | URL | Uso |
+|---------|-----|-----|
+| Portal institucional SIN | https://www.impuestos.gob.bo/ | Información, normativa, oficinas |
+| Portal SIAT (autenticación) | https://siat.impuestos.gob.bo/ | Consola del contribuyente, Token Delegado |
+| **Anexo Técnico / Facturación** | https://siatinfo.impuestos.gob.bo/index.php/facturacion-en-linea/factura-electronica | Estructura XML oficial (`facturaComputarizadaCompraVenta`), servicios SOAP, ejemplos |
+| Servicios SOAP PILOTO | `https://pilotosiatservicios.impuestos.gob.bo/v2/...` | Pruebas (ambiente 2) |
+| Servicios SOAP PRODUCCIÓN | `https://siatservicios.impuestos.gob.bo/v2/...` | Facturación con validez fiscal (ambiente 1) |
+| Mesa de ayuda SIAT | siatmesadeayuda@impuestos.gob.bo · (591-2) 2310400 | Soporte técnico y del Anexo Técnico |
+
+**Endpoints WSDL del Anexo Técnico (v2):**
+- `OperacionSIAT` → `.../v2/OperacionSIAT?wsdl` (CUIS, CUFD, fecha/hora, eventos)
+- `FacturacionComputarizada` → `.../v2/FacturacionComputarizada?wsdl` (recepción/anulación de facturas)
+- `CodigosSiatServicios` → `.../v2/CodigosSiatServicios?wsdl` (sincronización de catálogos)
+
+## 2. SDKs / librerías de la comunidad (referencia para implementar)
+
+| Lenguaje | Repositorio | Compatibilidad con este proyecto | Comentario |
+|----------|-------------|----------------------------------|------------|
+| **PHP 7.x+** | `sinticbolivia/mono-invoices-api` y Librería SIAT V2 PHP — https://github.com/sinticbolivia · docs: https://sinticbolivia.net/documentacion-libreria-siat-php | ✅ **Recomendada** (el proyecto corre en XAMPP / PHP 8.0.30) | Implementa CUIS, CUFD, sincronización, firma XML, recepción y anulación. Basada en `SoapClient` + `openssl` |
+| **PHP 8.1+** | `amyr-it/siat-bolivia-client` — https://github.com/arcquars/amyrit-in (Packagist) | ⚠️ Requiere **upgrade a PHP ≥ 8.1** (hoy es 8.0.30) | Cliente moderno, DTOs fuertemente tipados, soporte Laravel opcional |
+| **Go** | `ron86i/go-siat` — https://github.com/ron86i/go-siat (fork: `Guid3x/GO-SIAT`) | ➖ No aplica (backend es PHP) | SDK SOAP más completo: CUIS/CUFD, catálogos, eventos, firma XML |
+| **.NET / C#** | `CarlosQE/SiatBillingSystem` — https://github.com/CarlosQE/SiatBillingSystem | ➖ No aplica | App de escritorio WPF offline-first |
+| **API REST** | `cucu.bo` (cucuapi) — https://github.com/cucuapi · docs: https://docs.cucu.bo/ | ➖ Comercial (no gratuita) | Abstracción JSON sobre los SOAP del SIN; útil si se quiere evitar SOAP |
+| **Varios** | `villca/siat` — https://github.com/villca/siat | ➖ Referencia | Herramientas varias para SIAT |
+
+### Recomendación para SAMFARM (backend PHP en XAMPP)
+- El proyecto **no usa Composer** actualmente y corre en **PHP 8.0.30**, por lo que la opción más
+  directa es **implementar los llamados SOAP con `SoapClient` nativo** (como ya muestran los
+  Pasos 3 a 13 de este informe) o, si se habilita Composer, adoptar la librería
+  **`sinticbolivia`** (compatible con PHP 7.x+).
+- La librería `amyr-it/siat-bolivia-client` es más moderna pero exige PHP ≥ 8.1; convendría
+  actualizar XAMPP antes de usarla.
 
 ---
 
@@ -45,11 +102,16 @@
 ---
 
 ## Paso 2: Crear tablas SIAT en la base de datos
-> ⚠️ **VALIDADO** - Las 4 tablas deben ser CREADAS
+> ✅ **COMPLETADO** - Las 4 tablas SIAT y la columna `fe_tipo_emision` **ya existen** en
+> `samfarm_db.sql` (ver [`siat_configuracion`](samfarm_db.sql:124586),
+> [`siat_actividades`](samfarm_db.sql:124573), [`siat_productos`](samfarm_db.sql:124624),
+> [`siat_leyendas`](samfarm_db.sql:124612) y [`facturacion_electronica.fe_tipo_emision`](samfarm_db.sql:355)).
+> El script se conserva solo como referencia para reconstruir la BD desde cero.
 
-### Estado: PENDIENTE DE EJECUTAR
+### Estado: COMPLETADO (tablas presentes en el volcado actual)
 
-**Script SQL completo y validado:**
+**Script SQL de referencia (usa `IF NOT EXISTS`; no reejecutar tal cual si la BD ya tiene datos):**
+
 
 ```sql
 -- ============================================================
@@ -704,16 +766,16 @@ Cómo solicito formalmente el pase del ambiente PILOTO a PRODUCCIÓN del SIAT Bo
 
 ## FLUJO COMPLETO POR VENTA:
 
-1. Vendedor registra la venta en [`ventas`](samfarm_db.sql:557) + [`detalle_venta`](samfarm_db.sql:167)
+1. Vendedor registra la venta en [`ventas`](samfarm_db.sql:124760) + [`detalle_venta`](samfarm_db.sql:262)
 2. Sistema verifica: CUFD vigente? -> si no, obtener nuevo CUFD
-3. Generar número correlativo de factura ([`fa_numero`](samfarm_db.sql:203))
-4. Calcular CUF (algoritmo local) -> guardar en [`factura.fa_cuf`](samfarm_db.sql:207)
+3. Generar número correlativo de factura ([`fa_numero`](samfarm_db.sql:315))
+4. Calcular CUF (algoritmo local) -> guardar en [`factura.fa_cuf`](samfarm_db.sql:319)
 5. Construir XML con datos de la venta
 6. Intentar enviar al SIN (recepcionFactura)
-   - Si SIN OK: guardar ticket en [`facturacion_electronica`](samfarm_db.sql:212)
+   - Si SIN OK: guardar ticket en [`facturacion_electronica`](samfarm_db.sql:345)
    - Si SIN FALLA: emitir en contingencia (fe_tipo_emision=2)
 7. Consultar estado (validacionRecepcionFactura)
-8. Si estado=908: generar QR, actualizar [`factura.fa_estado=1`](samfarm_db.sql:208)
+8. Si estado=908: generar QR, actualizar [`factura.fa_estado=1`](samfarm_db.sql:320)
 9. Imprimir factura con QR al cliente
 
 ## FLUJO DIARIO (CRON 05:00 AM):

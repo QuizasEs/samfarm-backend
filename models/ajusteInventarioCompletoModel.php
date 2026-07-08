@@ -36,8 +36,7 @@ class ajusteInventarioCompletoModel extends mainModel
                 s.su_nombre,
                 s.su_id
             FROM medicamento m
-            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
-            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            LEFT JOIN proveedores p ON m.pr_id = p.pr_id
             JOIN inventarios i ON m.med_id = i.med_id
             JOIN sucursales s ON i.su_id = s.su_id
             WHERE (m.med_nombre_quimico LIKE :termino OR m.med_principio_activo LIKE :termino OR m.med_codigo_barras LIKE :termino)
@@ -65,10 +64,8 @@ class ajusteInventarioCompletoModel extends mainModel
     protected static function obtener_medicamento_modelo($medicamento_id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT m.*, p.pr_razon_social AS proveedor 
+            SELECT m.* 
             FROM medicamento m
-            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
-            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
             WHERE m.med_id = :medicamento_id
         ");
         $sql->bindParam(":medicamento_id", $medicamento_id, PDO::PARAM_INT);
@@ -89,8 +86,7 @@ class ajusteInventarioCompletoModel extends mainModel
                 uf.uf_nombre as uso_farmacologico_nombre,
                 vd.vd_nombre as via_administracion_nombre
             FROM medicamento m
-            LEFT JOIN lote_medicamento lm ON lm.med_id = m.med_id
-            LEFT JOIN proveedores p ON lm.pr_id = p.pr_id
+            LEFT JOIN proveedores p ON m.pr_id = p.pr_id
             LEFT JOIN forma_farmaceutica ff ON m.ff_id = ff.ff_id
             LEFT JOIN uso_farmacologico uf ON m.uf_id = uf.uf_id
             LEFT JOIN via_de_administracion vd ON m.vd_id = vd.vd_id
@@ -138,7 +134,7 @@ class ajusteInventarioCompletoModel extends mainModel
     /**
      * Modelo para actualizar los datos del medicamento.
      */
-    protected static function actualizar_medicamento_modelo($medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id, $cant_caja, $cant_blister, $cant_unidad, $via_administracion)
+    protected static function actualizar_medicamento_modelo($medicamento_id, $nombre, $principio, $codigo, $proveedor_id, $ff_id, $uf_id, $via_administracion)
     {
         $sql = mainModel::conectar()->prepare("
             UPDATE medicamento 
@@ -166,7 +162,7 @@ class ajusteInventarioCompletoModel extends mainModel
     /**
      * Modelo para actualizar los datos de un lote.
      */
-    protected static function actualizar_lote_modelo($lote_id, $numero_lote, $cant_caja, $cant_blister, $cant_unidad, $cant_actual_cajas, $cant_actual_unidades, $precio_compra, $precio_venta, $fecha_vencimiento)
+    protected static function actualizar_lote_modelo($lote_id, $numero_lote, $cant_caja, $cant_blister, $cant_unidad, $cant_actual_cajas, $cant_actual_unidades, $precio_compra, $precio_venta, $fecha_vencimiento, $precio_costo = null)
     {
         $sql = mainModel::conectar()->prepare("
             UPDATE lote_medicamento 
@@ -178,7 +174,8 @@ class ajusteInventarioCompletoModel extends mainModel
                 lm_cant_actual_unidades = :cant_actual_unidades,
                 lm_precio_compra = :precio_compra, 
                 lm_precio_venta = :precio_venta, 
-                lm_fecha_vencimiento = :fecha_vencimiento
+                lm_fecha_vencimiento = :fecha_vencimiento,
+                lm_precio_costo = :precio_costo
             WHERE lm_id = :lote_id
         ");
         
@@ -192,6 +189,7 @@ class ajusteInventarioCompletoModel extends mainModel
         $sql->bindParam(":precio_compra", $precio_compra, PDO::PARAM_STR);
         $sql->bindParam(":precio_venta", $precio_venta, PDO::PARAM_STR);
         $sql->bindParam(":fecha_vencimiento", $fecha_vencimiento, PDO::PARAM_STR);
+        $sql->bindParam(":precio_costo", $precio_costo, PDO::PARAM_STR);
         
         $sql->execute();
         return $sql;
@@ -221,7 +219,7 @@ class ajusteInventarioCompletoModel extends mainModel
             SELECT 
                 SUM(lm_cant_actual_cajas) as total_cajas,
                 SUM(lm_cant_actual_unidades) as total_unidades,
-                SUM(lm_cant_actual_unidades * lm_precio_compra) as total_valorado
+                SUM(lm_cant_actual_cajas * lm_precio_costo) as total_valorado
             FROM lote_medicamento
             WHERE med_id = :medicamento_id AND su_id = :sucursal_id AND lm_estado = 'activo'
         ");

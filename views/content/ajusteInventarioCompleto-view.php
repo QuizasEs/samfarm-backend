@@ -124,7 +124,7 @@ $datos_iniciales = $ins_ajuste->obtener_datos_iniciales_controlador();
                         <tr class="tr-click" onclick="seleccionarMedicamento(${med.med_id}, ${med.su_id})">
                             <td>
                                 <div class="td-main"><strong>${med.med_nombre_quimico}</strong></div>
-                                <div class="td-sub">${med.med_principio_activo} · ${med.la_nombre_comercial || 'N/A'}</div>
+                                <div class="td-sub">${med.med_principio_activo}</div>
                             </td>
                             <td>
                                 <div class="td-main"><strong style="color:#1976D2;">${med.inv_total_unidades}</strong> unidades</div>
