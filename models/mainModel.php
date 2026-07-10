@@ -2,8 +2,10 @@
 /* preguntamos si se realiza una peticion ajax o no */
 if ($peticionAjax) {
     require_once "../config/SERVER.php";
+    require_once "../config/siat.php";
 } else {
     require_once "./config/SERVER.php";
+    require_once "./config/siat.php";
 }
 
 /* -------------------------------------------------clase principal main model------------------------------------- */

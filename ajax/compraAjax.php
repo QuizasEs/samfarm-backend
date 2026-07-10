@@ -60,6 +60,24 @@ if (isset($_POST['compraAjax'])) {
         exit();
     }
 
+    if ($valor === "select_v2") {
+        $tablas_permitidas = ['proveedores', 'forma_farmaceutica', 'via_de_administracion', 'uso_farmacologico'];
+        $tabla = $_POST['tabla'] ?? '';
+        $campos = json_decode($_POST['campos'] ?? '[]', true);
+        $termino = mainModel::limpiar_cadena($_POST['termino'] ?? '');
+
+        if (!in_array($tabla, $tablas_permitidas, true) || !is_array($campos) || count($campos) < 2) {
+            echo json_encode([], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        if (strlen($termino) < 2) {
+            echo json_encode([], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        echo json_encode(mainModel::select_v2_model($tabla, $campos, $termino), JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
     if ($valor == "ultimo_lote_producto") {
         $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
         echo json_encode($ins_compra->ultimo_lote_por_medicamento_controller($med_id));

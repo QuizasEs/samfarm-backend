@@ -292,3 +292,122 @@ function calcularPrecioMinCaja() { compraManager.calcularPrecioMinCaja(); }
 function calcularPrecioMinUnitario() { compraManager.calcularPrecioMinUnitario(); }
 function forzarLimiteMargen(input) { compraManager.validarMargen(input); }
 function validarMargen(input) { compraManager.validarMargen(input); }
+
+// ===================== Dropdown con buscador (estilo módulo caja / medicamentos) =====================
+function CompraDropdown(inputId, resultsId, tabla, campos, selectId) {
+    this.input = document.getElementById(inputId);
+    this.resultsContainer = document.getElementById(resultsId);
+    this.select = document.getElementById(selectId);
+    this.tabla = tabla;
+    this.campos = campos;
+    this.debounce = null;
+    const form = document.getElementById('formCompra');
+    this.apiUrl = form ? form.getAttribute('action') : 'ajax/compraAjax.php';
+    if (this.input && this.resultsContainer) this.init();
+}
+
+CompraDropdown.prototype.escapeHtml = function(text) {
+    return String(text).replace(/[&<>"'`]/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+};
+
+CompraDropdown.prototype.search = async function(term) {
+    if (term.length < 2) { this.hide(); return; }
+    try {
+        const body = new URLSearchParams();
+        body.append('compraAjax', 'select_v2');
+        body.append('tabla', this.tabla);
+        body.append('campos', JSON.stringify(this.campos));
+        body.append('termino', term);
+        const response = await fetch(this.apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString()
+        });
+        const items = await response.json();
+        this.renderResults(items);
+    } catch (err) {
+        this.renderResults([]);
+    }
+};
+
+CompraDropdown.prototype.renderResults = function(items) {
+    if (!this.resultsContainer) return;
+    if (!items.length) {
+        this.resultsContainer.innerHTML = '<div class="search-results-item no-results">No se encontraron resultados</div>';
+    } else {
+        this.resultsContainer.innerHTML = items.map(item => {
+            const id = item[this.campos[0]];
+            const name = item[this.campos[1]] || '';
+            const extra = item[this.campos[2]] || '';
+            return `
+                <div class="search-results-item" data-id="${id}" data-name="${this.escapeHtml(name)}" style="cursor: pointer; padding: 8px; border-bottom: 1px solid #eee;">
+                    <div><strong>${this.escapeHtml(name)}</strong></div>
+                    ${extra ? `<small style="color: #666;">${this.escapeHtml(extra)}</small>` : ''}
+                </div>`;
+        }).join('');
+        this.attachListeners();
+    }
+    this.applyStyles();
+    this.show();
+};
+
+CompraDropdown.prototype.applyStyles = function() {
+    if (!this.resultsContainer) return;
+    this.resultsContainer.style.cssText = `
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        background: var(--bg-primary, #fff);
+        border: 1px solid var(--border-light, #ddd);
+        border-top: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 0 0 4px 4px;
+        margin-top: 0;
+    `;
+};
+
+CompraDropdown.prototype.attachListeners = function() {
+    this.resultsContainer.querySelectorAll('.search-results-item').forEach(item => {
+        item.addEventListener('click', () => this.selectProvider(item));
+    });
+};
+
+CompraDropdown.prototype.selectProvider = function(item) {
+    this.input.value = item.dataset.name;
+    this.input.dataset.selectedId = item.dataset.id;
+    if (this.select) {
+        this.select.value = item.dataset.id;
+        this.select.dispatchEvent(new Event('change'));
+    }
+    this.hide();
+};
+
+CompraDropdown.prototype.show = function() { this.resultsContainer.style.display = 'block'; };
+CompraDropdown.prototype.hide = function() { this.resultsContainer.style.display = 'none'; };
+
+CompraDropdown.prototype.init = function() {
+    this.input.addEventListener('input', (e) => {
+        this.input.dataset.selectedId = '';
+        if (this.select) this.select.value = '';
+        clearTimeout(this.debounce);
+        this.debounce = setTimeout(() => this.search(e.target.value.trim()), 300);
+    });
+    this.input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.hide();
+    });
+    document.addEventListener('click', (e) => {
+        if (!this.resultsContainer.contains(e.target) && e.target !== this.input) this.hide();
+    });
+};
+
+// Inicializar dropdowns de filtro (módulo de Compra)
+new CompraDropdown('dd_Proveedor_filtro', 'dd_Proveedor_filtro_res', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit'], 'Proveedor_filtro');
+new CompraDropdown('dd_Form_reg', 'dd_Form_reg_res', 'forma_farmaceutica', ['ff_id', 'ff_nombre'], 'Form_reg');
+new CompraDropdown('dd_Via_reg', 'dd_Via_reg_res', 'via_de_administracion', ['vd_id', 'vd_nombre'], 'Via_reg');
+new CompraDropdown('dd_Uso_reg', 'dd_Uso_reg_res', 'uso_farmacologico', ['uf_id', 'uf_nombre'], 'Uso_reg');

@@ -86,6 +86,18 @@ if (isset($_POST['MedicamentoAjax'])) {
         echo $html;
         exit();
     }
+
+    if ($valor === "select_v2") {
+        $tabla = $_POST['tabla'] ?? '';
+        $campos = json_decode($_POST['campos'] ?? '[]', true);
+        $termino = mainModel::limpiar_cadena($_POST['termino'] ?? '');
+        if (strlen($termino) < 2) {
+            echo json_encode([], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        echo json_encode(mainModel::select_v2_model($tabla, $campos, $termino), JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 } else {
     // Petición inválida - cerrar sesión
 /*     session_start(['name' => 'SMP']);

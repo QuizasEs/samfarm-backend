@@ -17,21 +17,21 @@
 
 ### ✅ Tablas que YA EXISTEN en la base de datos (verificado en volcado real):
 
-| Tabla | Estado en BD | Línea en `samfarm_db.sql` | Uso en Facturación Electrónica |
-|-------|---------------|---------------------------|-------------------------------|
-| [`configuracion_empresa`](samfarm_db.sql:173) | ✅ EXISTE | 173 | `ce_nit`, `ce_nombre`, `ce_direccion`, `ce_telefono` del emisor |
-| [`sucursales`](samfarm_db.sql:124637) | ✅ EXISTE | 124637 | `su_id`, `su_nombre` para CUIS/CUFD por sucursal |
-| [`clientes`](samfarm_db.sql:93) | ✅ EXISTE | 93 | `cl_nombres`, `cl_apellido_paterno`, `cl_carnet` (CI/NIT) del comprador |
-| [`ventas`](samfarm_db.sql:124760) | ✅ EXISTE | 124760 | Cabecera de cada transacción (`ve_total`, `ve_fecha_emision`, `ve_metodo_pago`) |
-| [`detalle_venta`](samfarm_db.sql:262) | ✅ EXISTE | 262 | Items/productos de cada venta (`dv_cantidad`, `dv_precio_unitario`, `dv_subtotal`) |
-| [`factura`](samfarm_db.sql:309) | ✅ EXISTE | 309 | `fa_cuf`, `fa_codigo_control`, `fa_numero`, `fa_estado`, `fa_monto_total` |
-| [`facturacion_electronica`](samfarm_db.sql:345) | ✅ EXISTE | 345 | `fe_cuf`, `fe_qr`, `fe_estado_siat`, `fe_ticket`, `fe_payload`, **`fe_tipo_emision`** |
-| [`devoluciones`](samfarm_db.sql:281) | ✅ EXISTE | 281 | `fa_id` y `dev_motivo` para anulaciones |
-| [`usuarios`](samfarm_db.sql:124723) | ✅ EXISTE | 124723 | `us_id`, `us_nombres` para el XML |
-| [`siat_configuracion`](samfarm_db.sql:124586) | ✅ EXISTE | 124586 | Token, CUIS, CUFD y caducidades por sucursal |
-| [`siat_actividades`](samfarm_db.sql:124573) | ✅ EXISTE | 124573 | Catálogo CAEB (vacío, requiere sincronización) |
-| [`siat_productos`](samfarm_db.sql:124624) | ✅ EXISTE | 124624 | Catálogo productos/servicios SIN (vacío, requiere sincronización) |
-| [`siat_leyendas`](samfarm_db.sql:124612) | ✅ EXISTE | 124612 | Leyendas por actividad (vacío, requiere sincronización) |
+| Tabla                                            | Estado en BD | Línea en`samfarm_db.sql` | Uso en Facturación Electrónica                                                                        |
+| ------------------------------------------------ | ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`configuracion_empresa`](samfarm_db.sql:173)   | ✅ EXISTE    | 173                         | `ce_nit`, `ce_nombre`, `ce_direccion`, `ce_telefono` del emisor                                 |
+| [`sucursales`](samfarm_db.sql:124637)           | ✅ EXISTE    | 124637                      | `su_id`, `su_nombre` para CUIS/CUFD por sucursal                                                    |
+| [`clientes`](samfarm_db.sql:93)                 | ✅ EXISTE    | 93                          | `cl_nombres`, `cl_apellido_paterno`, `cl_carnet` (CI/NIT) del comprador                           |
+| [`ventas`](samfarm_db.sql:124760)               | ✅ EXISTE    | 124760                      | Cabecera de cada transacción (`ve_total`, `ve_fecha_emision`, `ve_metodo_pago`)                  |
+| [`detalle_venta`](samfarm_db.sql:262)           | ✅ EXISTE    | 262                         | Items/productos de cada venta (`dv_cantidad`, `dv_precio_unitario`, `dv_subtotal`)                |
+| [`factura`](samfarm_db.sql:309)                 | ✅ EXISTE    | 309                         | `fa_cuf`, `fa_codigo_control`, `fa_numero`, `fa_estado`, `fa_monto_total`                     |
+| [`facturacion_electronica`](samfarm_db.sql:345) | ✅ EXISTE    | 345                         | `fe_cuf`, `fe_qr`, `fe_estado_siat`, `fe_ticket`, `fe_payload`, **`fe_tipo_emision`** |
+| [`devoluciones`](samfarm_db.sql:281)            | ✅ EXISTE    | 281                         | `fa_id` y `dev_motivo` para anulaciones                                                             |
+| [`usuarios`](samfarm_db.sql:124723)             | ✅ EXISTE    | 124723                      | `us_id`, `us_nombres` para el XML                                                                   |
+| [`siat_configuracion`](samfarm_db.sql:124586)   | ✅ EXISTE    | 124586                      | Token, CUIS, CUFD y caducidades por sucursal                                                            |
+| [`siat_actividades`](samfarm_db.sql:124573)     | ✅ EXISTE    | 124573                      | Catálogo CAEB (vacío, requiere sincronización)                                                       |
+| [`siat_productos`](samfarm_db.sql:124624)       | ✅ EXISTE    | 124624                      | Catálogo productos/servicios SIN (vacío, requiere sincronización)                                    |
+| [`siat_leyendas`](samfarm_db.sql:124612)        | ✅ EXISTE    | 124612                      | Leyendas por actividad (vacío, requiere sincronización)                                               |
 
 ### ❌ Tablas que FALTAN (CREAR):
 
@@ -41,12 +41,12 @@
 
 ### ⚠️ Observaciones de datos actuales (importantes antes de certificar):
 
-| Ítem | Estado actual | Acción requerida |
-|------|---------------|------------------|
-| [`configuracion_empresa.ce_nit`](samfarm_db.sql:190) | Valor de prueba `'123456789dfg'` (no son 13 dígitos) | Reemplazar por el **NIT real de 13 dígitos** del contribuyente |
-| [`siat_configuracion`](samfarm_db.sql:124603) | Fila para `su_id=1` con `sc_token`, `sc_cuis`, `sc_cufd` en `NULL` | Completar con Token Delegado y obtener CUIS/CUFD en runtime |
-| Catálogos SIAT (`siat_actividades`, `siat_productos`, `siat_leyendas`) | **Vacíos** | Ejecutar sincronización (Paso 5) contra el SIN |
-| Código PHP de integración SIAT | **No existe** en el proyecto (`grep` de `siat`/`cuis`/`cufd` sin resultados) | Implementar Pasos 3 a 13 |
+| Ítem                                                                         | Estado actual                                                                              | Acción requerida                                                    |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [`configuracion_empresa.ce_nit`](samfarm_db.sql:190)                         | Valor de prueba`'123456789dfg'` (no son 13 dígitos)                                     | Reemplazar por el**NIT real de 13 dígitos** del contribuyente |
+| [`siat_configuracion`](samfarm_db.sql:124603)                                | Fila para`su_id=1` con `sc_token`, `sc_cuis`, `sc_cufd` en `NULL`                | Completar con Token Delegado y obtener CUIS/CUFD en runtime          |
+| Catálogos SIAT (`siat_actividades`, `siat_productos`, `siat_leyendas`) | **Vacíos**                                                                          | Ejecutar sincronización (Paso 5) contra el SIN                      |
+| Código PHP de integración SIAT                                              | **No existe** en el proyecto (`grep` de `siat`/`cuis`/`cufd` sin resultados) | Implementar Pasos 3 a 13                                             |
 
 ---
 
@@ -59,32 +59,34 @@
 
 ## 1. Recursos oficiales del SIN (gob.bo)
 
-| Recurso | URL | Uso |
-|---------|-----|-----|
-| Portal institucional SIN | https://www.impuestos.gob.bo/ | Información, normativa, oficinas |
-| Portal SIAT (autenticación) | https://siat.impuestos.gob.bo/ | Consola del contribuyente, Token Delegado |
+| Recurso                                 | URL                                                                                  | Uso                                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Portal institucional SIN                | https://www.impuestos.gob.bo/                                                        | Información, normativa, oficinas                                                      |
+| Portal SIAT (autenticación)            | https://siat.impuestos.gob.bo/                                                       | Consola del contribuyente, Token Delegado                                              |
 | **Anexo Técnico / Facturación** | https://siatinfo.impuestos.gob.bo/index.php/facturacion-en-linea/factura-electronica | Estructura XML oficial (`facturaComputarizadaCompraVenta`), servicios SOAP, ejemplos |
-| Servicios SOAP PILOTO | `https://pilotosiatservicios.impuestos.gob.bo/v2/...` | Pruebas (ambiente 2) |
-| Servicios SOAP PRODUCCIÓN | `https://siatservicios.impuestos.gob.bo/v2/...` | Facturación con validez fiscal (ambiente 1) |
-| Mesa de ayuda SIAT | siatmesadeayuda@impuestos.gob.bo · (591-2) 2310400 | Soporte técnico y del Anexo Técnico |
+| Servicios SOAP PILOTO                   | `https://pilotosiatservicios.impuestos.gob.bo/v2/...`                              | Pruebas (ambiente 2)                                                                   |
+| Servicios SOAP PRODUCCIÓN              | `https://siatservicios.impuestos.gob.bo/v2/...`                                    | Facturación con validez fiscal (ambiente 1)                                           |
+| Mesa de ayuda SIAT                      | siatmesadeayuda@impuestos.gob.bo · (591-2) 2310400                                  | Soporte técnico y del Anexo Técnico                                                  |
 
 **Endpoints WSDL del Anexo Técnico (v2):**
+
 - `OperacionSIAT` → `.../v2/OperacionSIAT?wsdl` (CUIS, CUFD, fecha/hora, eventos)
 - `FacturacionComputarizada` → `.../v2/FacturacionComputarizada?wsdl` (recepción/anulación de facturas)
 - `CodigosSiatServicios` → `.../v2/CodigosSiatServicios?wsdl` (sincronización de catálogos)
 
 ## 2. SDKs / librerías de la comunidad (referencia para implementar)
 
-| Lenguaje | Repositorio | Compatibilidad con este proyecto | Comentario |
-|----------|-------------|----------------------------------|------------|
-| **PHP 7.x+** | `sinticbolivia/mono-invoices-api` y Librería SIAT V2 PHP — https://github.com/sinticbolivia · docs: https://sinticbolivia.net/documentacion-libreria-siat-php | ✅ **Recomendada** (el proyecto corre en XAMPP / PHP 8.0.30) | Implementa CUIS, CUFD, sincronización, firma XML, recepción y anulación. Basada en `SoapClient` + `openssl` |
-| **PHP 8.1+** | `amyr-it/siat-bolivia-client` — https://github.com/arcquars/amyrit-in (Packagist) | ⚠️ Requiere **upgrade a PHP ≥ 8.1** (hoy es 8.0.30) | Cliente moderno, DTOs fuertemente tipados, soporte Laravel opcional |
-| **Go** | `ron86i/go-siat` — https://github.com/ron86i/go-siat (fork: `Guid3x/GO-SIAT`) | ➖ No aplica (backend es PHP) | SDK SOAP más completo: CUIS/CUFD, catálogos, eventos, firma XML |
-| **.NET / C#** | `CarlosQE/SiatBillingSystem` — https://github.com/CarlosQE/SiatBillingSystem | ➖ No aplica | App de escritorio WPF offline-first |
-| **API REST** | `cucu.bo` (cucuapi) — https://github.com/cucuapi · docs: https://docs.cucu.bo/ | ➖ Comercial (no gratuita) | Abstracción JSON sobre los SOAP del SIN; útil si se quiere evitar SOAP |
-| **Varios** | `villca/siat` — https://github.com/villca/siat | ➖ Referencia | Herramientas varias para SIAT |
+| Lenguaje            | Repositorio                                                                                                                                                        | Compatibilidad con este proyecto                                  | Comentario                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **PHP 7.x+**  | `sinticbolivia/mono-invoices-api` y Librería SIAT V2 PHP — https://github.com/sinticbolivia · docs: https://sinticbolivia.net/documentacion-libreria-siat-php | ✅**Recomendada** (el proyecto corre en XAMPP / PHP 8.0.30) | Implementa CUIS, CUFD, sincronización, firma XML, recepción y anulación. Basada en`SoapClient` + `openssl` |
+| **PHP 8.1+**  | `amyr-it/siat-bolivia-client` — https://github.com/arcquars/amyrit-in (Packagist)                                                                               | ⚠️ Requiere**upgrade a PHP ≥ 8.1** (hoy es 8.0.30)       | Cliente moderno, DTOs fuertemente tipados, soporte Laravel opcional                                               |
+| **Go**        | `ron86i/go-siat` — https://github.com/ron86i/go-siat (fork: `Guid3x/GO-SIAT`)                                                                                 | ➖ No aplica (backend es PHP)                                     | SDK SOAP más completo: CUIS/CUFD, catálogos, eventos, firma XML                                                 |
+| **.NET / C#** | `CarlosQE/SiatBillingSystem` — https://github.com/CarlosQE/SiatBillingSystem                                                                                    | ➖ No aplica                                                      | App de escritorio WPF offline-first                                                                               |
+| **API REST**  | `cucu.bo` (cucuapi) — https://github.com/cucuapi · docs: https://docs.cucu.bo/                                                                                 | ➖ Comercial (no gratuita)                                        | Abstracción JSON sobre los SOAP del SIN; útil si se quiere evitar SOAP                                          |
+| **Varios**    | `villca/siat` — https://github.com/villca/siat                                                                                                                  | ➖ Referencia                                                     | Herramientas varias para SIAT                                                                                     |
 
 ### Recomendación para SAMFARM (backend PHP en XAMPP)
+
 - El proyecto **no usa Composer** actualmente y corre en **PHP 8.0.30**, por lo que la opción más
   directa es **implementar los llamados SOAP con `SoapClient` nativo** (como ya muestran los
   Pasos 3 a 13 de este informe) o, si se habilita Composer, adoptar la librería
@@ -97,11 +99,13 @@
 # PASOS DE IMPLEMENTACIÓN
 
 ## Paso 1: Estado Actual
+
 > ✅ **COMPLETADO** - Autorización obtenida del SIN
 
 ---
 
 ## Paso 2: Crear tablas SIAT en la base de datos
+
 > ✅ **COMPLETADO** - Las 4 tablas SIAT y la columna `fe_tipo_emision` **ya existen** en
 > `samfarm_db.sql` (ver [`siat_configuracion`](samfarm_db.sql:124586),
 > [`siat_actividades`](samfarm_db.sql:124573), [`siat_productos`](samfarm_db.sql:124624),
@@ -111,7 +115,6 @@
 ### Estado: COMPLETADO (tablas presentes en el volcado actual)
 
 **Script SQL de referencia (usa `IF NOT EXISTS`; no reejecutar tal cual si la BD ya tiene datos):**
-
 
 ```sql
 -- ============================================================
@@ -167,11 +170,13 @@ INSERT INTO siat_configuracion (su_id, sc_punto_venta) VALUES (1, 0);
 ```
 
 ### ✅ Prompt para ejecutar:
+
 ```
 Ejecutar el script SQL anterior en la base de datos samfarm_db para crear las tablas necesarias para la facturación electrónica SIAT.
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Tengo PHP 7.4 y la extensión PHP SOAP instalada. Tengo el Token Delegado que me dio el SIN. Dame el código completo de la clase SiatService.php con el constructor que inicialice la conexión SOAP usando ese token, manejando certificados SSL del SIAT Bolivia en ambiente PILOTO.
 ```
@@ -179,9 +184,10 @@ Tengo PHP 7.4 y la extensión PHP SOAP instalada. Tengo el Token Delegado que me
 ---
 
 ## Paso 3: Configurar conexión SOAP y Token Delegado
+
 > ⚠️ **VALIDADO** - Requiere archivo de configuración
 
-### Estado: PENDIENTE DE IMPLEMENTAR
+### Estado: completado
 
 **Archivo de configuración [`config/siat.php`](doc:269):**
 
@@ -205,23 +211,24 @@ define('SIAT_URLS', [
 ]);
 
 // Obtener del NIT de configuracion_empresa (ce_nit)
-define('SIAT_NIT', '123456789');        
+define('SIAT_NIT', '123456789');      
 // Código asignado por el SIN
-define('SIAT_COD_SISTEMA', 'XXXX');             
+define('SIAT_COD_SISTEMA', 'XXXX');           
 // Token del Portal SIAT
 define('SIAT_TOKEN', 'TOKEN_DELEGADO');   
 
 // Ambiente: 2=PILOTO, 1=PRODUCCIÓN
 define('SIAT_AMBIENTE', SIAT_MODO == 'PILOTO' ? 2 : 1);
 // Modalidad: 2 = Computarizada en línea
-define('SIAT_MODALIDAD', 2);                  
+define('SIAT_MODALIDAD', 2);                
 // Código de sucursal (0 = casa matriz)
-define('SIAT_COD_SUCURSAL', 0);                 
+define('SIAT_COD_SUCURSAL', 0);               
 // Punto de venta
 define('SIAT_PUNTO_VENTA', 0);
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Dame el código PHP completo de la clase SiatClient.php que encapsule todas las llamadas SOAP al SIAT Bolivia. Debe incluir: manejo del header de autenticación con Token Delegado, reintentos automáticos en caso de timeout (3 intentos), y logging de errores. Usa las URLs de pilotosiatservicios.impuestos.gob.bo.
 ```
@@ -229,9 +236,10 @@ Dame el código PHP completo de la clase SiatClient.php que encapsule todas las 
 ---
 
 ## Paso 4: Obtener el CUIS
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
-### Estado: PENDIENTE DE IMPLEMENTAR
+### Estado: ¿completado
 
 **Función PHP requerida:**
 
@@ -241,7 +249,7 @@ function obtenerCUIS($nitEmisor, $codigoSucursal = 0, $suId) {
         SIAT_URLS[SIAT_MODO]['operacion'],
         ['stream_context' => stream_context_create(['ssl' => ['verify_peer' => false]])]
     );
-    
+  
     $resp = $client->cuis([
         'SolicitudCuis' => [
             'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -252,9 +260,9 @@ function obtenerCUIS($nitEmisor, $codigoSucursal = 0, $suId) {
             'codigoPuntoVenta' => SIAT_PUNTO_VENTA,
         ]
     ]);
-    
+  
     $r = $resp->RespuestaCuis;
-    
+  
     // Guardar en siat_configuracion: sc_cuis, sc_cuis_expira
     // La tabla ya existe después del Paso 2
     $db = new mainModel();
@@ -264,12 +272,13 @@ function obtenerCUIS($nitEmisor, $codigoSucursal = 0, $suId) {
          sc_cuis_expira=VALUES(sc_cuis_expira)',
         [$suId, $r->codigo, $r->fechaVigencia]
     );
-    
+  
     return $r->codigo;
 }
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 El CUIS del SIAT Bolivia retorna un campo "transaccion" y "codigo". Dame el código PHP para manejar los errores de la respuesta del CUIS, incluyendo los códigos de error del SIN (ej. 909, 910) y como reintentar automáticamente si el servicio está temporalmente caído.
 ```
@@ -277,6 +286,7 @@ El CUIS del SIAT Bolivia retorna un campo "transaccion" y "codigo". Dame el cód
 ---
 
 ## Paso 5: Sincronizar catálogos del SIN
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -290,7 +300,7 @@ El CUIS del SIAT Bolivia retorna un campo "transaccion" y "codigo". Dame el cód
 function sincronizarCatalogos($client, $cuis) {
     // 1. Fecha/hora oficial del SIN
     $client->sincronizarFechaHora([...]);
-    
+  
     // 2. Actividades económicas (CAEB 477000 = farmacia)
     $resp = $client->sincronizarListaActividadesDocumentoSector([
         'SolicitudSincronizacion' => [
@@ -301,19 +311,20 @@ function sincronizarCatalogos($client, $cuis) {
             'codigoModalidad' => SIAT_MODALIDAD,
         ]
     ]);
-    
+  
     // Truncar e insertar en siat_actividades
     // La tabla ya existe después del Paso 2
-    
+  
     // 3. Productos/servicios por actividad (477000 = farmacia)
     $client->sincronizarListaProductosServicios([...]);
-    
+  
     // 4. Leyendas de facturas
     $client->sincronizarParametricaListaLeyendasFactura([...]);
 }
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Dame el código PHP completo para sincronizar los 4 catálogos del SIAT Bolivia (actividades, productos, leyendas, fecha/hora) y guardarlos en MariaDB. Incluye el manejo de la actividad CAEB 477000 para farmacia y como asociar los códigos de producto del SIN a los medicamentos de mi tabla "medicamento".
 ```
@@ -321,6 +332,7 @@ Dame el código PHP completo para sincronizar los 4 catálogos del SIAT Bolivia 
 ---
 
 ## Paso 6: Obtener el CUFD diario
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -330,7 +342,7 @@ Dame el código PHP completo para sincronizar los 4 catálogos del SIAT Bolivia 
 ```php
 function obtenerCUFD($nitEmisor, $cuis, $codigoSucursal = 0, $suId) {
     $client = new SoapClient(SIAT_URLS[SIAT_MODO]['operacion']);
-    
+  
     $resp = $client->cufd([
         'SolicitudCufd' => [
             'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -342,9 +354,9 @@ function obtenerCUFD($nitEmisor, $cuis, $codigoSucursal = 0, $suId) {
             'codigoPuntoVenta' => SIAT_PUNTO_VENTA,
         ]
     ]);
-    
+  
     $r = $resp->RespuestaCufd;
-    
+  
     // Guardar en siat_configuracion:
     // sc_cufd, sc_cufd_control, sc_cufd_expira
     $db = new mainModel();
@@ -354,7 +366,7 @@ function obtenerCUFD($nitEmisor, $cuis, $codigoSucursal = 0, $suId) {
          WHERE su_id=?',
         [$r->codigo, $r->codigoControl, $r->fechaVigencia, $suId]
     );
-    
+  
     return $r;
 }
 
@@ -366,6 +378,7 @@ function cufdVigente($suId) {
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Si son las 23:55 y mi CUFD vence a medianoche, y un cliente está pagando en ese momento, como manejo la transición sin interrumpir la venta? Dame el patrón PHP para pre-obtener el CUFD del día siguiente 30 minutos antes del vencimiento.
 ```
@@ -373,6 +386,7 @@ Si son las 23:55 y mi CUFD vence a medianoche, y un cliente está pagando en ese
 ---
 
 ## Paso 7: Generar el CUF por factura
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -392,7 +406,7 @@ function generarCUF($nit, $fechaHora, $nroFactura, $codigoControl, $codigoSucurs
         '1' .    // Tipo factura: 1=compra-venta
         '01' .   // Tipo doc: 01=NIT o CI
         '0000';  // Punto venta 4 dig
-    
+  
     // Dígito verificador Módulo 11
     $suma = 0;
     $multi = 2;
@@ -402,11 +416,11 @@ function generarCUF($nit, $fechaHora, $nroFactura, $codigoControl, $codigoSucurs
     }
     $resto = $suma % 11;
     $verif = $resto <= 1 ? $resto : 11 - $resto;
-    
+  
     // Codificar en Base 16 (HEX)
     $cadena53 = $cadena . $verif;
     $hex = strtoupper(base_convert($cadena53, 10, 16));
-    
+  
     // Concatenar código control del CUFD
     return $hex . $codigoControl;
 }
@@ -417,6 +431,7 @@ function generarCUF($nit, $fechaHora, $nroFactura, $codigoControl, $codigoSucurs
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Necesito generar números de factura (fa_numero) correlativos por sucursal, reiniciándose cada año. Dame el SQL y PHP para manejar esto con bloqueo optimista en MariaDB, evitando números duplicados cuando hay ventas concurrentes.
 ```
@@ -424,6 +439,7 @@ Necesito generar números de factura (fa_numero) correlativos por sucursal, rein
 ---
 
 ## Paso 8: Construir el XML de la factura
+
 > ⚠️ **VALIDADO** - Requiere implementación con ajustes
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -458,7 +474,7 @@ function generarXML($datos, $detalles, $leyenda) {
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:noNamespaceSchemaLocation="facturaComputarizadaCompraVenta.xsd">
         </facturaComputarizadaCompraVenta>');
-    
+  
     $cab = $xml->addChild('cabecera');
     $cab->addChild('nitEmisor', $datos['nit_emisor']);
     $cab->addChild('razonSocialEmisor', $datos['razon_social']);
@@ -484,7 +500,7 @@ function generarXML($datos, $detalles, $leyenda) {
     $cab->addChild('montoTotalMoneda', $datos['ve_total']);
     $cab->addChild('leyenda', $leyenda);
     $cab->addChild('usuario', $datos['us_nombre']);
-    
+  
     foreach ($detalles as $d) {
         $det = $xml->addChild('detalle');
         $det->addChild('actividadEconomica', '477000');
@@ -497,12 +513,13 @@ function generarXML($datos, $detalles, $leyenda) {
         $det->addChild('montoDescuento', $d['dv_descuento']);
         $det->addChild('subTotal', $d['dv_subtotal']);
     }
-    
+  
     return $xml->asXML();
 }
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Donde descargo el XSD oficial de facturaComputarizadaCompraVenta del SIAT Bolivia? Como valido mi XML contra ese XSD en PHP con DOMDocument antes de enviarlo? Que valor pongo en codigoProductoSin cuando el medicamento no tiene código en el catálogo del SIN?
 ```
@@ -510,6 +527,7 @@ Donde descargo el XSD oficial de facturaComputarizadaCompraVenta del SIAT Bolivi
 ---
 
 ## Paso 9: Enviar la factura al SIN
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -522,9 +540,9 @@ function enviarFactura($xmlString, $faId, $cuf, $sc) {
     $xmlGzip = gzencode($xmlString, 9);
     $xmlB64  = base64_encode($xmlGzip);
     $hash    = hash('sha256', $xmlGzip);
-    
+  
     $client = new SoapClient(SIAT_URLS[SIAT_MODO]['facturacion']);
-    
+  
     $resp = $client->recepcionFactura([
         'SolicitudServicioRecepcionFactura' => [
             'codigoAmbiente'       => SIAT_AMBIENTE,
@@ -541,9 +559,9 @@ function enviarFactura($xmlString, $faId, $cuf, $sc) {
             'tipoFacturaDocumento' => 1, // 1=Factura compra-venta
         ]
     ]);
-    
+  
     $r = $resp->RespuestaServicioFacturacion;
-    
+  
     // Guardar en facturacion_electronica
     // La columna fe_tipo_emision ya fue creada en el Paso 2
     $db = new mainModel();
@@ -553,13 +571,14 @@ function enviarFactura($xmlString, $faId, $cuf, $sc) {
          VALUES (?, ?, ?, ?, NOW(), ?)',
         [$faId, $cuf, $r->codigoEstado, $r->codigoRecepcion, $xmlString]
     );
-    
+  
     // Estados: 901=pendiente, 904=observada(error), 908=validado
     return $r;
 }
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 El SIN devolvió códigoEstado 904 (observada). Como obtengo los mensajes de error específicos de la respuesta para saber que campo del XML está incorrecto? Dame el código PHP para parsear los mensajes de error del SIAT Bolivia y mostrarlos de forma legible.
 ```
@@ -567,6 +586,7 @@ El SIN devolvió códigoEstado 904 (observada). Como obtengo los mensajes de err
 ---
 
 ## Paso 10: Validar la recepción y generar el QR
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -576,7 +596,7 @@ El SIN devolvió códigoEstado 904 (observada). Como obtengo los mensajes de err
 ```php
 function validarYGuardar($ticket, $cuf, $faId, $sc, $nroFactura) {
     $client = new SoapClient(SIAT_URLS[SIAT_MODO]['facturacion']);
-    
+  
     $resp = $client->validacionRecepcionFactura([
         'SolicitudServicioValidacionRecepcionFactura' => [
             'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -589,18 +609,18 @@ function validarYGuardar($ticket, $cuf, $faId, $sc, $nroFactura) {
             'codigoRecepcion'  => $ticket,
         ]
     ]);
-    
+  
     $estado = $resp->RespuestaServicioFacturacion->codigoEstado;
-    
+  
     // Generar QR (URL de verificación pública del SIN)
     $qrData = 'https://siat.impuestos.gob.bo/consulta/QR?' .
               'nit=' . SIAT_NIT .
               '&cuf=' . $cuf .
               '&numero=' . $nroFactura;
-    
+  
     // Instalar: composer require chillerlan/php-qrcode
     $qr = (new QRCode)->render($qrData); // retorna imagen Base64
-    
+  
     $db = new mainModel();
     $db->exeNoMulti(
         'UPDATE facturacion_electronica
@@ -608,16 +628,17 @@ function validarYGuardar($ticket, $cuf, $faId, $sc, $nroFactura) {
          WHERE fa_id=?',
         [$estado, $qr, $faId]
     );
-    
+  
     if ($estado == 908) { // 908 = VÁLIDO
         $db->exeNoMulti('UPDATE factura SET fa_estado=1 WHERE fa_id=?', [$faId]);
     }
-    
+  
     return $estado;
 }
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Dame el código PHP completo para generar e imprimir el recibo/factura en formato térmico (80mm) incluyendo el QR del SIAT Bolivia, el CUF, los datos del comprador y los items de la venta usando la librería DOMPDF o directamente con ESC/POS para impresora térmica.
 ```
@@ -625,6 +646,7 @@ Dame el código PHP completo para generar e imprimir el recibo/factura en format
 ---
 
 ## Paso 11: Anular facturas (devolución)
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -634,7 +656,7 @@ Dame el código PHP completo para generar e imprimir el recibo/factura en format
 ```php
 function anularFactura($cuf, $codigoMotivo, $sc) {
     $client = new SoapClient(SIAT_URLS[SIAT_MODO]['facturacion']);
-    
+  
     $resp = $client->anulacionFactura([
         'SolicitudServicioAnulacionFactura' => [
             'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -649,7 +671,7 @@ function anularFactura($cuf, $codigoMotivo, $sc) {
             'codigoMotivo'     => $codigoMotivo,
         ]
     ]);
-    
+  
     $db = new mainModel();
     if ($resp->RespuestaServicioAnulacion->transaccion === true) {
         $db->exeNoMulti('UPDATE factura SET fa_estado=2 WHERE fa_cuf=?', [$cuf]);
@@ -670,6 +692,7 @@ function anularFactura($cuf, $codigoMotivo, $sc) {
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Al aceptar una devolución en mi tabla devoluciones, necesito: 1) llamar a anulacionFactura del SIAT, 2) actualizar factura.fa_estado=2, 3) revertir el stock en lote_medicamento. Dame la transacción PHP completa que haga las 3 operaciones de forma atómica, con rollback si alguna falla.
 ```
@@ -677,6 +700,7 @@ Al aceptar una devolución en mi tabla devoluciones, necesito: 1) llamar a anula
 ---
 
 ## Paso 12: Modo contingencia (offline)
+
 > ⚠️ **VALIDADO** - Requiere implementación
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
@@ -703,13 +727,13 @@ function enviarPaqueteContingencia($codigosRecepcion) {
         'SELECT fe_payload, fe_cuf FROM facturacion_electronica
          WHERE fe_tipo_emision=2 AND fe_estado_siat="CONTINGENCIA"'
     );
-    
+  
     // Enviar como paquete (máx 500 facturas)
     $archivos = array_map(fn($f) => [
         'cuf'     => $f->fe_cuf,
         'archivo' => base64_encode(gzencode($f->fe_payload, 9))
     ], $facturas);
-    
+  
     $client->recepcionPaqueteFactura([
         'SolicitudServicioRecepcionPaquete' => [
             'codigoRecepcionEventoSignificativo' => $codigosRecepcion,
@@ -720,6 +744,7 @@ function enviarPaqueteContingencia($codigosRecepcion) {
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Cuáles son los códigos exactos de Evento Significativo del SIAT Bolivia para justificar contingencia por corte de internet? Cuánto tiempo tengo para enviar el paquete de facturas de contingencia después de recuperar la conexión? Dame el código para detectar automáticamente cuando el SIN no responde y activar el modo contingencia.
 ```
@@ -727,6 +752,7 @@ Cuáles son los códigos exactos de Evento Significativo del SIAT Bolivia para j
 ---
 
 ## Paso 13: Certificación PILOTO y pase a producción
+
 > ⚠️ **VALIDADO** - Checklist técnico
 
 ### Estado: PENDIENTE DE EJECUTAR
@@ -756,6 +782,7 @@ define('SIAT_MODO', 'PRODUCCIÓN');
 ```
 
 ### ✅ Prompt sugerido para continuar:
+
 ```
 Cómo solicito formalmente el pase del ambiente PILOTO a PRODUCCIÓN del SIAT Bolivia? Hay alguna presentación presencial en la oficina del SIN o se hace completamente en línea desde el Portal SIAT? Que documentación debo adjuntar?
 ```

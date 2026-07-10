@@ -23,17 +23,21 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
         </div>
 
-        <div class="card mb16">
+        <div class="card mb16" style="overflow: visible !important;">
             <div class="ch">
                 <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
             </div>
-            <div class="cb">
+            <div class="cb" style="overflow: visible !important;">
                 <form class="filtro-dinamico">
                     <div class="fr3">
                         <div class="fg">
                             <label class="fl">Laboratorios</label>
-                            <select class="sel select-filtro" name="select1">
-                                <option value="">Todos los proveedores</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_proveedor_filtro" placeholder="Buscar proveedor..." autocomplete="off">
+                                <div id="dd_proveedor_filtro_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel select-filtro" name="select1" id="select1" style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['proveedores'] as $prov) { ?>
                                     <option value="<?php echo $prov['pr_id'] ?>"><?php echo $prov['pr_razon_social'] ?></option>
                                 <?php } ?>
@@ -106,7 +110,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </div>
-            <div class="mb">
+            <div class="mb" style="overflow: visible !important;">
                 <form id="formNuevoMedicamento">
                     <input type="hidden" name="MedicamentoAjax" value="save">
                     <div class="fr1">
@@ -143,8 +147,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="fr">
                         <div class="fg">
                             <label class="fl">Uso Farmacológico <span class="tdan">*</span></label>
-                            <select class="sel" name="Uso_reg" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Uso_reg" placeholder="Buscar uso..." autocomplete="off">
+                                <div id="dd_Uso_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Uso_reg" id="sel_Uso_reg" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?>
                                     <option value="<?php echo $uso['uf_id'] ?>"><?php echo $uso['uf_nombre'] ?></option>
                                 <?php } ?>
@@ -152,8 +160,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                         <div class="fg">
                             <label class="fl">Forma Farmacéutica <span class="tdan">*</span></label>
-                            <select class="sel" name="Forma_reg" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Forma_reg" placeholder="Buscar forma..." autocomplete="off">
+                                <div id="dd_Forma_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Forma_reg" id="sel_Forma_reg" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
                                     <option value="<?php echo $forma['ff_id'] ?>"><?php echo $forma['ff_nombre'] ?></option>
                                 <?php } ?>
@@ -164,8 +176,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                         <div class="fg">
                             <label class="fl">Vía de Administración <span class="tdan">*</span></label>
-                            <select class="sel" name="Via_reg" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Via_reg" placeholder="Buscar vía..." autocomplete="off">
+                                <div id="dd_Via_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Via_reg" id="sel_Via_reg" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['via_administracion'] as $via) { ?>
                                     <option value="<?php echo $via['vd_id'] ?>"><?php echo $via['vd_nombre'] ?></option>
                                 <?php } ?>
@@ -173,8 +189,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                         <div class="fg">
                             <label class="fl">Proveedor (Laboratorio) <span class="tdan">*</span></label>
-                            <select class="sel" name="Proveedor_reg" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Proveedor_reg" placeholder="Buscar proveedor..." autocomplete="off">
+                                <div id="dd_Proveedor_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Proveedor_reg" id="sel_Proveedor_reg" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['proveedores'] as $proveedor) { ?>
                                     <option value="<?php echo $proveedor['pr_id'] ?>"><?php echo $proveedor['pr_razon_social'] ?></option>
                                 <?php } ?>
@@ -201,7 +221,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </div>
-            <div class="mb">
+            <div class="mb" style="overflow: visible !important;">
                 <form id="formEditarMedicamento">
                     <input type="hidden" name="MedicamentoAjax" value="update">
                     <input type="hidden" name="med_id">
@@ -240,8 +260,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="fr">
                         <div class="fg">
                             <label class="fl">Uso Farmacológico <span class="tdan">*</span></label>
-                            <select class="sel" name="Uso_up" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Uso_up" placeholder="Buscar uso..." autocomplete="off">
+                                <div id="dd_Uso_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Uso_up" id="sel_Uso_up" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?>
                                     <option value="<?php echo $uso['uf_id'] ?>"><?php echo $uso['uf_nombre'] ?></option>
                                 <?php } ?>
@@ -249,8 +273,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                         <div class="fg">
                             <label class="fl">Forma Farmacéutica <span class="tdan">*</span></label>
-                            <select class="sel" name="Forma_up" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Forma_up" placeholder="Buscar forma..." autocomplete="off">
+                                <div id="dd_Forma_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Forma_up" id="sel_Forma_up" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
                                     <option value="<?php echo $forma['ff_id'] ?>"><?php echo $forma['ff_nombre'] ?></option>
                                 <?php } ?>
@@ -260,8 +288,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="fr">
                         <div class="fg">
                             <label class="fl">Vía de Administración <span class="tdan">*</span></label>
-                            <select class="sel" name="Via_up" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Via_up" placeholder="Buscar vía..." autocomplete="off">
+                                <div id="dd_Via_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Via_up" id="sel_Via_up" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['via_administracion'] as $via) { ?>
                                     <option value="<?php echo $via['vd_id'] ?>"><?php echo $via['vd_nombre'] ?></option>
                                 <?php } ?>
@@ -269,8 +301,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                         </div>
                         <div class="fg">
                             <label class="fl">Proveedor (Laboratorio) <span class="tdan">*</span></label>
-                            <select class="sel" name="Proveedor_up" required>
-                                <option value="">Seleccionar</option>
+                            <div class="search-wrapper" style="position: relative;">
+                                <input type="text" class="inp" id="dd_Proveedor_up" placeholder="Buscar proveedor..." autocomplete="off">
+                                <div id="dd_Proveedor_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                            </div>
+                            <select class="sel" name="Proveedor_up" id="sel_Proveedor_up" required style="display: none;">
+                                <option value=""></option>
                                 <?php foreach ($datos_select['proveedores'] as $proveedor) { ?>
                                     <option value="<?php echo $proveedor['pr_id'] ?>"><?php echo $proveedor['pr_razon_social'] ?></option>
                                 <?php } ?>

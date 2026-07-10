@@ -170,51 +170,67 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         
 
         <!-- FILTRAR MEDICAMENTO -->
-        <div class="card mb16">
+        <div class="card mb16" style="overflow: visible !important;">
             <div class="ch">
                 <span class="ct">Filtrar por Medicamento</span>
             </div>
-             <div class="cb">
-                 <div class="filtro-dinamico">
-                     <div class="fr3">
-                        <div class="fg">
-                            <label class="fl" for="Proveedor_filtro">Proveedor</label>
-                            <select class="sel select-filtro" name="Proveedor_filtro" id="Proveedor_filtro" onchange="actualizarProveedor()">
-                                <option value="">Todos</option>
-                                <?php foreach ($datos_select['proveedores'] as $pro) { ?>
-                                    <option value="<?php echo $pro['pr_id']; ?>" data-nit="<?php echo $pro['pr_nit']; ?>"><?php echo $pro['pr_razon_social']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="fg">
-                            <label class="fl" for="Form_reg">Forma Farmacéutica</label>
-                            <select class="sel select-filtro" name="Form_reg" id="Form_reg">
-                                <option value="">Seleccionar</option>
-                                <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
-                                    <option value="<?php echo $forma['ff_id']; ?>"><?php echo $forma['ff_nombre']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="fg">
-                            <label class="fl" for="Via_reg">Vía de Administración</label>
-                            <select class="sel select-filtro" name="Via_reg" id="Via_reg">
-                                <option value="">Seleccionar</option>
-                                <?php foreach ($datos_select['via_administracion'] as $via) { ?>
-                                    <option value="<?php echo $via['vd_id']; ?>"><?php echo $via['vd_nombre']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="fr1">
-                        <div class="fg">
-                            <label class="fl" for="Uso_reg">Uso Farmacológico</label>
-                            <select class="sel select-filtro" name="Uso_reg" id="Uso_reg">
-                                <option value="">Seleccionar</option>
-                                <?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?>
-                                    <option value="<?php echo $uso['uf_id']; ?>"><?php echo $uso['uf_nombre']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
+             <div class="cb" style="overflow: visible !important;">
+                  <div class="filtro-dinamico">
+                      <div class="fr3">
+                         <div class="fg">
+                             <label class="fl" for="Proveedor_filtro">Proveedor</label>
+                             <div class="search-wrapper" style="position: relative;">
+                                 <input type="text" class="inp" id="dd_Proveedor_filtro" placeholder="Buscar proveedor..." autocomplete="off">
+                                 <div id="dd_Proveedor_filtro_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                             </div>
+                             <select class="sel select-filtro" name="Proveedor_filtro" id="Proveedor_filtro" onchange="actualizarProveedor()" style="display: none;">
+                                 <option value="">Todos</option>
+                                 <?php foreach ($datos_select['proveedores'] as $pro) { ?>
+                                     <option value="<?php echo $pro['pr_id']; ?>" data-nit="<?php echo $pro['pr_nit']; ?>"><?php echo $pro['pr_razon_social']; ?></option>
+                                 <?php } ?>
+                             </select>
+                         </div>
+                         <div class="fg">
+                             <label class="fl" for="Form_reg">Forma Farmacéutica</label>
+                             <div class="search-wrapper" style="position: relative;">
+                                 <input type="text" class="inp" id="dd_Form_reg" placeholder="Buscar forma..." autocomplete="off">
+                                 <div id="dd_Form_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                             </div>
+                             <select class="sel select-filtro" name="Form_reg" id="Form_reg" style="display: none;">
+                                 <option value="">Seleccionar</option>
+                                 <?php foreach ($datos_select['forma_farmaceutica'] as $forma) { ?>
+                                     <option value="<?php echo $forma['ff_id']; ?>"><?php echo $forma['ff_nombre']; ?></option>
+                                 <?php } ?>
+                             </select>
+                         </div>
+                         <div class="fg">
+                             <label class="fl" for="Via_reg">Vía de Administración</label>
+                             <div class="search-wrapper" style="position: relative;">
+                                 <input type="text" class="inp" id="dd_Via_reg" placeholder="Buscar vía..." autocomplete="off">
+                                 <div id="dd_Via_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                             </div>
+                             <select class="sel select-filtro" name="Via_reg" id="Via_reg" style="display: none;">
+                                 <option value="">Seleccionar</option>
+                                 <?php foreach ($datos_select['via_administracion'] as $via) { ?>
+                                     <option value="<?php echo $via['vd_id']; ?>"><?php echo $via['vd_nombre']; ?></option>
+                                 <?php } ?>
+                             </select>
+                         </div>
+                     </div>
+                     <div class="fr1">
+                         <div class="fg">
+                             <label class="fl" for="Uso_reg">Uso Farmacológico</label>
+                             <div class="search-wrapper" style="position: relative;">
+                                 <input type="text" class="inp" id="dd_Uso_reg" placeholder="Buscar uso..." autocomplete="off">
+                                 <div id="dd_Uso_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
+                             </div>
+                             <select class="sel select-filtro" name="Uso_reg" id="Uso_reg" style="display: none;">
+                                 <option value="">Seleccionar</option>
+                                 <?php foreach ($datos_select['uso_farmacologico'] as $uso) { ?>
+                                     <option value="<?php echo $uso['uf_id']; ?>"><?php echo $uso['uf_nombre']; ?></option>
+                                 <?php } ?>
+                             </select>
+                         </div>
                         <div class="fg">
                             <label class="fl" for="buscarMedicamento">Buscar Medicamento</label>
                             <div class="inpg">
