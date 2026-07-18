@@ -36,6 +36,8 @@ if (isset($_POST['loteAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['loteAjax'];
 
     require_once "../controllers/loteController.php";
@@ -121,6 +123,8 @@ if (isset($_GET['loteAjax'])) {
         ]);
         exit();
     }
+
+    session_write_close();
 
     $valor = $_GET['loteAjax'];
     require_once "../controllers/loteController.php";

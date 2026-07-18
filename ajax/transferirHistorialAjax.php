@@ -53,6 +53,8 @@ if (isset($_POST['transferirHistorialAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['transferirHistorialAjax'];
 
     require_once "../controllers/transferirHistorialController.php";

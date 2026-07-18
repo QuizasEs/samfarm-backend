@@ -79,6 +79,8 @@ if (isset($_POST['proveedoresAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['proveedoresAjax'];
 
     require_once "../controllers/proveedorController.php";

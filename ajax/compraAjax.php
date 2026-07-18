@@ -27,6 +27,8 @@ if (isset($_POST['compraAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['compraAjax'];
 
     require_once "../controllers/compraController.php";

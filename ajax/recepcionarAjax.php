@@ -24,6 +24,8 @@ if (isset($_POST['recepcionarAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['recepcionarAjax'];
 
     require_once "../controllers/recepcionarController.php";

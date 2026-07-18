@@ -16,6 +16,8 @@ if (isset($_GET['usuariosAjax']) && $_GET['usuariosAjax'] == "exportar_excel") {
         exit();
     }
 
+    session_write_close();
+
     require_once "../controllers/userController.php";
     $ins_usuario = new userController();
     $ins_usuario->exportar_usuarios_excel_controller();
@@ -48,6 +50,8 @@ if (isset($_POST['usuariosAjax'])) {
         ]);
         exit();
     }
+
+    session_write_close();
 
     $valor = $_POST['usuariosAjax'];
 

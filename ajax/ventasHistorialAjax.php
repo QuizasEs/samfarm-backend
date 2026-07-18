@@ -20,6 +20,8 @@ if (isset($_GET['ventasHistorialAjax']) && $_GET['ventasHistorialAjax'] === 'exp
         exit();
     }
 
+    session_write_close();
+
     require_once "../controllers/ventasHistorialController.php";
     $ins_ventas = new ventasHistorialController();
     $ins_ventas->exportar_excel_controller();
@@ -54,6 +56,8 @@ if (isset($_POST['ventasHistorialAjax'])) {
         echo json_encode($alerta);
         exit();
     }
+
+    session_write_close();
 
     $valor = $_POST['ventasHistorialAjax'];
 

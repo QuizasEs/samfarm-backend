@@ -81,6 +81,8 @@ if (isset($_POST['clientesAjax'])) {
 
     $rol_usuario = $_SESSION['rol_smp'] ?? 0;
 
+    session_write_close();
+
     $valor = $_POST['clientesAjax'];
 
     // Actions denied for role 3

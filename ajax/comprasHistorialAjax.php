@@ -110,6 +110,8 @@ if (isset($_POST['comprasHistorialAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['comprasHistorialAjax'];
 
     require_once "../controllers/compraHistorialController.php";

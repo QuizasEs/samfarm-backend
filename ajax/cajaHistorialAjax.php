@@ -18,6 +18,8 @@ if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar
         exit();
     }
     
+    session_write_close();
+    
     require_once "../controllers/cajaHistorialController.php";
     $ins_historial = new cajaHistorialController();
     $ins_historial->exportar_historial_caja_pdf_controller();
@@ -39,6 +41,8 @@ if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar
         exit();
     }
     
+    session_write_close();
+    
     require_once "../controllers/cajaHistorialController.php";
     $ins_historial = new cajaHistorialController();
     $ins_historial->exportar_historial_caja_excel_controller();
@@ -59,6 +63,8 @@ if (isset($_GET['cajaHistorialAjax']) && $_GET['cajaHistorialAjax'] == "exportar
         echo "No tiene permisos para exportar.";
         exit();
     }
+    
+    session_write_close();
     
     require_once "../controllers/cajaHistorialController.php";
     $ins_historial = new cajaHistorialController();
@@ -98,6 +104,8 @@ if (isset($_POST['cajaHistorialAjax'])) {
         echo json_encode($alerta);
         exit();
     }
+
+    session_write_close();
 
     $valor = $_POST['cajaHistorialAjax'];
 

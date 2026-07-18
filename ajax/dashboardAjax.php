@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start(['name' => 'SMP']);
 header('Content-Type: application/json; charset=utf-8');
 
 $peticionAjax = true;
@@ -9,12 +9,17 @@ require_once '../controllers/dashboardController.php';
 
 $response = ['success' => false, 'data' => null, 'message' => ''];
 
+// Validar sesión mínima
+if (!isset($_SESSION['id_smp'])) {
+    echo json_encode(['success' => false, 'message' => 'Sesión expirada']);
+    exit();
+}
+
+session_write_close();
+
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $su_id = null;
-        if (isset($_SESSION['sucursal_smp'])) {
-            $su_id = $_SESSION['sucursal_smp'];
-        }
+        $su_id = $_SESSION['sucursal_smp'] ?? null;
 
         if (isset($_GET['dashboardAjax'])) {
             $action = $_GET['dashboardAjax'];

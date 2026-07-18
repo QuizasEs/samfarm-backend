@@ -1,17 +1,17 @@
 <?php
-// Indicamos que esta petición viene vía AJAX
+// Indicamos que esta peticiรณn viene vรญa AJAX
 $peticionAjax = true;
 
-// Importamos la configuración general
+// Importamos la configuraciรณn general
 require_once "../config/APP.php";
 
 if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel") {
 
     session_start(['name' => 'SMP']);
 
-    // Verificar sesión y permisos
+    // Verificar sesiรณn y permisos
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
-        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        echo "Sesiรณn expirada. Por favor inicie sesiรณn nuevamente.";
         exit();
     }
 
@@ -21,7 +21,7 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_excel
         exit();
     }
 
-    // Procesar exportación
+    // Procesar exportaciรณn
     require_once "../controllers/inventarioController.php";
     $ins_inventario = new inventarioController();
     $ins_inventario->exportar_inventario_excel_controller();
@@ -32,9 +32,9 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_pdf")
 
     session_start(['name' => 'SMP']);
 
-    // Verificar sesión y permisos
+    // Verificar sesiรณn y permisos
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
-        echo "Sesión expirada. Por favor inicie sesión nuevamente.";
+        echo "Sesiรณn expirada. Por favor inicie sesiรณn nuevamente.";
         exit();
     }
 
@@ -44,7 +44,7 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_pdf")
         exit();
     }
 
-    // Procesar exportación PDF
+    // Procesar exportaciรณn PDF
     require_once "../controllers/inventarioController.php";
     $ins_inventario = new inventarioController();
     $ins_inventario->exportar_pdf_inventario_controller();
@@ -53,18 +53,18 @@ if (isset($_GET['inventarioAjax']) && $_GET['inventarioAjax'] == "exportar_pdf")
 
 if (isset($_POST['inventarioAjax'])) {
 
-    // Iniciamos sesión para validar permisos
+    // Iniciamos sesiรณn para validar permisos
     session_start(['name' => 'SMP']);
 
-    // Verificar que el usuario tenga sesión activa y permisos
+    // Verificar que el usuario tenga sesiรณn activa y permisos
     if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
         session_unset();
         session_destroy();
 
         echo json_encode([
             "Alerta" => "simple",
-            "Titulo" => "Sesión expirada",
-            "texto" => "Por favor vuelva a iniciar sesión",
+            "Titulo" => "Sesiรณn expirada",
+            "texto" => "Por favor vuelva a iniciar sesiรณn",
             "Tipo" => "error"
         ]);
         exit();
@@ -80,6 +80,10 @@ if (isset($_POST['inventarioAjax'])) {
         ]);
         exit();
     }
+
+    session_write_close();
+
+    session_write_close();
 
     //  Sesión válida, procesar petición
     $valor = $_POST['inventarioAjax'];
@@ -129,7 +133,7 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
-    /* ===== GUARDAR CONFIGURACIÓN DE INVENTARIO ===== */
+    /* ===== GUARDAR CONFIGURACIร�N DE INVENTARIO ===== */
     if ($valor == "configurar") {
         echo $ins_inventario->guardar_configuracion_inventario_controller();
         exit();
@@ -182,9 +186,9 @@ if (isset($_POST['inventarioAjax'])) {
         // Obtener datos actuales de precios del medicamento en la sucursal
         $resultado = $ins_inventario->obtener_datos_balance_controller($med_id);
 
-        // Verificar que el resultado es un array válido
+        // Verificar que el resultado es un array vรกlido
         if (!is_array($resultado)) {
-            echo json_encode(['success' => false, 'error' => 'Respuesta inválida del servidor']);
+            echo json_encode(['success' => false, 'error' => 'Respuesta invรกlida del servidor']);
         } else {
             echo json_encode($resultado);
         }
@@ -207,7 +211,7 @@ if (isset($_POST['inventarioAjax'])) {
             echo json_encode([
                 'Alerta' => 'simple',
                 'Titulo' => 'Datos incompletos',
-                'texto' => 'Información insuficiente para aplicar balance',
+                'texto' => 'Informaciรณn insuficiente para aplicar balance',
                 'Tipo' => 'error'
             ]);
             exit();
@@ -271,17 +275,17 @@ if (isset($_POST['inventarioAjax'])) {
         exit();
     }
 
-    // Si llegamos aquí, la acción no existe
+    // Si llegamos aquรญ, la acciรณn no existe
     echo json_encode([
         "Alerta" => "simple",
-        "Titulo" => "Acción no válida",
-        "texto" => "La acción solicitada no existe",
+        "Titulo" => "Acciรณn no vรกlida",
+        "texto" => "La acciรณn solicitada no existe",
         "Tipo" => "error"
     ]);
     exit();
 
 } else {
-    // Petición inválida - cerrar sesión
+    // Peticiรณn invรกlida - cerrar sesiรณn
     session_start(['name' => 'SMP']);
     session_unset();
     session_destroy();
@@ -289,7 +293,7 @@ if (isset($_POST['inventarioAjax'])) {
     echo json_encode([
         "Alerta" => "simple",
         "Titulo" => "Acceso denegado",
-        "texto" => "Petición no autorizada",
+        "texto" => "Peticiรณn no autorizada",
         "Tipo" => "error"
     ]);
     exit();

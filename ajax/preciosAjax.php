@@ -31,6 +31,8 @@ if (isset($_POST['preciosAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['preciosAjax'];
 
     require_once "../controllers/preciosController.php";

@@ -9,6 +9,8 @@ if (!isset($_SESSION['id_smp']) || !isset($_SESSION['rol_smp'])) {
     exit;
 }
 
+session_write_close();
+
 require_once "../controllers/notificacionesController.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

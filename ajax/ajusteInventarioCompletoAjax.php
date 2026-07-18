@@ -16,6 +16,8 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2])) {
     exit();
 }
 
+session_write_close();
+
 require_once "../controllers/ajusteInventarioCompletoController.php";
 $ins_ajuste = new ajusteInventarioCompletoController();
 

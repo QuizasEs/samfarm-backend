@@ -32,6 +32,8 @@ if ($rol_usuario != 1 && $rol_usuario != 2) {
     exit();
 }
 
+session_write_close();
+
 require_once "../controllers/mermaController.php";
 $ins_merma = new mermaController();
 

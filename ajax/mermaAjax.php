@@ -36,6 +36,8 @@ if (isset($_POST['mermaAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['mermaAjax'];
 
     require_once "../controllers/mermaController.php";

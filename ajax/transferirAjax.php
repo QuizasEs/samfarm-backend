@@ -31,6 +31,8 @@ if (isset($_POST['transferirAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['transferirAjax'];
 
     require_once "../controllers/transferirController.php";

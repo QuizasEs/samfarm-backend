@@ -19,6 +19,8 @@ if (isset($_POST['sucursalAjax']) || isset($_GET['sucursalAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['sucursalAjax'] ?? $_GET['sucursalAjax'];
 
     require_once "../controllers/sucursalController.php";

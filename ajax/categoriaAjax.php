@@ -33,6 +33,8 @@ if (isset($_POST['categoriaAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['categoriaAjax'];
     
     error_log("DEBUG categoriaAjax: Valor recibido = '" . $valor . "' (tipo: " . gettype($valor) . ")");

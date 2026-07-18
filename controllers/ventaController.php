@@ -583,10 +583,51 @@ class ventaController extends ventaModel
             $pdf_base64 = self::generar_pdf_factura_model($fa_id, 'nota_venta');
 
             if (!$pdf_base64) {
-                error_log("⚠️ No se pudo generar PDF para factura #{$fa_id}");
+                error_log(" No se pudo generar PDF para factura #{$fa_id}");
             }
 
             $db->commit();
+
+            /*
+            // === FACTURACIÓN ELECTRÓNICA SIAT (Pasos 7-9) - bloque desactivado por ahora ===
+            // La venta ya fue confirmada con $db->commit() arriba, así que un fallo
+            // del SIN no revierte la venta. Solo se ejecuta si está habilitado y el
+            // documento es 'factura'.
+            if (SIAT_HABILITADO && $documento === 'factura') {
+                try {
+                    // 1) Asegurar CUFD vigente (Paso 6)
+                    if (!siatModel::cufdVigente($sucursal_id)) {
+                        siatModel::obtenerCUFD($sucursal_id);
+                    }
+
+                    // 2) Número de factura numérico para el CUF (fa_numero visible no sirve)
+                    $nroFacturaSiat = self::obtener_numero_factura_numerico_model($sucursal_id);
+
+                    // 3) Leer CUFD/control de la BD (Paso 6)
+                    $dbSiat = mainModel::conectar();
+                    $stmtSc = $dbSiat->prepare("SELECT sc_cufd, sc_cufd_control FROM siat_configuracion WHERE su_id = :su_id");
+                    $stmtSc->execute([':su_id' => $sucursal_id]);
+                    $sc = $stmtSc->fetch(PDO::FETCH_OBJ);
+
+                    // 4) Generar CUF (Paso 7) y guardarlo en factura
+                    $cuf = siatModel::generarCUF(SIAT_NIT, date('Y-m-d H:i:s'), $nroFacturaSiat, $sc->sc_cufd_control, SIAT_COD_SUCURSAL);
+                    $stmtCuf = $dbSiat->prepare("UPDATE factura SET fa_cuf = :cuf WHERE fa_id = :fa_id");
+                    $stmtCuf->execute([':cuf' => $cuf, ':fa_id' => $fa_id]);
+
+                    // 5) Armar XML (Paso 8)
+                    $datosXml = siatModel::obtenerDatosFacturaXML($ve_id);
+                    $detalleXml = siatModel::obtenerDetalleFacturaXML($ve_id);
+                    $leyenda = self::obtener_leyenda_siat_model($sucursal_id);
+                    $xml = siatModel::generarXML($datosXml, $detalleXml, $leyenda);
+
+                    // 6) Enviar al SIN (Paso 9)
+                    siatModel::enviarFactura($xml, $fa_id, $cuf, $sucursal_id);
+                } catch (Exception $e) {
+                    error_log("SIAT: fallo al emitir factura fa_id={$fa_id}: " . $e->getMessage());
+                }
+            }
+            // === FIN bloque SIAT ===
+            */
 
             echo json_encode([
                 'Alerta' => 'venta_exitosa',

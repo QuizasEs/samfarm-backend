@@ -34,6 +34,8 @@ if (isset($_POST['devolucionAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['devolucionAjax'];
 
     require_once "../controllers/devolucionController.php";

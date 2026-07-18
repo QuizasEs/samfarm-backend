@@ -22,6 +22,8 @@ if (isset($_POST['cajaAjax']) || isset($_GET['cajaAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['cajaAjax'] ?? $_GET['cajaAjax'];
 
     require_once "../controllers/cajaController.php";

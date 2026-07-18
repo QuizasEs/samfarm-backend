@@ -40,6 +40,7 @@ if (isset($_POST['ventaAjax'])) {
         exit();
     }
 
+    session_write_close();
 
     //  Sesión válida, procesar petición
     $valor = $_POST['ventaAjax'];

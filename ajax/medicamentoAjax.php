@@ -37,6 +37,8 @@ if (isset($_POST['MedicamentoAjax'])) {
         exit();
     }
 
+    session_write_close();
+
     $valor = $_POST['MedicamentoAjax'];
 
     require_once "../controllers/medicamentoController.php";
