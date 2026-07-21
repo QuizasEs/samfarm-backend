@@ -1050,17 +1050,25 @@ class mainModel
     /* -------------------------------------------------------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
 
-    public static function select_v2_model($tabla, $campos, $termino, $limite = 20) {
-        $sql = "SELECT " . implode(', ', $campos) . " FROM $tabla WHERE ";
-        $condiciones = [];
-        foreach ($campos as $campo) {
-            $condiciones[] = "$campo LIKE :termino";
+    public static function select_v2_model($tabla, $campos, $termino, $limite = 20, $todos = false) {
+        $sql = "SELECT " . implode(', ', $campos) . " FROM $tabla";
+        if (!$todos) {
+            $sql .= " WHERE ";
+            $condiciones = [];
+            foreach ($campos as $campo) {
+                $condiciones[] = "$campo LIKE :termino";
+            }
+            $sql .= implode(' OR ', $condiciones);
         }
-        $sql .= implode(' OR ', $condiciones);
-        $sql .= " ORDER BY " . $campos[0] . " ASC LIMIT $limite";
+        $sql .= " ORDER BY " . $campos[1] . " ASC";
+        if (!$todos) {
+            $sql .= " LIMIT $limite";
+        }
         
         $stmt = self::conectar()->prepare($sql);
-        $stmt->bindValue(":termino", "%$termino%");
+        if (!$todos) {
+            $stmt->bindValue(":termino", "%$termino%");
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

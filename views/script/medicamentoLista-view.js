@@ -208,12 +208,13 @@ const MedicamentosModals = (function() {
     };
 
     // ===================== Dropdown reutilizable (estilo módulo caja) =====================
-    function MedicamentoDropdown(inputId, resultsId, tabla, campos, selectId) {
+    function MedicamentoDropdown(inputId, resultsId, tabla, campos, selectId, clearOnEmpty) {
         this.input = document.getElementById(inputId);
         this.resultsContainer = document.getElementById(resultsId);
         this.select = document.getElementById(selectId);
         this.tabla = tabla;
         this.campos = campos;
+        this.clearOnEmpty = !!clearOnEmpty;
         this.debounce = null;
         if (this.input && this.resultsContainer) this.init();
     }
@@ -225,7 +226,14 @@ const MedicamentosModals = (function() {
     };
 
     MedicamentoDropdown.prototype.search = async function(term) {
-        if (term.length < 2) { this.hide(); return; }
+        if (term.length < 2) {
+            if (this.clearOnEmpty && this.select) {
+                this.select.value = '';
+                this.select.dispatchEvent(new Event('change'));
+            }
+            this.showAll();
+            return;
+        }
         try {
             const body = new URLSearchParams();
             body.append('MedicamentoAjax', 'select_v2');
@@ -303,10 +311,34 @@ const MedicamentosModals = (function() {
     MedicamentoDropdown.prototype.show = function() { this.resultsContainer.style.display = 'block'; };
     MedicamentoDropdown.prototype.hide = function() { this.resultsContainer.style.display = 'none'; };
 
+    MedicamentoDropdown.prototype.showAll = async function() {
+        try {
+            const body = new URLSearchParams();
+            body.append('MedicamentoAjax', 'select_v2');
+            body.append('tabla', this.tabla);
+            body.append('campos', JSON.stringify(this.campos));
+            body.append('termino', '');
+            body.append('todos', '1');
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            });
+            const items = await response.json();
+            this.renderResults(items);
+        } catch (err) {
+            this.renderResults([]);
+        }
+    };
+
     MedicamentoDropdown.prototype.init = function() {
+        this.input.addEventListener('focus', () => {
+            clearTimeout(this.debounce);
+            this.showAll();
+        });
         this.input.addEventListener('input', (e) => {
             this.input.dataset.selectedId = '';
-            if (this.select) this.select.value = '';
+            if (this.clearOnEmpty && this.select) this.select.value = '';
             clearTimeout(this.debounce);
             this.debounce = setTimeout(() => this.search(e.target.value.trim()), 300);
         });
@@ -324,7 +356,8 @@ const MedicamentosModals = (function() {
         'dd_proveedor_filtro_res',
         'proveedores',
         ['pr_id', 'pr_razon_social', 'pr_nit'],
-        'select1'
+        'select1',
+        true
     );
 
     // Inicializar dropdowns del modal Nuevo Medicamento

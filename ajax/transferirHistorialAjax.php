@@ -52,10 +52,7 @@ if (isset($_POST['transferirHistorialAjax'])) {
         echo json_encode($alerta);
         exit();
     }
-
-    session_write_close();
-
-    $valor = $_POST['transferirHistorialAjax'];
+$valor = $_POST['transferirHistorialAjax'];
 
     require_once "../controllers/transferirHistorialController.php";
     $ins_historial = new transferirHistorialController();
@@ -100,6 +97,8 @@ if (isset($_POST['transferirHistorialAjax'])) {
         echo $ins_historial->generar_pdf_transferencia_controller();
         exit();
     }
+    session_write_close();
+
 } else {
     echo json_encode(['Alerta' => 'simple', 'Titulo' => 'Error', 'texto' => 'Solicitud inválida', 'Tipo' => 'error']);
 }

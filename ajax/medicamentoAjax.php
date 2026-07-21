@@ -37,8 +37,6 @@ if (isset($_POST['MedicamentoAjax'])) {
         exit();
     }
 
-    session_write_close();
-
     $valor = $_POST['MedicamentoAjax'];
 
     require_once "../controllers/medicamentoController.php";
@@ -59,6 +57,19 @@ if (isset($_POST['MedicamentoAjax'])) {
 
     if ($valor == "eliminar") {
         echo $ins_med->eliminar_medicamento_controller();
+    }
+
+    if ($valor === "select_v2") {
+        $tabla = $_POST['tabla'] ?? '';
+        $campos = json_decode($_POST['campos'] ?? '[]', true);
+        $termino = mainModel::limpiar_cadena($_POST['termino'] ?? '');
+        $todos = isset($_POST['todos']) && $_POST['todos'] == '1';
+        if (!$todos && strlen($termino) < 2) {
+            echo json_encode([], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        echo json_encode(mainModel::select_v2_model($tabla, $campos, $termino, 100, $todos), JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     if ($valor === "listar") {
@@ -86,18 +97,6 @@ if (isset($_POST['MedicamentoAjax'])) {
 
         header('Content-Type: text/html; charset=utf-8');
         echo $html;
-        exit();
-    }
-
-    if ($valor === "select_v2") {
-        $tabla = $_POST['tabla'] ?? '';
-        $campos = json_decode($_POST['campos'] ?? '[]', true);
-        $termino = mainModel::limpiar_cadena($_POST['termino'] ?? '');
-        if (strlen($termino) < 2) {
-            echo json_encode([], JSON_UNESCAPED_UNICODE);
-            exit();
-        }
-        echo json_encode(mainModel::select_v2_model($tabla, $campos, $termino), JSON_UNESCAPED_UNICODE);
         exit();
     }
 } else {
