@@ -329,8 +329,9 @@ class preciosModel extends mainModel
         }
     }
 
-    public static function registrar_balance_precio_model($lm_id, $usuario_id, $precio_anterior, $precio_nuevo, $detalle = null)
+    public static function registrar_balance_precio_model($db = null, $lm_id, $usuario_id, $precio_anterior, $precio_nuevo, $detalle = null)
     {
+        $conexion = $db ?? self::conectar();
         $sql = "
             INSERT INTO balance_precios
             (lm_id, us_id, bp_precio_anterior, bp_precio_nuevo, bp_detalle, bp_creado_en)
@@ -338,7 +339,6 @@ class preciosModel extends mainModel
             (:lm_id, :us_id, :bp_precio_anterior, :bp_precio_nuevo, :bp_detalle, NOW())
         ";
 
-        $conexion = self::conectar();
         $stmt = $conexion->prepare($sql);
         $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $stmt->bindParam(':us_id', $usuario_id, PDO::PARAM_INT);

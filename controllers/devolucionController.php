@@ -257,6 +257,26 @@ class devolucionController extends devolucionModel
                 throw new Exception("No se pudo registrar la devolución");
             }
 
+            /*
+            // === FACTURACIÓN ELECTRÓNICA SIAT (Paso 11) - bloque desactivado por ahora ===
+            // Anular la factura original en el SIN por devolución de mercadería (código 2).
+            // Solo se ejecuta si está habilitado y la factura tiene CUF registrado.
+            if (SIAT_HABILITADO) {
+                try {
+                    $stmt_cuf = $db->prepare("SELECT fa_cuf FROM factura WHERE fa_id = :fa_id");
+                    $stmt_cuf->execute([':fa_id' => $fa_id]);
+                    $factura_row = $stmt_cuf->fetch(PDO::FETCH_OBJ);
+
+                    if ($factura_row && !empty($factura_row->fa_cuf)) {
+                        siatModel::anularFactura($factura_row->fa_cuf, 2, $su_id);
+                    }
+                } catch (Exception $e) {
+                    error_log("SIAT: fallo al anular factura fa_id={$fa_id}: " . $e->getMessage());
+                }
+            }
+            // === FIN bloque SIAT ===
+            */
+
             // Actualizar referencias temporales específicas de esta devolución (solo registros creados en esta transacción)
             $stmt_update_refs = $db->prepare("
                 UPDATE movimiento_inventario

@@ -1,6 +1,7 @@
 <?php
 
 require_once "mainModel.php";
+require_once "../libs/phpqrcode.php";
 
 class siatModel extends mainModel
 {
@@ -373,6 +374,17 @@ class siatModel extends mainModel
 
     public static function enviarFactura($xmlString, $faId, $cuf, $suId)
     {
+        try {
+            return self::enviarFacturaOnline($xmlString, $faId, $cuf, $suId);
+        } catch (Exception $e) {
+            error_log("SIAT enviarFactura fallo, activando contingencia fa_id={$faId}: " . $e->getMessage());
+            self::emitirEnContingencia($faId, $cuf, $xmlString, $suId);
+            return null;
+        }
+    }
+
+    private static function enviarFacturaOnline($xmlString, $faId, $cuf, $suId)
+    {
         $db = mainModel::conectar();
         $stmt = $db->prepare("SELECT sc_cuis, sc_cufd FROM siat_configuracion WHERE su_id = :su_id");
         $stmt->execute([':su_id' => $suId]);
@@ -426,6 +438,93 @@ class siatModel extends mainModel
         }
 
         return $r;
+    }
+
+    public static function emitirEnContingencia($faId, $cuf, $xmlString, $suId)
+    {
+        $db = mainModel::conectar();
+        $ins = $db->prepare("
+            INSERT INTO facturacion_electronica
+            (fa_id, fe_cuf, fe_estado_siat, fe_payload, fe_tipo_emision, fe_fecha_envio)
+            VALUES (:fa_id, :cuf, 'CONTINGENCIA', :payload, 2, NOW())
+        ");
+        $ins->execute([
+            ':fa_id'   => $faId,
+            ':cuf'     => $cuf,
+            ':payload' => $xmlString
+        ]);
+    }
+
+    public static function enviarPaqueteContingencia($suId)
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->query("
+            SELECT fe_id, fe_cuf, fe_payload
+            FROM facturacion_electronica
+            WHERE fe_tipo_emision = 2
+              AND fe_estado_siat = 'CONTINGENCIA'
+            LIMIT " . (int)SIAT_MAX_FACTURAS_CONTINGENCIA
+        );
+        $facturas = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        if (!$facturas) {
+            return null;
+        }
+
+        $archivos = array_map(function ($f) {
+            $gzip = gzencode($f->fe_payload, 9);
+            return [
+                'cuf'     => $f->fe_cuf,
+                'archivo' => base64_encode($gzip)
+            ];
+        }, $facturas);
+
+        $sc = self::obtenerConfiguracionSucursal($suId);
+        if (!$sc) {
+            throw new Exception("SIAT enviarPaqueteContingencia: falta configuracion para su_id={$suId}");
+        }
+
+        $client = self::clienteSOAP('facturacion');
+        $resp = $client->recepcionPaqueteFactura([
+            'SolicitudServicioRecepcionPaquete' => [
+                'codigoAmbiente'      => SIAT_AMBIENTE,
+                'codigoModalidad'     => SIAT_MODALIDAD,
+                'codigoSistema'       => SIAT_COD_SISTEMA,
+                'nit'                 => SIAT_NIT,
+                'cuis'                => $sc->sc_cuis,
+                'cufd'                => $sc->sc_cufd,
+                'codigoSucursal'      => SIAT_COD_SUCURSAL,
+                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'archivos'            => $archivos,
+                'fechaEnvio'          => date('Y-m-d\TH:i:s.000-04:00'),
+            ]
+        ]);
+
+        $codigoRecepcion = $resp->codigoRecepcion ?? null;
+
+        if ($codigoRecepcion) {
+            $ids = array_column($facturas, 'fe_id');
+            $in = implode(',', array_fill(0, count($ids), '?'));
+
+            $stmtUpdate = $db->prepare("
+                UPDATE facturacion_electronica
+                SET fe_ticket = :ticket,
+                    fe_fecha_envio = NOW()
+                WHERE fe_id IN ({$in})
+            ");
+            $params = array_merge([$codigoRecepcion], $ids);
+            $stmtUpdate->execute($params);
+        }
+
+        return $codigoRecepcion;
+    }
+
+    private static function obtenerConfiguracionSucursal($suId)
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->prepare("SELECT sc_cuis, sc_cufd FROM siat_configuracion WHERE su_id = :su_id");
+        $stmt->execute([':su_id' => $suId]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
     public static function sincronizarCatalogos($suId = 1)
@@ -604,5 +703,155 @@ class siatModel extends mainModel
             $db->rollBack();
             error_log("SIAT guardarLeyendas: " . $e->getMessage());
         }
+    }
+
+    public static function obtener_leyenda_siat_model($codigoActividad = '477000')
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->prepare("
+            SELECT descripcion FROM siat_leyendas
+            WHERE codigo_actividad = :act
+            ORDER BY id DESC
+            LIMIT 1
+        ");
+        $stmt->execute([':act' => $codigoActividad]);
+        $row = $stmt->fetch(PDO::FETCH_OBJ);
+        return ($row && !empty($row->descripcion)) ? $row->descripcion : '';
+    }
+
+    public static function validarRecepcionFactura($ticket, $suId)
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->prepare("SELECT sc_cuis, sc_cufd FROM siat_configuracion WHERE su_id = :su_id");
+        $stmt->execute([':su_id' => $suId]);
+        $sc = $stmt->fetch(PDO::FETCH_OBJ);
+        if (!$sc || empty($sc->sc_cuis) || empty($sc->sc_cufd)) {
+            throw new Exception("SIAT validarRecepcionFactura: falta CUIS o CUFD para su_id={$suId}");
+        }
+
+        $client = self::clienteSOAP('facturacion');
+        $resp = $client->validacionRecepcionFactura([
+            'SolicitudServicioValidacionRecepcionFactura' => [
+                'codigoAmbiente'      => SIAT_AMBIENTE,
+                'codigoModalidad'     => SIAT_MODALIDAD,
+                'codigoSistema'       => SIAT_COD_SISTEMA,
+                'nit'                 => SIAT_NIT,
+                'cuis'                => $sc->sc_cuis,
+                'cufd'                => $sc->sc_cufd,
+                'codigoSucursal'      => SIAT_COD_SUCURSAL,
+                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'codigoRecepcion'     => $ticket,
+            ]
+        ]);
+
+        return $resp->RespuestaServicioFacturacion ?? null;
+    }
+
+    public static function generarQR($nit, $cuf, $nroFactura)
+    {
+        $cuf = (string) $cuf;
+        $nroFactura = str_pad((string) $nroFactura, 10, '0', STR_PAD_LEFT);
+        $url = 'https://siat.impuestos.gob.bo/consulta/QR?' .
+            'nit=' . urlencode($nit) .
+            '&cuf=' . urlencode($cuf) .
+            '&numero=' . urlencode($nroFactura);
+
+        return QRCode::render($url);
+    }
+
+    public static function procesarValidacionPendiente($faId, $ticket, $suId, $nroFactura)
+    {
+        $estadoResp = self::validarRecepcionFactura($ticket, $suId);
+
+        $estado = $estadoResp->codigoEstado ?? null;
+
+        $qr = null;
+        if ($estado == 908) {
+            $qr = self::generarQR(SIAT_NIT, $estadoResp->cuf ?? '', $nroFactura);
+        }
+
+        $db = mainModel::conectar();
+        $db->beginTransaction();
+        try {
+            $stmt = $db->prepare("
+                UPDATE facturacion_electronica
+                SET fe_estado_siat = :estado
+                WHERE fa_id = :fa_id
+            ");
+            $stmt->execute([
+                ':estado'  => $estado,
+                ':fa_id'   => $faId
+            ]);
+
+            if ($estado == 908 && $qr) {
+                $stmtQr = $db->prepare("
+                    UPDATE facturacion_electronica
+                    SET fe_qr = :qr
+                    WHERE fa_id = :fa_id
+                ");
+                $stmtQr->execute([':qr' => $qr, ':fa_id' => $faId]);
+
+                $db->prepare("UPDATE factura SET fa_estado = 1 WHERE fa_id = :fa_id")
+                   ->execute([':fa_id' => $faId]);
+            }
+
+            $db->commit();
+        } catch (Exception $e) {
+            $db->rollBack();
+            error_log("SIAT procesarValidacionPendiente fallo fa_id={$faId}: " . $e->getMessage());
+            return false;
+        }
+
+        return $estado;
+    }
+
+    public static function anularFactura($cuf, $codigoMotivo, $suId)
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->prepare("SELECT sc_cuis, sc_cufd FROM siat_configuracion WHERE su_id = :su_id");
+        $stmt->execute([':su_id' => $suId]);
+        $sc = $stmt->fetch(PDO::FETCH_OBJ);
+        if (!$sc || empty($sc->sc_cuis) || empty($sc->sc_cufd)) {
+            throw new Exception("SIAT anularFactura: falta CUIS o CUFD para su_id={$suId}");
+        }
+
+        $client = self::clienteSOAP('facturacion');
+        $resp = $client->anulacionFactura([
+            'SolicitudServicioAnulacionFactura' => [
+                'codigoAmbiente'      => SIAT_AMBIENTE,
+                'codigoModalidad'     => SIAT_MODALIDAD,
+                'codigoSistema'       => SIAT_COD_SISTEMA,
+                'nit'                 => SIAT_NIT,
+                'cuis'                => $sc->sc_cuis,
+                'cufd'                => $sc->sc_cufd,
+                'codigoSucursal'      => SIAT_COD_SUCURSAL,
+                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'cuf'                 => $cuf,
+                'codigoMotivo'        => (int)$codigoMotivo,
+            ]
+        ]);
+
+        $r = $resp->RespuestaServicioAnulacion ?? null;
+
+        if ($r && !empty($r->transaccion)) {
+            $db->beginTransaction();
+            try {
+                $db->prepare("UPDATE factura SET fa_estado = 2 WHERE fa_cuf = :cuf")
+                   ->execute([':cuf' => $cuf]);
+
+                $db->prepare("
+                    UPDATE facturacion_electronica
+                    SET fe_estado_siat = 'ANULADA'
+                    WHERE fe_cuf = :cuf
+                ")->execute([':cuf' => $cuf]);
+
+                $db->commit();
+            } catch (Exception $e) {
+                $db->rollBack();
+                error_log("SIAT anularFactura: fallo al actualizar estados localmente: " . $e->getMessage());
+            }
+        }
+
+        return $r;
     }
 }

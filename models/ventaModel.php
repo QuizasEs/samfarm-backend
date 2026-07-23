@@ -698,6 +698,20 @@ class ventaModel extends mainModel
         return "F-" . $sucursal_id . "-" . date('YmdHis') . "-" . rand(100, 999);
     }
 
+    public static function obtener_numero_factura_numerico_model($sucursal_id, $anio = null)
+    {
+        $anio = $anio ?? (int) date('Y');
+        $db = mainModel::conectar();
+
+        $sql = "INSERT INTO factura_secuencia (su_id, fs_anio, fs_ultimo_nro)
+                VALUES (:su_id, :anio, 1)
+                ON DUPLICATE KEY UPDATE fs_ultimo_nro = LAST_INSERT_ID(fs_ultimo_nro + 1)";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([':su_id' => $sucursal_id, ':anio' => $anio]);
+
+        return (int) $db->lastInsertId();
+    }
+
     /* Descontar el inventario consolidado tras una venta */
     public static function descontar_inventario_consolidado_model($med_id, $sucursal_id, $cantidad_unidades, $valorado_descuento = 0)
     {

@@ -1,8 +1,9 @@
 let notificacionesTimeout = null;
 let notificacionesCache = null;
 let lastSync = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutos
+let notificacionesAbortController = null;
+const CACHE_DURATION = 5 * 60 * 1000;
+const SYNC_INTERVAL = 5 * 60 * 1000;
 
 document.addEventListener('DOMContentLoaded', function() {
     const notificacionBtn = document.getElementById('notificacionBtn');
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             notificacionModal.classList.toggle('active');
             if (notificacionModal.classList.contains('active')) {
                 mostrarNotificacionesDesdeCache();
-                sincronizarNotificaciones(); // Refrescar en background si es necesario
+                sincronizarNotificaciones();
             }
         });
     }
@@ -32,11 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inicializar desde cache
     cargarDesdeCache();
     actualizarBadge();
 
-    // Sincronización periódica
     setInterval(sincronizarNotificaciones, SYNC_INTERVAL);
 });
 
@@ -71,23 +70,46 @@ function guardarEnCache(notificaciones) {
 function sincronizarNotificaciones() {
     const now = Date.now();
     if (now - lastSync < CACHE_DURATION) {
-        return; // No sincronizar si es reciente
+        return;
     }
 
-    cargarNotificaciones(true); // true para indicar que es sincronización en background
+    cargarNotificaciones(true);
 }
 
 function cargarNotificaciones(isSync = false) {
+    if (notificacionesAbortController) {
+        notificacionesAbortController.abort();
+    }
+    notificacionesAbortController = new AbortController();
+
     const formData = new FormData();
     formData.append('accion', 'obtener');
-
     const url = document.documentElement.getAttribute('data-server-url');
 
     fetch(url, {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: notificacionesAbortController.signal
     })
-    .then(response => response.json())
+    .then(response => {
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        if (!response.ok || !isJson) {
+            return response.text().then(text => {
+                console.error('Respuesta no OK:', response.status, text.substring(0, 500));
+                if (isJson) {
+                    try {
+                        const err = JSON.parse(text);
+                        throw new Error(err.mensaje || 'Error del servidor');
+                    } catch (e) {
+                        throw new Error('Error del servidor');
+                    }
+                }
+                throw new Error('Formato de respuesta inválido');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (!data.error) {
             guardarEnCache(data.notificaciones);
@@ -98,7 +120,13 @@ function cargarNotificaciones(isSync = false) {
         }
     })
     .catch(error => {
-        console.error('Error cargando notificaciones:', error);
+        if (error.name !== 'AbortError') {
+            console.error('Error cargando notificaciones:', error);
+            const badge = document.getElementById('notificacionBadge');
+            if (badge) {
+                badge.title = 'Error al cargar notificaciones';
+            }
+        }
     });
 }
 
@@ -106,7 +134,6 @@ function mostrarNotificacionesDesdeCache() {
     if (notificacionesCache) {
         mostrarNotificaciones(notificacionesCache);
     } else {
-        // Si no hay cache, cargar
         cargarNotificaciones();
     }
 }
@@ -152,7 +179,6 @@ function mostrarNotificaciones(notificaciones) {
 
     document.querySelectorAll('.notificacion-item').forEach(item => {
         item.addEventListener('click', function(e) {
-            // If clicked on discard button, don't navigate
             if (e.target.closest('.notificacion-discard')) {
                 return;
             }
@@ -161,7 +187,6 @@ function mostrarNotificaciones(notificaciones) {
             if (this.classList.contains('no-leida')) {
                 marcarComoLeida(id);
             }
-            // Navigate based on type
             const ajaxUrl = document.documentElement.getAttribute('data-server-url');
             const baseUrl = ajaxUrl.replace('ajax/notificacionesAjax.php', '');
             let view = '';
@@ -213,7 +238,6 @@ function marcarComoLeida(id) {
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
-            // Actualizar cache local
             if (notificacionesCache) {
                 const index = notificacionesCache.findIndex(n => n.id == id);
                 if (index !== -1) {
@@ -225,7 +249,6 @@ function marcarComoLeida(id) {
             if (item) {
                 item.classList.remove('no-leida');
             }
-            actualizarBadge(notificacionesCache);
             actualizarBadge(notificacionesCache);
         }
     })
@@ -248,17 +271,14 @@ function descartarNotificacion(id) {
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
-            // Remover del cache
             if (notificacionesCache) {
                 notificacionesCache = notificacionesCache.filter(n => n.id != id);
                 guardarEnCache(notificacionesCache);
             }
-            // Remove the item from the list
             const item = document.querySelector(`.notificacion-item[data-id="${id}"]`);
             if (item) {
                 item.remove();
             }
-            // Update badge
             actualizarBadge(notificacionesCache);
         } else {
             console.error('Error descartando notificación:', data.mensaje);

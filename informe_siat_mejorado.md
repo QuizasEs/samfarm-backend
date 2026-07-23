@@ -213,16 +213,16 @@ define('SIAT_URLS', [
 // Obtener del NIT de configuracion_empresa (ce_nit)
 define('SIAT_NIT', '123456789');  
 // Código asignado por el SIN
-define('SIAT_COD_SISTEMA', 'XXXX');     
+define('SIAT_COD_SISTEMA', 'XXXX');   
 // Token del Portal SIAT
 define('SIAT_TOKEN', 'TOKEN_DELEGADO');   
 
 // Ambiente: 2=PILOTO, 1=PRODUCCIÓN
 define('SIAT_AMBIENTE', SIAT_MODO == 'PILOTO' ? 2 : 1);
 // Modalidad: 2 = Computarizada en línea
-define('SIAT_MODALIDAD', 2);          
+define('SIAT_MODALIDAD', 2);        
 // Código de sucursal (0 = casa matriz)
-define('SIAT_COD_SUCURSAL', 0);         
+define('SIAT_COD_SUCURSAL', 0);       
 // Punto de venta
 define('SIAT_PUNTO_VENTA', 0);
 ```
@@ -647,7 +647,7 @@ Dame el código PHP completo para generar e imprimir el recibo/factura en format
 
 ## Paso 11: Anular facturas (devolución)
 
-> ⚠️ **VALIDADO** - Requiere implementación
+> ⚠️ **VALIDADO** - completado
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
 
@@ -701,7 +701,7 @@ Al aceptar una devolución en mi tabla devoluciones, necesito: 1) llamar a anula
 
 ## Paso 12: Modo contingencia (offline)
 
-> ⚠️ **VALIDADO** - Requiere implementación
+> ⚠️ **VALIDADO** - completado
 
 ### Estado: PENDIENTE DE IMPLEMENTAR
 

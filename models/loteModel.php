@@ -119,28 +119,25 @@ class loteModel extends mainModel
         return $sql;
     }
 
-    public static function actualizar_lote_model($datos)
+    public static function actualizar_lote_model($db = null, $datos)
     {
-        // Asegurar esquema antes del UPDATE.
         self::asegurar_columna_precio_costo();
 
-        // Construir consulta dinámica basada en los campos proporcionados
-        // soporta actualizacion de campos de auditoria como costo de lista, margenes y precios minimos
         $setClauses = [];
 
         foreach ($datos as $key => $value) {
-            if ($key !== 'ID') { // ID es para el WHERE, no para SET
+            if ($key !== 'ID') {
                 $setClauses[] = "$key = :$key";
             }
         }
 
         if (empty($setClauses)) {
-            return false; // No hay campos para actualizar
+            return false;
         }
 
         $setClause = implode(", ", $setClauses);
 
-        $sql = self::conectar()->prepare("
+        $sql = ($db ?? self::conectar())->prepare("
             UPDATE lote_medicamento
             SET
                 $setClause,
@@ -256,10 +253,10 @@ class loteModel extends mainModel
         }
     }
 
-    /* Registro en historial_lote */
-    public static function registrar_historial_lote_model($datos)
+    public static function registrar_historial_lote_model($db = null, $datos)
     {
-        $sql = mainModel::conectar()->prepare("
+        $conexion = $db ?? mainModel::conectar();
+        $sql = $conexion->prepare("
             INSERT INTO historial_lote (lm_id, us_id, hl_accion, hl_descripcion)
             VALUES (:lm_id, :us_id, :hl_accion, :hl_descripcion)
         ");

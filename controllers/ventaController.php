@@ -593,6 +593,8 @@ class ventaController extends ventaModel
             // La venta ya fue confirmada con $db->commit() arriba, así que un fallo
             // del SIN no revierte la venta. Solo se ejecuta si está habilitado y el
             // documento es 'factura'.
+            // Nota: siatModel::enviarFactura() ahora maneja contingencia automáticamente
+            // (Paso 12): si el SIN no responde, guarda la factura como CONTINGENCIA.
             if (SIAT_HABILITADO && $documento === 'factura') {
                 try {
                     // 1) Asegurar CUFD vigente (Paso 6)

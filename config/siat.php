@@ -40,6 +40,9 @@ define('SIAT_COD_SUCURSAL', 0);
 /* Código de punto de venta asignado por el SIN */
 define('SIAT_PUNTO_VENTA', 0);
 
+/* Máximo de facturas por paquete de contingencia (límite SIN: 500) */
+define('SIAT_MAX_FACTURAS_CONTINGENCIA', 500);
+
 /* Activación opcional de facturación electrónica.
    false = solo nota de venta (sin tocar el flujo actual).
    true  = se genera XML/factura SIAT cuando aplique. */
