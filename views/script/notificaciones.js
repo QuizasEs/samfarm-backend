@@ -2,8 +2,8 @@ let notificacionesTimeout = null;
 let notificacionesCache = null;
 let lastSync = 0;
 let notificacionesAbortController = null;
-const CACHE_DURATION = 5 * 60 * 1000;
-const SYNC_INTERVAL = 5 * 60 * 1000;
+const CACHE_DURATION = 30 * 1000;
+const SYNC_INTERVAL = 30 * 1000;
 
 document.addEventListener('DOMContentLoaded', function() {
     const notificacionBtn = document.getElementById('notificacionBtn');

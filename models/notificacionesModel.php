@@ -27,7 +27,7 @@ class notificacionesModel extends mainModel
 
     protected static function generar_notificaciones_automaticas_model()
     {
-        $conexion = mainModel::conectar();
+        $conexion = mainModel::conectarTransaccional();
 
         try {
             $conexion->beginTransaction();
@@ -59,9 +59,7 @@ class notificacionesModel extends mainModel
                 FROM inventarios i
                 JOIN medicamento m ON i.med_id = m.med_id
                 JOIN sucursales s ON i.su_id = s.su_id
-                WHERE i.inv_total_unidades > 0 AND i.inv_total_unidades <= (i.inv_minimo * 1.5)
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'stock_bajo' 
-                  AND not_referencia_id = CONCAT(m.med_id, '_', s.su_id) AND not_leida = 0 AND not_descartada = 0)";
+                WHERE i.inv_total_unidades > 0 AND i.inv_total_unidades <= (i.inv_minimo * 1.5)";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
@@ -111,9 +109,7 @@ class notificacionesModel extends mainModel
                 FROM lote_medicamento l
                 JOIN medicamento m ON l.med_id = m.med_id
                 JOIN sucursales s ON l.su_id = s.su_id
-                WHERE l.lm_fecha_vencimiento < CURDATE() AND l.lm_cant_actual_unidades > 0
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'ya_caducado' 
-                  AND not_referencia_id = l.lm_id AND not_leida = 0 AND not_descartada = 0)";
+                WHERE l.lm_fecha_vencimiento < CURDATE() AND l.lm_cant_actual_unidades > 0";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
@@ -128,9 +124,7 @@ class notificacionesModel extends mainModel
                 FROM inventarios i
                 JOIN medicamento m ON i.med_id = m.med_id
                 JOIN sucursales s ON i.su_id = s.su_id
-                WHERE i.inv_total_unidades = 0
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'sin_stock' 
-                  AND not_referencia_id = CONCAT(m.med_id, '_', s.su_id) AND not_leida = 0 AND not_descartada = 0)";
+                WHERE i.inv_total_unidades = 0";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
@@ -145,9 +139,7 @@ class notificacionesModel extends mainModel
                 FROM inventarios i
                 JOIN medicamento m ON i.med_id = m.med_id
                 JOIN sucursales s ON i.su_id = s.su_id
-                WHERE i.inv_total_unidades < i.inv_minimo AND i.inv_total_unidades > 0
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'bajo_minimo' 
-                  AND not_referencia_id = i.inv_id AND not_leida = 0 AND not_descartada = 0)";
+                WHERE i.inv_total_unidades < i.inv_minimo AND i.inv_total_unidades > 0";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
@@ -161,9 +153,7 @@ class notificacionesModel extends mainModel
                 'swap-horizontal-outline', '#2196f3', 1, 1
                 FROM transferencias t
                 JOIN sucursales s1 ON t.su_origen_id = s1.su_id
-                WHERE t.tr_estado = 'pendiente'
-                AND NOT EXISTS (SELECT 1 FROM notificaciones WHERE not_tipo = 'transferencia_pendiente' 
-                  AND not_referencia_id = t.tr_id AND not_leida = 0 AND not_descartada = 0)";
+                WHERE t.tr_estado = 'pendiente'";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();
@@ -178,9 +168,7 @@ class notificacionesModel extends mainModel
 
     protected static function obtener_notificaciones_model($rol, $su_id = null)
     {
-        self::generar_notificaciones_automaticas_model();
-
-        $conexion = mainModel::conectar();
+        $conexion = mainModel::conectarTransaccional();
 
         if ($rol == 1) {
             $sql = "SELECT not_id as id, not_tipo as tipo, not_icono as icono, not_color as color,
@@ -221,7 +209,7 @@ class notificacionesModel extends mainModel
     {
         $sql = "UPDATE notificaciones SET not_leida = 1, not_fecha_lectura = NOW() WHERE not_id = :id";
 
-        $conexion = mainModel::conectar();
+        $conexion = mainModel::conectarTransaccional();
         $stmt = $conexion->prepare($sql);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
@@ -231,7 +219,7 @@ class notificacionesModel extends mainModel
     {
         $sql = "UPDATE notificaciones SET not_descartada = 1 WHERE not_id = :id";
 
-        $conexion = mainModel::conectar();
+        $conexion = mainModel::conectarTransaccional();
         $stmt = $conexion->prepare($sql);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
