@@ -10,56 +10,11 @@ class loteModel extends mainModel
      */
     private static $precio_costo_columna_verificada = false;
 
-    /**
-     * Garantiza que la columna lm_precio_costo exista en lote_medicamento.
-     * Si no existe, la crea con ALTER TABLE. Es idempotente y se cachea
-     * en memoria para no ejecutarse mas de una vez por proceso.
-     *
-     * Esto evita obligar al usuario a ejecutar manualmente el script
-     * alter_lote_precio_costo.sql antes de poder usar la nueva logica.
-     */
-    private static function asegurar_columna_precio_costo()
-    {
-        if (self::$precio_costo_columna_verificada) {
-            return;
-        }
-
-        try {
-            $db = self::conectar();
-            $stmt = $db->prepare("
-                SELECT COUNT(*) AS existe
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = DATABASE()
-                  AND TABLE_NAME = 'lote_medicamento'
-                  AND COLUMN_NAME = 'lm_precio_costo'
-            ");
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ((int)($row['existe'] ?? 0) === 0) {
-                // La columna no existe: la creamos.
-                $db->exec("
-                    ALTER TABLE `lote_medicamento`
-                    ADD COLUMN `lm_precio_costo` DECIMAL(12,2) DEFAULT NULL
-                    COMMENT 'Precio costo por CAJA (precio efectivamente pagado con descuento)'
-                ");
-                error_log("Auto-migracion: columna lm_precio_costo creada en lote_medicamento");
-            }
-        } catch (Exception $e) {
-            // Si la migracion automatica falla, lo registramos pero no
-            // interrumpimos el flujo: el caller lanzara un error de SQL
-            // mas descriptivo.
-            error_log("No se pudo asegurar la columna lm_precio_costo: " . $e->getMessage());
-        }
-
-        self::$precio_costo_columna_verificada = true;
-    }
 
     /* modelo que optiene datos del lote  */
     public static function datos_lote_model($id)
     {
-        // Asegurar que el esquema este actualizado antes de consultar.
-        self::asegurar_columna_precio_costo();
+        
 
         $sql = mainModel::conectar()->prepare("
             SELECT
@@ -121,7 +76,7 @@ class loteModel extends mainModel
 
     public static function actualizar_lote_model($db = null, $datos)
     {
-        self::asegurar_columna_precio_costo();
+        
 
         $setClauses = [];
 

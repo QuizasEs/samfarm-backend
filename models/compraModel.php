@@ -6,7 +6,7 @@ class compraModel extends mainModel
 {
     public static function registrar_compra_completa_model($datos)
     {
-        $db = mainModel::conectar();
+        $db = mainModel::conectarTransaccional();
         $db->beginTransaction();
 
         $numero_compra = $datos['numero_compra'];
@@ -35,6 +35,10 @@ class compraModel extends mainModel
             }
 
             $mensajePropagacion = '';
+
+            usort($lotes, fn($a, $b) => ($a['id_medicamento'] ?? 0) <=> ($b['id_medicamento'] ?? 0));
+
+            $registros_auxiliares = [];
 
             foreach ($lotes as $lote) {
                 $medicamento_id = mainModel::limpiar_cadena($lote['id_medicamento'] ?? '');
@@ -140,6 +144,7 @@ class compraModel extends mainModel
                     $sql_lotes->bindParam(":lote_id_excluir", $lote_id);
                     $sql_lotes->execute();
                     $lotes_existentes = $sql_lotes->fetchAll(PDO::FETCH_ASSOC);
+                    usort($lotes_existentes, fn($a, $b) => $a['lm_id'] <=> $b['lm_id']);
                 }
 
                 foreach ($lotes_existentes as $lote_existente) {
@@ -159,52 +164,42 @@ class compraModel extends mainModel
                     $resultado_update = loteModel::actualizar_lote_model($db, $datos_up);
 
                     if ($resultado_update->rowCount() == 1) {
-                        loteModel::registrar_historial_lote_model($db, [
+                        $registros_auxiliares[] = [
+                            'tipo' => 'balance',
                             'lm_id' => $lote_existente['lm_id'],
                             'us_id' => $usuario_id,
                             'hl_accion' => 'balance',
-                            'hl_descripcion' => "Balance de precios por compra #{$numero_compra} - Lote {$lote_existente['lm_numero_lote']}"
-                        ]);
-
-                        preciosModel::registrar_balance_precio_model(
-                            $db,
-                            $lote_existente['lm_id'],
-                            $usuario_id,
-                            $lote_existente['lm_precio_venta'],
-                            $precio_venta,
-                            json_encode([
-                                'costo_lista' => $precio_compra_caja,
-                                'precio_costo' => $precio_compra_caja,
-                                'precio_compra' => $precio_compra,
-                                'unidades_caja' => $cantidad_unidades,
-                                'margen_u' => $lote['margen_unitario'] ?? null,
-                                'margen_c' => $lote['margen_caja'] ?? null,
-                                'precio_venta' => $precio_venta,
-                                'precio_min_u' => $lote['precio_min_unitario'] ?? null,
-                                'precio_min_c' => $lote['precio_min_caja'] ?? null,
-                                'origen' => 'compra',
-                                'compra_numero' => $numero_compra
-                            ])
-                        );
+                            'hl_descripcion' => "Balance de precios por compra #{$numero_compra} - Lote {$lote_existente['lm_numero_lote']}",
+                            'balance' => [
+                                'lm_id' => $lote_existente['lm_id'],
+                                'usuario_id' => $usuario_id,
+                                'precio_anterior' => $lote_existente['lm_precio_venta'],
+                                'precio_nuevo' => $precio_venta,
+                                'detalle' => json_encode([
+                                    'costo_lista' => $precio_compra_caja,
+                                    'precio_costo' => $precio_compra_caja,
+                                    'precio_compra' => $precio_compra,
+                                    'unidades_caja' => $cantidad_unidades,
+                                    'margen_u' => $lote['margen_unitario'] ?? null,
+                                    'margen_c' => $lote['margen_caja'] ?? null,
+                                    'precio_venta' => $precio_venta,
+                                    'precio_min_u' => $lote['precio_min_unitario'] ?? null,
+                                    'precio_min_c' => $lote['precio_min_caja'] ?? null,
+                                    'origen' => 'compra',
+                                    'compra_numero' => $numero_compra
+                                ])
+                            ]
+                        ];
                     }
                 }
 
-                $historial_result = self::registrar_historial_Lote_model($db, [
-                    "lm_id" => $lote_id,
-                    "us_id" => $usuario_id,
-                    "hl_accion" => "creacion",
-                    "hl_descripcion" => "Lote creado por compra #{$numero_compra} en estado '{$lm_estado}'."
-                ]);
-
-                if ($historial_result->rowCount() <= 0) {
-                    $db->rollBack();
-                    return [
-                        'Alerta' => 'simple',
-                        'Titulo' => 'Error al registrar historial',
-                        'texto' => 'No se pudo registrar el historial del lote.',
-                        'Tipo' => 'error'
-                    ];
-                }
+                $registros_auxiliares[] = [
+                    'tipo' => 'creacion',
+                    'lm_id' => $lote_id,
+                    'us_id' => $usuario_id,
+                    'hl_accion' => 'creacion',
+                    'hl_descripcion' => "Lote creado por compra #{$numero_compra} en estado '{$lm_estado}'."
+                ];
 
                 $detalle_result = self::agregar_detalle_compra_model($db, [
                     "co_id" => $compra_id,
@@ -268,26 +263,50 @@ class compraModel extends mainModel
                         ];
                     }
 
-                    $historial_activacion_result = self::registrar_historial_Lote_model($db, [
-                        "lm_id" => $lote_id,
-                        "us_id" => $usuario_id,
-                        "hl_accion" => "activacion",
-                        "hl_descripcion" => "Lote activado automáticamente al registrar compra #{$numero_compra}."
-                    ]);
-
-                    if ($historial_activacion_result->rowCount() <= 0) {
-                        $db->rollBack();
-                        return [
-                            'Alerta' => 'simple',
-                            'Titulo' => 'Error historial',
-                            'texto' => 'No se pudo registrar el historial de activación.',
-                            'Tipo' => 'error'
-                        ];
-                    }
+                    $registros_auxiliares[] = [
+                        'tipo' => 'activacion',
+                        'lm_id' => $lote_id,
+                        'us_id' => $usuario_id,
+                        'hl_accion' => 'activacion',
+                        'hl_descripcion' => "Lote activado automáticamente al registrar compra #{$numero_compra}."
+                    ];
                 }
             }
 
             $db->commit();
+
+            if (!empty($registros_auxiliares)) {
+                try {
+                    $db_aux = mainModel::conectar();
+                    foreach ($registros_auxiliares as $registro) {
+                        if ($registro['tipo'] === 'balance') {
+                            preciosModel::registrar_balance_precio_model(
+                                $db_aux,
+                                $registro['balance']['lm_id'],
+                                $registro['balance']['usuario_id'],
+                                $registro['balance']['precio_anterior'],
+                                $registro['balance']['precio_nuevo'],
+                                $registro['balance']['detalle']
+                            );
+                            loteModel::registrar_historial_lote_model($db_aux, [
+                                'lm_id' => $registro['lm_id'],
+                                'us_id' => $registro['us_id'],
+                                'hl_accion' => $registro['hl_accion'],
+                                'hl_descripcion' => $registro['hl_descripcion']
+                            ]);
+                        } else {
+                            loteModel::registrar_historial_lote_model($db_aux, [
+                                'lm_id' => $registro['lm_id'],
+                                'us_id' => $registro['us_id'],
+                                'hl_accion' => $registro['hl_accion'],
+                                'hl_descripcion' => $registro['hl_descripcion']
+                            ]);
+                        }
+                    }
+                } catch (Throwable $e) {
+                    error_log("Error registrando historial/balance post-compra: " . $e->getMessage());
+                }
+            }
 
             $textoRespuesta = "La compra {$numero_compra} se registró correctamente con " . count($lotes) . " lote(s).";
             if (!empty($mensajePropagacion)) {

@@ -45,6 +45,34 @@ class mainModel
         return self::$conexiones[$session_id];
     }
 
+    /* ----------------------------------------funcion para transacciones largas (sin persistencia)---------------------------------------------- */
+    public static function conectarTransaccional($session_id = null)
+    {
+        if ($session_id === null) {
+            $session_id = session_id() ?: 'default';
+        }
+
+        $clave = $session_id . '_tx';
+
+        if (!isset(self::$conexiones[$clave])) {
+            try {
+                self::$conexiones[$clave] = new PDO(
+                    SGBD . ";charset=utf8",
+                    USER,
+                    PASS,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_TIMEOUT => 60,
+                        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                    ]
+                );
+            } catch (PDOException $e) {
+                die("Error de conexión transaccional: " . $e->getMessage());
+            }
+        }
+
+        return self::$conexiones[$clave];
+    }
 
     /* ----------------------------------------funcion que ejecuta consultas simples---------------------------------------------- */
     protected static function ejecutar_consulta_simple($consulta)

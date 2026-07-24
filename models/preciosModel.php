@@ -223,7 +223,7 @@ class preciosModel extends mainModel
      */
     public static function actualizar_precio_todos_lotes_model($med_id, $precio_nuevo, $usuario_id, $su_id = null)
     {
-        $conexion = self::conectar();
+        $conexion = mainModel::conectarTransaccional();
         
         try {
             $conexion->beginTransaction();

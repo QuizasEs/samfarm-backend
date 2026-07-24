@@ -481,13 +481,10 @@ class ventaModel extends mainModel
         if ($cantidad_unidades <= 0) return false;
         $db = mainModel::conectar();
 
-        // Bloqueamos la fila para evitar race conditions
         $stmt = $db->prepare("
-            SELECT lm_cant_actual_unidades, lm_cant_actual_cajas, 
-                lm_cant_blister, lm_cant_unidad 
+            SELECT lm_cant_blister, lm_cant_unidad 
             FROM lote_medicamento 
             WHERE lm_id = :lm_id 
-            FOR UPDATE
         ");
         $stmt->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
         $stmt->execute();
@@ -495,28 +492,20 @@ class ventaModel extends mainModel
 
         if (!$lm) return false;
 
-        $unidades_antes = (int)$lm['lm_cant_actual_unidades'];
         $blister = max(1, (int)$lm['lm_cant_blister']);
         $por_blister = max(1, (int)$lm['lm_cant_unidad']);
         $unidades_por_caja = $blister * $por_blister;
 
-        // Validar stock suficiente
-        if ($unidades_antes < $cantidad_unidades) return false;
-
-        // Calcular nuevos valores
-        $unidades_despues = $unidades_antes - $cantidad_unidades;
-        $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
-
-        // Actualizar lote
         $upd = $db->prepare("
             UPDATE lote_medicamento
-            SET lm_cant_actual_unidades = :unidades_despues,
-                lm_cant_actual_cajas = :cajas_despues,
+            SET lm_cant_actual_unidades = lm_cant_actual_unidades - :cantidad_unidades,
+                lm_cant_actual_cajas = FLOOR((lm_cant_actual_unidades - :cantidad_unidades) / :unidades_por_caja),
                 lm_actualizado_en = NOW()
             WHERE lm_id = :lm_id
+              AND lm_cant_actual_unidades >= :cantidad_unidades
         ");
-        $upd->bindParam(":unidades_despues", $unidades_despues, PDO::PARAM_INT);
-        $upd->bindParam(":cajas_despues", $cajas_despues, PDO::PARAM_INT);
+        $upd->bindParam(":cantidad_unidades", $cantidad_unidades, PDO::PARAM_INT);
+        $upd->bindParam(":unidades_por_caja", $unidades_por_caja, PDO::PARAM_INT);
         $upd->bindParam(":lm_id", $lm_id, PDO::PARAM_INT);
         $upd->execute();
 
@@ -748,72 +737,32 @@ class ventaModel extends mainModel
                 }
             }
 
-            // 3) Bloquear fila para actualización
-            $lock_stmt = $db->prepare("
-                SELECT inv_id, inv_total_unidades, inv_total_cajas, inv_total_valorado
-                FROM inventarios 
-                WHERE inv_id = :inv_id 
-                FOR UPDATE
-            ");
-            $lock_stmt->bindParam(":inv_id", $inv['inv_id'], PDO::PARAM_INT);
-            $lock_stmt->execute();
-            $inv = $lock_stmt->fetch(PDO::FETCH_ASSOC);
-
             $inv_id = (int)$inv['inv_id'];
-            $unidades_antes = (int)$inv['inv_total_unidades'];
-            $valorado_antes = (float)$inv['inv_total_valorado'];
 
-            // 4) Validar stock suficiente
-            if ($unidades_antes < $cantidad_unidades) {
-                error_log("ERROR: Stock insuficiente en inventario. med_id={$med_id}, disponible={$unidades_antes}, requerido={$cantidad_unidades}");
-                return false;
-            }
-
-            // 5) Calcular nuevas cantidades
-            $unidades_despues = $unidades_antes - $cantidad_unidades;
-            $valorado_despues = max(0, $valorado_antes - $valorado_descuento);
-
-            // 6) Obtener factor de conversión para cajas
-            $stmt2 = $db->prepare("
-                SELECT lm_cant_blister, lm_cant_unidad 
-                FROM lote_medicamento 
-                WHERE med_id = :med_id AND su_id = :su_id AND lm_estado = 'activo' AND lm_cant_actual_unidades > 0 
-                LIMIT 1
-            ");
-            $stmt2->bindParam(":med_id", $med_id, PDO::PARAM_INT);
-            $stmt2->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
-            $stmt2->execute();
-            $ref = $stmt2->fetch(PDO::FETCH_ASSOC);
-
-            if ($ref) {
-                $blister = max(1, (int)$ref['lm_cant_blister']);
-                $por_unidad = max(1, (int)$ref['lm_cant_unidad']);
-                $unidades_por_caja = $blister * $por_unidad;
-            } else {
-                $unidades_por_caja = 1;
-            }
-
-            $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
-
-            // 7) Actualizar inventario
             $upd = $db->prepare("
                 UPDATE inventarios 
-                SET inv_total_unidades = :unidades_despues, 
-                    inv_total_cajas = :cajas_despues, 
-                    inv_total_valorado = :valorado_despues,
+                SET inv_total_unidades = inv_total_unidades - :cantidad_unidades, 
+                    inv_total_cajas = FLOOR((inv_total_unidades - :cantidad_unidades) / 
+                        (SELECT COALESCE(MAX(lm.lm_cant_blister * lm.lm_cant_unidad), 1)
+                         FROM lote_medicamento lm
+                         WHERE lm.med_id = :med_id AND lm.su_id = :su_id AND lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0
+                         LIMIT 1)),
+                    inv_total_valorado = inv_total_valorado - :valorado_descuento,
                     inv_actualizado_en = NOW()
                 WHERE inv_id = :inv_id
+                  AND inv_total_unidades >= :cantidad_unidades
             ");
-            $upd->bindParam(":unidades_despues", $unidades_despues, PDO::PARAM_INT);
-            $upd->bindParam(":cajas_despues", $cajas_despues, PDO::PARAM_INT);
-            $upd->bindParam(":valorado_despues", $valorado_despues);
+            $upd->bindParam(":cantidad_unidades", $cantidad_unidades, PDO::PARAM_INT);
+            $upd->bindParam(":valorado_descuento", $valorado_descuento);
+            $upd->bindParam(":med_id", $med_id, PDO::PARAM_INT);
+            $upd->bindParam(":su_id", $sucursal_id, PDO::PARAM_INT);
             $upd->bindParam(":inv_id", $inv_id, PDO::PARAM_INT);
             $upd->execute();
 
             $rows_affected = $upd->rowCount();
 
             if ($rows_affected > 0) {
-                error_log("SUCCESS: Inventario actualizado. med_id={$med_id}, unidades: {$unidades_antes} -> {$unidades_despues}, valorado: {$valorado_antes} -> {$valorado_despues}");
+                error_log("SUCCESS: Inventario actualizado. med_id={$med_id}, unidades: -{$cantidad_unidades}, valorado: -{$valorado_descuento}");
                 return true;
             } else {
                 error_log("WARNING: UPDATE no afectó filas. med_id={$med_id}, inv_id={$inv_id}");

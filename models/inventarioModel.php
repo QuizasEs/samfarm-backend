@@ -918,7 +918,7 @@ class inventarioModel extends mainModel
     public static function recalcular_valorado_inventario_model()
     {
         try {
-            $conexion = mainModel::conectar();
+            $conexion = mainModel::conectarTransaccional();
             $conexion->beginTransaction();
 
             $sql = "

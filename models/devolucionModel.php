@@ -214,11 +214,9 @@ class devolucionModel extends mainModel
         $db = mainModel::conectar();
 
         $stmt = $db->prepare("
-                SELECT lm_cant_actual_unidades, lm_cant_actual_cajas,
-                    lm_cant_blister, lm_cant_unidad
+                SELECT lm_cant_blister, lm_cant_unidad
                 FROM lote_medicamento
                 WHERE lm_id = :lm_id
-                FOR UPDATE
             ");
         $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $stmt->execute();
@@ -226,28 +224,21 @@ class devolucionModel extends mainModel
 
         if (!$lm) return false;
 
-        $unidades_antes = (int)$lm['lm_cant_actual_unidades'];
         $blister = max(1, (int)$lm['lm_cant_blister']);
         $por_blister = max(1, (int)$lm['lm_cant_unidad']);
         $unidades_por_caja = $blister * $por_blister;
 
-        if ($unidades_antes < $cantidad) return false;
-
-        $unidades_despues = $unidades_antes - $cantidad;
-        $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
-
         $upd = $db->prepare("
                 UPDATE lote_medicamento
-                SET lm_cant_actual_unidades = :unidades_despues,
-                    lm_cant_actual_cajas = :cajas_despues,
+                SET lm_cant_actual_unidades = lm_cant_actual_unidades - :cantidad,
+                    lm_cant_actual_cajas = FLOOR((lm_cant_actual_unidades - :cantidad) / :unidades_por_caja),
                     lm_actualizado_en = NOW()
                 WHERE lm_id = :lm_id
-                AND lm_cant_actual_unidades >= :cantidad
+                  AND lm_cant_actual_unidades >= :cantidad
             ");
-        $upd->bindParam(':unidades_despues', $unidades_despues, PDO::PARAM_INT);
-        $upd->bindParam(':cajas_despues', $cajas_despues, PDO::PARAM_INT);
-        $upd->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $upd->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+        $upd->bindParam(':unidades_por_caja', $unidades_por_caja, PDO::PARAM_INT);
+        $upd->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $upd->execute();
 
         return $upd->rowCount() > 0;
@@ -260,11 +251,9 @@ class devolucionModel extends mainModel
         $db = mainModel::conectar();
 
         $stmt = $db->prepare("
-                SELECT lm_cant_actual_unidades, lm_cant_actual_cajas,
-                    lm_cant_blister, lm_cant_unidad
+                SELECT lm_cant_blister, lm_cant_unidad
                 FROM lote_medicamento
                 WHERE lm_id = :lm_id
-                FOR UPDATE
             ");
         $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $stmt->execute();
@@ -272,28 +261,21 @@ class devolucionModel extends mainModel
 
         if (!$lm) return false;
 
-        $unidades_antes = (int)$lm['lm_cant_actual_unidades'];
         $blister = max(1, (int)$lm['lm_cant_blister']);
         $por_blister = max(1, (int)$lm['lm_cant_unidad']);
         $unidades_por_caja = $blister * $por_blister;
 
-        if ($unidades_antes < $cantidad) return false;
-
-        $unidades_despues = $unidades_antes - $cantidad;
-        $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
-
         $upd = $db->prepare("
                 UPDATE lote_medicamento
-                SET lm_cant_actual_unidades = :unidades_despues,
-                    lm_cant_actual_cajas = :cajas_despues,
+                SET lm_cant_actual_unidades = lm_cant_actual_unidades - :cantidad,
+                    lm_cant_actual_cajas = FLOOR((lm_cant_actual_unidades - :cantidad) / :unidades_por_caja),
                     lm_actualizado_en = NOW()
                 WHERE lm_id = :lm_id
-                AND lm_cant_actual_unidades >= :cantidad
+                  AND lm_cant_actual_unidades >= :cantidad
             ");
-        $upd->bindParam(':unidades_despues', $unidades_despues, PDO::PARAM_INT);
-        $upd->bindParam(':cajas_despues', $cajas_despues, PDO::PARAM_INT);
-        $upd->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $upd->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+        $upd->bindParam(':unidades_por_caja', $unidades_por_caja, PDO::PARAM_INT);
+        $upd->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $upd->execute();
 
         return $upd->rowCount() > 0;
@@ -310,7 +292,6 @@ class devolucionModel extends mainModel
                     lm_cant_blister, lm_cant_unidad
                 FROM lote_medicamento
                 WHERE lm_id = :lm_id
-                FOR UPDATE
             ");
         $stmt->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $stmt->execute();
@@ -318,24 +299,19 @@ class devolucionModel extends mainModel
 
         if (!$lm) return false;
 
-        $unidades_antes = (int)$lm['lm_cant_actual_unidades'];
         $blister = max(1, (int)$lm['lm_cant_blister']);
         $por_blister = max(1, (int)$lm['lm_cant_unidad']);
         $unidades_por_caja = $blister * $por_blister;
 
-        // Para devoluciones, agregamos unidades (no restringimos stock máximo)
-        $unidades_despues = $unidades_antes + $cantidad;
-        $cajas_despues = (int)floor($unidades_despues / $unidades_por_caja);
-
         $upd = $db->prepare("
                 UPDATE lote_medicamento
-                SET lm_cant_actual_unidades = :unidades_despues,
-                    lm_cant_actual_cajas = :cajas_despues,
+                SET lm_cant_actual_unidades = lm_cant_actual_unidades + :cantidad,
+                    lm_cant_actual_cajas = FLOOR((lm_cant_actual_unidades + :cantidad) / :unidades_por_caja),
                     lm_actualizado_en = NOW()
                 WHERE lm_id = :lm_id
             ");
-        $upd->bindParam(':unidades_despues', $unidades_despues, PDO::PARAM_INT);
-        $upd->bindParam(':cajas_despues', $cajas_despues, PDO::PARAM_INT);
+        $upd->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+        $upd->bindParam(':unidades_por_caja', $unidades_por_caja, PDO::PARAM_INT);
         $upd->bindParam(':lm_id', $lm_id, PDO::PARAM_INT);
         $upd->execute();
 
@@ -440,16 +416,6 @@ class devolucionModel extends mainModel
                 return false;
             }
 
-            $lock_stmt = $db->prepare("
-                    SELECT inv_id, inv_total_unidades, inv_total_cajas, inv_total_valorado
-                    FROM inventarios
-                    WHERE inv_id = :inv_id
-                    FOR UPDATE
-                ");
-            $lock_stmt->bindParam(':inv_id', $inv['inv_id'], PDO::PARAM_INT);
-            $lock_stmt->execute();
-            $inv = $lock_stmt->fetch(PDO::FETCH_ASSOC);
-
             $unidades_antes = (int)$inv['inv_total_unidades'];
             $valorado_antes = (float)$inv['inv_total_valorado'];
 
@@ -510,15 +476,16 @@ class devolucionModel extends mainModel
 
             $upd = $db->prepare("
                     UPDATE inventarios
-                    SET inv_total_unidades = :unidades_despues,
-                        inv_total_cajas = :cajas_despues,
-                        inv_total_valorado = :valorado_despues,
+                    SET inv_total_unidades = inv_total_unidades - :cantidad,
+                        inv_total_cajas = FLOOR((inv_total_unidades - :cantidad) / :unidades_por_caja),
+                        inv_total_valorado = inv_total_valorado - :valor_restado,
                         inv_actualizado_en = NOW()
                     WHERE inv_id = :inv_id
+                      AND inv_total_unidades >= :cantidad
                 ");
-            $upd->bindParam(':unidades_despues', $unidades_despues, PDO::PARAM_INT);
-            $upd->bindParam(':cajas_despues', $cajas_despues, PDO::PARAM_INT);
-            $upd->bindParam(':valorado_despues', $valorado_despues);
+            $upd->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+            $upd->bindParam(':unidades_por_caja', $unidades_por_caja, PDO::PARAM_INT);
+            $upd->bindParam(':valor_restado', $valor_restado);
             $upd->bindParam(':inv_id', $inv['inv_id'], PDO::PARAM_INT);
             $upd->execute();
 

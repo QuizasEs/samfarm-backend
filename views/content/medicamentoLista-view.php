@@ -146,7 +146,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl">Uso Farmacológico <span class="tdan">*</span></label>
+                            <label class="fl">Uso Farmacológico</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Uso_reg" placeholder="Buscar uso..." autocomplete="off">
                                 <div id="dd_Uso_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -159,7 +159,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
                         <div class="fg">
-                            <label class="fl">Forma Farmacéutica <span class="tdan">*</span></label>
+                            <label class="fl">Forma Farmacéutica</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Forma_reg" placeholder="Buscar forma..." autocomplete="off">
                                 <div id="dd_Forma_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -175,7 +175,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <div class="fr">
 
                         <div class="fg">
-                            <label class="fl">Vía de Administración <span class="tdan">*</span></label>
+                            <label class="fl">Vía de Administración</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Via_reg" placeholder="Buscar vía..." autocomplete="off">
                                 <div id="dd_Via_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -188,7 +188,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
                         <div class="fg">
-                            <label class="fl">Proveedor (Laboratorio) <span class="tdan">*</span></label>
+                            <label class="fl">Proveedor (Laboratorio)</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Proveedor_reg" placeholder="Buscar proveedor..." autocomplete="off">
                                 <div id="dd_Proveedor_reg_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -259,7 +259,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl">Uso Farmacológico <span class="tdan">*</span></label>
+                            <label class="fl">Uso Farmacológico</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Uso_up" placeholder="Buscar uso..." autocomplete="off">
                                 <div id="dd_Uso_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -272,7 +272,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
                         <div class="fg">
-                            <label class="fl">Forma Farmacéutica <span class="tdan">*</span></label>
+                            <label class="fl">Forma Farmacéutica</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Forma_up" placeholder="Buscar forma..." autocomplete="off">
                                 <div id="dd_Forma_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -287,7 +287,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl">Vía de Administración <span class="tdan">*</span></label>
+                            <label class="fl">Vía de Administración</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Via_up" placeholder="Buscar vía..." autocomplete="off">
                                 <div id="dd_Via_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
@@ -300,7 +300,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
                         <div class="fg">
-                            <label class="fl">Proveedor (Laboratorio) <span class="tdan">*</span></label>
+                            <label class="fl">Proveedor (Laboratorio)</label>
                             <div class="search-wrapper" style="position: relative;">
                                 <input type="text" class="inp" id="dd_Proveedor_up" placeholder="Buscar proveedor..." autocomplete="off">
                                 <div id="dd_Proveedor_up_res" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
