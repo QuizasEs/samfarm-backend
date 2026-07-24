@@ -3,8 +3,8 @@
     const SERVER = "localhost";
     const DB = "samfarm_db";
     /* const DB = "projecto"; */
-    const USER = "root";
-    const PASS = "";
+    const USER = "web_app_user";
+    const PASS = "2025sqlpass";
 
     /* Inicializa la conexión con la base de datos */
     define("SGBD", "mysql:host=" . SERVER . ";dbname=" . DB);

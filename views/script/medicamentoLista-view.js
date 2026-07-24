@@ -216,6 +216,7 @@ const MedicamentosModals = (function() {
         this.campos = campos;
         this.clearOnEmpty = !!clearOnEmpty;
         this.debounce = null;
+        this.selected = false;
         if (this.input && this.resultsContainer) this.init();
     }
 
@@ -299,6 +300,7 @@ const MedicamentosModals = (function() {
     };
 
     MedicamentoDropdown.prototype.selectProvider = function(item) {
+        this.selected = true;
         this.input.value = item.dataset.name;
         this.input.dataset.selectedId = item.dataset.id;
         if (this.select) {
@@ -312,6 +314,7 @@ const MedicamentosModals = (function() {
     MedicamentoDropdown.prototype.hide = function() { this.resultsContainer.style.display = 'none'; };
 
     MedicamentoDropdown.prototype.showAll = async function() {
+        this.selected = false;
         try {
             const body = new URLSearchParams();
             body.append('MedicamentoAjax', 'select_v2');
@@ -343,7 +346,27 @@ const MedicamentosModals = (function() {
             this.debounce = setTimeout(() => this.search(e.target.value.trim()), 300);
         });
         this.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.hide();
+            if (e.key === 'Escape') {
+                this.hide();
+                this.input.value = '';
+                if (this.select) {
+                    this.select.value = '';
+                    this.select.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+        this.input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!this.selected) {
+                    this.input.value = '';
+                    if (this.select) {
+                        this.select.value = '';
+                        this.select.dispatchEvent(new Event('change'));
+                    }
+                    this.hide();
+                }
+                this.selected = false;
+            }, 150);
         });
         document.addEventListener('click', (e) => {
             if (!this.resultsContainer.contains(e.target) && e.target !== this.input) this.hide();

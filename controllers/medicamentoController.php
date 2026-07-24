@@ -114,14 +114,10 @@ class medicamentoController extends medicamentoModel
 
         /* verificar valor de selects no negativo */
         if ($uso <= 0 || $forma <= 0 || $via <= 0) {
-            $alerta = [
-                "Alerta" => "simple",
-                "Titulo" => "Ocurrió un error inesperado",
-                "texto" => "No se seleccionó ningún campo disponible",
-                "Tipo" => "error"
-            ];
-            echo json_encode($alerta);
-            exit();
+            $uso = ($uso > 0) ? $uso : 10;
+            $forma = ($forma > 0) ? $forma : 10;
+            $via = ($via > 0) ? $via : 10;
+            $proveedor = ($proveedor > 0) ? $proveedor : 10;
         }
         $datos_med = [
             "Nombre" =>  $nombre,
@@ -466,13 +462,10 @@ class medicamentoController extends medicamentoModel
 
         /* preguntamos si estan vacios */
         if ($uso <= 0 || $forma <= 0 || $via <= 0) {
-            echo json_encode([
-                "Alerta" => "simple",
-                "Titulo" => "Error de validación",
-                "texto"  => "Por favor selecciona valores válidos en todos los campos desplegables.",
-                "Tipo"   => "error"
-            ]);
-            exit();
+            $uso = ($uso > 0) ? $uso : 10;
+            $forma = ($forma > 0) ? $forma : 10;
+            $via = ($via > 0) ? $via : 10;
+            $proveedor = ($proveedor > 0) ? $proveedor : 10;
         }
         /* en caso que se quiera restringir el duplicado de informacion */
         /*         if ($nombre != $campos['med_nombre_quimico']) {
