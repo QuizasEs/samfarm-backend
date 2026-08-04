@@ -33,7 +33,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                 <input type="hidden" id="dinero_recibido_venta" name="dinero_recibido_venta">
 
                 <div class="ph th1">Búsqueda de Productos</div>
-                <div class="grid2 mb16">
+                <div class="grid mb16">
                     <div class="card">
                         <div class="ch"><span class="ct">Buscar para Venta</span></div>
                         <div class="cb">
@@ -68,19 +68,6 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
 
 
 
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="ch"><span class="ct">Cotizar</span></div>
-                        <div class="cb">
-                            <div class="fg"><label class="fl">Proveedor</label>
-                                <div class="search-wrapper" style="position: relative;"><input type="text" id="filtro_proveedor_quote" class="inp" placeholder="Buscar proveedor..." autocomplete="off">
-                                    <div id="provider_results_quote" class="search-results-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; display: none;"></div>
-                                </div>
-                            </div>
-                            <div class="fg" style="margin-bottom:0"><label class="fl">Buscar Medicamento</label>
-                                <div class="inpg"><input class="inp med_search_quote" placeholder="¿Qué medicamento cotizar?"><button type="button" class="btn btn_buscar_med_quote"><ion-icon name="search"></ion-icon></button></div>
-                            </div>
                         </div>
                     </div>
                 </div>

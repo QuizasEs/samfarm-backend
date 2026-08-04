@@ -33,11 +33,13 @@ define('SIAT_AMBIENTE', SIAT_MODO == 'PILOTO' ? 2 : 1);
 /* Modalidad: 2 = Facturación Computarizada en Línea (fijo) */
 define('SIAT_MODALIDAD', 2);
 
-/* Código de sucursal asignado por el SIN (0 = casa matriz).
-   ⚠️ El proyecto usa su_id 1 y 7; mapear al código SIN real al certificar. */
-define('SIAT_COD_SUCURSAL', 0);
+/* Límite de facturas por paquete de contingencia enviado al SIN */
+define('SIAT_MAX_FACTURAS_CONTINGENCIA', 100);
 
-/* Código de punto de venta asignado por el SIN */
+/* Códigos de sucursal y punto de venta asignados por el SIN.
+   Ahora se obtienen por su_id desde la tabla siat_configuracion,
+   por lo que ya no se usan constantes globales fijas. */
+define('SIAT_COD_SUCURSAL', 0);
 define('SIAT_PUNTO_VENTA', 0);
 
 /* Activación opcional de facturación electrónica.

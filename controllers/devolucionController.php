@@ -257,8 +257,7 @@ class devolucionController extends devolucionModel
                 throw new Exception("No se pudo registrar la devolución");
             }
 
-            /*
-            // === FACTURACIÓN ELECTRÓNICA SIAT (Paso 11) - bloque desactivado por ahora ===
+            // === FACTURACIÓN ELECTRÓNICA SIAT (Paso 11) ===
             // Anular la factura original en el SIN por devolución de mercadería (código 2).
             // Solo se ejecuta si está habilitado y la factura tiene CUF registrado.
             if (SIAT_HABILITADO) {
@@ -275,7 +274,6 @@ class devolucionController extends devolucionModel
                 }
             }
             // === FIN bloque SIAT ===
-            */
 
             // Actualizar referencias temporales específicas de esta devolución (solo registros creados en esta transacción)
             $stmt_update_refs = $db->prepare("

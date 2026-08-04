@@ -534,7 +534,11 @@ class ventaController extends ventaModel
             $mc_res = self::registrar_movimiento_caja_model($mc);
             if (!$mc_res || $mc_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_caja");
 
-            $fa_numero = self::generar_numero_factura_model($sucursal_id);
+            if ($documento === 'factura') {
+                $fa_numero = self::obtener_numero_factura_numerico_model($sucursal_id);
+            } else {
+                $fa_numero = self::generar_numero_factura_model($sucursal_id);
+            }
             $datos_factura = [
                 "ve_id" => $ve_id,
                 "cl_id" => $cliente_id,
@@ -588,8 +592,7 @@ class ventaController extends ventaModel
 
             $db->commit();
 
-            /*
-            // === FACTURACIÓN ELECTRÓNICA SIAT (Pasos 7-9) - bloque desactivado por ahora ===
+            // === FACTURACIÓN ELECTRÓNICA SIAT (Pasos 7-9) ===
             // La venta ya fue confirmada con $db->commit() arriba, así que un fallo
             // del SIN no revierte la venta. Solo se ejecuta si está habilitado y el
             // documento es 'factura'.
@@ -612,7 +615,18 @@ class ventaController extends ventaModel
                     $sc = $stmtSc->fetch(PDO::FETCH_OBJ);
 
                     // 4) Generar CUF (Paso 7) y guardarlo en factura
-                    $cuf = siatModel::generarCUF(SIAT_NIT, date('Y-m-d H:i:s'), $nroFacturaSiat, $sc->sc_cufd_control, SIAT_COD_SUCURSAL);
+                    $codigosSucursal = siatModel::obtenerCodigosSucursal($sucursal_id);
+                    $cuf = siatModel::generarCUF(
+                        siatModel::obtenerNitEmpresa(),
+                        date('Y-m-d H:i:s'),
+                        $nroFacturaSiat,
+                        $sc->sc_cufd_control,
+                        $codigosSucursal['sucursal'],
+                        $codigosSucursal['punto_venta'],
+                        1, // tipoEmision: 1 = online
+                        1, // tipoFactura: 1 = con derecho a credito fiscal
+                        1  // tipoDocumentoSector: 1 = compra-venta
+                    );
                     $stmtCuf = $dbSiat->prepare("UPDATE factura SET fa_cuf = :cuf WHERE fa_id = :fa_id");
                     $stmtCuf->execute([':cuf' => $cuf, ':fa_id' => $fa_id]);
 
@@ -620,7 +634,7 @@ class ventaController extends ventaModel
                     $datosXml = siatModel::obtenerDatosFacturaXML($ve_id);
                     $detalleXml = siatModel::obtenerDetalleFacturaXML($ve_id);
                     $leyenda = self::obtener_leyenda_siat_model($sucursal_id);
-                    $xml = siatModel::generarXML($datosXml, $detalleXml, $leyenda);
+                    $xml = siatModel::generarXML($datosXml, $detalleXml, $leyenda, $sucursal_id);
 
                     // 6) Enviar al SIN (Paso 9)
                     siatModel::enviarFactura($xml, $fa_id, $cuf, $sucursal_id);
@@ -629,7 +643,6 @@ class ventaController extends ventaModel
                 }
             }
             // === FIN bloque SIAT ===
-            */
 
             echo json_encode([
                 'Alerta' => 'venta_exitosa',

@@ -86,6 +86,30 @@ try {
     }
 
     echo date('Y-m-d H:i:s') . " - SIAT validacion: {$ok} validadas, {$fail} con error\n";
+
+    // 3) Reintentar facturas rechazadas
+    $stmtRech = $db->query("
+        SELECT fe.fa_id
+        FROM facturacion_electronica fe
+        WHERE fe.fe_estado_siat = 'RECHAZADA'
+        LIMIT 20
+    ");
+    $rechazadas = $stmtRech->fetchAll(PDO::FETCH_OBJ);
+
+    foreach ($rechazadas as $row) {
+        try {
+            $db->prepare("
+                UPDATE facturacion_electronica
+                SET fe_estado_siat = 'CONTINGENCIA',
+                    fe_ticket = NULL,
+                    fe_fecha_envio = NULL
+                WHERE fa_id = :fa_id
+            ")->execute([':fa_id' => $row->fa_id]);
+        } catch (Exception $e) {
+            error_log("SIAT reintento rechazada fa_id={$row->fa_id}: " . $e->getMessage());
+        }
+    }
+
     exit(0);
 
 } catch (Exception $e) {

@@ -19,10 +19,55 @@ class siatModel extends mainModel
         ]);
     }
 
+    private static function obtenerCodigosSucursal($suId)
+    {
+        $db = mainModel::conectar();
+        $stmt = $db->prepare("
+            SELECT sc_sucursal_codigo, sc_punto_venta_codigo
+            FROM siat_configuracion
+            WHERE su_id = :su_id
+            LIMIT 1
+        ");
+        $stmt->execute([':su_id' => $suId]);
+        $row = $stmt->fetch(PDO::FETCH_OBJ);
+
+        if ($row) {
+            $codigoSucursal = (int) ($row->sc_sucursal_codigo ?? 0);
+            $codigoPuntoVenta = (int) ($row->sc_punto_venta_codigo ?? 0);
+            
+            if ($codigoSucursal === 0) {
+                error_log("SIAT WARNING: sc_sucursal_codigo=0 para su_id={$suId}. Actualizar con código real del Portal SIAT.");
+            }
+            
+            return [
+                'sucursal' => $codigoSucursal,
+                'punto_venta' => $codigoPuntoVenta,
+            ];
+        }
+
+        error_log("SIAT ERROR: No se encontró configuración para su_id={$suId}");
+        return ['sucursal' => 0, 'punto_venta' => 0];
+    }
+
+    private static function obtenerNitEmpresa()
+    {
+        static $nit = null;
+        if ($nit === null) {
+            $db = mainModel::conectar();
+            $stmt = $db->query("SELECT ce_nit FROM configuracion_empresa WHERE ce_id = 1 LIMIT 1");
+            $nit = $stmt->fetchColumn();
+            if (!$nit) {
+                $nit = SIAT_NIT;
+            }
+        }
+        return $nit;
+    }
+
     public static function obtenerCUIS($suId, $codigoSucursal = null, $codigoPuntoVenta = null)
     {
-        $codigoSucursal = $codigoSucursal ?? SIAT_COD_SUCURSAL;
-        $codigoPuntoVenta = $codigoPuntoVenta ?? SIAT_PUNTO_VENTA;
+        $codigos = self::obtenerCodigosSucursal($suId);
+        $codigoSucursal = $codigoSucursal ?? $codigos['sucursal'];
+        $codigoPuntoVenta = $codigoPuntoVenta ?? $codigos['punto_venta'];
 
         $intentos = 0;
         $maxIntentos = 3;
@@ -37,7 +82,7 @@ class siatModel extends mainModel
                         'codigoAmbiente'   => SIAT_AMBIENTE,
                         'codigoModalidad'  => SIAT_MODALIDAD,
                         'codigoSistema'    => SIAT_COD_SISTEMA,
-                        'nit'              => SIAT_NIT,
+                        'nit'              => self::obtenerNitEmpresa(),
                         'codigoSucursal'   => $codigoSucursal,
                         'codigoPuntoVenta' => $codigoPuntoVenta
                     ]
@@ -81,20 +126,23 @@ class siatModel extends mainModel
         if ($check->fetch()) {
             $stmt = $db->prepare("
                 UPDATE siat_configuracion
-                SET sc_cuis = :cuis, sc_cuis_expira = :vigencia, sc_actualizado = NOW()
+                SET sc_cuis = :cuis, sc_actualizado_en = NOW()
                 WHERE su_id = :su_id
             ");
         } else {
+            $codigos = self::obtenerCodigosSucursal($suId);
             $stmt = $db->prepare("
-                INSERT INTO siat_configuracion (su_id, sc_cuis, sc_cuis_expira, sc_punto_venta)
-                VALUES (:su_id, :cuis, :vigencia, :pv)
+                INSERT INTO siat_configuracion
+                    (su_id, sc_cuis, sc_sucursal_codigo, sc_punto_venta_codigo)
+                VALUES
+                    (:su_id, :cuis, :sucursal, :punto_venta)
             ");
-            $stmt->bindValue(':pv', SIAT_PUNTO_VENTA);
+            $stmt->bindValue(':sucursal', $codigos['sucursal']);
+            $stmt->bindValue(':punto_venta', $codigos['punto_venta']);
         }
 
         $stmt->bindValue(':su_id', $suId, PDO::PARAM_INT);
         $stmt->bindValue(':cuis', $cuis);
-        $stmt->bindValue(':vigencia', $vigencia);
         $stmt->execute();
     }
 
@@ -120,8 +168,9 @@ class siatModel extends mainModel
 
     public static function obtenerCUFD($suId, $codigoSucursal = null, $codigoPuntoVenta = null)
     {
-        $codigoSucursal = $codigoSucursal ?? SIAT_COD_SUCURSAL;
-        $codigoPuntoVenta = $codigoPuntoVenta ?? SIAT_PUNTO_VENTA;
+        $codigos = self::obtenerCodigosSucursal($suId);
+        $codigoSucursal = $codigoSucursal ?? $codigos['sucursal'];
+        $codigoPuntoVenta = $codigoPuntoVenta ?? $codigos['punto_venta'];
 
         $cuis = self::leerCUIS($suId);
         if (!$cuis) {
@@ -142,7 +191,7 @@ class siatModel extends mainModel
                         'codigoAmbiente'   => SIAT_AMBIENTE,
                         'codigoModalidad'  => SIAT_MODALIDAD,
                         'codigoSistema'    => SIAT_COD_SISTEMA,
-                        'nit'              => SIAT_NIT,
+                        'nit'              => self::obtenerNitEmpresa(),
                         'cuis'             => $cuis,
                         'codigoSucursal'   => $codigoSucursal,
                         'codigoPuntoVenta' => $codigoPuntoVenta
@@ -180,13 +229,13 @@ class siatModel extends mainModel
     public static function cufdVigente($suId)
     {
         $db = mainModel::conectar();
-        $stmt = $db->prepare("SELECT sc_cufd_expira FROM siat_configuracion WHERE su_id = :su_id");
+        $stmt = $db->prepare("SELECT sc_cufd_vigente_hasta FROM siat_configuracion WHERE su_id = :su_id");
         $stmt->execute([':su_id' => $suId]);
         $row = $stmt->fetch(PDO::FETCH_OBJ);
-        if (!$row || empty($row->sc_cufd_expira)) {
+        if (!$row || empty($row->sc_cufd_vigente_hasta)) {
             return false;
         }
-        return strtotime($row->sc_cufd_expira) > time();
+        return strtotime($row->sc_cufd_vigente_hasta) > time();
     }
 
     private static function guardarCUFD($suId, $codigo, $control, $vigencia)
@@ -194,7 +243,7 @@ class siatModel extends mainModel
         $db = mainModel::conectar();
         $stmt = $db->prepare("
             UPDATE siat_configuracion
-            SET sc_cufd = :codigo, sc_cufd_control = :control, sc_cufd_expira = :vigencia, sc_actualizado = NOW()
+            SET sc_cufd = :codigo, sc_cufd_control = :control, sc_cufd_vigente_hasta = :vigencia, sc_actualizado_en = NOW()
             WHERE su_id = :su_id
         ");
         $stmt->execute([
@@ -231,7 +280,7 @@ class siatModel extends mainModel
         return $hex;
     }
 
-    public static function generarCUF($nit, $fechaHora, $nroFactura, $codigoControl, $codigoSucursal = 0)
+    public static function generarCUF($nit, $fechaHora, $nroFactura, $codigoControl, $codigoSucursal = 0, $puntoVenta = 0, $tipoEmision = 1, $tipoFactura = 1, $tipoDocumentoSector = 1)
     {
         if (!ctype_digit((string) $nroFactura)) {
             error_log("SIAT generarCUF: nroFactura no numerico: {$nroFactura}");
@@ -239,11 +288,20 @@ class siatModel extends mainModel
         }
 
         $nit = str_pad((string) $nit, 13, '0', STR_PAD_LEFT);
-        $fecha = date('YmdHis', strtotime($fechaHora)) . '00';
-        $nro = str_pad((string) $nroFactura, 10, '0', STR_PAD_LEFT);
-        $suc = str_pad((string) $codigoSucursal, 4, '0', STR_PAD_LEFT);
 
-        $cadena = $nit . $fecha . $nro . $suc . '2' . '1' . '1' . '01' . '0000';
+        $dt = new DateTime($fechaHora, new DateTimeZone('America/La_Paz'));
+        $fecha = $dt->format('YmdHis') . $dt->format('u');
+        $fecha = substr($fecha, 0, 17);
+
+        $suc = str_pad((string) $codigoSucursal, 4, '0', STR_PAD_LEFT);
+        $puntoVenta = str_pad((string) $puntoVenta, 4, '0', STR_PAD_LEFT);
+        $nro = str_pad((string) $nroFactura, 10, '0', STR_PAD_LEFT);
+        $modalidad = str_pad((string) SIAT_MODALIDAD, 1, '0', STR_PAD_LEFT);
+        $tipoEmision = str_pad((string) $tipoEmision, 1, '0', STR_PAD_LEFT);
+        $tipoFactura = str_pad((string) $tipoFactura, 1, '0', STR_PAD_LEFT);
+        $tipoDocumentoSector = str_pad((string) $tipoDocumentoSector, 2, '0', STR_PAD_LEFT);
+
+        $cadena = $nit . $fecha . $suc . $modalidad . $tipoEmision . $tipoFactura . $tipoDocumentoSector . $nro . $puntoVenta;
 
         $suma = 0;
         $multi = 2;
@@ -317,8 +375,12 @@ class siatModel extends mainModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function generarXML($datos, $detalles, $leyenda)
+    public static function generarXML($datos, $detalles, $leyenda, $suId)
     {
+        $codigos = self::obtenerCodigosSucursal($suId);
+        $sucursal = $codigos['sucursal'];
+        $puntoVenta = $codigos['punto_venta'];
+
         $xml = new SimpleXMLElement(
             '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
             '<facturaComputarizadaCompraVenta ' .
@@ -335,9 +397,9 @@ class siatModel extends mainModel
         $cab->addChild('numeroFactura', $datos['fa_numero']);
         $cab->addChild('cuf', $datos['fa_cuf']);
         $cab->addChild('cufd', $datos['sc_cufd']);
-        $cab->addChild('codigoSucursal', SIAT_COD_SUCURSAL);
+        $cab->addChild('codigoSucursal', $sucursal);
         $cab->addChild('direccion', $datos['ce_direccion']);
-        $cab->addChild('codigoPuntoVenta', SIAT_PUNTO_VENTA);
+        $cab->addChild('codigoPuntoVenta', $puntoVenta);
         $cab->addChild('fechaEmision', date('c', strtotime($datos['ve_fecha'])));
         $nombre = trim(($datos['cl_nombres'] ?? '') . ' ' . ($datos['cl_apellido_paterno'] ?? ''));
         $cab->addChild('nombreRazonSocial', $nombre !== '' ? $nombre : 'SIN NOMBRE');
@@ -393,6 +455,10 @@ class siatModel extends mainModel
             throw new Exception("SIAT enviarFactura: falta CUIS o CUFD para su_id={$suId}");
         }
 
+        $codigosSucursal = self::obtenerCodigosSucursal($suId);
+        $codigoSucursal = $codigosSucursal['sucursal'];
+        $codigoPuntoVenta = $codigosSucursal['punto_venta'];
+
         $xmlGzip = gzencode($xmlString, 9);
         $xmlB64 = base64_encode($xmlGzip);
         $hash = hash('sha256', $xmlGzip);
@@ -406,12 +472,14 @@ class siatModel extends mainModel
                 'nit'                  => SIAT_NIT,
                 'cuis'                 => $sc->sc_cuis,
                 'cufd'                 => $sc->sc_cufd,
-                'codigoSucursal'       => SIAT_COD_SUCURSAL,
-                'codigoPuntoVenta'     => SIAT_PUNTO_VENTA,
+                'codigoSucursal'       => $codigoSucursal,
+                'codigoPuntoVenta'     => $codigoPuntoVenta,
                 'archivo'              => $xmlB64,
                 'hashArchivo'          => $hash,
                 'fechaEnvio'           => date('Y-m-d\TH:i:s.000-04:00'),
-                'tipoFacturaDocumento' => 1
+                'tipoFacturaDocumento' => 1,
+                'codigoEmision'        => 1,
+                'codigoDocumentoSector'=> 1
             ]
         ]);
 
@@ -479,10 +547,14 @@ class siatModel extends mainModel
             ];
         }, $facturas);
 
-        $sc = self::obtenerConfiguracionSucursal($suId);
-        if (!$sc) {
-            throw new Exception("SIAT enviarPaqueteContingencia: falta configuracion para su_id={$suId}");
-        }
+        $codigosSucursal = self::obtenerCodigosSucursal($suId);
+        $codigoSucursal = $codigosSucursal['sucursal'];
+        $codigoPuntoVenta = $codigosSucursal['punto_venta'];
+
+        $db = mainModel::conectar();
+        $scStmt = $db->prepare("SELECT sc_cuis, sc_cufd FROM siat_configuracion WHERE su_id = :su_id");
+        $scStmt->execute([':su_id' => $suId]);
+        $sc = $scStmt->fetch(PDO::FETCH_OBJ);
 
         $client = self::clienteSOAP('facturacion');
         $resp = $client->recepcionPaqueteFactura([
@@ -493,8 +565,8 @@ class siatModel extends mainModel
                 'nit'                 => SIAT_NIT,
                 'cuis'                => $sc->sc_cuis,
                 'cufd'                => $sc->sc_cufd,
-                'codigoSucursal'      => SIAT_COD_SUCURSAL,
-                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'codigoSucursal'      => $codigoSucursal,
+                'codigoPuntoVenta'    => $codigoPuntoVenta,
                 'archivos'            => $archivos,
                 'fechaEnvio'          => date('Y-m-d\TH:i:s.000-04:00'),
             ]
@@ -509,7 +581,8 @@ class siatModel extends mainModel
             $stmtUpdate = $db->prepare("
                 UPDATE facturacion_electronica
                 SET fe_ticket = :ticket,
-                    fe_fecha_envio = NOW()
+                    fe_fecha_envio = NOW(),
+                    fe_estado_siat = 'PENDIENTE_VALIDACION'
                 WHERE fe_id IN ({$in})
             ");
             $params = array_merge([$codigoRecepcion], $ids);
@@ -729,6 +802,8 @@ class siatModel extends mainModel
             throw new Exception("SIAT validarRecepcionFactura: falta CUIS o CUFD para su_id={$suId}");
         }
 
+        $codigosSucursal = self::obtenerCodigosSucursal($suId);
+
         $client = self::clienteSOAP('facturacion');
         $resp = $client->validacionRecepcionFactura([
             'SolicitudServicioValidacionRecepcionFactura' => [
@@ -738,8 +813,8 @@ class siatModel extends mainModel
                 'nit'                 => SIAT_NIT,
                 'cuis'                => $sc->sc_cuis,
                 'cufd'                => $sc->sc_cufd,
-                'codigoSucursal'      => SIAT_COD_SUCURSAL,
-                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'codigoSucursal'      => $codigosSucursal['sucursal'],
+                'codigoPuntoVenta'    => $codigosSucursal['punto_venta'],
                 'codigoRecepcion'     => $ticket,
             ]
         ]);
@@ -815,6 +890,8 @@ class siatModel extends mainModel
             throw new Exception("SIAT anularFactura: falta CUIS o CUFD para su_id={$suId}");
         }
 
+        $codigosSucursal = self::obtenerCodigosSucursal($suId);
+
         $client = self::clienteSOAP('facturacion');
         $resp = $client->anulacionFactura([
             'SolicitudServicioAnulacionFactura' => [
@@ -824,8 +901,8 @@ class siatModel extends mainModel
                 'nit'                 => SIAT_NIT,
                 'cuis'                => $sc->sc_cuis,
                 'cufd'                => $sc->sc_cufd,
-                'codigoSucursal'      => SIAT_COD_SUCURSAL,
-                'codigoPuntoVenta'    => SIAT_PUNTO_VENTA,
+                'codigoSucursal'      => $codigosSucursal['sucursal'],
+                'codigoPuntoVenta'    => $codigosSucursal['punto_venta'],
                 'cuf'                 => $cuf,
                 'codigoMotivo'        => (int)$codigoMotivo,
             ]

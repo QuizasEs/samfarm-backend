@@ -50,7 +50,7 @@ class ventaModel extends mainModel
     }
 
 
-    /* Buscar medicamento con stock disponible en sucursal */
+/* Buscar medicamento con stock disponible en sucursal */
     protected static function buscar_medicamento_model($termino, $sucursal_id, $filtros = [])
     {
         if (!$sucursal_id) {
@@ -72,37 +72,38 @@ class ventaModel extends mainModel
             COALESCE(uf.uf_nombre, '') AS funcion,
             COALESCE(vd.vd_nombre, '') AS via,
             m.med_codigo_barras,
-            lm.lm_precio_venta AS precio_venta,
-            lm.lm_precio_compra AS precio_compra,
-            lm.lm_costo_lista AS costo_lista,
-            lm.lm_cant_actual_unidades AS stock,
-            lm.lm_cant_blister,
-            lm.lm_cant_unidad,
-            DATE_FORMAT(lm.lm_fecha_vencimiento, '%Y-%m-%d') AS fecha_vencimiento
-        FROM lote_medicamento lm
-        INNER JOIN medicamento m ON m.med_id = lm.med_id
+            COALESCE(lm.lm_precio_venta, 0) AS precio_venta,
+            COALESCE(lm.lm_precio_compra, 0) AS precio_compra,
+            COALESCE(lm.lm_costo_lista, 0) AS costo_lista,
+            CASE 
+                WHEN lm.su_id = :sucursal_id AND lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 
+                THEN lm.lm_cant_actual_unidades 
+                ELSE 0 
+            END AS stock,
+            COALESCE(lm.lm_cant_blister, 1) AS lm_cant_blister,
+            COALESCE(lm.lm_cant_unidad, 1) AS lm_cant_unidad,
+            DATE_FORMAT(COALESCE(lm.lm_fecha_vencimiento, '9999-12-31'), '%Y-%m-%d') AS fecha_vencimiento
+        FROM medicamento m
+        INNER JOIN lote_medicamento lm ON lm.med_id = m.med_id
         LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
         LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
         LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
         LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
-        WHERE lm.su_id = :sucursal_id
-          AND lm.lm_estado = 'activo'
-          AND lm.lm_cant_actual_unidades > 0
+        WHERE (
+            m.med_nombre_quimico LIKE :termino
+            OR m.med_codigo_barras LIKE :termino
+            OR m.med_version_comercial LIKE :termino
+            OR lm.lm_numero_lote LIKE :termino
+        )
           AND lm.lm_precio_venta <= 900
-          AND (
-              m.med_nombre_quimico LIKE :termino
-              OR m.med_codigo_barras LIKE :termino
-              OR m.med_version_comercial LIKE :termino
-              OR lm.lm_numero_lote LIKE :termino
-          )
-    ";
+        AND lm.lm_estado = 'activo'
+        ";
 
         $params = [
             ":termino" => $termino,
             ":sucursal_id" => $sucursal_id
         ];
 
-        // Aplicar filtros opcionales
         if (!empty($filtros['proveedor'])) {
             $sql .= " AND lm.pr_id = :pr_id";
             $params[":pr_id"] = (int)$filtros['proveedor'];
@@ -120,7 +121,6 @@ class ventaModel extends mainModel
             $params[":vd_id"] = (int)$filtros['via'];
         }
 
-        // Ordenar: nombre, proveedor, precio (más barato primero), vencimiento
         $sql .= " ORDER BY
                 m.med_nombre_quimico ASC,
                 p.pr_razon_social ASC,
@@ -155,7 +155,11 @@ class ventaModel extends mainModel
             COALESCE(ff.ff_nombre, '') AS presentacion,
             COALESCE(p.pr_razon_social, '') AS proveedor,
             MIN(lm.lm_precio_venta) AS precio_venta,
-            SUM(lm.lm_cant_actual_unidades) AS stock,
+            SUM(CASE 
+                WHEN lm.su_id = :sucursal_id AND lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 
+                THEN lm.lm_cant_actual_unidades 
+                ELSE 0 
+            END) AS stock,
             (
                 SELECT lm2.lm_numero_lote 
                 FROM lote_medicamento lm2 
@@ -179,19 +183,17 @@ class ventaModel extends mainModel
             m.med_codigo_barras,
             COALESCE(lm.lm_cant_blister, 1) AS lm_cant_blister,
             COALESCE(lm.lm_cant_unidad, 1) AS lm_cant_unidad
-        FROM lote_medicamento lm
-        INNER JOIN medicamento m ON m.med_id = lm.med_id
+        FROM medicamento m
+        INNER JOIN lote_medicamento lm ON lm.med_id = m.med_id
         LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
         LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
-        WHERE lm.su_id = :sucursal_id
-          AND lm.lm_estado = 'activo'
-          AND lm.lm_cant_actual_unidades > 0
+        WHERE (
+            m.med_nombre_quimico LIKE :termino
+            OR m.med_codigo_barras LIKE :termino
+            OR m.med_version_comercial LIKE :termino
+        )
           AND lm.lm_precio_venta <= 900
-          AND (
-              m.med_nombre_quimico LIKE :termino
-              OR m.med_codigo_barras LIKE :termino
-              OR m.med_version_comercial LIKE :termino
-          )
+          AND lm.lm_estado = 'activo'
         ";
 
         $params = [

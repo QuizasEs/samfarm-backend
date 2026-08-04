@@ -2177,207 +2177,7 @@ const descripcion = `${nombre} - ${presentacion}`;
         }
     }
 
-    // clase para manejar la cotizacion
-    class CotizarManager {
-        constructor() {
-            // inicializa propiedades
-            this.medSearchQuote = document.querySelector('.med_search_quote');
-            this.btnBuscarQuote = document.querySelector('.btn_buscar_med_quote');
-            this.filtroProveedorQuote = document.getElementById('filtro_proveedor_quote');
-            this.resultsContainer = null;
-            this.debounce = null;
-
-            if (!this.medSearchQuote) return;
-
-            // crear contenedor de resultados
-            this.resultsContainer = document.createElement('div');
-            this.resultsContainer.id = 'quote_search_results';
-            this.resultsContainer.className = 'search-results-dropdown';
-            this.resultsContainer.style.cssText = `
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            box-shadow: 0 4px 6px var(--shadow-md);
-        `;
-            document.body.appendChild(this.resultsContainer);
-
-            // posicionar debajo del input
-            this.updatePosition();
-
-            // inicializa eventos
-            this.init();
-        }
-
-        // metodo para escapar html
-        escapeHtml(s) {
-            if (s == null) return '';
-            return String(s).replace(/[&<>"'`]/g, function(m) {
-                return ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": "&#39;",
-                    '`': '&#96;'
-                })[m];
-            });
-        }
-
-        // metodo para buscar
-        doSearch(term) {
-            if (!term || term.trim().length < 1) {
-                if (this.resultsContainer) {
-                    this.resultsContainer.innerHTML = '';
-                    this.resultsContainer.style.display = 'none';
-                }
-                return;
-            }
-
-            const body = new URLSearchParams();
-            body.append('ventaAjax', 'buscar');
-            body.append('termino', term);
-            body.append('proveedor', this.filtroProveedorQuote ? this.filtroProveedorQuote.dataset.selectedId : '');
-            // otros filtros vacios para cotizacion
-
-            fetch('<?php echo SERVER_URL ?>ajax/ventaAjax.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: body.toString()
-            }).then(r => r.json()).then(json => {
-                this.renderResults(json || []);
-            }).catch(err => {
-                if (this.resultsContainer) {
-                    this.resultsContainer.innerHTML = '<div class="search-results-item no-results">error en la busqueda</div>';
-                    this.resultsContainer.style.display = 'block';
-                }
-            });
-        }
-
-        // metodo para renderizar resultados
-        renderResults(items) {
-            if (!this.resultsContainer) return;
-
-            if (!items || items.length === 0) {
-                this.resultsContainer.innerHTML = '<div class="txctr tc">no se encontraron resultados</div>';
-                this.updatePosition();
-                this.resultsContainer.style.display = 'block';
-                return;
-            }
-
-            const tableHtml = `
-                <div class="tw">
-                    <table>
-                        <thead>
-                            <tr style="background: var(--bg-secondary);">
-                                <th style="width: 18%">n° lote</th>
-                                <th>medicamento</th>
-                                <th style="width: 18%">p. unitario</th>
-                                <th style="width: 18%">p. caja</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${items.map((it) => {
-                                const nombre = this.escapeHtml(it.nombre || '');
-                                const lote = this.escapeHtml(it.lm_numero_lote || '');
-                                const presentacion = this.escapeHtml(it.presentacion || 'sin presentacion');
-                                const precioUnitario = this.formatMoney(it.precio_venta || 0);
-                                const unidadesPorCaja = (it.lm_cant_blister || 1) * (it.lm_cant_unidad || 1);
-                                const precioCaja = this.formatMoney((it.precio_venta || 0) * unidadesPorCaja);
-
-                                const descripcion = `${nombre} - ${presentacion}`;
-
-                                return `
-                                    <tr>
-                                        <td>${lote}</td>
-                                        <td>${descripcion}</td>
-                                        <td>bs. ${precioUnitario}</td>
-                                        <td>bs. ${precioCaja}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            this.resultsContainer.innerHTML = tableHtml;
-            this.updatePosition();
-            this.resultsContainer.style.display = 'block';
-        }
-
-        // metodo para formatear dinero
-        formatMoney(n) {
-            return Number(n || 0).toFixed(2);
-        }
-
-        // metodo para actualizar posicion
-        updatePosition() {
-            if (!this.medSearchQuote) return;
-            const rect = this.medSearchQuote.getBoundingClientRect();
-            this.resultsContainer.style.top = (rect.bottom + window.scrollY) + 'px';
-            this.resultsContainer.style.left = (rect.left + window.scrollX) + 'px';
-            this.resultsContainer.style.width = rect.width + 'px';
-        }
-
-        // metodo para inicializar
-        init() {
-            if (this.medSearchQuote) {
-                this.medSearchQuote.addEventListener('keydown', e => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.performSearch();
-                    }
-                });
-
-                this.medSearchQuote.addEventListener('focus', () => {
-                    if (this.medSearchQuote.value.trim().length > 0 && this.resultsContainer && this.resultsContainer.innerHTML) {
-                        this.resultsContainer.style.display = 'block';
-                    }
-                });
-            }
-
-            if (this.btnBuscarQuote) {
-                this.btnBuscarQuote.addEventListener('click', () => this.performSearch());
-            }
-
-            if (this.filtroProveedorQuote) {
-                this.filtroProveedorQuote.addEventListener('input', () => {
-                    if (this.medSearchQuote && this.medSearchQuote.value && !this.medSearchQuote.dataset.isDropdown) this.doSearch(this.medSearchQuote.value);
-                });
-            }
-
-            // cerrar resultados al hacer click fuera
-            document.addEventListener('click', e => {
-                if (this.resultsContainer &&
-                    !this.resultsContainer.contains(e.target) &&
-                    e.target !== this.medSearchQuote) {
-                    this.resultsContainer.style.display = 'none';
-                }
-            });
-        }
-
-        // metodo para realizar busqueda
-        performSearch() {
-            const term = this.medSearchQuote.value.trim();
-            if (term.length === 0) {
-                if (this.resultsContainer) {
-                    this.resultsContainer.innerHTML = '';
-                    this.resultsContainer.style.display = 'none';
-                }
-                return;
-            }
-            this.doSearch(term);
-        }
-}
-
-    class ProviderSearchManager {
+class ProviderSearchManager {
         constructor(inputId, resultsId, tabla = 'proveedores', campos = ['pr_id', 'pr_razon_social', 'pr_nit']) {
             this.input = document.getElementById(inputId);
             this.resultsContainer = document.getElementById(resultsId);
@@ -2503,12 +2303,10 @@ const descripcion = `${nombre} - ${presentacion}`;
     // instanciar las clases cuando el dom este listo
     document.addEventListener('DOMContentLoaded', () => {
         new CajaManager();
-        new CotizarManager();
         
         // Solo inicializar ProviderSearchManager si los elementos existen (evita error en páginas sin esos elementos)
         const providerSearchConfigs = [
             ['filtro_proveedor', 'provider_results_venta', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']],
-            ['filtro_proveedor_quote', 'provider_results_quote', 'proveedores', ['pr_id', 'pr_razon_social', 'pr_nit']],
             ['filtro_presentacion', 'presentation_results', 'forma_farmaceutica', ['ff_id', 'ff_nombre']],
             ['filtro_funcion', 'function_results', 'uso_farmacologico', ['uf_id', 'uf_nombre']],
             ['filtro_via', 'via_results', 'via_de_administracion', ['vd_id', 'vd_nombre']]
@@ -4385,22 +4183,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var medSearchVenta = document.querySelector('.med_search');
         if (medSearchVenta) medSearchVenta.value = '';
 
-        // Limpiar inputs de cotización
-        var medSearchQuote = document.querySelector('.med_search_quote');
-        if (medSearchQuote) medSearchQuote.value = '';
-        var proveedorQuote = document.getElementById('filtro_proveedor_quote');
-        if (proveedorQuote) proveedorQuote.value = '';
-
         // Limpiar resultados desplegables
         var resultsVenta = document.getElementById('provider_results_venta');
-        var resultsQuote = document.getElementById('provider_results_quote');
         var medResults = document.getElementById('med_search_results');
-        var quoteResults = document.getElementById('quote_search_results');
         
         if (resultsVenta) { resultsVenta.innerHTML = ''; resultsVenta.style.display = 'none'; }
-        if (resultsQuote) { resultsQuote.innerHTML = ''; resultsQuote.style.display = 'none'; }
         if (medResults) { medResults.innerHTML = ''; medResults.style.display = 'none'; }
-        if (quoteResults) { quoteResults.innerHTML = ''; quoteResults.style.display = 'none'; }
     });
 });
 </script>
