@@ -237,7 +237,6 @@ class clienteModel extends mainModel
                     c.cl_carnet AS 'CI',
                     c.cl_telefono AS 'Teléfono',
                     c.cl_correo AS 'Correo',
-                    c.cl_direccion AS 'Dirección',
                     DATE_FORMAT(c.cl_creado_en, '%d/%m/%Y') AS 'Fecha Registro',
                     COUNT(v.ve_id) AS 'Total Compras',
                     FORMAT(IFNULL(SUM(v.ve_total), 0), 2) AS 'Monto Total',
@@ -270,7 +269,6 @@ class clienteModel extends mainModel
             cl_apellido_materno, 
             cl_telefono, 
             cl_correo, 
-            cl_direccion, 
             cl_carnet
         ) VALUES (
             :nombres, 
@@ -278,18 +276,16 @@ class clienteModel extends mainModel
             :materno, 
             :telefono, 
             :correo, 
-            :direccion, 
             :carnet
         )";
 
         $stmt = self::conectar()->prepare($sql);
-        $stmt->bindParam(':nombres', $datos['cl_nombres']);
-        $stmt->bindParam(':paterno', $datos['cl_apellido_paterno']);
-        $stmt->bindParam(':materno', $datos['cl_apellido_materno']);
-        $stmt->bindParam(':telefono', $datos['cl_telefono']);
-        $stmt->bindParam(':correo', $datos['cl_correo']);
-        $stmt->bindParam(':direccion', $datos['cl_direccion']);
-        $stmt->bindParam(':carnet', $datos['cl_carnet']);
+        $stmt->bindParam(":nombres", $datos['cl_nombres']);
+        $stmt->bindParam(":paterno", $datos['cl_apellido_paterno']);
+        $stmt->bindParam(":materno", $datos['cl_apellido_materno']);
+        $stmt->bindParam(":telefono", $datos['cl_telefono']);
+        $stmt->bindParam(":correo", $datos['cl_correo']);
+        $stmt->bindParam(":carnet", $datos['cl_carnet']);
         $stmt->execute();
 
         return $stmt;
@@ -303,19 +299,17 @@ class clienteModel extends mainModel
             cl_apellido_materno = :materno,
             cl_telefono = :telefono,
             cl_correo = :correo,
-            cl_direccion = :direccion,
             cl_carnet = :carnet
         WHERE cl_id = :cl_id";
 
         $stmt = self::conectar()->prepare($sql);
-        $stmt->bindParam(':cl_id', $datos['cl_id']);
-        $stmt->bindParam(':nombres', $datos['cl_nombres']);
-        $stmt->bindParam(':paterno', $datos['cl_apellido_paterno']);
-        $stmt->bindParam(':materno', $datos['cl_apellido_materno']);
-        $stmt->bindParam(':telefono', $datos['cl_telefono']);
-        $stmt->bindParam(':correo', $datos['cl_correo']);
-        $stmt->bindParam(':direccion', $datos['cl_direccion']);
-        $stmt->bindParam(':carnet', $datos['cl_carnet']);
+        $stmt->bindParam(":cl_id", $datos['cl_id']);
+        $stmt->bindParam(":nombres", $datos['cl_nombres']);
+        $stmt->bindParam(":paterno", $datos['cl_apellido_paterno']);
+        $stmt->bindParam(":materno", $datos['cl_apellido_materno']);
+        $stmt->bindParam(":telefono", $datos['cl_telefono']);
+        $stmt->bindParam(":correo", $datos['cl_correo']);
+        $stmt->bindParam(":carnet", $datos['cl_carnet']);
         $stmt->execute();
 
         return $stmt;

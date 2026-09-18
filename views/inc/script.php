@@ -1341,7 +1341,7 @@
             this.tablaBody.innerHTML = '';
 
             if (this.cart.length === 0) {
-                this.tablaBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#666;padding:12px">no hay medicamentos en la lista</td></tr>';
+                this.tablaBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;padding:12px">no hay medicamentos en la lista</td></tr>';
             } else {
                 this.cart.forEach((it, i) => {
                     const tr = document.createElement('tr');
@@ -1373,8 +1373,7 @@
                         '<td><input type="text" class="qty-input-cajas inp" data-index="' + i + '" value="' + cajas + '" style="width: 60px; text-align: center; color:#00695C;font-weight:700;"></td>' +
                         '<td><span style="color:#00BFA5;font-weight:700;">' + this.formatMoney(it.precio * (it.unidades_por_caja || 1)) + '</span></td>' +
                         '<td><span style="color:#00BFA5;font-weight:700;">' + this.formatMoney(it.precio) + '</span></td>' +
-                        '<td><input type="number" class="descuento-input inp" data-index="' + i + '" value="' + (it.descuento || 0) + '" min="0" max="100" step="0.01" style="width: 80px; text-align: center; color:#7B1FA2;font-weight:700;"></td>' +
-                        '<td class="' + ((it.descuento || 0) > 0 ? 'discounted-subtotal' : '') + '"><span style="color:#2E7D32;font-weight:700;">' + this.formatMoney((it.precio * it.cantidad) - (it.descuento || 0)) + '</span></td>';
+                        '<td><span style="color:#2E7D32;font-weight:700;">' + this.formatMoney(it.precio * it.cantidad) + '</span></td>';
 
                     this.tablaBody.appendChild(tr);
                 });
@@ -1382,17 +1381,16 @@
 
             this.itemsHidden.value = JSON.stringify(this.cart.map(i => {
                 const upc = i.unidades_por_caja || 1;
-                return {
-                    med_id: i.med_id,
-                    lote_id: i.lote_id || null,
-                    cantidad: i.cantidad,
-                    unidades: i.cantidad % upc,
-                    cajas: Math.floor(i.cantidad / upc),
-                    unidades_por_caja: upc,
-                    precio: Number(i.precio),
-                    descuento: Number(i.descuento || 0),
-                    subtotal: Number(((i.precio * i.cantidad) - (i.descuento || 0)).toFixed(2))
-                };
+                    return {
+                        med_id: i.med_id,
+                        lote_id: i.lote_id || null,
+                        cantidad: i.cantidad,
+                        unidades: i.cantidad % upc,
+                        cajas: Math.floor(i.cantidad / upc),
+                        unidades_por_caja: upc,
+                        precio: Number(i.precio),
+                        subtotal: Number((i.precio * i.cantidad).toFixed(2))
+                    };
             }));
 
             this.updateTotals();
@@ -1441,20 +1439,6 @@
                 };
                 i.onchange = function() {
                     this.manager.setQtyCajasByIndex(parseInt(this.dataset.index), parseInt(this.value) || 0);
-                };
-                i.manager = this;
-            });
-
-            // eventos para descuento
-            this.$all('.descuento-input').forEach(i => {
-                i.oninput = function() {
-                    this.manager.clampDescuento(this);
-                };
-                i.onblur = function() {
-                    this.manager.validarDescuento(this);
-                    const index = parseInt(this.dataset.index);
-                    const descuento = parseFloat(this.value) || 0;
-                    this.manager.setDescuentoByIndex(index, descuento);
                 };
                 i.manager = this;
             });
@@ -1684,71 +1668,9 @@
             this.renderCart();
         }
 
-        // metodo para clamp descuento (similar a clampMargen)
-        clampDescuento(input) {
-            let value = input.value;
-            
-            // Permitir vacío para que el usuario pueda borrar todo
-            if (value === "") return;
-
-            // Eliminar cualquier caracter que no sea número o punto
-            value = value.replace(/[^0-9.]/g, "");
-
-            // Asegurar solo un punto decimal
-            const parts = value.split(".");
-            if (parts.length > 2) {
-                value = parts[0] + "." + parts.slice(1).join("").replace(/\./g, "");
-            }
-
-            // Limitar a 2 decimales
-            if (parts.length > 1 && parts[1].length > 2) {
-                value = parts[0] + "." + parts[1].substring(0, 2);
-            }
-
-            // Evitar que el 0 inicial interfiera con otros números, a menos que sea 0.
-            if (value.length > 1 && value.startsWith("0") && value[1] !== ".") {
-                value = value.substring(1);
-            }
-
-            // No superar el límite de 100
-            if (parseFloat(value) > 100) {
-                value = "100";
-            }
-
-            if (input.value !== value) {
-                input.value = value;
-            }
-        }
-
-        // metodo para validar descuento
-        validarDescuento(input) {
-            let valor = parseFloat(input.value);
-            if (isNaN(valor) || valor < 0) {
-                input.value = "0.00";
-            } else {
-                if (valor > 100) valor = 100;
-                input.value = valor.toFixed(2);
-            }
-        }
-
-        // metodo para establecer descuento por indice
-        setDescuentoByIndex(idx, val) {
-            if (idx < 0 || idx >= this.cart.length) return;
-
-            const item = this.cart[idx];
-            let descuento = parseFloat(val);
-            if (isNaN(descuento) || descuento < 0) {
-                descuento = 0;
-            } else if (descuento > 100) {
-                descuento = 100;
-            }
-            item.descuento = descuento;
-            this.renderCart();
-        }
-
         // metodo para actualizar totales
         updateTotals() {
-            const subtotal = this.cart.reduce((s, i) => s + ((i.precio * i.cantidad) - (i.descuento || 0)), 0);
+            const subtotal = this.cart.reduce((s, i) => s + (i.precio * i.cantidad), 0);
             const total = subtotal;
             this.subtotalHidden.value = subtotal.toFixed(2);
             this.totalHidden.value = total.toFixed(2);
@@ -1805,7 +1727,6 @@
                     proveedor: m.proveedor,
                     precio: parseFloat(m.precio) || 0,
                     cantidad: 0,
-                    descuento: 0,
                     stock: m.stock != null ? Number(m.stock) : null,
                     unidades_por_caja: m.unidades_por_caja || 1
                 });
@@ -2602,13 +2523,13 @@ class ProviderSearchManager {
         confirmarCierre() {
             // primera confirmacion
             Swal.fire({
-                title: 'cerrar caja?',
+                title: '¿Cerrar caja?',
                 html: `
                 <div style="text-align: left; padding: 10px;">
-                    <p style="margin-bottom: 15px;"><ion-icon name="warning-outline" style="color: #ff9800; font-size: 24px; vertical-align: middle;"></ion-icon> <strong>esta accion cerrara tu caja actual</strong></p>
+                    <p style="margin-bottom: 15px;"><ion-icon name="warning-outline" style="color: #ff9800; font-size: 24px; vertical-align: middle;"></ion-icon> <strong>Esta accion cerrara tu caja actual</strong></p>
                     <ul style="list-style: none; padding: 0;">
-                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> se realizara un balance automatico</li>
-                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> el detalle sera visible para administradores</li>
+                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> Se realizara un balance automatico</li>
+                        <li style="margin: 8px 0;"><ion-icon name="checkmark-circle" style="color: #4caf50;"></ion-icon> El detalle sera visible para administradores</li>
                     </ul>
                 </div>
             `,
@@ -2629,13 +2550,13 @@ class ProviderSearchManager {
         // metodo para segunda confirmacion
         confirmarCierreSegunda() {
             Swal.fire({
-                title: 'confirmar cierre de caja',
+                title: 'Confirmar cierre de caja',
                 html: `
                 <p style="font-size: 16px; margin: 20px 0;">
-                    <strong>estas completamente seguro?</strong>
+                    <strong>Estas completamente seguro?</strong>
                 </p>
                 <p style="color: #666; margin-bottom: 15px;">
-                    esta accion es irreversible y cerrara tu sesion de ventas.
+                    Esta accion es irreversible y cerrara tu sesion de ventas.
                 </p>
             `,
                 icon: 'question',
@@ -2657,8 +2578,8 @@ class ProviderSearchManager {
         async cerrarCajaAjax() {
             // mostrar loading
             Swal.fire({
-                title: 'cerrando caja...',
-                html: 'por favor espera',
+                title: 'Cerrando caja',
+                html: 'por favor espera....',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 didOpen: () => {
@@ -2688,8 +2609,8 @@ class ProviderSearchManager {
                     await Swal.fire({
                         icon: data.Tipo || 'success',
                         title: data.Titulo || 'exito',
-                        html: data.texto || 'operacion exitosa',
-                        confirmButtonText: 'entendido'
+                        html: data.texto || 'Operacion exitosa',
+                        confirmButtonText: 'Entendido'
                     });
 
                     // recargar pagina
@@ -2697,18 +2618,18 @@ class ProviderSearchManager {
                 } else {
                     Swal.fire({
                         icon: data.Tipo || 'info',
-                        title: data.Titulo || 'atencion',
-                        html: data.texto || 'operacion completada',
-                        confirmButtonText: 'entendido'
+                        title: data.Titulo || 'Atencion',
+                        html: data.texto || 'Operacion completada',
+                        confirmButtonText: 'Entendido'
                     });
                 }
 
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'error de conexion',
-                    text: 'no se pudo cerrar la caja: ' + error.message,
-                    confirmButtonText: 'entendido'
+                    title: 'Error de conexion',
+                    text: 'No se pudo cerrar la caja: ' + error.message,
+                    confirmButtonText: 'Entendido'
                 });
             }
         }
@@ -2881,7 +2802,7 @@ class ProviderSearchManager {
                             <td>${utils.formatearNumero(lote.unidades)}</td>
                             <td>${utils.formatearMoneda(lote.precio)}</td>
                             <td>${utils.formatearFecha(lote.vencimiento)}</td>
-                            <td>${lote.estado}</td>
+                            <td>${lote.sucursal}</td>
                         </tr>
                     `).join('');
                     } else {

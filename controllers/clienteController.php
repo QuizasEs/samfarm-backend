@@ -597,7 +597,6 @@ class clienteController extends clienteModel
         $materno = mainModel::limpiar_cadena($_POST['Materno_cl'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_cl'] ?? '');
         $correo = mainModel::limpiar_cadena($_POST['Correo_cl'] ?? '');
-        $direccion = mainModel::limpiar_cadena($_POST['Direccion_cl'] ?? '');
         $carnet = mainModel::limpiar_cadena($_POST['Carnet_cl'] ?? '');
 
         /* verificamos que os campos obligaptorios no vengan vacios */
@@ -688,7 +687,6 @@ class clienteController extends clienteModel
             'cl_apellido_materno' => $materno,
             'cl_telefono' => $telefono,
             'cl_correo' => $correo,
-            'cl_direccion' => $direccion,
             'cl_carnet' => $carnet
         ];
 
@@ -722,7 +720,6 @@ class clienteController extends clienteModel
         $materno = mainModel::limpiar_cadena($_POST['Materno_cl'] ?? '');
         $telefono = mainModel::limpiar_cadena($_POST['Telefono_cl'] ?? '');
         $correo = mainModel::limpiar_cadena($_POST['Correo_cl'] ?? '');
-        $direccion = mainModel::limpiar_cadena($_POST['Direccion_cl'] ?? '');
         $carnet = mainModel::limpiar_cadena($_POST['Carnet_cl'] ?? '');
 
         /* verificamos que los campos obligatorios no esten vacios */
@@ -828,7 +825,6 @@ class clienteController extends clienteModel
             'cl_apellido_materno' => $materno,
             'cl_telefono' => $telefono,
             'cl_correo' => $correo,
-            'cl_direccion' => $direccion,
             'cl_carnet' => $carnet
         ];
 
@@ -1166,7 +1162,6 @@ class clienteController extends clienteModel
                     'CI/Carnet' => $detalle['cl_carnet'] ?: 'Sin CI',
                     'Teléfono' => $detalle['cl_telefono'] ?: '-',
                     'Correo' => $detalle['cl_correo'] ?: '-',
-                    'Dirección' => $detalle['cl_direccion'] ?: '-',
                     'Fecha Registro' => date('d/m/Y', strtotime($detalle['cl_creado_en'])),
                     'Estado' => $detalle['cl_estado'] == 1 ? 'ACTIVO' : 'INACTIVO'
                 ],

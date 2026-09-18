@@ -332,6 +332,14 @@ class userModel extends mainModel
         return $stmt;
     }
 
+    protected static function eliminar_usuario_model($us_id)
+    {
+        $sql = "UPDATE usuarios SET us_estado = 0 WHERE us_id = :us_id";
+        $stmt = self::conectar()->prepare($sql);
+        $stmt->bindParam(':us_id', $us_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
+    }
     /* ------------------------------ usuario usuario----------------------------------- */
     /* ------------------------------ usuario usuario----------------------------------- */
     /* ------------------------------ usuario usuario----------------------------------- */

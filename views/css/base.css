@@ -2098,12 +2098,6 @@ img, table, pre, .tw { max-width: 100%; }
     min-width: 180px;
 }
 
-/* Estilos para subtotal con descuento en carrito */
-.discounted-subtotal {
-    color: var(--btn-success);
-    font-weight: bold;
-}
-
 /* Solución para dropdowns en caja - permitir overflow visible en todos los contenedores */
 #form-venta-caja .card,
 #form-venta-caja .cb,

@@ -85,7 +85,7 @@ class loteController extends loteModel
 
         //  Select 1: Estado del lote
         if ($f1 !== '') {
-            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado', 'deshabilitado'];
             if (in_array($f1, $estados_validos)) {
                 $whereParts[] = "lm.lm_estado = '$f1'";
             }
@@ -202,7 +202,7 @@ class loteController extends loteModel
                             <th>STOCK</th>
                             <th>FECHAS</th>
                             <th>AUDITORIA</th>
-                            <th>ESTADO</th>
+                            <th>ACCIONES</th>
 
                         </tr>
                     </thead>
@@ -274,15 +274,9 @@ class loteController extends loteModel
                             <div class="td-sub">Min. C: ' . ($rows['lm_precio_min_c'] ? 'Bs. ' . number_format($rows['lm_precio_min_c'], 2) : 'N/A') . '</div>
                         </td>
                         <td>
-                            <div class="td-main">' .
-                    ($rows['lm_estado'] == "en_espera"
-                        ? '<a class="btn btn-souc" href="#" onclick="loteManager.openActivationModal(\'' . mainModel::encryption($rows['lm_id']) . '\', \'' . htmlspecialchars(addslashes($rows['med_nombre_quimico'])) . '\'); return false;" title="Activar lote">Activar</a>'
-                        : $estado_html)
-                    . '</div>
-                        </td>
-                        <td class="buttons">
-                            ' . ''
-                            . '
+                            <button type="button" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deshabilitarLote(\'' . mainModel::encryption($rows['lm_id']) . '\')">
+                                <ion-icon name="trash-outline"></ion-icon> Eliminar
+                            </button>
                         </td>
                     </tr>
                 ';
@@ -801,6 +795,81 @@ class loteController extends loteModel
         exit();
     }
 
+    public function deshabilitar_lote_controller()
+    {
+        $id = mainModel::decryption($_POST['lote_id'] ?? '');
+        $id = mainModel::limpiar_cadena($id);
+
+        if (empty($id) || !is_numeric($id)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'ID de lote no válido',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (!in_array($rol, [1, 2])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No cuenta con los privilegios necesarios para realizar esta accion',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check = mainModel::ejecutar_consulta_simple("SELECT lm_id, lm_estado, lm_numero_lote FROM lote_medicamento WHERE lm_id = '$id'");
+        if ($check->rowCount() <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'El lote no existe en el sistema',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $lote = $check->fetch(PDO::FETCH_ASSOC);
+
+        if ($lote['lm_estado'] === 'deshabilitado') {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'El lote ya se encuentra eliminado',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $actualizar = mainModel::ejecutar_consulta_simple("UPDATE lote_medicamento SET lm_estado = 'deshabilitado', lm_actualizado_en = NOW() WHERE lm_id = '$id'");
+
+        if ($actualizar->rowCount() > 0) {
+
+            $alerta = [
+                'Alerta' => 'recargar',
+                'Titulo' => 'Lote eliminado',
+                'texto' => 'El lote se eliminó correctamente',
+                'Tipo' => 'success'
+            ];
+        } else {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No se pudo eliminar el lote',
+                'Tipo' => 'error'
+            ];
+        }
+        echo json_encode($alerta);
+        exit();
+    }
+
     public function exportar_pdf_lotes_controller()
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -830,7 +899,7 @@ class loteController extends loteModel
         }
 
         if (isset($_GET['select1']) && $_GET['select1'] !== '') {
-            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado', 'deshabilitado'];
             if (in_array($_GET['select1'], $estados_validos)) {
                 $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
             }
@@ -1040,7 +1109,7 @@ class loteController extends loteModel
         }
 
         if (isset($_GET['select1']) && $_GET['select1'] !== '') {
-            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado'];
+            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado', 'deshabilitado'];
             if (in_array($_GET['select1'], $estados_validos)) {
                 $filtros['estado'] = mainModel::limpiar_cadena($_GET['select1']);
             }

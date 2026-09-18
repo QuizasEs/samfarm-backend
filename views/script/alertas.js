@@ -251,7 +251,7 @@ function alertas_ajax(alerta) {
             text: alerta.texto,
             icon: alerta.Tipo,
             showCancelButton: true,
-            confirmButtonText: ' Ver Nota de Venta',
+            confirmButtonText: ' Ver factura',
             cancelButtonText: 'Cerrar',
             allowOutsideClick: false
         }).then((result) => {

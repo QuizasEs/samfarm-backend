@@ -117,13 +117,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="hidden" name="cl_id_editar" id="cl_id_editar">
 
                     <div class="fg">
-                        <label class="fl req">Nombres</label>
+                        <label class="fl req required" >Nombres</label>
                         <input class="inp" type="text" name="Nombres_cl" id="Nombres_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                     </div>
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">Apellido Paterno</label>
+                            <label class="fl req required">Apellido Paterno</label>
                             <input class="inp" type="text" name="Paterno_cl" id="Paterno_cl_edit" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                         </div>
                         <div class="fg">
@@ -134,18 +134,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">Carnet / CI</label>
+                            <label class="fl req required">Carnet / CI</label>
                             <input class="inp" type="number" name="Carnet_cl" id="Carnet_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
                         <div class="fg">
                             <label class="fl">Teléfono</label>
                             <input class="inp" type="number" name="Telefono_cl" id="Telefono_cl_edit" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Dirección</label>
-                        <input class="inp" type="text" name="Direccion_cl" id="Direccion_cl_edit">
                     </div>
 
                     <div class="fg" style="margin-bottom:0">
@@ -179,13 +174,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <input type="hidden" name="clientesAjax" value="nuevo">
 
                     <div class="fg">
-                        <label class="fl req">Nombres</label>
+                        <label class="fl req required">Nombres</label>
                         <input class="inp" type="text" name="Nombres_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,100}" maxlength="100" required>
                     </div>
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">Apellido Paterno</label>
+                            <label class="fl req required">Apellido Paterno</label>
                             <input class="inp" type="text" name="Paterno_cl" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,100}" maxlength="100" required>
                         </div>
                         <div class="fg">
@@ -196,18 +191,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
 
                     <div class="fr">
                         <div class="fg">
-                            <label class="fl req">Carnet / CI</label>
+                            <label class="fl req required">Carnet / CI</label>
                             <input class="inp" type="number" name="Carnet_cl" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
                         <div class="fg">
                             <label class="fl">Teléfono</label>
                             <input class="inp" type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20">
                         </div>
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Dirección</label>
-                        <input class="inp" type="text" name="Direccion_cl">
                     </div>
 
                     <div class="fg" style="margin-bottom:0">
@@ -272,12 +262,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                     <div class="card">
                         <div class="cb">
-                            <div class="litem"><ion-icon name="location-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
-                                <div class="f1">
-                                    <div class="tc">Dirección</div>
-                                    <div class="th5" id="detalleDireccion">-</div>
-                                </div>
-                            </div>
                             <div class="litem"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
                                 <div class="f1">
                                     <div class="tc">Fecha de Registro</div>
@@ -450,7 +434,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('Materno_cl_edit').value = data.cl_apellido_materno || '';
                     document.getElementById('Telefono_cl_edit').value = data.cl_telefono || '';
                     document.getElementById('Correo_cl_edit').value = data.cl_correo || '';
-                    document.getElementById('Direccion_cl_edit').value = data.cl_direccion || '';
                     document.getElementById('Carnet_cl_edit').value = data.cl_carnet || '';
 
                     const modal = document.getElementById('modalEditarCliente');
@@ -554,7 +537,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     document.getElementById('detalleCarnet').textContent = data.cl_carnet || 'Sin CI';
                     document.getElementById('detalleTelefono').textContent = data.cl_telefono || '-';
                     document.getElementById('detalleCorreo').textContent = data.cl_correo || '-';
-                    document.getElementById('detalleDireccion').textContent = data.cl_direccion || '-';
                     document.getElementById('detalleFechaRegistro').textContent = formatearFecha(data.cl_creado_en);
                     document.getElementById('detalleAntiguedad').textContent = data.antiguedad_dias;
 

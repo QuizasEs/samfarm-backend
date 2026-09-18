@@ -172,7 +172,6 @@ class ventasHistorialModel extends mainModel
                 c.cl_apellido_materno,
                 c.cl_carnet,
                 c.cl_telefono,
-                c.cl_direccion,
                 
                 -- Usuario/Vendedor
                 u.us_nombres,

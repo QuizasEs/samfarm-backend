@@ -86,6 +86,40 @@ const UsuariosModals = (function() {
         }
     }
 
+    async function eliminarUsuario(us_id) {
+        const result = await Swal.fire({
+            title: '¿Eliminar usuario?',
+            text: 'Esto desactivará el usuario en el sistema.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    usuariosAjax: 'eliminar',
+                    us_id: us_id
+                })
+            });
+
+            const data = await response.json();
+            alertas_ajax(data);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     async function toggleEstado(us_id, estado) {
         const texto = estado == 1 ? 'desactivar' : 'activar';
 
@@ -405,6 +439,7 @@ const UsuariosModals = (function() {
         abrirModalEditar,
         cerrarModalEditar,
         toggleEstado,
+        eliminarUsuario,
         verDetalle,
         cerrarModalDetalle,
         editarDesdeDetalle

@@ -90,6 +90,10 @@ if (isset($_POST['loteAjax'])) {
         echo $ins_lote->actualizar_lote_controller();
     }
 
+    if ($valor == "deshabilitar") {
+        echo $ins_lote->deshabilitar_lote_controller();
+    }
+
     if ($valor == "obtener_ultimo_lote_medicamento") {
         $med_id = isset($_POST['med_id']) ? (int)$_POST['med_id'] : 0;
         echo $ins_lote->obtener_ultimo_lote_medicamento_controller($med_id);

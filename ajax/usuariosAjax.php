@@ -93,6 +93,11 @@ if (isset($_POST['usuariosAjax'])) {
         exit();
     }
 
+    if ($valor === "eliminar") {
+        echo $ins_usuario->eliminar_usuario_controller();
+        exit();
+    }
+
     if ($valor === "datos_usuario") {
         echo $ins_usuario->datos_usuario_controller();
         exit();

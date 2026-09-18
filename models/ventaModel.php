@@ -57,8 +57,18 @@ class ventaModel extends mainModel
             return [];
         }
 
-        $termino = "%$termino%";
+        $termino = mainModel::limpiar_cadena($termino);
         $conexion = mainModel::conectar();
+
+        $palabras = array_values(array_filter(array_map('trim', explode(' ', $termino)), 'strlen'));
+        $condiciones = [];
+        $params = [":sucursal_id" => $sucursal_id];
+
+        foreach ($palabras as $i => $palabra) {
+            $param = ":termino{$i}";
+            $condiciones[] = "(m.med_nombre_quimico LIKE $param OR m.med_codigo_barras LIKE $param OR m.med_version_comercial LIKE $param OR lm.lm_numero_lote LIKE $param)";
+            $params[$param] = "%{$palabra}%";
+        }
 
         $sql = "
         SELECT 
@@ -89,20 +99,13 @@ class ventaModel extends mainModel
         LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
         LEFT JOIN uso_farmacologico uf ON uf.uf_id = m.uf_id
         LEFT JOIN via_de_administracion vd ON vd.vd_id = m.vd_id
-        WHERE (
-            m.med_nombre_quimico LIKE :termino
-            OR m.med_codigo_barras LIKE :termino
-            OR m.med_version_comercial LIKE :termino
-            OR lm.lm_numero_lote LIKE :termino
-        )
-          AND lm.lm_precio_venta <= 900
-        AND lm.lm_estado = 'activo'
+        WHERE lm.lm_precio_venta <= 900
+          AND lm.lm_estado = 'activo'
         ";
 
-        $params = [
-            ":termino" => $termino,
-            ":sucursal_id" => $sucursal_id
-        ];
+        if (!empty($condiciones)) {
+            $sql .= " AND (" . implode(' AND ', $condiciones) . ")";
+        }
 
         if (!empty($filtros['proveedor'])) {
             $sql .= " AND lm.pr_id = :pr_id";
@@ -145,8 +148,18 @@ class ventaModel extends mainModel
             return [];
         }
 
-        $termino = "%$termino%";
+        $termino = mainModel::limpiar_cadena($termino);
         $conexion = mainModel::conectar();
+
+        $palabras = array_values(array_filter(array_map('trim', explode(' ', $termino)), 'strlen'));
+        $condiciones = [];
+        $params = [":sucursal_id" => $sucursal_id];
+
+        foreach ($palabras as $i => $palabra) {
+            $param = ":termino{$i}";
+            $condiciones[] = "(m.med_nombre_quimico LIKE $param OR m.med_codigo_barras LIKE $param OR m.med_version_comercial LIKE $param)";
+            $params[$param] = "%{$palabra}%";
+        }
 
         $sql = "
         SELECT 
@@ -187,19 +200,13 @@ class ventaModel extends mainModel
         INNER JOIN lote_medicamento lm ON lm.med_id = m.med_id
         LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
         LEFT JOIN proveedores p ON p.pr_id = lm.pr_id
-        WHERE (
-            m.med_nombre_quimico LIKE :termino
-            OR m.med_codigo_barras LIKE :termino
-            OR m.med_version_comercial LIKE :termino
-        )
-          AND lm.lm_precio_venta <= 900
+        WHERE lm.lm_precio_venta <= 900
           AND lm.lm_estado = 'activo'
         ";
 
-        $params = [
-            ":termino" => $termino,
-            ":sucursal_id" => $sucursal_id
-        ];
+        if (!empty($condiciones)) {
+            $sql .= " AND (" . implode(' AND ', $condiciones) . ")";
+        }
 
         if (!empty($filtros['proveedor'])) {
             $sql .= " AND lm.pr_id = :pr_id";

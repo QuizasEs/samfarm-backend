@@ -254,6 +254,39 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
     </div>
 
+    <script>
+        function deshabilitarLote(lote_id) {
+            Swal.fire({
+                title: 'Eliminar lote',
+                text: '¿Estás seguro de eliminar este lote?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('loteAjax', 'deshabilitar');
+                    formData.append('lote_id', lote_id);
+
+                    fetch('<?php echo SERVER_URL; ?>ajax/loteAjax.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        alertas_ajax(data);
+                        document.querySelector('.tabla-dinamica .btn-search')?.click();
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Error al eliminar el lote', 'error');
+                    });
+                }
+            });
+        }
+    </script>
     <script src="<?php echo SERVER_URL; ?>views/script/loteLista-view.js"></script>
 
 <?php } else {

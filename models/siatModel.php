@@ -8,15 +8,28 @@ class siatModel extends mainModel
     private static function clienteSOAP($servicio)
     {
         $wsdl = SIAT_URLS[SIAT_MODO][$servicio];
+
+        // Autenticación SIAT: el SIN exige el token delegado como HTTP header
+        // "apikey: TokenApi <token>" (el WSDL no declara SOAP header). Se envía vía stream_context.
+        $token = defined('SIAT_TOKEN') ? SIAT_TOKEN : '';
         $context = stream_context_create([
-            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            'http' => ['header' => "apikey: TokenApi " . $token . "\r\n"]
         ]);
-        return new SoapClient($wsdl, [
+        $client = new SoapClient($wsdl, [
             'stream_context' => $context,
             'trace' => 1,
             'exceptions' => true,
             'connection_timeout' => 30
         ]);
+
+        return $client;
+    }
+
+    public static function listarSucursales()
+    {
+        $db = mainModel::conectar();
+        return $db->query("SELECT su_id FROM siat_configuracion ORDER BY su_id")->fetchAll(PDO::FETCH_COLUMN);
     }
 
     private static function obtenerCodigosSucursal($suId)
@@ -34,11 +47,11 @@ class siatModel extends mainModel
         if ($row) {
             $codigoSucursal = (int) ($row->sc_sucursal_codigo ?? 0);
             $codigoPuntoVenta = (int) ($row->sc_punto_venta_codigo ?? 0);
-            
+
             if ($codigoSucursal === 0) {
                 error_log("SIAT WARNING: sc_sucursal_codigo=0 para su_id={$suId}. Actualizar con código real del Portal SIAT.");
             }
-            
+
             return [
                 'sucursal' => $codigoSucursal,
                 'punto_venta' => $codigoPuntoVenta,
@@ -57,7 +70,7 @@ class siatModel extends mainModel
             $stmt = $db->query("SELECT ce_nit FROM configuracion_empresa WHERE ce_id = 1 LIMIT 1");
             $nit = $stmt->fetchColumn();
             if (!$nit) {
-                $nit = SIAT_NIT;
+                throw new Exception("SIAT: configuracion_empresa.ce_nit esta vacio");
             }
         }
         return $nit;
@@ -76,7 +89,7 @@ class siatModel extends mainModel
         while ($intentos < $maxIntentos) {
             $intentos++;
             try {
-                $client = self::clienteSOAP('operacion');
+                $client = self::clienteSOAP('codigos');
                 $resp = $client->cuis([
                     'SolicitudCuis' => [
                         'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -89,6 +102,9 @@ class siatModel extends mainModel
                 ]);
 
                 $r = $resp->RespuestaCuis;
+
+                
+
 
                 if (!isset($r->codigo) || trim($r->codigo) === '') {
                     $ultimoError = 'Respuesta CUIS sin codigo';
@@ -185,7 +201,7 @@ class siatModel extends mainModel
         while ($intentos < $maxIntentos) {
             $intentos++;
             try {
-                $client = self::clienteSOAP('operacion');
+                $client = self::clienteSOAP('codigos');
                 $resp = $client->cufd([
                     'SolicitudCufd' => [
                         'codigoAmbiente'   => SIAT_AMBIENTE,
@@ -383,10 +399,10 @@ class siatModel extends mainModel
 
         $xml = new SimpleXMLElement(
             '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<facturaComputarizadaCompraVenta ' .
-            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
-            'xsi:noNamespaceSchemaLocation="facturaComputarizadaCompraVenta.xsd">' .
-            '</facturaComputarizadaCompraVenta>'
+                '<facturaComputarizadaCompraVenta ' .
+                'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' .
+                'xsi:noNamespaceSchemaLocation="facturaComputarizadaCompraVenta.xsd">' .
+                '</facturaComputarizadaCompraVenta>'
         );
 
         $cab = $xml->addChild('cabecera');
@@ -463,7 +479,7 @@ class siatModel extends mainModel
         $xmlB64 = base64_encode($xmlGzip);
         $hash = hash('sha256', $xmlGzip);
 
-        $client = self::clienteSOAP('facturacion');
+        $client = self::clienteSOAP('compra_venta');
         $resp = $client->recepcionFactura([
             'SolicitudServicioRecepcionFactura' => [
                 'codigoAmbiente'       => SIAT_AMBIENTE,
@@ -479,7 +495,7 @@ class siatModel extends mainModel
                 'fechaEnvio'           => date('Y-m-d\TH:i:s.000-04:00'),
                 'tipoFacturaDocumento' => 1,
                 'codigoEmision'        => 1,
-                'codigoDocumentoSector'=> 1
+                'codigoDocumentoSector' => 1
             ]
         ]);
 
@@ -502,7 +518,7 @@ class siatModel extends mainModel
 
         if ($estado == 908) {
             $db->prepare("UPDATE factura SET fa_estado = 1 WHERE fa_id = :fa_id")
-               ->execute([':fa_id' => $faId]);
+                ->execute([':fa_id' => $faId]);
         }
 
         return $r;
@@ -526,7 +542,8 @@ class siatModel extends mainModel
     public static function enviarPaqueteContingencia($suId)
     {
         $db = mainModel::conectar();
-        $stmt = $db->query("
+        $stmt = $db->query(
+            "
             SELECT fe_id, fe_cuf, fe_payload
             FROM facturacion_electronica
             WHERE fe_tipo_emision = 2
@@ -556,7 +573,7 @@ class siatModel extends mainModel
         $scStmt->execute([':su_id' => $suId]);
         $sc = $scStmt->fetch(PDO::FETCH_OBJ);
 
-        $client = self::clienteSOAP('facturacion');
+        $client = self::clienteSOAP('compra_venta');
         $resp = $client->recepcionPaqueteFactura([
             'SolicitudServicioRecepcionPaquete' => [
                 'codigoAmbiente'      => SIAT_AMBIENTE,
@@ -609,29 +626,38 @@ class siatModel extends mainModel
         }
 
         return [
-            'fechaHora'   => self::sincronizarFechaHora($cuis),
-            'actividades' => self::sincronizarActividades($cuis),
-            'productos'   => self::sincronizarProductos($cuis),
-            'leyendas'    => self::sincronizarLeyendas($cuis),
+            'fechaHora'   => self::sincronizarFechaHora($cuis, $suId),
+            'actividades' => self::sincronizarActividades($cuis, $suId),
+            'productos'   => self::sincronizarProductos($cuis, $suId),
+            'leyendas'    => self::sincronizarLeyendas($cuis, $suId),
+            'unidades'    => self::sincronizarUnidadesMedida($cuis, $suId),
         ];
     }
 
-    private static function sincronizarFechaHora($cuis)
+    private static function sincronizarFechaHora($cuis, $suId = null)
     {
         try {
-            $client = self::clienteSOAP('operacion');
+            $codigos = $suId !== null ? self::obtenerCodigosSucursal($suId) : ['sucursal' => 0, 'punto_venta' => 0];
+            $client = self::clienteSOAP('sincronizacion_datos');
             $resp = $client->sincronizarFechaHora([
                 'SolicitudSincronizacion' => [
                     'codigoAmbiente'  => SIAT_AMBIENTE,
                     'codigoSistema'   => SIAT_COD_SISTEMA,
-                    'nit'             => SIAT_NIT,
+                    'nit'             => self::obtenerNitEmpresa(),
                     'cuis'            => $cuis,
                     'codigoModalidad' => SIAT_MODALIDAD,
+                    'codigoSucursal'   => (int)$codigos['sucursal'],
+                    'codigoPuntoVenta' => (int)$codigos['punto_venta'],
                 ]
             ]);
             $fh = $resp->RespuestaFechaHora->fechaHora ?? null;
             if ($fh) {
                 error_log("SIAT fechaHora SIN: {$fh}");
+                if ($suId !== null) {
+                    $db = mainModel::conectar();
+                    $stmt = $db->prepare("UPDATE siat_configuracion SET sc_fecha_siat = ? WHERE su_id = ?");
+                    $stmt->execute([$fh, $suId]);
+                }
             }
             return $fh;
         } catch (Exception $e) {
@@ -640,70 +666,109 @@ class siatModel extends mainModel
         }
     }
 
-    private static function sincronizarActividades($cuis)
+    private static function sincronizarActividades($cuis, $suId = null)
     {
         try {
-            $client = self::clienteSOAP('codigos');
+            $codigos = $suId !== null ? self::obtenerCodigosSucursal($suId) : ['sucursal' => 0, 'punto_venta' => 0];
+            $client = self::clienteSOAP('sincronizacion_datos');
             $resp = $client->sincronizarListaActividadesDocumentoSector([
                 'SolicitudSincronizacion' => [
                     'codigoAmbiente'  => SIAT_AMBIENTE,
                     'codigoSistema'   => SIAT_COD_SISTEMA,
-                    'nit'             => SIAT_NIT,
+                    'nit'             => self::obtenerNitEmpresa(),
                     'cuis'            => $cuis,
                     'codigoModalidad' => SIAT_MODALIDAD,
+                    'codigoSucursal'   => (int)$codigos['sucursal'],
+                    'codigoPuntoVenta' => (int)$codigos['punto_venta'],
                 ]
             ]);
-            $lista = $resp->RespuestaListaActividades->listaActividades ?? [];
-            self::guardarActividades(self::aLista($lista));
-            return count(self::aLista($lista));
+            $root = $resp->RespuestaListaActividadesDocumentoSector ?? null;
+            $lista = $root->listaActividadesDocumentoSector ?? [];
+            $lista = self::aLista($lista);
+            self::guardarActividades($lista);
+            return count($lista);
         } catch (Exception $e) {
             error_log("SIAT sincronizarActividades: " . $e->getMessage());
             return false;
         }
     }
 
-    private static function sincronizarProductos($cuis)
+    private static function sincronizarProductos($cuis, $suId = null)
     {
         try {
-            $client = self::clienteSOAP('codigos');
+            $codigos = $suId !== null ? self::obtenerCodigosSucursal($suId) : ['sucursal' => 0, 'punto_venta' => 0];
+            $client = self::clienteSOAP('sincronizacion_datos');
             $resp = $client->sincronizarListaProductosServicios([
                 'SolicitudSincronizacion' => [
                     'codigoAmbiente'  => SIAT_AMBIENTE,
                     'codigoSistema'   => SIAT_COD_SISTEMA,
-                    'nit'             => SIAT_NIT,
+                    'nit'             => self::obtenerNitEmpresa(),
                     'cuis'            => $cuis,
                     'codigoModalidad' => SIAT_MODALIDAD,
                     'codigoActividad' => '477000',
+                    'codigoSucursal'   => (int)$codigos['sucursal'],
+                    'codigoPuntoVenta' => (int)$codigos['punto_venta'],
                 ]
             ]);
-            $lista = $resp->RespuestaListaProductos->listaProductos ?? [];
-            self::guardarProductos(self::aLista($lista));
-            return count(self::aLista($lista));
+            $root = $resp->RespuestaListaProductos ?? null;
+            $lista = $root->listaCodigos ?? [];
+            $lista = self::aLista($lista);
+            self::guardarProductos($lista);
+            return count($lista);
         } catch (Exception $e) {
             error_log("SIAT sincronizarProductos: " . $e->getMessage());
             return false;
         }
     }
 
-    private static function sincronizarLeyendas($cuis)
+    private static function sincronizarLeyendas($cuis, $suId = null)
     {
         try {
-            $client = self::clienteSOAP('codigos');
-            $resp = $client->sincronizarParametricaListaLeyendasFactura([
+            $codigos = $suId !== null ? self::obtenerCodigosSucursal($suId) : ['sucursal' => 0, 'punto_venta' => 0];
+            $client = self::clienteSOAP('sincronizacion_datos');
+            $resp = $client->sincronizarListaLeyendasFactura([
                 'SolicitudSincronizacion' => [
                     'codigoAmbiente'  => SIAT_AMBIENTE,
                     'codigoSistema'   => SIAT_COD_SISTEMA,
-                    'nit'             => SIAT_NIT,
+                    'nit'             => self::obtenerNitEmpresa(),
                     'cuis'            => $cuis,
                     'codigoModalidad' => SIAT_MODALIDAD,
+                    'codigoSucursal'   => (int)$codigos['sucursal'],
+                    'codigoPuntoVenta' => (int)$codigos['punto_venta'],
                 ]
             ]);
-            $lista = $resp->RespuestaListaLeyendas->listaLeyendas ?? [];
-            self::guardarLeyendas(self::aLista($lista));
-            return count(self::aLista($lista));
+            $root = $resp->RespuestaListaParametricasLeyendas ?? null;
+            $lista = $root->listaLeyendas ?? [];
+            $lista = self::aLista($lista);
+            self::guardarLeyendas($lista);
+            return count($lista);
         } catch (Exception $e) {
             error_log("SIAT sincronizarLeyendas: " . $e->getMessage());
             return false;
+        }
+    }
+
+    private static function guardarLeyendas($lista)
+    {
+        $db = mainModel::conectar();
+        $db->beginTransaction();
+        try {
+            $db->exec("DELETE FROM siat_leyendas");
+            $stmt = $db->prepare("
+                INSERT INTO siat_leyendas (codigo_actividad, leyenda, tipo_leyenda)
+                VALUES (:act, :ley, :tipo)
+            ");
+            foreach ($lista as $l) {
+                $stmt->execute([
+                    ':act' => $l->codigoActividad ?? null,
+                    ':ley' => $l->descripcionLeyenda ?? '',
+                    ':tipo' => 'LEYENDA',
+                ]);
+            }
+            $db->commit();
+        } catch (Exception $e) {
+            $db->rollBack();
+            error_log("SIAT guardarLeyendas: " . $e->getMessage());
         }
     }
 
@@ -712,16 +777,17 @@ class siatModel extends mainModel
         $db = mainModel::conectar();
         $db->beginTransaction();
         try {
+            // Limpia solo las actividades del codigo de actividad principal para evitar duplicados
             $db->exec("DELETE FROM siat_actividades");
             $stmt = $db->prepare("
-                INSERT INTO siat_actividades (codigo_caeb, descripcion, tipo_actividad)
-                VALUES (:caeb, :desc, :tipo)
+                INSERT INTO siat_actividades (codigo, descripcion, tipo_actividad)
+                VALUES (:cod, :desc, :tipo)
             ");
             foreach ($lista as $a) {
                 $stmt->execute([
-                    ':caeb' => $a->codigoCaeb ?? '',
-                    ':desc' => $a->descripcion ?? '',
-                    ':tipo' => $a->tipoActividad ?? 1,
+                    ':cod' => $a->codigoActividad ?? '',
+                    ':desc' => $a->tipoDocumentoSector ?? '',
+                    ':tipo' => $a->codigoDocumentoSector ?? 1,
                 ]);
             }
             $db->commit();
@@ -734,18 +800,31 @@ class siatModel extends mainModel
     private static function guardarProductos($lista)
     {
         $db = mainModel::conectar();
+        // Asegura la columna nandina si no existe (fuera de la transacción)
+        try {
+            $db->exec("ALTER TABLE siat_productos ADD COLUMN IF NOT EXISTS nandina TEXT NULL");
+        } catch (Exception $e) {
+            error_log("SIAT guardarProductos alter: " . $e->getMessage());
+        }
         $db->beginTransaction();
         try {
             $db->exec("DELETE FROM siat_productos");
             $stmt = $db->prepare("
-                INSERT INTO siat_productos (codigo_producto, descripcion, codigo_actividad)
-                VALUES (:cod, :desc, :act)
+                INSERT IGNORE INTO siat_productos (codigo_producto, descripcion, codigo_unidad, tipo_producto, nandina)
+                VALUES (:cod, :desc, :uni, :tipo, :nandina)
             ");
+            $vistos = [];
             foreach ($lista as $p) {
+                $cod = $p->codigoProducto ?? '';
+                if (isset($vistos[$cod])) continue; // evita duplicados dentro del mismo lote
+                $vistos[$cod] = true;
+                $nandina = isset($p->nandina) ? (is_array($p->nandina) ? implode(',', $p->nandina) : $p->nandina) : null;
                 $stmt->execute([
-                    ':cod' => $p->codigoProducto ?? '',
-                    ':desc' => $p->descripcion ?? '',
-                    ':act' => $p->codigoActividad ?? null,
+                    ':cod' => $cod,
+                    ':desc' => $p->descripcionProducto ?? '',
+                    ':uni' => 1,
+                    ':tipo' => 'bien',
+                    ':nandina' => $nandina,
                 ]);
             }
             $db->commit();
@@ -755,26 +834,57 @@ class siatModel extends mainModel
         }
     }
 
-    private static function guardarLeyendas($lista)
+    private static function sincronizarUnidadesMedida($cuis, $suId = null)
+    {
+        try {
+            $codigos = $suId !== null ? self::obtenerCodigosSucursal($suId) : ['sucursal' => 0, 'punto_venta' => 0];
+            $client = self::clienteSOAP('sincronizacion_datos');
+            $resp = $client->sincronizarParametricaUnidadMedida([
+                'SolicitudSincronizacion' => [
+                    'codigoAmbiente'  => SIAT_AMBIENTE,
+                    'codigoSistema'   => SIAT_COD_SISTEMA,
+                    'nit'             => self::obtenerNitEmpresa(),
+                    'cuis'            => $cuis,
+                    'codigoModalidad' => SIAT_MODALIDAD,
+                    'codigoSucursal'   => (int)$codigos['sucursal'],
+                    'codigoPuntoVenta' => (int)$codigos['punto_venta'],
+                ]
+            ]);
+            $root = $resp->RespuestaListaParametricas ?? null;
+            $lista = $root->listaUnidadesMedida ?? [];
+            $lista = self::aLista($lista);
+            self::guardarUnidadesMedida($lista);
+            return count($lista);
+        } catch (Exception $e) {
+            error_log("SIAT sincronizarUnidadesMedida: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function guardarUnidadesMedida($lista)
     {
         $db = mainModel::conectar();
         $db->beginTransaction();
         try {
-            $db->exec("DELETE FROM siat_leyendas");
+            $db->exec("DELETE FROM siat_unidades_medida");
             $stmt = $db->prepare("
-                INSERT INTO siat_leyendas (codigo_actividad, descripcion)
-                VALUES (:act, :desc)
+                INSERT IGNORE INTO siat_unidades_medida (codigo, descripcion)
+                VALUES (:cod, :desc)
             ");
-            foreach ($lista as $l) {
+            $vistos = [];
+            foreach ($lista as $u) {
+                $cod = $u->codigoUnidadMedida ?? ($u->codigo ?? '');
+                if (isset($vistos[$cod])) continue;
+                $vistos[$cod] = true;
                 $stmt->execute([
-                    ':act' => $l->codigoActividad ?? null,
-                    ':desc' => $l->descripcion ?? '',
+                    ':cod' => $cod,
+                    ':desc' => $u->descripcion ?? '',
                 ]);
             }
             $db->commit();
         } catch (Exception $e) {
             $db->rollBack();
-            error_log("SIAT guardarLeyendas: " . $e->getMessage());
+            error_log("SIAT guardarUnidadesMedida: " . $e->getMessage());
         }
     }
 
@@ -804,7 +914,7 @@ class siatModel extends mainModel
 
         $codigosSucursal = self::obtenerCodigosSucursal($suId);
 
-        $client = self::clienteSOAP('facturacion');
+        $client = self::clienteSOAP('compra_venta');
         $resp = $client->validacionRecepcionFactura([
             'SolicitudServicioValidacionRecepcionFactura' => [
                 'codigoAmbiente'      => SIAT_AMBIENTE,
@@ -867,7 +977,7 @@ class siatModel extends mainModel
                 $stmtQr->execute([':qr' => $qr, ':fa_id' => $faId]);
 
                 $db->prepare("UPDATE factura SET fa_estado = 1 WHERE fa_id = :fa_id")
-                   ->execute([':fa_id' => $faId]);
+                    ->execute([':fa_id' => $faId]);
             }
 
             $db->commit();
@@ -892,7 +1002,7 @@ class siatModel extends mainModel
 
         $codigosSucursal = self::obtenerCodigosSucursal($suId);
 
-        $client = self::clienteSOAP('facturacion');
+        $client = self::clienteSOAP('compra_venta');
         $resp = $client->anulacionFactura([
             'SolicitudServicioAnulacionFactura' => [
                 'codigoAmbiente'      => SIAT_AMBIENTE,
@@ -914,7 +1024,7 @@ class siatModel extends mainModel
             $db->beginTransaction();
             try {
                 $db->prepare("UPDATE factura SET fa_estado = 2 WHERE fa_cuf = :cuf")
-                   ->execute([':cuf' => $cuf]);
+                    ->execute([':cuf' => $cuf]);
 
                 $db->prepare("
                     UPDATE facturacion_electronica

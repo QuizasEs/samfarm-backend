@@ -237,7 +237,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <th>Unidades</th>
                                     <th>Precio</th>
                                     <th>Vencimiento</th>
-                                    <th>Estado</th>
+                                    <th>Sucursal</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaLotesDetalle">

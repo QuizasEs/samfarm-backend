@@ -92,13 +92,12 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                         <th>Cajas</th>
                                         <th>Precio Caja</th>
                                         <th>Precio</th>
-                                        <th>Descuento</th>
                                         <th>Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla_items_venta">
                                     <tr>
-                                        <td colspan="9" class="txctr tc">No hay medicamentos en la lista</td>
+                                        <td colspan="8" class="txctr tc">No hay medicamentos en la lista</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -130,7 +129,7 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                     </div>
 
                     <div class="card">
-                        <div class="ch"><span class="ct">Cliente y Pago</span></div>
+                        <div class="ch"><span class="ct">Cliente y metodo de pago</span></div>
                         <div class="cb">
                             <div class="fg" style="position: relative;"><label class="fl">Buscar Cliente</label>
                                 <div class="inpw"><ion-icon class="iil" name="search-outline"></ion-icon><input class="inp" id="buscar_cliente_venta" placeholder="Buscar Cliente"><button type="button" class="iir" onclick="ModalCliente.abrirModal()"><ion-icon name="person-add-outline"></ion-icon></button></div>
@@ -203,7 +202,6 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                 <div class="fg"><label class="fl">Teléfono</label><input class="inp" type="number" name="Telefono_cl" pattern="[0-9]{6,20}" maxlength="20"></div>
                             </div>
                             <div class="fr">
-                                <div class="fg"><label class="fl">Dirección</label><input class="inp" type="text" name="Direccion_cl"></div>
                                 <div class="fg"><label class="fl">Correo</label><input class="inp" type="email" name="Correo_cl"></div>
                             </div>
                         </form>

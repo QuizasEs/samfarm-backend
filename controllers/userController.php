@@ -144,14 +144,18 @@ class userController extends userModel
                             </td>
                             <td>' . $estado_html . '</td>
                             <td>
-                             
+                              
                                     <a href="javascript:void(0)" 
                                     class="btn ' . ($row['us_estado'] == 1 ? 'btn-douc' : 'btn-souc') . ' btn-sm" 
                                     title="' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
                                     onclick="event.stopPropagation(); UsuariosModals.toggleEstado(' . $row['us_id'] . ', ' . $row['us_estado'] . ')">
-                                    <ion-icon name="' . ($row['us_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon> 
-                                    ' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '
+                                        <ion-icon name="' . ($row['us_estado'] == 1 ? 'close-circle-outline' : 'checkmark-circle-outline') . '"></ion-icon> 
+                                        ' . ($row['us_estado'] == 1 ? 'Desactivar' : 'Activar') . '
                                     </a>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Eliminar"
+                                        onclick="event.stopPropagation(); UsuariosModals.eliminarUsuario(' . $row['us_id'] . ')">
+                                        <ion-icon name="trash-outline"></ion-icon> Eliminar
+                                    </button>
 
                             </td>
                         </tr>
@@ -862,6 +866,78 @@ class userController extends userModel
                 "Alerta" => "simple",
                 "Titulo" => "Error",
                 "texto" => "No se pudo actualizar el perfil",
+                "Tipo" => "error"
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
+
+    public function eliminar_usuario_controller()
+    {
+        $us_id = isset($_POST['us_id']) ? (int)$_POST['us_id'] : 0;
+
+        if ($us_id <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "ID de usuario inválido",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if ($us_id == 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acción no permitida",
+                "texto" => "No se puede eliminar el usuario principal",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $check_usuario = mainModel::ejecutar_consulta_simple("SELECT us_id, ro_id FROM usuarios WHERE us_id = '$us_id'");
+        if ($check_usuario->rowCount() <= 0) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Usuario no existe",
+                "texto" => "El usuario no fue encontrado en el sistema",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $usuario = $check_usuario->fetch();
+        if ($usuario['ro_id'] == 1) {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Acción no permitida",
+                "texto" => "No se puede eliminar usuarios administradores",
+                "Tipo" => "error"
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $eliminado = userModel::eliminar_usuario_model($us_id);
+
+        if ($eliminado->rowCount() == 1) {
+            $alerta = [
+                "Alerta" => "recargar",
+                "Titulo" => "Usuario eliminado",
+                "texto" => "El usuario fue eliminado correctamente",
+                "Tipo" => "success"
+            ];
+        } else {
+            $alerta = [
+                "Alerta" => "simple",
+                "Titulo" => "Error",
+                "texto" => "No se pudo eliminar el usuario",
                 "Tipo" => "error"
             ];
         }
