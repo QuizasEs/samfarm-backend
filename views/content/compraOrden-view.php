@@ -284,7 +284,6 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                                     <th>Presentación</th>
                                     <th>Proveedor</th>
                                     <th>Código de Barras</th>
-                                    <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaMedicamentos">
@@ -380,16 +379,16 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <div class="stit">Cantidades</div>
                 <div class="fr3">
                     <div class="fg">
-                        <label class="fl" for="cantidad">Número de Cajas que Entran</label>
+                        <label class="fl required" for="cantidad">Número de Cajas que Entran</label>
                         <input class="inp" type="number" name="Cantidad_reg" id="cantidad" min="1">
                     </div>
                     <div class="fg">
-                        <label class="fl" for="cantidad_unidades">Unidades por Caja</label>
+                        <label class="fl required" for="cantidad_unidades">Unidades por Caja</label>
                         <input class="inp" type="number" name="Cantidad_unidades_reg" id="cantidad_unidades" min="1" value="1" oninput="calcularPrecioMinCaja();">
                     </div>
 
                     <div class="fg">
-                        <label class="fl" for="fecha_vencimiento">Vencimiento</label>
+                        <label class="fl required" for="fecha_vencimiento">Vencimiento</label>
                         <input class="inp" type="date" name="Vencimiento_reg" id="fecha_vencimiento">
                     </div>
                 </div>
@@ -397,11 +396,11 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <div class="stit">Precios Principales</div>
                 <div class="fr">
                     <div class="fg">
-                        <label class="fl" for="precio_compra">Precio Costo</label>
+                        <label class="fl required" for="precio_compra">Precio Costo</label>
                         <input class="inp" type="number" name="Precio_compra_reg" id="precio_compra" step="0.01" min="0.01">
                     </div>
                     <div class="fg">
-                        <label class="fl" for="costo_lista">Costo Lista</label>
+                        <label class="fl required" for="costo_lista">Costo Lista</label>
                         <input class="inp" type="number" id="costo_lista" step="0.01" min="0">
                     </div>
                 </div>
@@ -410,25 +409,25 @@ $ultima_compra = $ins_med->ultima_compra_controller();
                 <div class="fr3">
 
                     <div class="fg">
-                        <label class="fl" for="margen_unitario">Margen Unitario (%)</label>
+                        <label class="fl required" for="margen_unitario">Margen Unitario (%)</label>
                         <input class="inp" type="number" id="margen_unitario" step="0.01" min="0">
                     </div>
                     <div class="fg">
-                        <label class="fl" for="precio_venta_reg">Precio Venta</label>
+                        <label class="fl required" for="precio_venta_reg">Precio Venta</label>
                         <input class="inp" type="number" name="precio_venta_reg" id="precio_venta_reg" step="0.01" min="0.01" readonly>
                     </div>
                     <div class="fg">
-                        <label class="fl" for="precio_min_unitario">Precio Min. Unitario</label>
+                        <label class="fl required" for="precio_min_unitario">Precio Min. Unitario</label>
                         <input class="inp" type="number" id="precio_min_unitario" step="0.01" min="0">
                     </div>
                 </div>
                 <div class="fr">
                     <div class="fg">
-                        <label class="fl" for="margen_caja">Margen Caja (%)</label>
+                        <label class="fl required" for="margen_caja">Margen Caja (%)</label>
                         <input class="inp" type="number" id="margen_caja" step="0.01" min="0">
                     </div>
                     <div class="fg">
-                        <label class="fl" for="precio_min_caja">Precio Min. Caja</label>
+                        <label class="fl required" for="precio_min_caja">Precio Min. Caja</label>
                         <input class="inp" type="number" id="precio_min_caja" step="0.01" min="0">
                     </div>
 

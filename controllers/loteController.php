@@ -83,12 +83,16 @@ class loteController extends loteModel
             )";
         }
 
-        //  Select 1: Estado del lote
-        if ($f1 !== '') {
-            $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado', 'deshabilitado'];
-            if (in_array($f1, $estados_validos)) {
-                $whereParts[] = "lm.lm_estado = '$f1'";
-            }
+        /*  Select 1: Estado del lote
+            SOFT DELETE: 'deshabilitado' es el estado que asigna el borrado logico
+            (deshabilitar_lote_controller). Por defecto los lotes eliminados NO se
+            listan; solo aparecen si se filtra explicitamente por ese estado. */
+        $estados_validos = ['en_espera', 'activo', 'terminado', 'caducado', 'devuelto', 'bloqueado', 'deshabilitado'];
+        if ($f1 !== '' && in_array($f1, $estados_validos)) {
+            $whereParts[] = "lm.lm_estado = '$f1'";
+        } else {
+            // Excluye lotes eliminados y estados corruptos ('') heredados del ENUM sin el valor
+            $whereParts[] = "lm.lm_estado NOT IN ('deshabilitado', '')";
         }
 
         //  Select 2: Mes
@@ -951,6 +955,9 @@ class loteController extends loteModel
             }
             if (!empty($filtros['estado'])) {
                 $whereParts[] = "lm.lm_estado = '{$filtros['estado']}'";
+            } else {
+                // SOFT DELETE: excluir lotes eliminados (lm_estado = 'deshabilitado')
+                $whereParts[] = "lm.lm_estado NOT IN ('deshabilitado', '')";
             }
             if (!empty($filtros['mes'])) {
                 $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = {$filtros['mes']}";
@@ -1158,6 +1165,9 @@ class loteController extends loteModel
             }
             if (!empty($filtros['estado'])) {
                 $whereParts[] = "lm.lm_estado = '{$filtros['estado']}'";
+            } else {
+                // SOFT DELETE: excluir lotes eliminados (lm_estado = 'deshabilitado')
+                $whereParts[] = "lm.lm_estado NOT IN ('deshabilitado', '')";
             }
             if (!empty($filtros['mes'])) {
                 $whereParts[] = "MONTH(lm.lm_fecha_ingreso) = {$filtros['mes']}";

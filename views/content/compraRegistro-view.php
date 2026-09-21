@@ -104,7 +104,6 @@ if (!isset($_SESSION['id_smp'])) {
                             <th>Presentación</th>
                             <th>Descripción</th>
                             <th>Código de Barras</th>
-                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaMedicamentos">

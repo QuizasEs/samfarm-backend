@@ -113,7 +113,7 @@
             bindEvents();
             const resultados = document.getElementById('tablaMedicamentos');
             if (resultados && !hasSearched) {
-                resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Use los filtros o busque por nombre</td></tr>';
+                resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Use los filtros o busque por nombre</td></tr>';
             }
         }
 
@@ -166,13 +166,13 @@
 
             if (!termino && !forma && !via && !laboratorio && !uso && !proveedor) {
                 if (hasSearched) {
-                    resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Ingrese algún criterio de búsqueda</td></tr>';
+                    resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Ingrese algún criterio de búsqueda</td></tr>';
                 }
                 return;
             }
 
             hasSearched = true;
-            resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Buscando...</td></tr>';
+            resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> Buscando...</td></tr>';
 
             try {
                 const filtros = {
@@ -209,7 +209,7 @@
             if (!resultados) return;
 
             if (!data || data.length === 0) {
-                resultados.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> No se encontraron resultados</td></tr>';
+                resultados.innerHTML = '<tr><td colspan="5" style="text-align:center;"><ion-icon name="pencil-outline"></ion-icon> No se encontraron resultados</td></tr>';
                 return;
             }
 
@@ -220,9 +220,6 @@
             <td>${escapeHtml(item.med_presentacion || 'N/A')}</td>
             <td>${escapeHtml(item.proveedor || 'N/A')}</td>
             <td>${escapeHtml(item.med_codigo_barras || 'N/A')}</td>
-            <td>
-                <span style="color: #27ae60; font-size: 12px;">Click para agregar</span>
-            </td>
         </tr>
     `).join('');
         }
