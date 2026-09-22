@@ -696,9 +696,15 @@ class medicamentoController extends medicamentoModel
 
     public function ultima_compra_controller()
     {
+        /* Solo se toman los folios del año actual: así el correlativo no se reinicia por un folio
+           de otro año con número más alto (ese folio no corresponde a la serie que se está numerando) */
+        $anio_actual = date('Y');
+        $patron_anio = '^COMP-' . $anio_actual . '-[0-9]+$';
+
         $sql = mainModel::conectar()->prepare("
-            SELECT co_numero FROM `compras` WHERE co_numero REGEXP '^COMP-[0-9]{4}-[0-9]+$' ORDER BY CAST(SUBSTRING_INDEX(co_numero, '-', -1) AS UNSIGNED) DESC LIMIT 1
+            SELECT co_numero FROM `compras` WHERE co_numero REGEXP :patron ORDER BY CAST(SUBSTRING_INDEX(co_numero, '-', -1) AS UNSIGNED) DESC LIMIT 1
         ");
+        $sql->bindParam(":patron", $patron_anio);
         $sql->execute();
 
         $resultado = $sql->fetch();

@@ -30,6 +30,8 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         <input type="hidden" name="totales_json" id="totales_json" value="{}">
         <input type="hidden" name="Proveedor_reg" id="Proveedor_reg" value="">
         <input type="hidden" id="ultimo_lote_valor" value="<?php echo $ultimo_lote ?? 0; ?>">
+        <!-- Último folio de compra: alimenta el cálculo del nuevo número en views/inc/script.php (id requerido) -->
+        <input type="hidden" id="ultima_campra_valor" value="<?php echo $ultima_compra ?? 0; ?>">
 
         <style>
             /* Estilos para la lista de lotes en compra */
@@ -176,15 +178,13 @@ $ultima_compra = $ins_med->ultima_compra_controller();
         </style>
 
         <!-- DATOS ESENCIALES -->
-        <div class="card mb16">
-            <div class="ch">
-                <span class="ct">Datos de Compra</span>
-            </div>
-            <div class="cb">
-                <div class="fr">
-                    <div class="fg">
-                        <label class="fl" for="numero_compra">Número de Compra*</label>
-                        <input class="inp" type="text" name="Numero_compra_reg" id="numero_compra" readonly>
+        <div class="">
+            
+            <div class="">
+                <div class="">
+                    <div class="">
+                        <!-- <label class="fl" for="numero_compra">Número de Compra*</label> -->
+                        <input type="hidden" name="Numero_compra_reg" id="numero_compra">
                     </div>
                 </div>
             </div>
