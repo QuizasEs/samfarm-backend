@@ -1,7 +1,8 @@
 <?php
-
+/* PNOTA: agregar rutas absolutas __DIR__ */
 require_once "mainModel.php";
 require_once "../libs/phpqrcode.php";
+require_once __DIR__ . '/../libs/xmlseclibs/xmlseclibs.php';
 
 class siatModel extends mainModel
 {
@@ -24,6 +25,76 @@ class siatModel extends mainModel
         ]);
 
         return $client;
+    }
+
+    /* procesa la firma digital */
+    private static function cargarCertificadoP12()
+    {
+        $p12Path = SIAT_CERT_P12_PATH;
+        $password = SIAT_CERT_PASSWORD;
+
+        if (!file_exists($p12Path)) {
+            throw new Exception("P12 no encontrado en: $p12Path");
+        }
+
+        $pkcs12 = file_get_contents($p12Path);
+        $certs = [];
+
+        if (!openssl_pkcs12_read($pkcs12, $certs, $password)) {
+            throw new Exception("Error leyendo P12: password incorrecto o archivo corrupto");
+        }
+
+        return [
+            'cert' => $certs['cert'],
+            'pkey' => $certs['pkey'],
+        ];
+    }
+/* manipula la firma usando librerias xml */
+    private static function firmarXML($xmlString)
+    {
+        $certData = self::cargarCertificadoP12();
+        $certPem = $certData['cert'];
+        $pkeyPem = $certData['pkey'];
+
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML($xmlString);
+
+        // El nodo raíz DEBE tener Id para que la firma lo referencie
+        $root = $dom->documentElement;
+        if (!$root->hasAttribute('Id')) {
+            $root->setAttribute('Id', 'factura');
+        }
+
+        // 1. Crear objeto firma (namespace global - xmlseclibs v1.x)
+        $objDSig = new XMLSecurityDSig();
+
+        // 2. Canonicalización exclusiva (requerido por SIAT)
+        $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+
+        // 3. Agregar referencia al documento completo
+        //    URI='#factura' apunta al Id del root
+        //    Algoritmo digest SHA256
+        $objDSig->addReference(
+            $dom,
+            XMLSecurityDSig::SHA256,
+            null,
+            ['force_uri' => true]
+        );
+
+        // 4. Crear llave privada RSA-SHA256
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+
+        // 5. Cargar llave privada + certificado (concatenados)
+        $objKey->loadKey($pkeyPem . $certPem, false, false);
+
+        // 6. Firmar y adjuntar al nodo raíz
+        $objDSig->sign($objKey, $root);
+
+        // 7. Agregar certificado X509 al KeyInfo
+        $objDSig->add509Cert($certPem, true, false);
+
+        return $dom->saveXML();
     }
 
     public static function listarSucursales()
@@ -447,7 +518,8 @@ class siatModel extends mainModel
             $det->addChild('subTotal', $d['dv_subtotal']);
         }
 
-        return $xml->asXML();
+        $xmlSinFirmar = $xml->asXML();
+        return self::firmarXML($xmlSinFirmar);
     }
 
     public static function enviarFactura($xmlString, $faId, $cuf, $suId)

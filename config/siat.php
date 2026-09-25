@@ -37,7 +37,9 @@ define('SIAT_MODALIDAD', 1);
 define('SIAT_MAX_FACTURAS_CONTINGENCIA', 100);
 
 
-/* Activación opcional de facturación electrónica.
-   false = solo nota de venta (sin tocar el flujo actual).
-   true  = se genera XML/factura SIAT cuando aplique. */
+/* Activación opcional de facturación electrónica. */
 define('SIAT_HABILITADO', true);
+
+/* Certificado digital P12 para firma XMLDSig */
+define('SIAT_CERT_P12_PATH', dirname(__DIR__) . '/firma/MARTIN_YANA.p12');
+define('SIAT_CERT_PASSWORD', '6006007');
