@@ -209,10 +209,13 @@ class proveedorModel extends mainModel
                 p.pr_estado,
                 p.pr_creado_en,
                 p.pr_actualizado_en,
-                0 AS total_compras,  -- Temporalmente 0 hasta implementar relación compras-proveedores
-                0 AS monto_total_compras,  -- Temporalmente 0 hasta implementar relación compras-proveedores
                 COALESCE(COUNT(DISTINCT lm.lm_id), 0) AS total_lotes,
-                NULL AS ultima_compra,  -- Temporalmente NULL hasta implementar relación compras-proveedores
+                COALESCE(SUM(
+                    lm.lm_cant_caja * COALESCE(lm.lm_precio_costo, lm.lm_precio_compra * lm.lm_cant_blister * lm.lm_cant_unidad)
+                ), 0) AS valor_ingresado,
+                COALESCE(SUM(lm.lm_cant_caja), 0) AS unidades_ingresadas,
+                COALESCE(SUM(lm.lm_cant_actual_unidades), 0) AS unidades_actuales,
+                MAX(lm.lm_fecha_ingreso) AS ultima_compra,
                 DATEDIFF(CURDATE(), p.pr_creado_en) AS dias_antiguedad
             FROM proveedores p
             LEFT JOIN lote_medicamento lm ON lm.pr_id = p.pr_id
@@ -227,20 +230,58 @@ class proveedorModel extends mainModel
         return $stmt;
     }
 
+    /* --------------------------------------ultimos ingresos de lotes del proveedor--------------------------------------- */
     protected static function ultimas_compras_proveedor_model($pr_id, $limit = 5)
     {
-        // Temporalmente retorna una consulta vacía hasta implementar la relación compras-proveedores
-        // La tabla compras actual no tiene relación con proveedores
-        $sql = "SELECT NULL as co_id, NULL as co_numero, NULL as co_fecha, NULL as co_total, NULL as co_numero_factura, NULL as proveedor, NULL as total_items WHERE 1=0";
-        return mainModel::conectar()->prepare($sql);
+        $sql = "
+            SELECT
+                lm.lm_numero_lote,
+                lm.lm_fecha_ingreso,
+                m.med_nombre_quimico,
+                s.su_nombre AS su_nombre,
+                lm.lm_cant_caja,
+                lm.lm_cant_actual_unidades,
+                COALESCE(lm.lm_precio_costo, lm.lm_precio_compra * lm.lm_cant_blister * lm.lm_cant_unidad) AS lm_precio_costo,
+                lm.lm_estado
+            FROM lote_medicamento lm
+            LEFT JOIN medicamento m ON m.med_id = lm.med_id
+            LEFT JOIN sucursales s ON s.su_id = lm.su_id
+            WHERE lm.pr_id = :pr_id
+            ORDER BY lm.lm_fecha_ingreso DESC
+            LIMIT :limite
+        ";
+
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
+        $limite = (int)$limit;
+        $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
     }
 
+    /* --------------------------------------top de medicamentos ingresados por el proveedor--------------------------------------- */
     protected static function top_medicamentos_proveedor_model($pr_id, $limit = 5)
     {
-        // Temporalmente retorna una consulta vacía hasta implementar la relación compras-proveedores
-        // La tabla compras actual no tiene relación con proveedores
-        $sql = "SELECT NULL as med_id, NULL as med_nombre_quimico, NULL as veces_comprado, NULL as ultima_compra, NULL as proveedor WHERE 1=0";
-        return mainModel::conectar()->prepare($sql);
+        $sql = "
+            SELECT
+                m.med_nombre_quimico,
+                COUNT(DISTINCT lm.lm_id) AS veces_ingresado,
+                COALESCE(SUM(lm.lm_cant_caja), 0) AS cajas,
+                MAX(lm.lm_fecha_ingreso) AS ultima_ingreso
+            FROM lote_medicamento lm
+            INNER JOIN medicamento m ON m.med_id = lm.med_id
+            WHERE lm.pr_id = :pr_id
+            GROUP BY m.med_id, m.med_nombre_quimico
+            ORDER BY veces_ingresado DESC, ultima_ingreso DESC
+            LIMIT :limite
+        ";
+
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
+        $limite = (int)$limit;
+        $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
     }
 
     protected static function exportar_proveedores_excel_model($filtros = [])
@@ -423,5 +464,29 @@ class proveedorModel extends mainModel
         $stmt->bindParam(':pr_id', $datos['pr_id'], PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
+    }
+
+    /* --------------------------------------modelo para contar los medicamentos de un proveedor--------------------------------------- */
+    protected static function contar_medicamentos_proveedor_model($pr_id)
+    {
+        $sql = "SELECT COUNT(*) FROM medicamento WHERE pr_id = :pr_id";
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    /* --------------------------------------modelo para eliminar un proveedor--------------------------------------- */
+    /* la validacion va dentro del delete para que la base de datos no permita
+       borrar un proveedor que tenga medicamentos asociados en la tabla medicamento */
+    protected static function eliminar_proveedor_model($pr_id)
+    {
+        $sql = "DELETE FROM proveedores
+                WHERE pr_id = :pr_id
+                AND NOT EXISTS (SELECT 1 FROM medicamento WHERE pr_id = :pr_id)";
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->bindParam(':pr_id', $pr_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount();
     }
 }

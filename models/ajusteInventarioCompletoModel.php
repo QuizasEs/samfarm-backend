@@ -31,7 +31,7 @@ class ajusteInventarioCompletoModel extends mainModel
                 m.med_nombre_quimico,
                 m.med_principio_activo,
                 m.med_codigo_barras,
-                p.pr_razon_social AS proveedor,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor,
                 i.inv_total_unidades,
                 s.su_nombre,
                 s.su_id
@@ -81,7 +81,7 @@ class ajusteInventarioCompletoModel extends mainModel
         $sql = mainModel::conectar()->prepare("
             SELECT 
                 m.*,
-                p.pr_razon_social AS proveedor,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor,
                 ff.ff_nombre as forma_farmaceutica_nombre,
                 uf.uf_nombre as uso_farmacologico_nombre,
                 vd.vd_nombre as via_administracion_nombre

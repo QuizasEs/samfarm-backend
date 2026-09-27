@@ -119,7 +119,12 @@ if (isset($_POST['proveedoresAjax'])) {
         echo $ins_proveedor->actualizar_proveedor_controller();
         exit();
     }
-    
+
+    if ($valor === "eliminar") {
+        echo $ins_proveedor->eliminar_proveedor_controller();
+        exit();
+    }
+
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

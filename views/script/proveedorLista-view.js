@@ -195,7 +195,7 @@ const ProveedoresModals = (function() {
             modalNombre.textContent = nombre;
             if (modalPrId) modalPrId.value = prId;
 
-            tablaCompras.innerHTML = '<tr><td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
+            tablaCompras.innerHTML = '<tr><td colspan="7" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
             tablaMedicamentos.innerHTML = '<tr><td colspan="4" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td></tr>';
 
             utils.abrir('modalDetalleProveedor');
@@ -223,10 +223,10 @@ const ProveedoresModals = (function() {
                 setText('detalleNombreComercial', data.direccion);
                 setText('detalleFechaRegistro', data.fecha_registro);
                 setText('detalleEstado', data.estado);
-                setText('detalleTotalCompras', utils.formatearNumero(data.total_compras || 0));
-                setText('detalleMontoTotal', utils.formatearMoneda(data.monto_total || 0));
                 setText('detalleTotalLotes', utils.formatearNumero(data.total_lotes || 0));
-                setText('detallePromedio', utils.formatearMoneda(data.promedio || 0));
+                setText('detalleValorIngresado', utils.formatearMoneda(data.valor_ingresado || 0));
+                setText('detalleUnidadesIngresadas', utils.formatearNumero(data.unidades_ingresadas || 0));
+                setText('detalleUnidadesActuales', utils.formatearNumero(data.unidades_actuales || 0));
                 setText('detalleUltimaCompra', data.ultima_compra);
                 setText('detalleAntiguedad', (data.antiguedad || 0) + ' días');
 
@@ -238,15 +238,16 @@ const ProveedoresModals = (function() {
                         compras.length ?
                         compras.map(c => `
                             <tr>
-                                <td>${c.co_numero || '-'}</td>
-                                <td>${utils.formatearFecha(c.co_fecha)}</td>
-                                <td>${c.proveedor || '-'}</td>
-                                <td>${utils.formatearMoneda(c.co_total)}</td>
-                                <td>${utils.formatearNumero(c.total_items)}</td>
-                                <td>${c.co_numero_factura || '-'}</td>
+                                <td>${c.lm_numero_lote || '-'}</td>
+                                <td>${utils.formatearFecha(c.lm_fecha_ingreso)}</td>
+                                <td>${c.med_nombre_quimico || '-'}</td>
+                                <td>${c.su_nombre || '-'}</td>
+                                <td>${utils.formatearNumero(c.lm_cant_caja)}</td>
+                                <td>${utils.formatearNumero(c.lm_cant_actual_unidades)}</td>
+                                <td>${utils.formatearMoneda(c.lm_precio_costo)}</td>
                             </tr>
                         `).join('') :
-                        '<tr><td colspan="6" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin compras</td></tr>';
+                        '<tr><td colspan="7" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin ingresos</td></tr>';
                 }
 
                 if (tablaMedicamentos) {
@@ -255,9 +256,9 @@ const ProveedoresModals = (function() {
                         top.map(m => `
                             <tr>
                                 <td>${m.med_nombre_quimico || '-'}</td>
-                                <td>${utils.formatearNumero(m.veces_comprado)}</td>
-                                <td>${m.proveedor || '-'}</td>
-                                <td>${utils.formatearFecha(m.ultima_compra)}</td>
+                                <td>${utils.formatearNumero(m.veces_ingresado)}</td>
+                                <td>${utils.formatearNumero(m.cajas)}</td>
+                                <td>${utils.formatearFecha(m.ultima_ingreso)}</td>
                             </tr>
                         `).join('') :
                         '<tr><td colspan="4" style="text-align:center;"><ion-icon name="information-circle-outline"></ion-icon> Sin medicamentos</td></tr>';
@@ -265,7 +266,7 @@ const ProveedoresModals = (function() {
             } catch (error) {
                 console.error('Error en detalle.abrir:', error);
                 if (tablaCompras) {
-                    tablaCompras.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;"><ion-icon name="alert-circle-outline"></ion-icon> Error de conexión</td></tr>';
+                    tablaCompras.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;"><ion-icon name="alert-circle-outline"></ion-icon> Error de conexión</td></tr>';
                 }
                 if (tablaMedicamentos) {
                     tablaMedicamentos.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;"><ion-icon name="alert-circle-outline"></ion-icon> Error de conexión</td></tr>';
@@ -306,12 +307,48 @@ const ProveedoresModals = (function() {
         }
     };
 
+    const eliminacion = {
+        async eliminar(prId, nombre) {
+            const result = await Swal.fire({
+                title: '¿Eliminar proveedor?',
+                text: 'Se eliminará el proveedor ' + nombre + '. Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
+
+            const formData = new FormData();
+            formData.append('proveedoresAjax', 'eliminar');
+            formData.append('PrId_del', prId);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                alertas_ajax(data);
+            } catch (error) {
+                console.error('Error en eliminacion.eliminar:', error);
+                Swal.fire('Error', 'Ocurrió un error de conexión', 'error');
+            }
+        }
+    };
+
     return {
         cerrar: utils.cerrar,
         verDetalle: detalle.abrir,
         abrirRegistro: registro.abrir,
         cerrarRegistro: registro.cerrar,
         abrirEdicion: edicion.abrir,
-        cerrarEdicion: edicion.cerrar
+        cerrarEdicion: edicion.cerrar,
+        eliminarProveedor: eliminacion.eliminar
     };
 })();

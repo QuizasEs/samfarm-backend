@@ -234,4 +234,53 @@ try {
 }
 echo "\n";
 
+// 8. Test sincronizarUnidadesMedida (usando siat_parametricas)
+echo "8. TEST sincronizarUnidadesMedida (siat_parametricas):\n";
+try {
+    $resp = $client->sincronizarParametricaUnidadMedida([
+        'SolicitudSincronizacion' => [
+            'codigoAmbiente'   => SIAT_AMBIENTE,
+            'codigoModalidad'  => SIAT_MODALIDAD,
+            'codigoSistema'    => SIAT_COD_SISTEMA,
+            'nit'              => SIAT_NIT,
+            'cuis'             => $config->sc_cuis,
+            'codigoSucursal'   => (int)$config->sc_sucursal_codigo,
+            'codigoPuntoVenta' => (int)$config->sc_punto_venta_codigo
+        ]
+    ]);
+    
+    $root = $resp->RespuestaListaParametricas ?? null;
+    if ($root && isset($root->listaUnidadesMedida)) {
+        $unidades = is_array($root->listaUnidadesMedida) ? $root->listaUnidadesMedida : [$root->listaUnidadesMedida];
+        echo "   ✅ Unidades de medida obtenidas: " . count($unidades) . "\n";
+        
+        // Guardar en siat_parametricas
+        $stmt = $pdo->prepare("
+            INSERT INTO siat_parametricas (par_tipo, par_codigo, par_descripcion, par_vigente, par_sincronizado_en)
+            VALUES ('UNIDAD_MEDIDA', :cod, :desc, 1, NOW())
+            ON DUPLICATE KEY UPDATE par_descripcion = :desc2, par_vigente = 1, par_sincronizado_en = NOW()
+        ");
+        $count = 0;
+        foreach ($unidades as $u) {
+            $cod = $u->codigoUnidadMedida ?? ($u->codigo ?? '');
+            $desc = $u->descripcion ?? '';
+            if ($cod !== '') {
+                $stmt->execute([':cod' => $cod, ':desc' => $desc, ':desc2' => $desc]);
+                $count++;
+            }
+        }
+        echo "   ✅ Guardadas $count unidades en siat_parametricas\n";
+    } else {
+        echo "   ⚠️  Respuesta SIN (nodo RespuestaListaParametricas). En PILOTO suele venir VACIO.\n";
+        debugSoapResponse($client, 'sincronizarParametricaUnidadMedida', $resp);
+        if (isset($root->mensajesList)) { echo "   MENSAJES SIN:\n"; print_r($root->mensajesList); }
+    }
+} catch (SoapFault $e) {
+    echo "   ❌ SoapFault: " . $e->getMessage() . "\n";
+    if ($client) { echo "   REQ:\n".htmlspecialchars($client->__getLastRequest())."\n   RESP:\n".htmlspecialchars($client->__getLastResponse())."\n"; }
+} catch (Exception $e) {
+    echo "   ❌ Exception: " . $e->getMessage() . "\n";
+}
+echo "\n";
+
 echo "=== FIN DEBUG ===\n";

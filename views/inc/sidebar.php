@@ -41,7 +41,7 @@ if ($_SESSION['rol_smp'] == 1) {
             <div class="nsec">
                 <div class="nl">Catálogo e Inventario</div>
                 <!-- catalogo -->
-                <?php $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista']); ?>
+                <?php $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista', 'proveedorLista']); ?>
                 <div class="ni <?php echo $is_cat ? 'open pac' : ''; ?>" id="nii" data-tip="Catalogo" onclick="App.toggleSub('si_cat',this)">
                     <ion-icon class="nic" name="list-outline"></ion-icon>
                     <span class="ntxt">Catalogo</span>
@@ -59,7 +59,7 @@ if ($_SESSION['rol_smp'] == 1) {
                     </a>
                 </div>
                 <!-- almacen -->
-                <?php $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'proveedorLista', 'transferirLista', 'recepcionarLista']); ?>
+                <?php $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista', 'recepcionarLista']); ?>
                 <div class="ni <?php echo $is_alm ? 'open pac' : ''; ?>" id="nii" data-tip="Almacen" onclick="App.toggleSub('si_alm',this)">
                     <ion-icon class="nic" name="cube-outline"></ion-icon>
                     <span class="ntxt">Almacen</span>
@@ -163,8 +163,8 @@ if ($_SESSION['rol_smp'] == 1) {
     $program_name = $config['ce_nombre'] ?? 'SamFarm';
     $sucursal = isset($_SESSION['sucursal_smp']) ? $_SESSION['sucursal_smp'] : 'Standard';
 
-    $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista']);
-    $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'proveedorLista', 'transferirLista', 'recepcionarLista']);
+    $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista', 'proveedorLista']);
+    $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista', 'recepcionarLista']);
 
 ?>
     <aside class="sidebar" id="sidebar">

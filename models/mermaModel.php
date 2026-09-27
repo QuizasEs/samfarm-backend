@@ -131,7 +131,7 @@ class mermaModel extends mainModel
                 s.su_nombre,
                 u.us_nombres,
                 u.us_apellido_paterno,
-                p.pr_razon_social AS proveedor
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor
             FROM merma m
             INNER JOIN medicamento med ON med.med_id = m.med_id
             INNER JOIN lote_medicamento lm ON lm.lm_id = m.lm_id
@@ -244,7 +244,7 @@ class mermaModel extends mainModel
                 s.su_nombre,
                 u.us_nombres,
                 u.us_apellido_paterno,
-                p.pr_razon_social AS proveedor
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor
             FROM merma m
             INNER JOIN medicamento med ON med.med_id = m.med_id
             INNER JOIN lote_medicamento lm ON lm.lm_id = m.lm_id

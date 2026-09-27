@@ -134,54 +134,55 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     </div>
                 </div>
 
-                <div class="stit">Estadísticas de Compra</div>
+                <div class="stit">Estadísticas de Ingreso</div>
                 <div class="grid4">
-                    <div class="statc"><div class="siw gr"><ion-icon name="cart-outline"></ion-icon></div><div><div class="sv" id="detalleTotalCompras">0</div><div class="sl">Total Compras</div></div></div>
-                    <div class="statc"><div class="siw bl"><ion-icon name="cash-outline"></ion-icon></div><div><div class="sv" id="detalleMontoTotal">Bs. 0.00</div><div class="sl">Monto Total</div></div></div>
-                    <div class="statc"><div class="siw ww"><ion-icon name="document-text-outline"></ion-icon></div><div><div class="sv" id="detalleTotalLotes">0</div><div class="sl">Lotes Generados</div></div></div>
-                    <div class="statc"><div class="siw bl"><ion-icon name="stats-chart-outline"></ion-icon></div><div><div class="sv" id="detallePromedio">Bs. 0.00</div><div class="sl">Promedio por Compra</div></div></div>
+                    <div class="statc"><div class="siw gr"><ion-icon name="cube-outline"></ion-icon></div><div><div class="sv" id="detalleTotalLotes">0</div><div class="sl">Total Lotes</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="cash-outline"></ion-icon></div><div><div class="sv" id="detalleValorIngresado">Bs. 0.00</div><div class="sl">Valor Ingresado</div></div></div>
+                    <div class="statc"><div class="siw ww"><ion-icon name="document-text-outline"></ion-icon></div><div><div class="sv" id="detalleUnidadesIngresadas">0</div><div class="sl">Cajas Ingresadas</div></div></div>
+                    <div class="statc"><div class="siw bl"><ion-icon name="stats-chart-outline"></ion-icon></div><div><div class="sv" id="detalleUnidadesActuales">0</div><div class="sl">Unidades Actuales</div></div></div>
                 </div>
 
-                <div class="stit">Última Compra</div>
+                <div class="stit">Último Ingreso</div>
                 <div class="card">
                     <div class="cb">
                         <div class="th5" id="detalleUltimaCompra">-</div>
                     </div>
                 </div>
 
-                <div class="stit">Últimas 5 Compras</div>
+                <div class="stit">Últimos 5 Ingresos</div>
                 <div class="card">
                     <div class="tw">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>N° Compra</th>
-                                    <th>Fecha</th>
-                                    <th>Proveedor</th>
-                                    <th>Total</th>
-                                    <th>Items</th>
-                                    <th>N° Factura</th>
+                                    <th>N° Lote</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Medicamento</th>
+                                    <th>Sucursal</th>
+                                    <th>Cajas</th>
+                                    <th>Unidades</th>
+                                    <th>Valor</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaUltimasCompras">
                                 <tr>
-                                    <td colspan="6" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td>
+                                    <td colspan="7" style="text-align:center;"><ion-icon name="hourglass-outline"></ion-icon> Cargando...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="stit">Top 5 Medicamentos Suministrados</div>
+                <div class="stit">Top 5 Medicamentos Ingresados</div>
                 <div class="card">
                     <div class="tw">
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Medicamento</th>
-                                    <th>Veces Comprado</th>
-                                    <th>Proveedor</th>
-                                    <th>Última Compra</th>
+                                    <th>Veces Ingresado</th>
+                                    <th>Cajas</th>
+                                    <th>Último Ingreso</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaTopMedicamentos">

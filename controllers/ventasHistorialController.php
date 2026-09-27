@@ -250,7 +250,7 @@ class ventasHistorialController extends ventasHistorialModel
                     'vendedor_nombre' => $vendedor_nombre,
                     'sucursal_nombre' => $venta['su_nombre'],
                     'caja_nombre' => $venta['caja_nombre'] ?? 'N/A',
-                    'fa_numero' => $venta['fa_numero'] ?? null
+                    'fa_numero_control' => $venta['fa_numero_control'] ?? null
                 ],
                 'items' => $itemsFormateados
             ];

@@ -20,7 +20,7 @@ class compraController extends compraModel
                 m.med_id,
                 m.med_nombre_quimico AS nombre,
                 m.med_presentacion,
-                pr.pr_razon_social AS proveedor,
+                COALESCE(pr.pr_razon_social, 'Proveedor eliminado') AS proveedor,
                 m.med_codigo_barras,
                 ff.ff_nombre AS forma,
                 vd.vd_nombre AS via,

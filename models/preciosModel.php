@@ -51,7 +51,7 @@ class preciosModel extends mainModel
             SELECT
                 m.med_id,
                 m.med_nombre_quimico,
-                p.pr_razon_social AS proveedor,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor,
                 ROUND(AVG(lm.lm_precio_compra), 2) AS precio_compra_promedio,
                 ROUND(AVG(lm.lm_precio_venta), 2) AS precio_venta_unitario_promedio,
                 ROUND(AVG(lm.lm_precio_venta * COALESCE(lm.lm_cant_blister, 1) * COALESCE(lm.lm_cant_unidad, 1)), 2) AS precio_venta_caja_promedio,
@@ -74,7 +74,7 @@ class preciosModel extends mainModel
         }
 
         $sql .= "
-            GROUP BY m.med_id, m.med_nombre_quimico, p.pr_razon_social
+            GROUP BY m.med_id, m.med_nombre_quimico, COALESCE(p.pr_razon_social, 'Proveedor eliminado')
             HAVING SUM(CASE WHEN lm.lm_estado = 'activo' AND lm.lm_cant_actual_unidades > 0 THEN 1 ELSE 0 END) > 0
             ORDER BY m.med_nombre_quimico ASC
         ";

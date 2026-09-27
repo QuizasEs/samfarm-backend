@@ -43,7 +43,7 @@ class PDFFacturaGenerator {
         $pdf->Cell(0, 6, strtoupper($factura['ve_tipo_documento'] ?? 'NOTA DE VENTA'), 0, 1, 'C');
 
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Cell(0, 5, 'Nº: ' . ($factura['fa_numero'] ?? ''), 0, 1, 'L');
+        $pdf->Cell(0, 5, 'Nº: ' . ($factura['fa_numero_control'] ?? ''), 0, 1, 'L');
         $pdf->Cell(0, 5, 'Fecha: ' . ($factura['fa_fecha_emision'] ?? ''), 0, 1, 'L');
         $pdf->Cell(0, 5, 'Cliente: ' . (($factura['cl_nombres'] ?? '') . ' ' . ($factura['cl_apellido_paterno'] ?? '')), 0, 1, 'L');
         $pdf->Ln(4);

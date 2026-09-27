@@ -389,7 +389,7 @@ class inventarioModel extends mainModel
                 vd.vd_nombre AS via_administracion,
                 s.su_nombre AS sucursal_nombre,
                 -- Obtener proveedor desde los lotes activos
-                (
+                COALESCE((
                     SELECT COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor')
                     FROM lote_medicamento lm
                     INNER JOIN proveedores p ON p.pr_id = lm.pr_id
@@ -398,7 +398,7 @@ class inventarioModel extends mainModel
                     AND lm.lm_estado = 'activo'
                     AND lm.pr_id IS NOT NULL
                     LIMIT 1
-                ) AS proveedor
+                ), 'Proveedor eliminado') AS proveedor
             FROM inventarios i
             INNER JOIN medicamento m ON m.med_id = i.med_id
             INNER JOIN sucursales s ON s.su_id = i.su_id
@@ -441,7 +441,7 @@ class inventarioModel extends mainModel
                 vd.vd_nombre AS via_administracion,
                 GROUP_CONCAT(DISTINCT s.su_nombre ORDER BY s.su_nombre SEPARATOR ', ') AS sucursal_nombre,
                 -- Obtener proveedor desde los lotes activos
-                (
+                COALESCE((
                     SELECT COALESCE(p.pr_razon_social, p.pr_nombre_comercial, 'Sin proveedor')
                     FROM lote_medicamento lm
                     INNER JOIN proveedores p ON p.pr_id = lm.pr_id
@@ -451,7 +451,7 @@ class inventarioModel extends mainModel
                     GROUP BY lm.pr_id
                     ORDER BY COUNT(*) DESC
                     LIMIT 1
-                ) AS proveedor
+                ), 'Proveedor eliminado') AS proveedor
             FROM inventarios i
             INNER JOIN medicamento m ON m.med_id = i.med_id
             INNER JOIN sucursales s ON s.su_id = i.su_id
@@ -804,7 +804,7 @@ class inventarioModel extends mainModel
         $sql = "
             SELECT 
                 m.med_nombre_quimico,
-                p.pr_razon_social AS proveedor,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor,
                 SUM(dv.dv_cantidad) AS unidades_vendidas,
                 ROUND(SUM(dv.dv_subtotal), 2) AS ingresos_totales,
                 ROUND(SUM(dv.dv_cantidad * lm.lm_precio_compra), 2) AS costo_ventas,

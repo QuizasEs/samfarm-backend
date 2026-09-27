@@ -407,7 +407,7 @@ class clienteModel extends mainModel
                     SELECT 
                         m.med_nombre_quimico,
                         m.med_version_comercial,
-                        p.pr_razon_social as proveedor,
+                        COALESCE(p.pr_razon_social, 'Proveedor eliminado') as proveedor,
                         ff.ff_nombre as forma_farmaceutica,
                         COUNT(dv.dv_id) as veces_comprado,
                         SUM(dv.dv_cantidad) as total_unidades,

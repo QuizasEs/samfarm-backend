@@ -157,16 +157,16 @@ class clienteController extends clienteModel
                             <td>
                                 <div class="tda">
                                     <button type="button"
-                                    class="btn btn-gho btn-ico btn-sm"
+                                    class="btn btn-dan"
                                     title="Editar"
                                     onclick="event.stopPropagation(); ClientesModals.abrirModalEditar(' . $row['cl_id'] . ')">
-                                        <ion-icon name="pencil-outline"></ion-icon>
+                                        <ion-icon name="pencil-outline"></ion-icon>Editar
                                     </button>
                                     ' . ($rol_usuario != 3 ? '<button type="button"
-                                    class="btn btn-ico btn-sm ' . ($row['cl_estado'] == 1 ? 'btn-wouc' : 'btn-souc') . '"
+                                    class="btn btn ' . ($row['cl_estado'] == 1 ? 'btn-wouc' : 'btn-souc') . '"
                                     title="' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '"
                                     onclick="event.stopPropagation(); ClientesModals.toggleEstado(' . $row['cl_id'] . ', ' . $row['cl_estado'] . ')">
-                                        <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-outline' : 'checkmark-outline') . '"></ion-icon>
+                                        <ion-icon name="' . ($row['cl_estado'] == 1 ? 'close-outline' : 'checkmark-outline') . '"></ion-icon>' . ($row['cl_estado'] == 1 ? 'Desactivar' : 'Activar') . '
                                     </button>' : '') . '
                                 </div>
                             </td>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<facturaElectronicaCompraVenta xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="facturaElectronicaCompraVenta.xsd">
+  <cabecera>
+    <nitEmisor>6006007013</nitEmisor>
+    <razonSocialEmisor>Farmacias Sasuke</razonSocialEmisor>
+    <municipio>La paz</municipio>
+    <telefono>77777862</telefono>
+    <numeroFactura>6</numeroFactura>
+    <cuf>0000000000000000000000000000000000000000000000000000000000</cuf>
+    <cufd>FBQmVCSDlBR0E=A4QTM4QzY5Q0U=QmU6ZXRQYkphVUMzczNjQxQjY2Rj</cufd>
+    <codigoSucursal>1</codigoSucursal>
+    <direccion>Final Los Andes</direccion>
+    <codigoPuntoVenta>0</codigoPuntoVenta>
+    <fechaEmision>2026-07-24T07:00:23-04:00</fechaEmision>
+    <nombreRazonSocial>Consumidor Final</nombreRazonSocial>
+    <codigoTipoDocumentoIdentidad>1</codigoTipoDocumentoIdentidad>
+    <numeroDocumento>0</numeroDocumento>
+    <complemento xsi:nil="true"/>
+    <codigoCliente>0</codigoCliente>
+    <codigoMetodoPago>1</codigoMetodoPago>
+    <numeroTarjeta xsi:nil="true"/>
+    <montoTotal>180.00</montoTotal>
+    <montoTotalSujetoIva>180.00</montoTotalSujetoIva>
+    <codigoMoneda>1</codigoMoneda>
+    <tipoCambio>1.0000</tipoCambio>
+    <montoTotalMoneda>180.00</montoTotalMoneda>
+    <montoGiftCard xsi:nil="true"/>
+    <descuentoAdicional>0.00</descuentoAdicional>
+    <codigoExcepcion xsi:nil="true"/>
+    <cafc xsi:nil="true"/>
+    <leyenda>Ley N 453: Tienes derecho a recibir informacion sobre las caracteristicas y contenidos de los servicios que utilices.</leyenda>
+    <usuario>sistemas</usuario>
+    <codigoDocumentoSector>1</codigoDocumentoSector>
+  </cabecera>
+    <detalle>
+      <actividadEconomica>477000</actividadEconomica>
+      <codigoProductoSin>99900</codigoProductoSin>
+      <codigoProducto>84942</codigoProducto>
+      <descripcion>prueba3</descripcion>
+      <cantidad>4</cantidad>
+      <unidadMedida>1</unidadMedida>
+      <precioUnitario>45.00</precioUnitario>
+      <montoDescuento>0.00</montoDescuento>
+      <subTotal>180.00</subTotal>
+      <numeroSerie></numeroSerie>
+      <numeroImei></numeroImei>
+    </detalle>
+</facturaElectronicaCompraVenta>

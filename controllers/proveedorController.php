@@ -8,6 +8,11 @@ if ($peticionAjax) {
 
 class proveedorController extends proveedorModel
 {
+    /* proveedores predeterminados del sistema que no pueden eliminarse */
+    const PROVEEDORES_PROTEGIDOS = [
+        1 => 'N/A'
+    ];
+
     public function paginado_proveedor_controller($pagina, $registros, $url, $busqueda = "", $f1 = "", $f2 = "", $f3 = "", $f4 = "", $f5 = "")
     {
         $rol_usuario = $_SESSION['rol_smp'] ?? 0;
@@ -86,7 +91,7 @@ class proveedorController extends proveedorModel
                             <th>PROVEEDOR</th>
                             <th>CONTACTO</th>
                             <th>ESTADÍSTICAS</th>
-                            <th>ESTADO</th>
+                            <th>FECHA</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
@@ -99,10 +104,6 @@ class proveedorController extends proveedorModel
 
             foreach ($datos as $row) {
                 $nombre_completo = $row['pr_razon_social'] ?? '';
-
-                $estado_html = $row['pr_estado'] == 1
-                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="badge bgry"><ion-icon name="ban-outline"></ion-icon> Inactivo</span>';
 
                 $ultima_compra = $row['ultima_compra']
                     ? date('d/m/Y', strtotime($row['ultima_compra']))
@@ -129,19 +130,25 @@ class proveedorController extends proveedorModel
                             <div class="td-sub">' . htmlspecialchars($row['pr_correo'] ?? '-') . '</div>
                         </td>
                         <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
-                            <div class="td-main"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . ' compras</strong></div>
-                            <div class="td-sub">Última: ' . $ultima_compra . '</div>
+                            <div class="td-main"><strong style="color:#1976D2;">' . number_format($row['total_compras']) . ' lotes</strong></div>
+                            <div class="td-sub">Último: ' . $ultima_compra . '</div>
                         </td>
                         <td onclick="ProveedoresModals.verDetalle(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
-                            ' . $estado_html . '
-                            <div class="td-sub">Registrado: ' . date('d/m/Y', strtotime($row['pr_creado_en'])) . '</div>
+                            <div class="td-main">' . date('d/m/Y', strtotime($row['pr_creado_en'])) . '</div>
+                            <div class="td-sub">Fecha de registro</div>
                         </td>
                         <td class="buttons">
                             <a href="javascript:void(0)"
                             class="btn btn-def"
                             title="Editar proveedor"
                             onclick="event.stopPropagation(); ProveedoresModals.abrirEdicion(' . $row['pr_id'] . ')">
-                                <ion-icon name="create-outline"></ion-icon>editar
+                                <ion-icon name="create-outline"></ion-icon>Editar
+                            </a>
+                            <a href="javascript:void(0)"
+                            class="btn btn-war"
+                            title="Eliminar proveedor"
+                            onclick="event.stopPropagation(); ProveedoresModals.eliminarProveedor(' . $row['pr_id'] . ', \'' . addslashes($nombre_completo) . '\')">
+                                <ion-icon name="trash-outline"></ion-icon>Eliminar
                             </a>
                         </td>
                     </tr>
@@ -189,10 +196,6 @@ class proveedorController extends proveedorModel
 
             $nombre_completo = $proveedor['pr_razon_social'] ?? '';
 
-            $promedio = $proveedor['total_compras'] > 0
-                ? $proveedor['monto_total_compras'] / $proveedor['total_compras']
-                : 0;
-
             $response = [
                 'nombre_completo' => $nombre_completo,
                 'nit' => $proveedor['pr_nit'] ?? '-',
@@ -201,11 +204,11 @@ class proveedorController extends proveedorModel
                 'direccion' => $proveedor['pr_nombre_comercial'] ?? '-',
                 'fecha_registro' => date('d/m/Y', strtotime($proveedor['pr_creado_en'])),
                 'estado' => $proveedor['pr_estado'] == 1 ? 'Activo' : 'Inactivo',
-                'total_compras' => (int)$proveedor['total_compras'],
-                'monto_total' => (float)$proveedor['monto_total_compras'],
                 'total_lotes' => (int)$proveedor['total_lotes'],
+                'valor_ingresado' => (float)$proveedor['valor_ingresado'],
+                'unidades_ingresadas' => (int)$proveedor['unidades_ingresadas'],
+                'unidades_actuales' => (int)$proveedor['unidades_actuales'],
                 'ultima_compra' => $proveedor['ultima_compra'] ? date('d/m/Y', strtotime($proveedor['ultima_compra'])) : 'Nunca',
-                'promedio' => $promedio,
                 'antiguedad' => (int)$proveedor['dias_antiguedad'],
                 'ultimas_compras' => $ultimasCompras,
                 'top_medicamentos' => $topMedicamentos
@@ -516,6 +519,115 @@ class proveedorController extends proveedorModel
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
                 'texto' => 'Ocurrió un error al actualizar',
+                'Tipo' => 'error'
+            ];
+        }
+
+        echo json_encode($alerta);
+        exit();
+    }
+
+    /* controlador para eliminar un proveedor */
+    public function eliminar_proveedor_controller()
+    {
+        $rol_usuario = $_SESSION['rol_smp'] ?? 0;
+
+        if ($rol_usuario == 3) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Acceso denegado',
+                'texto' => 'No cuenta con los privilegios necesarios para eliminar proveedores',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $pr_id = mainModel::limpiar_cadena($_POST['PrId_del'] ?? '');
+
+        if (empty($pr_id) || !is_numeric($pr_id) || $pr_id <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'El identificador del proveedor no es válido',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $pr_id = (int)$pr_id;
+
+        /* los proveedores predeterminados del sistema no se pueden eliminar */
+        if (isset(self::PROVEEDORES_PROTEGIDOS[$pr_id])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Proveedor protegido',
+                'texto' => 'El proveedor ' . self::PROVEEDORES_PROTEGIDOS[$pr_id] . ' es predeterminado del sistema y no puede eliminarse',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $verificar = self::obtener_proveedor_por_id_model($pr_id);
+
+        if ($verificar->rowCount() == 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'El proveedor no existe',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* no se elimina si tiene medicamentos asociados en la tabla medicamento */
+        $total_medicamentos = self::contar_medicamentos_proveedor_model($pr_id);
+
+        if ($total_medicamentos > 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'No se puede eliminar',
+                'texto' => 'El proveedor tiene ' . $total_medicamentos . ' medicamento(s) asociado(s), desvincule los medicamentos del proveedor e intente nuevamente',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        try {
+            $eliminados = self::eliminar_proveedor_model($pr_id);
+
+            if ($eliminados > 0) {
+                $alerta = [
+                    'Alerta' => 'recargar',
+                    'Titulo' => 'Proveedor eliminado',
+                    'texto' => 'El proveedor se eliminó correctamente',
+                    'Tipo' => 'success'
+                ];
+            } elseif (self::contar_medicamentos_proveedor_model($pr_id) > 0) {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'No se puede eliminar',
+                    'texto' => 'El proveedor tiene medicamentos asociados, desvincule los medicamentos del proveedor e intente nuevamente',
+                    'Tipo' => 'error'
+                ];
+            } else {
+                $alerta = [
+                    'Alerta' => 'simple',
+                    'Titulo' => 'Error',
+                    'texto' => 'No se pudo eliminar el proveedor',
+                    'Tipo' => 'error'
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("Error eliminando proveedor: " . $e->getMessage());
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'Ocurrió un error al eliminar el proveedor',
                 'Tipo' => 'error'
             ];
         }

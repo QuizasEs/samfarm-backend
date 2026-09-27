@@ -677,14 +677,14 @@ class ventaModel extends mainModel
     {
         $db = mainModel::conectar();
         $stmt = $db->prepare("
-            INSERT INTO factura (ve_id, cl_id, us_id, su_id, fa_numero, fa_monto_total, fa_creado_en)
-            VALUES (:ve_id, :cl_id, :us_id, :su_id, :fa_numero, :fa_monto_total, NOW())
+            INSERT INTO factura (ve_id, cl_id, us_id, su_id, fa_numero_control, fa_monto_total, fa_creado_en)
+            VALUES (:ve_id, :cl_id, :us_id, :su_id, :fa_numero_control, :fa_monto_total, NOW())
         ");
         $stmt->bindParam(":ve_id", $datos['ve_id']);
         $stmt->bindParam(":cl_id", $datos['cl_id']);
         $stmt->bindParam(":us_id", $datos['us_id']);
         $stmt->bindParam(":su_id", $datos['su_id']);
-        $stmt->bindParam(":fa_numero", $datos['fa_numero']);
+        $stmt->bindParam(":fa_numero_control", $datos['fa_numero_control']);
         $stmt->bindParam(":fa_monto_total", $datos['fa_monto_total']);
         $stmt->execute();
         return (int)$db->lastInsertId();

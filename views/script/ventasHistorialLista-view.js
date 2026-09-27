@@ -111,7 +111,7 @@ const VentasHistorialModals = (function() {
                 document.getElementById('detalleVendedor').textContent = data.venta.vendedor_nombre;
                 document.getElementById('detalleSucursal').textContent = data.venta.sucursal_nombre;
                 document.getElementById('detalleCaja').textContent = data.venta.caja_nombre;
-                document.getElementById('detalleNumeroFactura').textContent = data.venta.fa_numero || '-';
+                document.getElementById('detalleNumeroFactura').textContent = data.venta.fa_numero_control || '-';
 
                 // Llenar totales
                 document.getElementById('detalleSubtotal').textContent = utils.formatearMoneda(data.venta.ve_subtotal);

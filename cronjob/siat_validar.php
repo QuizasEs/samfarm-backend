@@ -45,7 +45,7 @@ try {
 
     // 2) Validar facturas pendientes de recepción (Paso 10)
     $stmt = $db->query("
-        SELECT fe.fa_id, fe.fe_ticket, f.fa_cuf, f.fa_numero, v.su_id
+        SELECT fe.fa_id, fe.fe_ticket, f.fa_cuf, f.fa_numero_control, v.su_id
         FROM facturacion_electronica fe
         JOIN factura f ON f.fa_id = fe.fa_id
         JOIN ventas v ON v.ve_id = f.ve_id

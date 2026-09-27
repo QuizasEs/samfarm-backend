@@ -22,7 +22,7 @@ class ventasHistorialModel extends mainModel
                     s.su_nombre AS sucursal_nombre,
                     COALESCE(cj.caja_nombre, '') AS caja_nombre,
                     COALESCE(f.fa_id, 0) AS fa_id,
-                    COALESCE(f.fa_numero, '') AS fa_numero,
+                    COALESCE(f.fa_numero_control, '') AS fa_numero_control,
                     (SELECT COUNT(*) FROM detalle_venta dv WHERE dv.ve_id = v.ve_id AND dv.dv_estado = 1) AS cantidad_items
                 FROM ventas v
                 INNER JOIN usuarios u ON u.us_id = v.us_id
@@ -188,7 +188,7 @@ class ventasHistorialModel extends mainModel
                 
                 -- Factura
                 f.fa_id,
-                f.fa_numero,
+                f.fa_numero_control,
                 f.fa_codigo_control,
                 f.fa_cuf
                 
@@ -304,7 +304,7 @@ class ventasHistorialModel extends mainModel
                 v.ve_impuesto AS 'Impuestos (Bs)',
                 v.ve_total AS 'Total (Bs)',
                 COALESCE(v.ve_tipo_documento, 'venta') AS 'Tipo Documento',
-                f.fa_numero AS 'N° Factura'
+                f.fa_numero_control AS 'N° Factura'
             FROM ventas v
             INNER JOIN usuarios u ON u.us_id = v.us_id
             INNER JOIN sucursales s ON s.su_id = v.su_id

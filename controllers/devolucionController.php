@@ -85,7 +85,7 @@ class devolucionController extends devolucionModel
                 'fa_id' => $venta['fa_id'],
                 'su_id' => $venta['su_id'],
                 'numero_documento' => $venta['ve_numero_documento'],
-                'numero_factura' => $venta['fa_numero'],
+                'numero_factura' => $venta['fa_numero_control'],
                 'fecha' => date('d/m/Y H:i', strtotime($venta['ve_fecha_emision'])),
                 'cliente' => $nombre_cliente,
                 'carnet' => $venta['cl_carnet'] ?? 'S/N',

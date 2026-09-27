@@ -400,8 +400,8 @@ class compraHistorialModel extends mainModel
     {
         $sql = "SELECT 
                 ic.*,
-                p.pr_razon_social AS proveedor_nombre,
-                p.pr_nit AS proveedor_nit,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor_nombre,
+                COALESCE(p.pr_nit, 'Sin NIT') AS proveedor_nit,
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre
             FROM informes_compra ic
@@ -430,7 +430,8 @@ class compraHistorialModel extends mainModel
             $whereParts[] = "(
                 ic.ic_numero_compra LIKE '%$busqueda%' OR
                 ic.ic_numero_factura LIKE '%$busqueda%' OR
-                p.pr_razon_social LIKE '%$busqueda%'
+                p.pr_razon_social LIKE '%$busqueda%' OR
+                ic.ic_config_json LIKE '%$busqueda%'
             )";
         }
 
@@ -459,8 +460,8 @@ class compraHistorialModel extends mainModel
                 ic.ic_fecha_compra,
                 ic.ic_numero_factura,
                 ic.ic_total,
-                p.pr_razon_social AS proveedor_nombre,
-                p.pr_nit AS proveedor_nit,
+                COALESCE(p.pr_razon_social, 'Proveedor eliminado') AS proveedor_nombre,
+                COALESCE(p.pr_nit, 'Sin NIT') AS proveedor_nit,
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre,
                 ic.ic_cantidad_lotes
@@ -489,7 +490,8 @@ class compraHistorialModel extends mainModel
             $whereParts[] = "(
                 ic.ic_numero_compra LIKE '%$busqueda%' OR
                 ic.ic_numero_factura LIKE '%$busqueda%' OR
-                p.pr_razon_social LIKE '%$busqueda%'
+                p.pr_razon_social LIKE '%$busqueda%' OR
+                ic.ic_config_json LIKE '%$busqueda%'
             )";
         }
 

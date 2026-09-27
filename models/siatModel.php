@@ -421,9 +421,17 @@ class siatModel extends mainModel
         $db = mainModel::conectar();
         $stmt = $db->prepare("
             SELECT v.ve_total, v.ve_fecha_emision AS ve_fecha,
+                   v.ve_codigo_moneda, v.ve_tipo_cambio,
                    c.cl_carnet, c.cl_nombres, c.cl_apellido_paterno, c.cl_id,
+                   c.cl_tipo_documento,
                    ce.ce_nit, ce.ce_nombre, ce.ce_direccion, ce.ce_telefono,
-                   f.fa_numero, f.fa_cuf,
+                   ce.ce_municipio, ce.ce_codigo_actividad,
+                   f.fa_numero_control, f.fa_cuf,
+                   f.fa_numero_siat, f.fa_cufd, f.fa_cufd_control,
+                   f.fa_leyenda, f.fa_monto_sujeto_iva, f.fa_descuento_adicional,
+                   f.fa_codigo_metodo_pago, f.fa_numero_tarjeta,
+                   f.fa_codigo_moneda, f.fa_tipo_cambio,
+                   f.fa_doc_sector, f.fa_codigo_emision, f.fa_tipo_factura, f.fa_modalidad,
                    sc.sc_cufd, sc.sc_cufd_control,
                    u.us_nombres AS us_nombre,
                    v.su_id
@@ -445,6 +453,7 @@ class siatModel extends mainModel
         $db = mainModel::conectar();
         $sql = "
             SELECT dv.dv_cantidad, dv.dv_precio_unitario, dv.dv_descuento, dv.dv_subtotal,
+                   dv.dv_unidad_medida_sin,
                    m.med_id, m.med_nombre_quimico AS med_nombre
             FROM detalle_venta dv
             JOIN medicamento m ON m.med_id = dv.med_id
@@ -468,6 +477,21 @@ class siatModel extends mainModel
         $sucursal = $codigos['sucursal'];
         $puntoVenta = $codigos['punto_venta'];
 
+        // Usar datos de la BD en lugar de hardcoded
+        $municipio = $datos['ce_municipio'] ?? 'La Paz';
+        $codigoActividad = $datos['ce_codigo_actividad'] ?? '477000';
+        $codigoMoneda = $datos['fa_codigo_moneda'] ?? ($datos['ve_codigo_moneda'] ?? '1');
+        $tipoCambio = $datos['fa_tipo_cambio'] ?? ($datos['ve_tipo_cambio'] ?? 1.0000);
+        $docSector = $datos['fa_doc_sector'] ?? '1';
+        $codigoEmision = $datos['fa_codigo_emision'] ?? '1';
+        $tipoFactura = $datos['fa_tipo_factura'] ?? 'factura';
+        $modalidad = $datos['fa_modalidad'] ?? 1;
+
+        // Tipo documento cliente desde BD
+        $carnet = $datos['cl_carnet'] ?? '0';
+        $tipoDocMap = ['CI' => 1, 'NIT' => 5, 'CE' => 4, 'Pasaporte' => 3];
+        $tipoDoc = $tipoDocMap[$datos['cl_tipo_documento'] ?? 'CI'] ?? 1;
+
         $xml = new SimpleXMLElement(
             '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
                 '<facturaComputarizadaCompraVenta ' .
@@ -479,40 +503,42 @@ class siatModel extends mainModel
         $cab = $xml->addChild('cabecera');
         $cab->addChild('nitEmisor', $datos['ce_nit']);
         $cab->addChild('razonSocialEmisor', $datos['razon_social'] ?? $datos['ce_nombre']);
-        $cab->addChild('municipio', 'La Paz');
+        $cab->addChild('municipio', $municipio);
         $cab->addChild('telefono', $datos['ce_telefono']);
-        $cab->addChild('numeroFactura', $datos['fa_numero']);
+        $cab->addChild('numeroFactura', $datos['fa_numero_control']);
         $cab->addChild('cuf', $datos['fa_cuf']);
-        $cab->addChild('cufd', $datos['sc_cufd']);
+        $cab->addChild('cufd', $datos['sc_cufd'] ?? $datos['fa_cufd']);
         $cab->addChild('codigoSucursal', $sucursal);
         $cab->addChild('direccion', $datos['ce_direccion']);
         $cab->addChild('codigoPuntoVenta', $puntoVenta);
         $cab->addChild('fechaEmision', date('c', strtotime($datos['ve_fecha'])));
         $nombre = trim(($datos['cl_nombres'] ?? '') . ' ' . ($datos['cl_apellido_paterno'] ?? ''));
         $cab->addChild('nombreRazonSocial', $nombre !== '' ? $nombre : 'SIN NOMBRE');
-        $carnet = $datos['cl_carnet'] ?? '0';
-        $tipoDoc = (ctype_digit((string) $carnet) && strlen($carnet) === 13) ? 1 : 5;
         $cab->addChild('codigoTipoDocumentoIdentidad', $tipoDoc);
         $cab->addChild('numeroDocumento', $carnet !== '' ? $carnet : '0');
         $cab->addChild('complemento', '');
         $cab->addChild('codigoCliente', $datos['cl_id'] ?? 0);
-        $cab->addChild('codigoMetodoPago', 1);
+        $cab->addChild('codigoMetodoPago', $datos['fa_codigo_metodo_pago'] ?? 1);
+        $cab->addChild('numeroTarjeta', $datos['fa_numero_tarjeta'] ?? '');
         $cab->addChild('montoTotal', $datos['ve_total']);
-        $cab->addChild('montoTotalSujetoIva', $datos['ve_total']);
-        $cab->addChild('codigoMoneda', 1);
-        $cab->addChild('tipoCambio', 1);
+        $cab->addChild('montoTotalSujetoIva', $datos['fa_monto_sujeto_iva'] ?? $datos['ve_total']);
+        $cab->addChild('descuentoAdicional', $datos['fa_descuento_adicional'] ?? 0.00);
+        $cab->addChild('codigoMoneda', $codigoMoneda);
+        $cab->addChild('tipoCambio', $tipoCambio);
         $cab->addChild('montoTotalMoneda', $datos['ve_total']);
-        $cab->addChild('leyenda', $leyenda);
+        $cab->addChild('leyenda', $leyenda ?? $datos['fa_leyenda'] ?? '');
         $cab->addChild('usuario', $datos['us_nombre'] ?? '');
+        $cab->addChild('codigoDocumentoSector', $docSector);
+        $cab->addChild('codigoEmision', $codigoEmision);
 
         foreach ($detalles as $d) {
             $det = $xml->addChild('detalle');
-            $det->addChild('actividadEconomica', '477000');
+            $det->addChild('actividadEconomica', $codigoActividad);
             $det->addChild('codigoProductoSin', $d['codigo_sin'] ?? '99900');
             $det->addChild('codigoProducto', $d['med_id']);
             $det->addChild('descripcion', $d['med_nombre']);
             $det->addChild('cantidad', $d['dv_cantidad']);
-            $det->addChild('unidadMedida', 1);
+            $det->addChild('unidadMedida', $d['dv_unidad_medida_sin'] ?? 1);
             $det->addChild('precioUnitario', $d['dv_precio_unitario']);
             $det->addChild('montoDescuento', $d['dv_descuento'] ?? 0);
             $det->addChild('subTotal', $d['dv_subtotal']);
@@ -575,17 +601,25 @@ class siatModel extends mainModel
         $estado = $r->codigoEstado ?? null;
         $ticket = $r->codigoRecepcion ?? null;
 
+        $estadoLocal = ($estado == 908) ? 'VALIDADO' : 'RECHAZADO';
+        $mensajes = isset($r->mensajesList) ? json_encode($r->mensajesList) : null;
+
         $ins = $db->prepare("
             INSERT INTO facturacion_electronica
-            (fa_id, fe_cuf, fe_estado_siat, fe_ticket, fe_fecha_envio, fe_payload, fe_tipo_emision)
-            VALUES (:fa_id, :cuf, :estado, :ticket, NOW(), :payload, 1)
+            (fa_id, fe_cuf, fe_estado_siat, fe_ticket, fe_fecha_envio, fe_payload, fe_tipo_emision,
+             fe_estado_local, fe_mensajes, fe_intentos, fe_hash_archivo, fe_ultimo_intento)
+            VALUES (:fa_id, :cuf, :estado, :ticket, NOW(), :payload, 1,
+                    :estado_local, :mensajes, 0, :hash, NOW())
         ");
         $ins->execute([
-            ':fa_id'   => $faId,
-            ':cuf'     => $cuf,
-            ':estado'  => $estado,
-            ':ticket'  => $ticket,
-            ':payload' => $xmlString
+            ':fa_id'        => $faId,
+            ':cuf'          => $cuf,
+            ':estado'       => $estado,
+            ':ticket'       => $ticket,
+            ':payload'      => $xmlString,
+            ':estado_local' => $estadoLocal,
+            ':mensajes'     => $mensajes,
+            ':hash'         => $hash,
         ]);
 
         if ($estado == 908) {
@@ -599,15 +633,21 @@ class siatModel extends mainModel
     public static function emitirEnContingencia($faId, $cuf, $xmlString, $suId)
     {
         $db = mainModel::conectar();
+        $xmlGzip = gzencode($xmlString, 9);
+        $hash = hash('sha256', $xmlGzip);
+
         $ins = $db->prepare("
             INSERT INTO facturacion_electronica
-            (fa_id, fe_cuf, fe_estado_siat, fe_payload, fe_tipo_emision, fe_fecha_envio)
-            VALUES (:fa_id, :cuf, 'CONTINGENCIA', :payload, 2, NOW())
+            (fa_id, fe_cuf, fe_estado_siat, fe_payload, fe_tipo_emision, fe_fecha_envio,
+             fe_estado_local, fe_intentos, fe_hash_archivo, fe_ultimo_intento)
+            VALUES (:fa_id, :cuf, 'CONTINGENCIA', :payload, 2, NOW(),
+                    'PENDIENTE', 0, :hash, NOW())
         ");
         $ins->execute([
             ':fa_id'   => $faId,
             ':cuf'     => $cuf,
-            ':payload' => $xmlString
+            ':payload' => $xmlString,
+            ':hash'    => $hash,
         ]);
     }
 
@@ -925,7 +965,7 @@ class siatModel extends mainModel
             $root = $resp->RespuestaListaParametricas ?? null;
             $lista = $root->listaUnidadesMedida ?? [];
             $lista = self::aLista($lista);
-            self::guardarUnidadesMedida($lista);
+            self::guardarParametrica($lista, 'UNIDAD_MEDIDA');
             return count($lista);
         } catch (Exception $e) {
             error_log("SIAT sincronizarUnidadesMedida: " . $e->getMessage());
@@ -933,15 +973,15 @@ class siatModel extends mainModel
         }
     }
 
-    private static function guardarUnidadesMedida($lista)
+    private static function guardarParametrica($lista, $tipo)
     {
         $db = mainModel::conectar();
         $db->beginTransaction();
         try {
-            $db->exec("DELETE FROM siat_unidades_medida");
             $stmt = $db->prepare("
-                INSERT IGNORE INTO siat_unidades_medida (codigo, descripcion)
-                VALUES (:cod, :desc)
+                INSERT INTO siat_parametricas (par_tipo, par_codigo, par_descripcion, par_vigente, par_sincronizado_en)
+                VALUES (:tipo, :cod, :desc, 1, NOW())
+                ON DUPLICATE KEY UPDATE par_descripcion = :desc, par_vigente = 1, par_sincronizado_en = NOW()
             ");
             $vistos = [];
             foreach ($lista as $u) {
@@ -949,14 +989,15 @@ class siatModel extends mainModel
                 if (isset($vistos[$cod])) continue;
                 $vistos[$cod] = true;
                 $stmt->execute([
-                    ':cod' => $cod,
+                    ':tipo' => $tipo,
+                    ':cod'  => $cod,
                     ':desc' => $u->descripcion ?? '',
                 ]);
             }
             $db->commit();
         } catch (Exception $e) {
             $db->rollBack();
-            error_log("SIAT guardarUnidadesMedida: " . $e->getMessage());
+            error_log("SIAT guardarParametrica($tipo): " . $e->getMessage());
         }
     }
 
@@ -964,14 +1005,14 @@ class siatModel extends mainModel
     {
         $db = mainModel::conectar();
         $stmt = $db->prepare("
-            SELECT descripcion FROM siat_leyendas
-            WHERE codigo_actividad = :act
-            ORDER BY id DESC
+            SELECT ley_texto FROM siat_leyendas
+            WHERE ley_codigo_actividad = :act
+            ORDER BY ley_id DESC
             LIMIT 1
         ");
         $stmt->execute([':act' => $codigoActividad]);
         $row = $stmt->fetch(PDO::FETCH_OBJ);
-        return ($row && !empty($row->descripcion)) ? $row->descripcion : '';
+        return ($row && !empty($row->ley_texto)) ? $row->ley_texto : '';
     }
 
     public static function validarRecepcionFactura($ticket, $suId)

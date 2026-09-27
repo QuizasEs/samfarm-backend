@@ -11,7 +11,7 @@ define('SIAT_MODO', 'PILOTO');
 define('SIAT_AMBIENTE', 2);
 define('SIAT_MODALIDAD', 1);
 define('SIAT_COD_SISTEMA', '373641B66F08A38C69CE');
-define('SIAT_TOKEN', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXJ0aW55YW5hMTc0QGdtYWlsLmNvbSIsImNvZGlnb1Npc3RlbWEiOiIzNzM2NDFCNjZGMDhBMzhDNjlDRSIsIm5pdCI6Ikg0c0lBQUFBQUFBQUFETXpNREF6TURBM01EUUdBTWxsYVhNS0FBQUEiLCJpZCI6NTA2MTYyNCwiZXhwIjoxNzkyNzg0OTI0LCJpYXQiOjE3ODYzMTkyOTQsIm5pdERlbGVnYWRvIjo2MDA2MDA3MDEzLCJzdWJzaXN0ZW1hIjoiU0ZFIn0.v8f1k7jyOF7lc7CaRdlAB799OGSqBI8gk33zwSUNN5Fb_sJvzXJr8oCV8bFBpQCaQS8aSIKcFSNoiHhGFygTAgeyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXJ0aW55YW5hMTc0QGdtYWlsLmNvbSIsImNvZGlnb1Npc3RlbWEiOiIzNzM2NDFCNjZGMDhBMzhDNjlDRSIsIm5pdCI6Ikg0c0lBQUFBQUFBQUFETXpNREF6TURBM01EUUdBTWxsYVhNS0FBQUEiLCJpZCI6NTA2MTYyNCwiZXhwIjoxNzkyNzg0OTI0LCJpYXQiOjE3ODYzMTkyOTQsIm5pdERlbGVnYWRvIjo2MDA2MDA3MDEzLCJzdWJzaXN0ZW1hIjoiU0ZFIn0.v8f1k7jyOF7lc7CaRdlAB799OGSqBI8gk33zwSUNN5Fb_sJvzXJr8oCV8bFBpQCaQS8aSIKcFSNoiHhGFygTAg');
+define('SIAT_TOKEN', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtYXJ0aW55YW5hMTc0QGdtYWlsLmNvbSIsImNvZGlnb1Npc3RlbWEiOiIzNzM2NDFCNjZGMDhBMzhDNjlDRSIsIm5pdCI6Ikg0c0lBQUFBQUFBQUFETXpNREF6TURBM01EUUdBTWxsYVhNS0FBQUEiLCJpZCI6NTA2MTYyNCwiZXhwIjoxNzkyNzg0OTI0LCJpYXQiOjE3ODYzMTkyOTQsIm5pdERlbGVnYWRvIjo2MDA2MDA3MDEzLCJzdWJzaXN0ZW1hIjoiU0ZFIn0.v8f1k7jyOF7lc7CaRdlAB799OGSqBI8gk33zwSUNN5Fb_sJvzXJr8oCV8bFBpQCaQS8aSIKcFSNoiHhGFygTAg');
 define('SIAT_NIT', '6006007013');
 
 define('SIAT_URLS', [
@@ -99,21 +99,41 @@ echo "   fechaInicio:  {$fechaInicioEvento}\n";
 echo "   fechaFin:     {$fechaFinEvento}\n";
 echo "   cufdEvento:   {$cufdEvento}\n\n";
 
+// 5. Registrar evento en BD local (siat_eventos) ANTES de enviar al SIN
+$evCodigo = 'EVT-' . date('YmdHis') . '-' . $suId . '-' . $codigoEvento;
+$stmt = $pdo->prepare("
+    INSERT INTO siat_eventos (su_id, ev_codigo, ev_codigo_evento, ev_cufd, ev_cufd_evento,
+                              ev_fecha_inicio, ev_fecha_fin, ev_descripcion, ev_estado, ev_creado_en)
+    VALUES (:su_id, :ev_codigo, :ev_codigo_evento, :ev_cufd, :ev_cufd_evento,
+            :ev_fecha_inicio, :ev_fecha_fin, :ev_descripcion, 'registrado', NOW())
+");
+$stmt->execute([
+    ':su_id'            => $suId,
+    ':ev_codigo'        => $evCodigo,
+    ':ev_codigo_evento' => (string)$codigoEvento,
+    ':ev_cufd'          => $cufd,
+    ':ev_cufd_evento'   => $cufdEvento,
+    ':ev_fecha_inicio'  => $fechaInicioEvento,
+    ':ev_fecha_fin'     => $fechaFinEvento,
+    ':ev_descripcion'   => $descripcionEvento,
+]);
+echo "✅ Evento guardado en siat_eventos con ev_codigo: {$evCodigo}\n\n";
+
 $solicitud = [
     'SolicitudEventoSignificativo' => [
-        'codigoAmbiente'     => SIAT_AMBIENTE,
-        'codigoSistema'      => SIAT_COD_SISTEMA,
-        'nit'                => SIAT_NIT,
-        'cuis'               => $cuis,
-        'cufd'               => $cufd,
-        'codigoSucursal'     => $codigoSucursal,
-        'codigoPuntoVenta'   => $codigoPuntoVenta,
-        'codigoEvento'       => $codigoEvento,
-        'codigoMotivoEvento' => 1,
-        'descripcion'        => $descripcionEvento,
-        'fechaInicioEvento'  => $fechaInicioEvento,
-        'fechaFinEvento'     => $fechaFinEvento,
-        'cufdEvento'         => $cufdEvento,
+        'codigoAmbiente'       => SIAT_AMBIENTE,
+        'codigoSistema'        => SIAT_COD_SISTEMA,
+        'nit'                  => SIAT_NIT,
+        'cuis'                 => $cuis,
+        'cufd'                 => $cufd,
+        'codigoSucursal'       => $codigoSucursal,
+        'codigoPuntoVenta'     => $codigoPuntoVenta,
+        'codigoEvento'         => $codigoEvento,
+        'codigoMotivoEvento'   => 1,
+        'descripcion'          => $descripcionEvento,
+        'fechaHoraInicioEvento'=> $fechaInicioEvento,
+        'fechaHoraFinEvento'   => $fechaFinEvento,
+        'cufdEvento'           => $cufdEvento,
     ]
 ];
 
@@ -132,6 +152,25 @@ try {
         echo "\n--- Datos de respuesta ---\n";
         echo "transaccion:      " . var_export($r->transaccion ?? null, true) . "\n";
         echo "codigoRecepcion:  " . ($r->codigoRecepcion ?? 'N/A') . "\n";
+        
+        // Actualizar siat_eventos con respuesta del SIN
+        $estado = 'enviado';
+        if (isset($r->transaccion) && $r->transaccion) $estado = 'validado';
+        if (isset($r->mensajes) && !empty($r->mensajes)) $estado = 'rechazado';
+        
+        $stmt = $pdo->prepare("
+            UPDATE siat_eventos 
+            SET ev_estado = :estado, ev_respuesta_siat = :respuesta, ev_codigo_recepcion = :codigo_recepcion
+            WHERE ev_codigo = :ev_codigo
+        ");
+        $stmt->execute([
+            ':estado'           => $estado,
+            ':respuesta'        => json_encode($r),
+            ':codigo_recepcion' => $r->codigoRecepcion ?? null,
+            ':ev_codigo'        => $evCodigo,
+        ]);
+        echo "✅ siat_eventos actualizado con respuesta del SIN\n";
+        
         if (!empty($r->mensajes)) {
             echo "mensajes:\n";
             foreach ((array)$r->mensajes as $m) {
@@ -142,6 +181,10 @@ try {
 } catch (SoapFault $e) {
     echo "❌ Error SOAP: " . $e->getMessage() . "\n";
     echo "Request enviado:\n" . $client->__getLastRequest() . "\n";
+    
+    // Marcar como rechazado en BD
+    $stmt = $pdo->prepare("UPDATE siat_eventos SET ev_estado = 'rechazado', ev_respuesta_siat = :resp WHERE ev_codigo = :ev_codigo");
+    $stmt->execute([':resp' => json_encode(['error' => $e->getMessage()]), ':ev_codigo' => $evCodigo]);
 }
 
 echo "\n=== FIN DEBUG ===\n";

@@ -29,8 +29,8 @@ class transferirModel extends mainModel
                         m.med_nombre_quimico,
                         m.med_principio_activo,
                         m.med_presentacion,
-                        pr.pr_razon_social AS proveedor,
-                        pr.pr_razon_social AS laboratorio
+                        COALESCE(pr.pr_razon_social, 'Proveedor eliminado') AS proveedor,
+                        COALESCE(pr.pr_razon_social, 'Proveedor eliminado') AS laboratorio
                     FROM lote_medicamento lm
                     INNER JOIN medicamento m ON m.med_id = lm.med_id
                     LEFT JOIN proveedores pr ON pr.pr_id = lm.pr_id

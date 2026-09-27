@@ -922,7 +922,7 @@ class inventarioController extends inventarioModel
                         m.med_presentacion,
                         ff.ff_nombre as forma_farmaceutica,
                         uf.uf_nombre as uso_farmacologico,
-                        p.pr_razon_social as laboral,
+                        COALESCE(p.pr_razon_social, 'Proveedor eliminado') as laboral,
                         GROUP_CONCAT(DISTINCT s.su_nombre ORDER BY s.su_nombre SEPARATOR ', ') as sucursal
                     FROM inventarios i
                     LEFT JOIN medicamento m ON i.med_id = m.med_id
@@ -932,7 +932,7 @@ class inventarioController extends inventarioModel
                     LEFT JOIN sucursales s ON i.su_id = s.su_id
                     WHERE i.med_id = :med_id
                     GROUP BY m.med_id, m.med_nombre_quimico, m.med_presentacion,
-                             ff.ff_nombre, uf.uf_nombre, p.pr_razon_social
+                             ff.ff_nombre, uf.uf_nombre, COALESCE(p.pr_razon_social, 'Proveedor eliminado')
                     LIMIT 1
                 ");
 
@@ -970,7 +970,7 @@ class inventarioController extends inventarioModel
                         m.med_presentacion,
                         ff.ff_nombre as forma_farmaceutica,
                         uf.uf_nombre as uso_farmacologico,
-                        p.pr_razon_social as laboral,
+                        COALESCE(p.pr_razon_social, 'Proveedor eliminado') as laboral,
                         s.su_nombre as sucursal
                     FROM inventarios i
                     LEFT JOIN medicamento m ON i.med_id = m.med_id

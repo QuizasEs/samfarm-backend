@@ -12,7 +12,7 @@ class devolucionModel extends mainModel
             'fa_id' => 'f.fa_id',
             've_id' => 'v.ve_id',
             'numero_documento' => 'v.ve_numero_documento',
-            'numero_factura' => 'f.fa_numero',
+            'numero_factura' => 'f.fa_numero_control',
         ];
 
         $campo_busqueda = isset($map[$criterio]) ? $map[$criterio] : null;
@@ -33,7 +33,7 @@ class devolucionModel extends mainModel
                     v.ve_estado_documento,
                     v.su_id,
                     f.fa_id,
-                    f.fa_numero,
+                    f.fa_numero_control,
                     f.fa_monto_total,
                     c.cl_id,
                     c.cl_nombres,

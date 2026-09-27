@@ -535,16 +535,16 @@ class ventaController extends ventaModel
             if (!$mc_res || $mc_res->rowCount() <= 0) throw new Exception("No se pudo registrar movimiento_caja");
 
             if ($documento === 'factura') {
-                $fa_numero = self::obtener_numero_factura_numerico_model($sucursal_id);
+                $fa_numero_control = self::obtener_numero_factura_numerico_model($sucursal_id);
             } else {
-                $fa_numero = self::generar_numero_factura_model($sucursal_id);
+                $fa_numero_control = self::generar_numero_factura_model($sucursal_id);
             }
             $datos_factura = [
                 "ve_id" => $ve_id,
                 "cl_id" => $cliente_id,
                 "us_id" => $usuario_id,
                 "su_id" => $sucursal_id,
-                "fa_numero" => $fa_numero,
+                "fa_numero_control" => $fa_numero_control,
                 "fa_monto_total" => $total
             ];
             $fa_id = self::insertar_factura_model($datos_factura);
@@ -554,7 +554,7 @@ class ventaController extends ventaModel
                 "ve_id" => $ve_id,
                 "fa_id" => $fa_id,
                 "ve_numero_documento" => $ve_numero_documento,
-                "fa_numero" => $fa_numero,
+                "fa_numero_control" => $fa_numero_control,
                 "usuario_id" => $usuario_id,
                 "sucursal_id" => $sucursal_id,
                 "items" => $venta_items,
@@ -563,7 +563,7 @@ class ventaController extends ventaModel
                 "metodo_pago" => $metodo_pago
             ];
             $informe_data = [
-                "inf_nombre" => "Nota Venta {$fa_numero}",
+                "inf_nombre" => "Nota Venta {$fa_numero_control}",
                 "inf_usuario" => $usuario_id,
                 "inf_config" => json_encode($config_informe, JSON_UNESCAPED_UNICODE)
             ];
@@ -605,7 +605,7 @@ class ventaController extends ventaModel
                         siatModel::obtenerCUFD($sucursal_id);
                     }
 
-                    // 2) Número de factura numérico para el CUF (fa_numero visible no sirve)
+                    // 2) Número de factura numérico para el CUF (fa_numero_control visible no sirve)
                     $nroFacturaSiat = self::obtener_numero_factura_numerico_model($sucursal_id);
 
                     // 3) Leer CUFD/control de la BD (Paso 6)
