@@ -3,6 +3,33 @@ require_once "mainModel.php";
 
 class transferirModel extends mainModel
 {
+    protected static function sucursal_existe_model($su_id)
+    {
+        $sql = "SELECT su_id, su_nombre FROM sucursales WHERE su_id = :su_id AND su_estado = 1 LIMIT 1";
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute([':su_id' => (int)$su_id]);
+        $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $fila ?: null;
+    }
+
+    protected static function sucursales_origen_permitidas_model($rol, $su_propia)
+    {
+        if ($rol != 1) {
+            $propia = self::sucursal_existe_model($su_propia);
+            return $propia ? array($propia) : array();
+        }
+
+        $sql = "SELECT su_id, su_nombre FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC";
+        $stmt = mainModel::conectar()->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    protected static function sucursales_activas_model()
+    {
+        $sql = "SELECT su_id, su_nombre FROM sucursales WHERE su_estado = 1 ORDER BY su_nombre ASC";
+        $stmt = mainModel::conectar()->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     protected static function buscar_lotes_disponibles_model($su_id, $busqueda, $fecha_venc_max, $pagina = 1, $registros = 10)
     {
@@ -110,16 +137,23 @@ class transferirModel extends mainModel
         }
 
         $destinos_unicos = array_unique(array_column($items, 'su_destino'));
+        $destinos_unicos = array_values(array_filter($destinos_unicos, function ($v) {
+            return !empty($v);
+        }));
+
+        if (empty($destinos_unicos)) {
+            throw new Exception("No se indicó una sucursal destino válida");
+        }
 
         if (count($destinos_unicos) > 1) {
             throw new Exception("No se pueden transferir items a múltiples sucursales en una sola transferencia");
         }
 
-        $su_destino_id = $destinos_unicos[0];
+        $su_destino_id = (int)$destinos_unicos[0];
 
-        $sql = "INSERT INTO transferencias 
-                (tr_numero, su_origen_id, su_destino_id, us_emisor_id, tr_total_items, tr_observaciones)
-                VALUES (:tr_numero, :su_origen_id, :su_destino_id, :us_emisor_id, :tr_total_items, :tr_observaciones)";
+        $sql = "INSERT INTO transferencias
+                (tr_numero, su_origen_id, su_destino_id, us_emisor_id, tr_total_items, tr_observaciones, tr_estado, tr_fecha_envio)
+                VALUES (:tr_numero, :su_origen_id, :su_destino_id, :us_emisor_id, :tr_total_items, :tr_observaciones, 'aceptada', NOW())";
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute([
@@ -144,7 +178,7 @@ class transferirModel extends mainModel
 
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute($datos);
-        return $stmt;
+        return mainModel::conectar()->lastInsertId();
     }
 
     protected static function datos_lote_transfer_model($lm_id)
@@ -284,17 +318,15 @@ class transferirModel extends mainModel
 
     protected static function datos_transferencia_completa_model($tr_id)
     {
-        $sql = "SELECT 
+        $sql = "SELECT
                             t.*,
                             so.su_nombre AS sucursal_origen,
                             sd.su_nombre AS sucursal_destino,
-                            CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor,
-                            CONCAT(ur.us_nombres, ' ', ur.us_apellido_paterno) AS usuario_receptor
+                            CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor
                         FROM transferencias t
                         INNER JOIN sucursales so ON so.su_id = t.su_origen_id
                         INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
                         INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
-                        LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
                         WHERE t.tr_id = :tr_id
                         LIMIT 1";
 
@@ -324,7 +356,6 @@ class transferirModel extends mainModel
         $su_origen = '',
         $su_destino = '',
         $us_emisor = '',
-        $estado = '',
         $fecha_desde = '',
         $fecha_hasta = '',
         $busqueda = '',
@@ -340,25 +371,19 @@ class transferirModel extends mainModel
                     t.su_origen_id,
                     t.su_destino_id,
                     t.us_emisor_id,
-                    t.us_receptor_id,
                     t.tr_total_items,
                     t.tr_total_cajas,
                     t.tr_total_unidades,
                     t.tr_total_valorado,
-                    t.tr_estado,
                     t.tr_observaciones,
-                    t.tr_motivo_rechazo,
                     t.tr_fecha_envio,
-                    t.tr_fecha_respuesta,
                     so.su_nombre AS sucursal_origen,
                     sd.su_nombre AS sucursal_destino,
-                    CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor,
-                    CONCAT(ur.us_nombres, ' ', ur.us_apellido_paterno) AS usuario_receptor
+                    CONCAT(ue.us_nombres, ' ', ue.us_apellido_paterno) AS usuario_emisor
                 FROM transferencias t
                 INNER JOIN sucursales so ON so.su_id = t.su_origen_id
                 INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
                 INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
-                LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
                 WHERE 1=1";
 
         if ($rol != 1) {
@@ -379,11 +404,6 @@ class transferirModel extends mainModel
         if (!empty($us_emisor)) {
             $sql .= " AND t.us_emisor_id = :us_emisor";
             $params[':us_emisor'] = $us_emisor;
-        }
-
-        if (!empty($estado)) {
-            $sql .= " AND t.tr_estado = :estado";
-            $params[':estado'] = $estado;
         }
 
         if (!empty($fecha_desde)) {
@@ -421,7 +441,6 @@ class transferirModel extends mainModel
         $su_origen = '',
         $su_destino = '',
         $us_emisor = '',
-        $estado = '',
         $fecha_desde = '',
         $fecha_hasta = '',
         $busqueda = '',
@@ -435,7 +454,6 @@ class transferirModel extends mainModel
                 INNER JOIN sucursales so ON so.su_id = t.su_origen_id
                 INNER JOIN sucursales sd ON sd.su_id = t.su_destino_id
                 INNER JOIN usuarios ue ON ue.us_id = t.us_emisor_id
-                LEFT JOIN usuarios ur ON ur.us_id = t.us_receptor_id
                 WHERE 1=1";
 
         if ($rol != 1) {
@@ -456,11 +474,6 @@ class transferirModel extends mainModel
         if (!empty($us_emisor)) {
             $sql .= " AND t.us_emisor_id = :us_emisor";
             $params[':us_emisor'] = $us_emisor;
-        }
-
-        if (!empty($estado)) {
-            $sql .= " AND t.tr_estado = :estado";
-            $params[':estado'] = $estado;
         }
 
         if (!empty($fecha_desde)) {
@@ -488,19 +501,31 @@ class transferirModel extends mainModel
     protected static function crear_lote_en_destino_model($datos)
     {
         $sql = "INSERT INTO lote_medicamento
-                (med_id, su_id, lm_numero_lote, lm_cant_caja, lm_cant_blister, lm_cant_unidad,
-                 lm_cant_actual_cajas, lm_cant_actual_unidades, lm_precio_compra, lm_precio_venta,
+                (pr_id, pr_id_compra, med_id, su_id, lm_numero_lote, lm_cant_caja, lm_cant_blister, lm_cant_unidad,
+                 lm_cant_actual_cajas, lm_cant_actual_unidades, lm_costo_lista, lm_precio_compra, lm_precio_venta,
+                 lm_margen_u, lm_margen_c, lm_precio_min_u, lm_precio_min_c,
                  lm_fecha_ingreso, lm_fecha_vencimiento, lm_estado, lm_origen_id)
                 VALUES
-                (:med_id, :su_id, :lm_numero_lote, :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad,
-                 :lm_cant_actual_cajas, :lm_cant_actual_unidades, :lm_precio_compra, :lm_precio_venta,
-                 NOW(), :lm_fecha_vencimiento, :lm_estado, :lm_origen_id)";
-        
-        $datos_completos = array_merge($datos, ['lm_estado' => 'activo']);
-        
+                (:pr_id, :pr_id_compra, :med_id, :su_id, :lm_numero_lote, :lm_cant_caja, :lm_cant_blister, :lm_cant_unidad,
+                 :lm_cant_actual_cajas, :lm_cant_actual_unidades, :lm_costo_lista, :lm_precio_compra, :lm_precio_venta,
+                 :lm_margen_u, :lm_margen_c, :lm_precio_min_u, :lm_precio_min_c,
+                 NOW(), :lm_fecha_vencimiento, 'activo', :lm_origen_id)";
+
         $stmt = mainModel::conectar()->prepare($sql);
-        $stmt->execute($datos_completos);
+        $stmt->execute($datos);
         return mainModel::conectar()->lastInsertId();
+    }
+
+    protected static function actualizar_detalle_lote_destino_model($dt_id, $lm_destino_id)
+    {
+        $sql = "UPDATE detalle_transferencia
+                SET lm_destino_id = :lm_destino_id,
+                    dt_estado = 1
+                WHERE dt_id = :dt_id";
+
+        $stmt = mainModel::conectar()->prepare($sql);
+        $stmt->execute([':lm_destino_id' => $lm_destino_id, ':dt_id' => $dt_id]);
+        return $stmt;
     }
 
     protected static function actualizar_inventario_destino_model($med_id, $su_destino, $cajas, $unidades, $valorado)
@@ -553,28 +578,6 @@ class transferirModel extends mainModel
         
         $stmt = mainModel::conectar()->prepare($sql);
         $stmt->execute($datos);
-        return $stmt;
-    }
-
-    protected static function actualizar_estado_transferencia_model($tr_id, $estado, $us_receptor_id = null)
-    {
-        $sql = "UPDATE transferencias
-                SET tr_estado = :estado,
-                    tr_fecha_respuesta = NOW()";
-        
-        if ($us_receptor_id) {
-            $sql .= ", us_receptor_id = :us_receptor_id";
-        }
-        
-        $sql .= " WHERE tr_id = :tr_id";
-        
-        $stmt = mainModel::conectar()->prepare($sql);
-        $params = [':tr_id' => $tr_id, ':estado' => $estado];
-        if ($us_receptor_id) {
-            $params[':us_receptor_id'] = $us_receptor_id;
-        }
-        
-        $stmt->execute($params);
         return $stmt;
     }
 }

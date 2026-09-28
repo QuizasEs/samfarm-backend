@@ -66,11 +66,10 @@ $valor = $_POST['transferirHistorialAjax'];
         $su_origen = isset($_POST['select1']) ? $ins_historial->limpiar_cadena($_POST['select1']) : '';
         $su_destino = isset($_POST['select2']) ? $ins_historial->limpiar_cadena($_POST['select2']) : '';
         $us_emisor = isset($_POST['select3']) ? $ins_historial->limpiar_cadena($_POST['select3']) : '';
-        $estado = isset($_POST['select4']) ? $ins_historial->limpiar_cadena($_POST['select4']) : '';
         $fecha_desde = isset($_POST['fecha_desde']) ? $ins_historial->limpiar_cadena($_POST['fecha_desde']) : '';
         $fecha_hasta = isset($_POST['fecha_hasta']) ? $ins_historial->limpiar_cadena($_POST['fecha_hasta']) : '';
 
-        error_log("AJAX LISTAR DEBUG: pagina=$pagina, registros=$registros, su_origen='$su_origen', su_destino='$su_destino', us_emisor='$us_emisor', estado='$estado'");
+        error_log("AJAX LISTAR DEBUG: pagina=$pagina, registros=$registros, su_origen='$su_origen', su_destino='$su_destino', us_emisor='$us_emisor'");
 
         $html = $ins_historial->paginado_historial_transferencias_controller(
             $pagina,
@@ -78,7 +77,6 @@ $valor = $_POST['transferirHistorialAjax'];
             $su_origen,
             $su_destino,
             $us_emisor,
-            $estado,
             $fecha_desde,
             $fecha_hasta,
             $busqueda

@@ -8,74 +8,6 @@ if ($peticionAjax) {
 
 class categoriaController extends categoriaModel
 {
-    private function guardar_imagen_desde_archivo($tipo = 'uso_farmacologico')
-    {
-        if (!isset($_FILES['imgLoad_uso']) && !isset($_FILES['imgLoad_uso_edit'])) {
-            return '';
-        }
-
-        $archivo = isset($_FILES['imgLoad_uso']) ? $_FILES['imgLoad_uso'] : $_FILES['imgLoad_uso_edit'];
-
-        if ($archivo['error'] !== UPLOAD_ERR_OK || empty($archivo['name'])) {
-            return '';
-        }
-
-        $img_dir = dirname(__FILE__) . '/../views/assets/img/';
-
-        if (!is_dir($img_dir)) {
-            mkdir($img_dir, 0755, true);
-        }
-
-        $mime_type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $archivo['tmp_name']);
-        if (!in_array($mime_type, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-            return '';
-        }
-
-        if (($archivo['size'] / 1024) > 5120) {
-            return '';
-        }
-
-        $extension = '';
-        if ($mime_type === 'image/jpeg') {
-            $extension = '.jpg';
-        } elseif ($mime_type === 'image/png') {
-            $extension = '.png';
-        } elseif ($mime_type === 'image/gif') {
-            $extension = '.gif';
-        } elseif ($mime_type === 'image/webp') {
-            $extension = '.webp';
-        }
-
-        $random_id = bin2hex(random_bytes(8));
-        $nombre_archivo = $tipo . "_" . $random_id . "_" . time() . $extension;
-
-        if (!move_uploaded_file($archivo['tmp_name'], $img_dir . $nombre_archivo)) {
-            error_log("ERROR: No se pudo mover archivo a: " . $img_dir . $nombre_archivo);
-            return '';
-        }
-
-        chmod($img_dir . $nombre_archivo, 0644);
-
-        $ruta_final = SERVER_URL . 'views/assets/img/' . $nombre_archivo;
-        error_log("DEBUG GUARDAR IMAGEN: archivo=$nombre_archivo | ruta=$ruta_final");
-        return $ruta_final;
-    }
-
-    private function eliminar_imagen($ruta_imagen)
-    {
-        if (empty($ruta_imagen)) {
-            return;
-        }
-
-        $ruta_relativa = str_replace(SERVER_URL, '', $ruta_imagen);
-        $ruta_absoluta = dirname(__FILE__) . '/../' . $ruta_relativa;
-
-        if (file_exists($ruta_absoluta)) {
-            chmod($ruta_absoluta, 0777);
-            unlink($ruta_absoluta);
-        }
-    }
-
     public function paginado_uso_farmacologico_controller($pagina, $registros, $url, $busqueda = "")
     {
         $pagina = mainModel::limpiar_cadena($pagina);
@@ -104,7 +36,6 @@ class categoriaController extends categoriaModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>IMAGEN</th>
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
@@ -124,19 +55,9 @@ class categoriaController extends categoriaModel
                     ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
                     : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
-                $tiene_imagen = !empty($rows['uf_imagen']) && strlen(trim($rows['uf_imagen'])) > 10;
-                $imagen_src = $tiene_imagen ? $rows['uf_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
-
-
                 $tabla .= '
                     <tr onclick="abrirModalEditarUsoFarmacologico(' . $rows['uf_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
-                        <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
-                                alt="' . htmlspecialchars($rows['uf_nombre']) . '"
-                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                                onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
-                        </td>
                         <td><strong>' . htmlspecialchars($rows['uf_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['uf_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['uf_actualizado_en'])) . '</td>
@@ -155,7 +76,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -200,28 +121,10 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = '';
-        if (isset($_FILES['imgLoad_uso']) && $_FILES['imgLoad_uso']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('uso_farmacologico');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => 1
         ];
-
-        error_log("DEBUG AGREGAR - imagen: " . var_export($ruta_imagen, true) . " | SERVER_URL: " . SERVER_URL);
 
         $resultado = self::agregar_uso_farmacologico_model($datos);
 
@@ -233,9 +136,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (!empty($ruta_imagen)) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -320,36 +220,15 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = $actual['uf_imagen'];
-        $imagen_antigua = $actual['uf_imagen'];
-
-        if (isset($_FILES['imgLoad_uso_edit']) && $_FILES['imgLoad_uso_edit']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('uso_farmacologico');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'id' => $id,
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => $actual['uf_estado']
         ];
 
         $resultado = self::actualizar_uso_farmacologico_model($datos);
 
         if ($resultado->rowCount() >= 0) {
-            if (!empty($imagen_antigua) && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($imagen_antigua);
-            }
             $alerta = [
                 'Alerta' => 'recargar',
                 'Titulo' => 'Actualización exitosa',
@@ -357,9 +236,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (isset($_FILES['imgLoad_uso_edit']) && $_FILES['imgLoad_uso_edit']['error'] === UPLOAD_ERR_OK && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -439,7 +315,6 @@ class categoriaController extends categoriaModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>IMAGEN</th>
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
@@ -459,18 +334,9 @@ class categoriaController extends categoriaModel
                     ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
                     : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
-                $tiene_imagen = !empty($rows['vd_imagen']) && strlen(trim($rows['vd_imagen'])) > 10;
-                $imagen_src = $tiene_imagen ? $rows['vd_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
-
                 $tabla .= '
                     <tr onclick="abrirModalEditarViaAdministracion(' . $rows['vd_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
-                        <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
-                                 alt="' . htmlspecialchars($rows['vd_nombre']) . '"
-                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                                 onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
-                        </td>
                         <td><strong>' . htmlspecialchars($rows['vd_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['vd_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['vd_actualizado_en'])) . '</td>
@@ -489,7 +355,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -534,24 +400,8 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = '';
-        if (isset($_FILES['imgLoad_via']) && $_FILES['imgLoad_via']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('via_administracion');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => 1
         ];
 
@@ -565,9 +415,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (!empty($ruta_imagen)) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -652,36 +499,15 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = $actual['vd_imagen'];
-        $imagen_antigua = $actual['vd_imagen'];
-
-        if (isset($_FILES['imgLoad_via_edit']) && $_FILES['imgLoad_via_edit']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('via_administracion');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'id' => $id,
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => $actual['vd_estado']
         ];
 
         $resultado = self::actualizar_via_administracion_model($datos);
 
         if ($resultado->rowCount() >= 0) {
-            if (!empty($imagen_antigua) && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($imagen_antigua);
-            }
             $alerta = [
                 'Alerta' => 'recargar',
                 'Titulo' => 'Actualización exitosa',
@@ -689,9 +515,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (isset($_FILES['imgLoad_via_edit']) && $_FILES['imgLoad_via_edit']['error'] === UPLOAD_ERR_OK && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -770,7 +593,6 @@ class categoriaController extends categoriaModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>IMAGEN</th>
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
@@ -790,18 +612,9 @@ class categoriaController extends categoriaModel
                     ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
                     : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
 
-                $tiene_imagen = !empty($rows['ff_imagen']) && strlen(trim($rows['ff_imagen'])) > 10;
-                $imagen_src = $tiene_imagen ? $rows['ff_imagen'] : SERVER_URL . 'views/assets/img/predeterminado.png';
-
                 $tabla .= '
                     <tr onclick="abrirModalEditarFormaFarmaceutica(' . $rows['ff_id'] . ')" style="cursor:pointer;">
                         <td>' . $contador . '</td>
-                        <td>
-                            <img src="' . ($tiene_imagen ? htmlspecialchars($imagen_src) : $imagen_src) . '"
-                                alt="' . htmlspecialchars($rows['ff_nombre']) . '"
-                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                                onerror="this.src=\'' . SERVER_URL . 'views/assets/img/predeterminado.png\'">
-                        </td>
                         <td><strong>' . htmlspecialchars($rows['ff_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['ff_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['ff_actualizado_en'])) . '</td>
@@ -820,7 +633,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -865,24 +678,8 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = '';
-        if (isset($_FILES['imgLoad_forma']) && $_FILES['imgLoad_forma']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('forma_farmaceutica');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => 1
         ];
 
@@ -896,9 +693,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (!empty($ruta_imagen)) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
@@ -983,36 +777,15 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $ruta_imagen = $actual['ff_imagen'];
-        $imagen_antigua = $actual['ff_imagen'];
-
-        if (isset($_FILES['imgLoad_forma_edit']) && $_FILES['imgLoad_forma_edit']['error'] === UPLOAD_ERR_OK) {
-            $ruta_imagen = $this->guardar_imagen_desde_archivo('forma_farmaceutica');
-            if (empty($ruta_imagen)) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error de imagen',
-                    'texto' => 'No se pudo guardar la imagen',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-        }
-
         $datos = [
             'id' => $id,
             'nombre' => $nombre,
-            'imagen' => $ruta_imagen,
             'estado' => $actual['ff_estado']
         ];
 
         $resultado = self::actualizar_forma_farmaceutica_model($datos);
 
         if ($resultado->rowCount() >= 0) {
-            if (!empty($imagen_antigua) && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($imagen_antigua);
-            }
             $alerta = [
                 'Alerta' => 'recargar',
                 'Titulo' => 'Actualización exitosa',
@@ -1020,9 +793,6 @@ class categoriaController extends categoriaModel
                 'Tipo' => 'success'
             ];
         } else {
-            if (isset($_FILES['imgLoad_forma_edit']) && $_FILES['imgLoad_forma_edit']['error'] === UPLOAD_ERR_OK && $ruta_imagen !== $imagen_antigua) {
-                $this->eliminar_imagen($ruta_imagen);
-            }
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',

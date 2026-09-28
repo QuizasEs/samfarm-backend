@@ -10,7 +10,7 @@ if (isset($_SESSION['id_smp']) && $_SESSION['rol_smp'] == 1) {
             </div>
             <div class="tbr">
                 <button type="button" class="btn btn-def" onclick="SucursalesModals.abrirModalNuevo()">
-                    <ion-icon name="add-circle-outline"></ion-icon> Nuevo Sucursal
+                    <ion-icon name="add-circle-outline"></ion-icon> Nueva Sucursal
                 </button>
                 <button type="button" class="btn btn-out" id="btnExportarPDF">
                     <ion-icon name="document-text-outline"></ion-icon> PDF

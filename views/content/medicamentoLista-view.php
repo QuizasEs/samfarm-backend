@@ -110,7 +110,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </div>
-            <div class="mb" style="overflow: visible !important;">
+            <div class="mb">
                 <form id="formNuevoMedicamento">
                     <input type="hidden" name="MedicamentoAjax" value="save">
                     <div class="fr1">
@@ -221,7 +221,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <ion-icon name="close-outline"></ion-icon>
                 </button>
             </div>
-            <div class="mb" style="overflow: visible !important;">
+            <div class="mb">
                 <form id="formEditarMedicamento">
                     <input type="hidden" name="MedicamentoAjax" value="update">
                     <input type="hidden" name="med_id">

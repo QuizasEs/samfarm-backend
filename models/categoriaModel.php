@@ -9,7 +9,6 @@ class categoriaModel extends mainModel
         $sql = "SELECT 
                     uf_id,
                     uf_nombre,
-                    uf_imagen,
                     uf_creado_en,
                     uf_actualizado_en,
                     uf_estado
@@ -67,12 +66,11 @@ class categoriaModel extends mainModel
         $conexion = mainModel::conectar();
 
         $sql = $conexion->prepare("
-                INSERT INTO uso_farmacologico (uf_nombre, uf_imagen, uf_estado)
-                VALUES (:nombre, :imagen, :estado)
+                INSERT INTO uso_farmacologico (uf_nombre, uf_estado)
+                VALUES (:nombre, :estado)
             ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
 
         $sql->execute();
@@ -82,7 +80,8 @@ class categoriaModel extends mainModel
     protected static function obtener_uso_farmacologico_model($id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT * FROM uso_farmacologico WHERE uf_id = :id LIMIT 1
+            SELECT uf_id, uf_nombre, uf_creado_en, uf_actualizado_en, uf_estado
+            FROM uso_farmacologico WHERE uf_id = :id LIMIT 1
         ");
 
         $sql->bindParam(':id', $id, PDO::PARAM_INT);
@@ -97,14 +96,12 @@ class categoriaModel extends mainModel
         $sql = $conexion->prepare("
                 UPDATE uso_farmacologico 
                 SET uf_nombre = :nombre,
-                    uf_imagen = :imagen,
                     uf_estado = :estado,
                     uf_actualizado_en = NOW()
                 WHERE uf_id = :id
             ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
         $sql->bindParam(':id', $datos['id'], PDO::PARAM_INT);
 
@@ -154,7 +151,6 @@ class categoriaModel extends mainModel
         $sql = "SELECT 
                     vd_id,
                     vd_nombre,
-                    vd_imagen,
                     vd_creado_en,
                     vd_actualizado_en,
                     vd_estado
@@ -212,12 +208,11 @@ class categoriaModel extends mainModel
         $conexion = mainModel::conectar();
 
         $sql = $conexion->prepare("
-            INSERT INTO via_de_administracion (vd_nombre, vd_imagen, vd_estado)
-            VALUES (:nombre, :imagen, :estado)
+            INSERT INTO via_de_administracion (vd_nombre, vd_estado)
+            VALUES (:nombre, :estado)
         ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
 
         $sql->execute();
@@ -227,7 +222,8 @@ class categoriaModel extends mainModel
     protected static function obtener_via_administracion_model($id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT * FROM via_de_administracion WHERE vd_id = :id LIMIT 1
+            SELECT vd_id, vd_nombre, vd_creado_en, vd_actualizado_en, vd_estado
+            FROM via_de_administracion WHERE vd_id = :id LIMIT 1
         ");
 
         $sql->bindParam(':id', $id, PDO::PARAM_INT);
@@ -241,15 +237,13 @@ class categoriaModel extends mainModel
 
         $sql = $conexion->prepare("
             UPDATE via_de_administracion 
-            SET vd_nombre = :nombre,
-                vd_imagen = :imagen,
-                vd_estado = :estado,
+                SET vd_nombre = :nombre,
+                    vd_estado = :estado,
                 vd_actualizado_en = NOW()
             WHERE vd_id = :id
         ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
         $sql->bindParam(':id', $datos['id'], PDO::PARAM_INT);
 
@@ -298,7 +292,6 @@ class categoriaModel extends mainModel
         $sql = "SELECT 
                     ff_id,
                     ff_nombre,
-                    ff_imagen,
                     ff_creado_en,
                     ff_actualizado_en,
                     ff_estado
@@ -356,12 +349,11 @@ class categoriaModel extends mainModel
         $conexion = mainModel::conectar();
 
         $sql = $conexion->prepare("
-                INSERT INTO forma_farmaceutica (ff_nombre, ff_imagen, ff_estado)
-                VALUES (:nombre, :imagen, :estado)
-            ");
+            INSERT INTO forma_farmaceutica (ff_nombre, ff_estado)
+            VALUES (:nombre, :estado)
+        ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
 
         $sql->execute();
@@ -371,7 +363,8 @@ class categoriaModel extends mainModel
     protected static function obtener_forma_farmaceutica_model($id)
     {
         $sql = mainModel::conectar()->prepare("
-            SELECT * FROM forma_farmaceutica WHERE ff_id = :id LIMIT 1
+            SELECT ff_id, ff_nombre, ff_creado_en, ff_actualizado_en, ff_estado
+            FROM forma_farmaceutica WHERE ff_id = :id LIMIT 1
         ");
 
         $sql->bindParam(':id', $id, PDO::PARAM_INT);
@@ -386,14 +379,12 @@ class categoriaModel extends mainModel
         $sql = $conexion->prepare("
                 UPDATE forma_farmaceutica 
                 SET ff_nombre = :nombre,
-                    ff_imagen = :imagen,
                     ff_estado = :estado,
                     ff_actualizado_en = NOW()
                 WHERE ff_id = :id
             ");
 
         $sql->bindParam(':nombre', $datos['nombre'], PDO::PARAM_STR);
-        $sql->bindParam(':imagen', $datos['imagen'], PDO::PARAM_STR);
         $sql->bindParam(':estado', $datos['estado'], PDO::PARAM_INT);
         $sql->bindParam(':id', $datos['id'], PDO::PARAM_INT);
 

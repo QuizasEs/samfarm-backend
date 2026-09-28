@@ -44,7 +44,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <?php $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista', 'proveedorLista']); ?>
                 <div class="ni <?php echo $is_cat ? 'open pac' : ''; ?>" id="nii" data-tip="Catalogo" onclick="App.toggleSub('si_cat',this)">
                     <ion-icon class="nic" name="list-outline"></ion-icon>
-                    <span class="ntxt">Catalogo</span>
+                    <span class="ntxt">Catálogo</span>
                     <ion-icon class="narr" name="chevron-forward"></ion-icon>
                 </div>
                 <div class="sub <?php echo $is_cat ? 'open' : ''; ?>" id="si_cat">
@@ -52,14 +52,14 @@ if ($_SESSION['rol_smp'] == 1) {
                         <ion-icon class="smd" name="medical-outline"></ion-icon>Medicamentos
                     </a>
                     <a href="<?php echo SERVER_URL ?>categoriaLista/" class="smi <?php echo $current_view == 'categoriaLista' ? 'ac' : ''; ?>">
-                        <ion-icon class="smd" name="folder-outline"></ion-icon>Categorias
+                        <ion-icon class="smd" name="folder-outline"></ion-icon>Categorías
                     </a>
                     <a href="<?php echo SERVER_URL ?>proveedorLista/" class="smi <?php echo $current_view == 'proveedorLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="business-outline"></ion-icon>Proveedores
                     </a>
                 </div>
                 <!-- almacen -->
-                <?php $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista', 'recepcionarLista']); ?>
+                <?php $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista']); ?>
                 <div class="ni <?php echo $is_alm ? 'open pac' : ''; ?>" id="nii" data-tip="Almacen" onclick="App.toggleSub('si_alm',this)">
                     <ion-icon class="nic" name="cube-outline"></ion-icon>
                     <span class="ntxt">Almacen</span>
@@ -78,9 +78,6 @@ if ($_SESSION['rol_smp'] == 1) {
 
                     <a href="<?php echo SERVER_URL ?>transferirLista/" class="smi <?php echo $current_view == 'transferirLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="swap-horizontal-outline"></ion-icon>Transferencias
-                    </a>
-                    <a href="<?php echo SERVER_URL ?>recepcionarLista/" class="smi <?php echo $current_view == 'recepcionarLista' ? 'ac' : ''; ?>">
-                        <ion-icon class="smd" name="download-outline"></ion-icon>Recepcionar
                     </a>
                 </div>
             </div>
@@ -164,7 +161,7 @@ if ($_SESSION['rol_smp'] == 1) {
     $sucursal = isset($_SESSION['sucursal_smp']) ? $_SESSION['sucursal_smp'] : 'Standard';
 
     $is_cat = in_array($current_view, ['medicamentoLista', 'categoriaLista', 'proveedorLista']);
-    $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista', 'recepcionarLista']);
+    $is_alm = in_array($current_view, ['loteLista', 'inventarioLista', 'ajusteInventarioCompleto', 'transferirLista']);
 
 ?>
     <aside class="sidebar" id="sidebar">
@@ -194,7 +191,7 @@ if ($_SESSION['rol_smp'] == 1) {
                 <!-- catalogo -->
                 <div class="ni <?php echo $is_cat ? 'open pac' : ''; ?>" id="nii" data-tip="Catalogo" onclick="App.toggleSub('si_cat_v',this)">
                     <ion-icon class="nic" name="list-outline"></ion-icon>
-                    <span class="ntxt">Catalogo</span>
+                    <span class="ntxt">Catálogo</span>
                     <ion-icon class="narr" name="chevron-forward"></ion-icon>
                 </div>
                 <div class="sub <?php echo $is_cat ? 'open' : ''; ?>" id="si_cat_v">
@@ -202,7 +199,7 @@ if ($_SESSION['rol_smp'] == 1) {
                         <ion-icon class="smd" name="medical-outline"></ion-icon>Medicamento
                     </a>
                     <a href="<?php echo SERVER_URL ?>categoriaLista/" class="smi <?php echo $current_view == 'categoriaLista' ? 'ac' : ''; ?>">
-                        <ion-icon class="smd" name="folder-outline"></ion-icon>Categoria
+                        <ion-icon class="smd" name="folder-outline"></ion-icon>Categoría
                     </a>
                     <a href="<?php echo SERVER_URL ?>proveedorLista/" class="smi <?php echo $current_view == 'proveedorLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="business-outline"></ion-icon>Proveedor
@@ -227,9 +224,6 @@ if ($_SESSION['rol_smp'] == 1) {
 
                     <a href="<?php echo SERVER_URL ?>transferirLista/" class="smi <?php echo $current_view == 'transferirLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="swap-horizontal-outline"></ion-icon>Tranferencias
-                    </a>
-                    <a href="<?php echo SERVER_URL ?>recepcionarLista/" class="smi <?php echo $current_view == 'recepcionarLista' ? 'ac' : ''; ?>">
-                        <ion-icon class="smd" name="download-outline"></ion-icon>Recepcionar
                     </a>
                 </div>
             </div>

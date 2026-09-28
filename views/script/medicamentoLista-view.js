@@ -310,7 +310,23 @@ const MedicamentosModals = (function() {
         this.hide();
     };
 
-    MedicamentoDropdown.prototype.show = function() { this.resultsContainer.style.display = 'block'; };
+    MedicamentoDropdown.prototype.show = function() {
+        this.resultsContainer.style.display = 'block';
+        const borde = 'var(--border-light, #ddd)';
+        if (this.resultsContainer.getBoundingClientRect().bottom > window.innerHeight - 10) {
+            this.resultsContainer.style.top = 'auto';
+            this.resultsContainer.style.bottom = '100%';
+            this.resultsContainer.style.borderTop = '1px solid ' + borde;
+            this.resultsContainer.style.borderBottom = 'none';
+            this.resultsContainer.style.borderRadius = '4px 4px 0 0';
+        } else {
+            this.resultsContainer.style.top = '100%';
+            this.resultsContainer.style.bottom = 'auto';
+            this.resultsContainer.style.borderTop = 'none';
+            this.resultsContainer.style.borderBottom = '1px solid ' + borde;
+            this.resultsContainer.style.borderRadius = '0 0 4px 4px';
+        }
+    };
     MedicamentoDropdown.prototype.hide = function() { this.resultsContainer.style.display = 'none'; };
 
     MedicamentoDropdown.prototype.showAll = async function() {

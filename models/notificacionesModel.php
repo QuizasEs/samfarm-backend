@@ -39,7 +39,6 @@ class notificacionesModel extends mainModel
             self::generar_notificaciones_ya_caducados_model($conexion);
             self::generar_notificaciones_sin_stock_model($conexion);
             self::generar_notificaciones_bajo_minimo_model($conexion);
-            self::generar_notificaciones_transferencias_pendientes_model($conexion);
 
             self::limpiar_notificaciones_antiguas_model($conexion);
 
@@ -140,20 +139,6 @@ class notificacionesModel extends mainModel
                 JOIN medicamento m ON i.med_id = m.med_id
                 JOIN sucursales s ON i.su_id = s.su_id
                 WHERE i.inv_total_unidades < i.inv_minimo AND i.inv_total_unidades > 0";
-
-        $stmt = $conexion->prepare($sql);
-        $stmt->execute();
-    }
-
-    protected static function generar_notificaciones_transferencias_pendientes_model($conexion)
-    {
-        $sql = "INSERT IGNORE INTO notificaciones (not_tipo, not_referencia_id, not_su_id, not_titulo, not_mensaje, not_icono, not_color, not_aplicable_rol_1, not_aplicable_rol_2)
-                SELECT 'transferencia_pendiente', t.tr_id, t.su_destino_id, 'Transferencia Pendiente',
-                CONCAT('Transferencia #', t.tr_numero, ' de ', s1.su_nombre, ' pendiente de recepcionar'),
-                'swap-horizontal-outline', '#2196f3', 1, 1
-                FROM transferencias t
-                JOIN sucursales s1 ON t.su_origen_id = s1.su_id
-                WHERE t.tr_estado = 'pendiente'";
 
         $stmt = $conexion->prepare($sql);
         $stmt->execute();

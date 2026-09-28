@@ -194,8 +194,6 @@ function mostrarNotificaciones(notificaciones) {
                 view = 'inventarioLista/';
             } else if (tipo === 'proximo_caducar' || tipo === 'ya_caducado') {
                 view = 'loteLista/';
-            } else if (tipo === 'transferencia_pendiente') {
-                view = 'recepcionarLista/';
             }
             if (view) {
                 window.location.href = baseUrl + view;

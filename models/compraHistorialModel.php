@@ -63,6 +63,8 @@ class compraHistorialModel extends mainModel
                 s.su_nombre AS sucursal,
                 CONCAT(u.us_nombres, ' ', u.us_apellido_paterno) AS usuario_nombre,
                 (SELECT COUNT(*) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS total_items,
+                (SELECT COUNT(DISTINCT dc.med_id) FROM detalle_compra dc WHERE dc.co_id = c.co_id) AS medicamentos_distintos,
+                (SELECT GROUP_CONCAT(DISTINCT m.med_nombre_quimico ORDER BY m.med_nombre_quimico SEPARATOR ' | ') FROM detalle_compra dc INNER JOIN medicamento m ON dc.med_id = m.med_id WHERE dc.co_id = c.co_id) AS medicamentos_lista,
                 (SELECT COUNT(DISTINCT lm.lm_id) FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id WHERE dc.co_id = c.co_id) AS total_lotes,
                 (SELECT COUNT(DISTINCT lm.lm_id) FROM detalle_compra dc INNER JOIN lote_medicamento lm ON dc.lm_id = lm.lm_id WHERE dc.co_id = c.co_id AND lm.lm_estado = 'en_espera') AS lotes_pendientes
             FROM compras c

@@ -24,9 +24,6 @@
         case 'loteLista':
             $page_title = 'Lotes';
             break;
-        case 'recepcionarLista':
-            $page_title = 'Recepcionar';
-            break;
         case 'proveedorLista':
             $page_title = 'Proveedores';
             break;

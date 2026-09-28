@@ -14,7 +14,6 @@ class transferirHistorialController extends transferirModel
         $su_origen = '',
         $su_destino = '',
         $us_emisor = '',
-        $estado = '',
         $fecha_desde = '',
         $fecha_hasta = '',
         $busqueda = ''
@@ -29,7 +28,6 @@ class transferirHistorialController extends transferirModel
                 $su_origen,
                 $su_destino,
                 $us_emisor,
-                $estado,
                 $fecha_desde,
                 $fecha_hasta,
                 $busqueda,
@@ -43,7 +41,6 @@ class transferirHistorialController extends transferirModel
                 $su_origen,
                 $su_destino,
                 $us_emisor,
-                $estado,
                 $fecha_desde,
                 $fecha_hasta,
                 $busqueda,
@@ -57,10 +54,9 @@ class transferirHistorialController extends transferirModel
                     <table class="table">
                         <thead>
                             <tr>
-                                <th width="40%">Transferencia</th>
-                                <th width="15%">Fecha</th>
-                                <th width="15%">Estado</th>
-                                <th width="15%">Total</th>
+                                <th width="45%">Transferencia</th>
+                                <th width="20%">Fecha</th>
+                                <th width="20%">Total</th>
                                 <th width="15%">Acciones</th>
                             </tr>
                         </thead>
@@ -71,7 +67,6 @@ class transferirHistorialController extends transferirModel
                 $contador = $reg_inicio;
 
                 foreach ($transferencias as $tr) {
-                    $estado_badge = $this->obtener_badge_estado($tr['tr_estado']);
                     $fecha = date('d/m/Y H:i', strtotime($tr['tr_fecha_envio']));
                     $monto = number_format($tr['tr_total_valorado'], 2, '.', ',');
 
@@ -86,7 +81,6 @@ class transferirHistorialController extends transferirModel
                                     </div>
                                 </td>
                                 <td>' . $fecha . '</td>
-                                <td>' . $estado_badge . '</td>
                                 <td style="text-align:right;"><strong>Bs. ' . $monto . '</strong></td>
                                 <td>
                                     <a href="javascript:void(0)" class="btn btn-sec btn-sm" title="Descargar PDF" onclick="event.stopPropagation(); window.open(\'' . $url_pdf . '\', \'_blank\')">
@@ -99,7 +93,7 @@ class transferirHistorialController extends transferirModel
                 $reg_final = $contador - 1;
             } else {
                 $html .= '<tr>
-                            <td colspan="5" style="text-align:center;padding:20px;">
+                            <td colspan="4" style="text-align:center;padding:20px;">
                                 <ion-icon name="information-circle-outline"></ion-icon> Sin transferencias
                             </td>
                         </tr>';
@@ -157,6 +151,24 @@ class transferirHistorialController extends transferirModel
         }
     }
 
+    private function pdf_utf8($datos)
+    {
+        if (is_array($datos)) {
+            $convertido = array();
+            foreach ($datos as $clave => $valor) {
+                $convertido[$this->pdf_utf8($clave)] = $this->pdf_utf8($valor);
+            }
+            return $convertido;
+        }
+
+        if (is_string($datos)) {
+            $resultado = @iconv('UTF-8', 'Windows-1252//TRANSLIT', $datos);
+            return $resultado === false ? utf8_decode($datos) : $resultado;
+        }
+
+        return $datos;
+    }
+
     public function generar_pdf_transferencia_controller()
     {
         $tr_id = isset($_GET['tr_id']) ? (int)$_GET['tr_id'] : 0;
@@ -196,17 +208,8 @@ class transferirHistorialController extends transferirModel
                 'Fecha Envío' => date('d/m/Y H:i', strtotime($transferencia['tr_fecha_envio'])),
                 'Origen' => $transferencia['sucursal_origen'],
                 'Destino' => $transferencia['sucursal_destino'],
-                'Emisor' => $transferencia['usuario_emisor'],
-                'Estado' => ucfirst(str_replace(['pendiente', 'aceptada', 'rechazada'], ['Pendiente', 'Aceptada', 'Rechazada'], $transferencia['tr_estado']))
+                'Emisor' => $transferencia['usuario_emisor']
             ];
-
-            if ($transferencia['tr_fecha_respuesta']) {
-                $info_superior['Fecha Recepción'] = date('d/m/Y H:i', strtotime($transferencia['tr_fecha_respuesta']));
-            }
-
-            if (!empty($transferencia['usuario_receptor'])) {
-                $info_superior['Receptor'] = $transferencia['usuario_receptor'];
-            }
 
             // Headers
             $headers = [
@@ -235,9 +238,9 @@ class transferirHistorialController extends transferirModel
             }
 
             // Fila de totales
-            $cells_total = array_fill(0, count($headers) - 1, ['text' => '', 'align' => 'C']);
-            $cells_total[0] = ['text' => 'TOTALES', 'align' => 'R'];
-            $cells_total[count($headers) - 5] = ['text' => $transferencia['tr_total_cajas'], 'align' => 'C'];
+            $cells_total = array_fill(0, count($headers), ['text' => '', 'align' => 'C']);
+            $cells_total[0] = ['text' => 'TOTALES', 'align' => 'C', 'span' => 3];
+            $cells_total[count($headers) - 3] = ['text' => $transferencia['tr_total_cajas'], 'align' => 'C'];
             $cells_total[count($headers) - 2] = ['text' => number_format($transferencia['tr_total_unidades']), 'align' => 'C'];
             $cells_total[count($headers) - 1] = ['text' => 'Bs. ' . number_format($transferencia['tr_total_valorado'], 2), 'align' => 'R'];
 
@@ -281,6 +284,8 @@ class transferirHistorialController extends transferirModel
             $pdf->AddPage();
 
             $config_empresa = mainModel::obtener_config_empresa_model();
+            $config_empresa = $this->pdf_utf8($config_empresa);
+            $datos_pdf = $this->pdf_utf8($datos_pdf);
 
             // Encabezado más compacto
             $pdf->SetFont('Arial', 'B', 12);
@@ -289,8 +294,8 @@ class transferirHistorialController extends transferirModel
 
             $pdf->SetFont('Arial', '', 7);
             $pdf->SetTextColor(100, 100, 100);
-            $pdf->Cell(0, 3, ('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
-            $pdf->Cell(0, 3, ($config_empresa['ce_direccion']), 0, 1, 'C');
+            $pdf->Cell(0, 3, $this->pdf_utf8('NIT: ' . $config_empresa['ce_nit'] . ' | Telf: ' . $config_empresa['ce_telefono']), 0, 1, 'C');
+            $pdf->Cell(0, 3, $this->pdf_utf8($config_empresa['ce_direccion']), 0, 1, 'C');
 
             $pdf->SetDrawColor(52, 152, 219);
             $pdf->SetLineWidth(0.2);
@@ -409,19 +414,27 @@ class transferirHistorialController extends transferirModel
 
                     foreach ($cells_filtrados as $i => $cell) {
                         $text = isset($cell['text']) ? $cell['text'] : '';
-                        $width = $tabla['headers'][$i]['width'];
                         $align = isset($cell['align']) ? $cell['align'] : 'C';
+                        $span = isset($cell['span']) ? max(1, (int)$cell['span']) : 1;
+
+                        $width = 0;
+                        for ($s = 0; $s < $span; $s++) {
+                            if (!isset($tabla['headers'][$i + $s])) {
+                                break;
+                            }
+                            $width += $tabla['headers'][$i + $s]['width'];
+                        }
+                        $i += $span - 1;
 
                         if (isset($cell['color'])) {
                             $pdf->SetTextColor($cell['color'][0], $cell['color'][1], $cell['color'][2]);
+                        } else {
+                            $pdf->SetTextColor($fill_total ? 255 : 44, $fill_total ? 255 : 62, $fill_total ? 255 : 80);
                         }
 
                         $pdf->Cell($width, 4, $text, 1, 0, $align, $fill_total ? true : $fill);
-
-                        if (isset($cell['color'])) {
-                            $pdf->SetTextColor(44, 62, 80);
-                        }
                     }
+                    $pdf->SetTextColor(44, 62, 80);
                     $pdf->Ln();
                     $fill = !$fill;
                 }
@@ -443,24 +456,24 @@ class transferirHistorialController extends transferirModel
 
                 $y_start = $pdf->GetY() + 2;
                 $pdf->SetXY(15, $y_start);
-                $pdf->SetFont('Arial', 'B', 8);
-                $pdf->Cell(0, 4, ('RESUMEN DEL PERIODO'), 0, 1, 'L');
+                $pdf->SetFont('Arial', 'B', 7);
+                $pdf->SetTextColor(44, 62, 80);
+                $pdf->Cell(0, 4, $this->pdf_utf8('RESUMEN DEL PERÍODO'), 0, 1, 'L');
 
                 foreach ($datos_pdf['resumen'] as $key => $value) {
                     $pdf->SetX(15);
                     $pdf->SetFont('Arial', 'B', 7);
+                    $pdf->SetTextColor(44, 62, 80);
                     $pdf->Cell(50, 3, ($key . ':'), 0, 0, 'L');
                     $pdf->SetFont('Arial', '', 7);
 
                     if (isset($value['color'])) {
                         $pdf->SetTextColor($value['color'][0], $value['color'][1], $value['color'][2]);
+                    } else {
+                        $pdf->SetTextColor(44, 62, 80);
                     }
 
                     $pdf->Cell(0, 3, ($value['text']), 0, 1, 'L');
-
-                    if (isset($value['color'])) {
-                        $pdf->SetTextColor(44, 62, 80);
-                    }
                 }
             }
 
@@ -468,8 +481,8 @@ class transferirHistorialController extends transferirModel
             $pdf->SetY(-40); // Posición fija desde el fondo
             $pdf->SetFont('Arial', 'I', 6);
             $pdf->SetTextColor(150, 150, 150);
-            $pdf->Cell(0, 2, ('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
-            $pdf->Cell(0, 2, ('Página ') . $pdf->PageNo(), 0, 0, 'C');
+            $pdf->Cell(0, 2, $this->pdf_utf8('Generado: ' . date('d/m/Y H:i:s') . ' | Usuario: ' . ($_SESSION['nombre_smp'] ?? 'Sistema')), 0, 1, 'C');
+            $pdf->Cell(0, 2, $this->pdf_utf8('Página ') . $pdf->PageNo(), 0, 0, 'C');
 
             // Generar y descargar PDF directamente como comprasHistorial
             $content = $pdf->Output('S');
@@ -487,16 +500,5 @@ class transferirHistorialController extends transferirModel
             error_log("Error en generar_pdf_transferencia: " . $e->getMessage());
             echo "Error al generar PDF: " . $e->getMessage();
         }
-    }
-
-    private function obtener_badge_estado($estado)
-    {
-        $estados = [
-            'pendiente' => '<span class="badge badge-warning">Pendiente</span>',
-            'aceptada' => '<span class="badge badge-success">Aceptada</span>',
-            'rechazada' => '<span class="badge badge-danger">Rechazada</span>'
-        ];
-
-        return $estados[$estado] ?? '<span class="badge badge-secondary">Desconocido</span>';
     }
 }

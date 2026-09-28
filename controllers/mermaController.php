@@ -97,6 +97,9 @@ class mermaController extends mermaModel
         if ($resultado) {
             return [
                 "Alerta" => "redireccionar",
+                "Titulo" => "Merma Registrada",
+                "texto" => "Se registraron " . (int)$me_cantidad . " unidades como merma",
+                "Tipo" => "success",
                 "URL" => SERVER_URL . "mermaLista/"
             ];
         } else {

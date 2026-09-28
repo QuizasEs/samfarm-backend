@@ -40,6 +40,12 @@ define('SIAT_MAX_FACTURAS_CONTINGENCIA', 100);
 /* Activación opcional de facturación electrónica. */
 define('SIAT_HABILITADO', true);
 
-/* Certificado digital P12 para firma XMLDSig */
-define('SIAT_CERT_P12_PATH', dirname(__DIR__) . '/firma/MARTIN_YANA.p12');
+/* Certificado digital P12 para firma XMLDSig.
+   El original (MARTIN_YANA.p12) usa PKCS#12 PBE con SHA-1 y RC2-128 / 3DES,
+   algoritmos que OpenSSL 3.x moved al proveedor "legacy" y no lee por defecto,
+   por lo que openssl_pkcs12_read() devolvia false y la firma nunca se generaba.
+   MARTIN_YANA_MODERNO.p12 es el mismo certificado reexportado en AES-256-CBC +
+   SHA-256; el original se conserva como respaldo.
+   Ver firma/convertir_certificado.php para regenerarlo. */
+define('SIAT_CERT_P12_PATH', dirname(__DIR__) . '/firma/MARTIN_YANA_MODERNO.p12');
 define('SIAT_CERT_PASSWORD', '6006007');

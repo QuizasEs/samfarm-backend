@@ -15,7 +15,7 @@ if (!isset($_SESSION['id_smp']) || empty($_SESSION['id_smp'])) {
     echo json_encode([
         'Alerta' => 'simple',
         'Titulo' => 'Sesión Expirada',
-        'Texto' => 'Por favor vuelva a iniciar sesión',
+        'texto' => 'Por favor vuelva a iniciar sesión',
         'Tipo' => 'error'
     ]);
     exit();
@@ -26,7 +26,7 @@ if ($rol_usuario != 1 && $rol_usuario != 2) {
     echo json_encode([
         'Alerta' => 'simple',
         'Titulo' => 'Acceso Denegado',
-        'Texto' => 'No tiene permisos para acceder a esta funcionalidad',
+        'texto' => 'No tiene permisos para acceder a esta funcionalidad',
         'Tipo' => 'error'
     ]);
     exit();
@@ -41,7 +41,7 @@ if (!isset($_POST['mermaRegistrarAjax'])) {
     echo json_encode([
         'Alerta' => 'simple',
         'Titulo' => 'Error',
-        'Texto' => 'Parámetro inválido',
+        'texto' => 'Parámetro inválido',
         'Tipo' => 'error'
     ]);
     exit();
@@ -51,6 +51,19 @@ $valor = $_POST['mermaRegistrarAjax'];
 
 if ($valor === "crear") {
     $resultado = $ins_merma->crear_merma_controller();
+
+    // el protocolo de alertas espera el mensaje en la clave "texto"
+    if (isset($resultado['Texto'])) {
+        $resultado['texto'] = $resultado['Texto'];
+        unset($resultado['Texto']);
+    }
+
+    // tras registrar solo se recarga la vista para refrescar la tabla, no se redirige
+    if (($resultado['Alerta'] ?? '') === 'redireccionar') {
+        $resultado['Alerta'] = 'recargar';
+        unset($resultado['URL']);
+    }
+
     echo json_encode($resultado);
 
 } elseif ($valor === "listar") {
@@ -79,7 +92,7 @@ if ($valor === "crear") {
     echo json_encode([
         'Alerta' => 'simple',
         'Titulo' => 'Error',
-        'Texto' => 'Acción no válida',
+        'texto' => 'Acción no válida',
         'Tipo' => 'error'
     ]);
 }

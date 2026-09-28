@@ -25,6 +25,9 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
 
         <div class="card mb20">
+            <div class="ch">
+                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+            </div>
             <div class="cb">
                 <form class="filtro-dinamico">
                     <div class="fr3">
@@ -82,38 +85,42 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                 </button>
             </div>
 
-            <form id="formMermaRegistro" class="mb">
+            <form id="formMermaRegistro" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/mermaRegistrarAjax.php" method="POST" data-form="save" autocomplete="off">
+                <input type="hidden" name="mermaRegistrarAjax" value="crear">
                 <input type="hidden" id="lm_id" name="lm_id">
-                
-                <div class="fg">
-                    <label class="fl">Medicamento</label>
-                    <input type="text" class="inp" id="medicamentoNombre" readonly>
+                <input type="hidden" id="me_cantidad" name="me_cantidad" value="0">
+
+                <div class="mb">
+                    <div class="fg">
+                        <label class="fl">Medicamento</label>
+                        <input type="text" class="inp" id="medicamentoNombre" readonly>
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Total de Unidades</label>
+                        <input type="text" class="inp" id="cantidadDisponible" readonly>
+                        <div class="fh">Se registrarán TODAS las unidades del lote como merma</div>
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Motivo de la Merma <span class="tdan">*</span></label>
+                        <textarea class="ta" id="me_motivo" name="me_motivo" required placeholder="Ej: Producto caducado, Vencimiento próximo, Daño físico, etc."></textarea>
+                    </div>
                 </div>
 
-                <div class="fg">
-                    <label class="fl">Total de Unidades</label>
-                    <input type="text" class="inp" id="cantidadDisponible" readonly>
-                    <div class="fh">Se registrarán TODAS las unidades del lote como merma</div>
-                </div>
-
-                <div class="fg">
-                    <label class="fl">Motivo de la Merma <span class="tdan">*</span></label>
-                    <textarea class="ta" id="me_motivo" name="me_motivo" required placeholder="Ej: Producto caducado, Vencimiento próximo, Daño físico, etc."></textarea>
+                <div class="mf">
+                    <button type="button" class="btn btn-sec" onclick="cerrarModalMermaRegistro()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-dan">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon> Registrar Merma
+                    </button>
                 </div>
             </form>
-
-            <div class="mf">
-                <button type="button" class="btn btn-sec" onclick="cerrarModalMermaRegistro()">
-                    Cancelar
-                </button>
-                <button type="button" class="btn btn-dan" onclick="guardarMermaRegistro()">
-                    <ion-icon name="checkmark-circle-outline"></ion-icon> Registrar Merma
-                </button>
-            </div>
         </div>
     </div>
 
-    <script src="<?php echo SERVER_URL; ?>views/script/mermaRegistrar-view.js"></script>
+    <script src="<?php echo SERVER_URL; ?>views/script/mermaRegistrar-view.js?v=<?php echo filemtime(__DIR__ . '/../script/mermaRegistrar-view.js'); ?>"></script>
 
 <?php } else { ?>
     <div style="text-align: center; padding: 60px;">

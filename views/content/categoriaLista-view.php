@@ -65,23 +65,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formAgregarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                <form id="formAgregarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="agregar_uso">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_uso" id="nombre_uso" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_uso" id="imgLoad_uso" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-uso" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>
@@ -109,25 +98,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formEditarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+                <form id="formEditarUso" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="actualizar_uso">
                     <input type="hidden" name="id_uso_edit" id="id_uso_edit">
-                    <input type="hidden" name="imagen_antigua_edit" id="imagen_antigua_edit">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_uso_edit" id="nombre_uso_edit" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_uso_edit" id="imgLoad_uso_edit" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-uso-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>
@@ -205,23 +182,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formAgregarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                <form id="formAgregarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="agregar_via">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_via" id="nombre_via" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_via" id="imgLoad_via" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-via" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>
@@ -249,25 +215,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formEditarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+                <form id="formEditarVia" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="actualizar_via">
                     <input type="hidden" name="id_via_edit" id="id_via_edit">
-                    <input type="hidden" name="imagen_antigua_edit_via" id="imagen_antigua_edit_via">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_via_edit" id="nombre_via_edit" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_via_edit" id="imgLoad_via_edit" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-via-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>
@@ -346,23 +300,12 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formAgregarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off" enctype="multipart/form-data">
+                <form id="formAgregarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="save" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="agregar_forma">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_forma" id="nombre_forma" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_forma" id="imgLoad_forma" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-forma" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>
@@ -390,25 +333,13 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
             </div>
 
             <div class="mb">
-                <form id="formEditarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off" enctype="multipart/form-data">
+                <form id="formEditarForma" class="FormularioAjax" action="<?php echo SERVER_URL; ?>ajax/categoriaAjax.php" method="POST" data-form="update" autocomplete="off">
                     <input type="hidden" name="categoriaAjax" value="actualizar_forma">
                     <input type="hidden" name="id_forma_edit" id="id_forma_edit">
-                    <input type="hidden" name="imagen_antigua_forma_edit" id="imagen_antigua_forma_edit">
 
                     <div class="fg">
                         <label class="fl req">Nombre</label>
                         <input class="inp" type="text" name="nombre_forma_edit" id="nombre_forma_edit" required maxlength="250">
-                    </div>
-
-                    <div class="fg">
-                        <label class="fl">Imagen</label>
-                        <input class="inp" type="file" name="imgLoad_forma_edit" id="imgLoad_forma_edit" accept="image/*">
-                    </div>
-
-                    <div class="fg" style="text-align: center;">
-                        <img id="img-pic-forma-edit" src="<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png"
-                            style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;"
-                            onerror="this.src='<?php echo SERVER_URL; ?>views/assets/img/predeterminado.png'">
                     </div>
                 </form>
             </div>

@@ -13,15 +13,21 @@ const TransferManager = (function() {
 
     const container = document.getElementById('transferir-container') || document.body;
     const SU_ACTUAL = parseInt(container.dataset.suActual || 0);
-    const ROL_USUARIO = parseInt(container.dataset.rolUsuario || 0);
+    const SU_ORIGEN_NOMBRE = container.dataset.suOrigenNombre || '';
 
     const URL_AJAX = getBaseURL() + 'ajax/transferirAjax.php';
 
     let items = [];
     let currentPage = 1;
 
+    let suOrigen = SU_ACTUAL;
+
     function init() {
+        if (SU_ACTUAL <= 0) {
+            return;
+        }
         configurarEventos();
+        buscarLotes(1);
     }
 
     function configurarEventos() {
@@ -83,17 +89,11 @@ const TransferManager = (function() {
         const busqueda = document.getElementById('busqueda_transfer').value.trim();
         const fechaVenc = document.getElementById('fecha_venc_max_transfer').value;
 
-        let suOrigen = SU_ACTUAL;
-        if (ROL_USUARIO === 1) {
-            const suOrigenSelect = document.getElementById('su_origen_filter_transfer');
-            if (suOrigenSelect && suOrigenSelect.value) {
-                suOrigen = suOrigenSelect.value;
-            }
-        }
+        let suOrigenBusqueda = SU_ACTUAL;
 
         const formData = new FormData();
         formData.append('transferirAjax', 'buscar_lotes');
-        formData.append('su_origen', suOrigen);
+        formData.append('su_origen', suOrigenBusqueda);
         formData.append('busqueda', busqueda);
         formData.append('fecha_venc_max', fechaVenc);
         formData.append('pagina', currentPage);
@@ -395,10 +395,17 @@ const TransferManager = (function() {
             return;
         }
 
+        const destinos = [...new Set(items.map(i => i.su_destino_nombre))];
+        const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+
         const result = await Swal.fire({
             title: '¿Generar transferencia?',
-            html: '<p>Se transferirán <strong>' + items.length + '</strong> items</p>' +
-                '<p>Total: <strong>Bs. ' + items.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2) + '</strong></p>',
+            html: '<p style="text-align:left;">' +
+                '<p style="margin:4px 0;"><strong>Origen:</strong> ' + escapeHtml(SU_ORIGEN_NOMBRE) + '</p>' +
+                '<p style="margin:4px 0;"><strong>Destino:</strong> ' + escapeHtml(destinos.join(', ')) + '</p>' +
+                '<p style="margin:4px 0;"><strong>Items:</strong> ' + items.length + '</p>' +
+                '<p style="margin:4px 0;"><strong>Total:</strong> Bs. ' + total.toFixed(2) + '</p>' +
+                '</p>',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, generar',
@@ -411,6 +418,7 @@ const TransferManager = (function() {
 
         const formData = new FormData();
         formData.append('transferirAjax', 'generar');
+        formData.append('su_origen', suOrigen);
         formData.append('items_json', JSON.stringify(items));
         formData.append('observaciones', observaciones);
 

@@ -74,17 +74,6 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                             </select>
                         </div>
 
-                        <div class="fg">
-                            <label class="fl">Estado</label>
-                            <select class="sel select-filtro" name="select4">
-                                <option value="">Todos los estados</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="aceptada">Aceptada</option>
-                                <option value="rechazada">Rechazada</option>
-                            </select>
-                        </div>
-
-
                     </div>
                     <div class="fr1">
                         <div class="fg">
@@ -159,16 +148,10 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                                     <div class="th5" id="detalleDestino"></div>
                                 </div>
                             </div>
-                            <div class="litem"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
+                            <div class="litem" style="border:none"><ion-icon name="person-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
                                 <div class="f1">
                                     <div class="tc">Usuario Emisor</div>
                                     <div class="th5" id="detalleUsuarioEmisor"></div>
-                                </div>
-                            </div>
-                            <div class="litem" style="border:none"><ion-icon name="radio-button-on-outline" style="font-size:18px;color:var(--accent-primary)"></ion-icon>
-                                <div class="f1">
-                                    <div class="tc">Estado</div>
-                                    <div id="detalleEstado"></div>
                                 </div>
                             </div>
                         </div>

@@ -99,7 +99,7 @@ class compraHistorialController extends compraHistorialModel
                     <thead>
                         <tr>
                             <th>N°</th>
-                            <th>N° COMPRA</th>
+                            <th>DETALLE COMPRA</th>
                             <th>FECHA COMPRA</th>
                             ' .
             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
@@ -124,10 +124,28 @@ class compraHistorialController extends compraHistorialModel
                         '<ion-icon name="warning-outline"></ion-icon> ' . $row['lotes_pendientes'] . ' pendiente(s)</span>';
                 }
 
+                $medicamentos = array_filter(array_map('trim', explode('|', $row['medicamentos_lista'] ?? '')));
+                $muestra = array_slice($medicamentos, 0, 2);
+                $restantes = count($medicamentos) - count($muestra);
+
+                if (count($medicamentos) > 0) {
+                    $estilo_muestra = 'display:inline-block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;';
+                    $contenido_html = '<div class="td-sub" title="' . htmlspecialchars(implode(', ', $medicamentos)) . '">' .
+                        '<span style="' . $estilo_muestra . '">' . htmlspecialchars(implode(', ', $muestra)) . '</span>';
+
+                    if ($restantes > 0) {
+                        $contenido_html .= ' <span style="color:var(--text-faint);">+' . $restantes . ' más</span>';
+                    }
+
+                    $contenido_html .= '</div>';
+                } else {
+                    $contenido_html = '<div class="td-sub">Sin medicamentos</div>';
+                }
+
                 $tabla .= '
                     <tr class="tr-click" onclick="ComprasHistorialModals.verDetalle(' . $row['co_id'] . ', \'' . addslashes($row['co_numero']) . '\')">
                         <td>' . $contador . '</td>
-                        <td><strong style="color:#1976D2;">' . htmlspecialchars($row['co_numero']) . '</strong></td>
+                        <td><div class="td-main"><strong style="color:#1976D2;">' . htmlspecialchars($row['co_numero']) . '</strong></div>' . $contenido_html . '</td>
                         <td>' . date('d/m/Y', strtotime($row['co_creado_en'])) . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style="background:#E3F2FD;padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal']) . '</span></td>' : '') .
                     '

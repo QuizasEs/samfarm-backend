@@ -188,15 +188,13 @@ class preciosController extends preciosModel
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>N°</th>
-                                    <th>Lote</th>
+                                    <th style="width:40px;">N°</th>
+                                    <th style="width:90px;">Lote</th>
                                     <th>Medicamento</th>
-                                    <th>Sucursal</th>
-                                    <th>Precio Anterior (Bs)</th>
-                                    <th>Precio Nuevo (Bs)</th>
-                                    <th>Detalles</th>
-                                    <th>Usuario</th>
-                                    <th>Fecha/Hora</th>
+                                    <th style="width:130px;">Sucursal</th>
+                                    <th style="width:160px;">Precio (Bs)</th>
+                                    <th style="width:210px;">Detalle</th>
+                                    <th style="width:160px;">Usuario / Fecha</th>
                                 </tr>
                             </thead>
                             <tbody>';
@@ -215,35 +213,43 @@ class preciosController extends preciosModel
                     $precio_nuevo = number_format($informe['bp_precio_nuevo'] ?? 0, 2, ',', '.');
 
                     // Decodificar detalles
-                    $detalles = '';
-                    if (!empty($informe['bp_detalle'])) {
-                        $detalle_json = json_decode($informe['bp_detalle'], true);
-                        if ($detalle_json) {
-                            $detalles_arr = [];
-                            foreach ($detalle_json as $key => $value) {
-                                $detalles_arr[] = ucfirst(str_replace('_', ' ', $key)) . ': ' . (is_numeric($value) ? number_format($value, 2) : $value);
-                            }
-                            $detalles = implode('<br>', $detalles_arr);
-                        }
+                    $detalle_json = json_decode($informe['bp_detalle'] ?? '', true) ?: [];
+                    $tipo = $detalle_json['origen'] ?? $detalle_json['tipo'] ?? 'balance_manual';
+
+                    $origenes = [
+                        'compra' => 'Compra',
+                        'balance_manual' => 'Balance manual total',
+                        'cambio_individual' => 'Balance solo al lote',
+                        'cambio_todos_lotes' => 'Balance a todos los lotes',
+                        'cambio_individual_lote' => 'Edicion de lote'
+                    ];
+                    $etiqueta = $origenes[$tipo] ?? ucfirst(str_replace('_', ' ', $tipo));
+                    $detalles = htmlspecialchars($etiqueta);
+
+                    if ($tipo === 'compra' && !empty($detalle_json['compra_numero'])) {
+                        $detalles .= '<br><span style="color:#888;">Compra N° ' . htmlspecialchars($detalle_json['compra_numero']) . '</span>';
                     }
 
                     $html .= '<tr>';
-                    $html .= '<td>' . $contador . '</td>';
-                    $html .= '<td><strong>' . $lote . '</strong></td>';
+                    $html .= '<td  style="font-size:14px;">' . $contador . '</td>';
+                    $html .= '<td  style="font-size:12px;"><strong>' . $lote . '</strong></td>';
                     $html .= '<td><strong>' . $medicamento . '</strong></td>';
                     $html .= '<td>' . $sucursal . '</td>';
-                    $html .= '<td style="text-align:right;color:#e74c3c;font-weight:600;">Bs ' . $precio_anterior . '</td>';
-                    $html .= '<td style="text-align:right;color:#27ae60;font-weight:600;">Bs ' . $precio_nuevo . '</td>';
-                    $html .= '<td style="font-size:11px;">' . $detalles . '</td>';
-                    $html .= '<td>' . $usuario . '</td>';
-                    $html .= '<td>' . $fecha . '</td>';
+                    $html .= '<td style="text-align:right;white-space:nowrap;">'
+                        . '<span style="color:#e74c3c;text-decoration:line-through;">' . $precio_anterior . '</span>'
+                        . ' <span style="color:#999;">&rarr;</span> '
+                        . '<span style="color:#27ae60;font-weight:600;">' . $precio_nuevo . '</span>'
+                        . '</td>';
+                    $html .= '<td style="font-size:13px;line-height:1.5;">' . $detalles . '</td>';
+                    $html .= '<td style="font-size:13px;">' . $usuario
+                        . '<br><span style="color:#888;">' . $fecha . '</span></td>';
                     $html .= '</tr>';
                     $contador++;
                 }
                 $reg_final = $contador - 1;
             } else {
                 error_log("No hay informes o no es un array. Total: " . $total_registros);
-                $html .= '<tr><td colspan="9" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros de cambios de precios</td></tr>';
+                $html .= '<tr><td colspan="7" style="text-align:center;padding:20px;color:#999;"><ion-icon name="document-outline"></ion-icon> No hay registros de cambios de precios</td></tr>';
             }
 
             $html .= '</tbody></table></div>';

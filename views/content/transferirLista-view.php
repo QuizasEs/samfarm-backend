@@ -1,57 +1,148 @@
 <?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
+    require_once "./controllers/transferirController.php";
+    $ins_transfer = new transferirController();
+    $rol_usuario = (int)$_SESSION['rol_smp'];
+    $mi_sucursal = (int)($_SESSION['sucursal_smp'] ?? 0);
+
+    $sucursales_origen = $ins_transfer->listar_sucursales_origen_view($rol_usuario, $mi_sucursal);
+
+    // La sucursal de origen viaja como segmento de la ruta: transferirLista/5/
+    $segmentos = isset($_GET['views']) ? explode('/', (string)$_GET['views']) : array();
+    $sucursal_origen = isset($segmentos[1]) && $segmentos[1] !== '' ? (int)$segmentos[1] : 0;
+
+    if ($sucursal_origen > 0) {
+        $permitida = false;
+        foreach ($sucursales_origen as $s) {
+            if ((int)$s['su_id'] === $sucursal_origen) {
+                $permitida = true;
+            }
+        }
+        if (!$permitida) {
+            $sucursal_origen = 0;
+        }
+    }
+
+    $sucursal_origen_nombre = '';
+    foreach ($sucursales_origen as $s) {
+        if ((int)$s['su_id'] === $sucursal_origen) {
+            $sucursal_origen_nombre = $s['su_nombre'];
+        }
+    }
+
+    $sucursales_destino = $sucursal_origen > 0
+        ? $ins_transfer->listar_sucursales_destino_view($sucursal_origen)
+        : array();
+
     require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();
     $datos_select = $ins_med->datos_extras_controller();
 ?>
 
-    <div class="" id="transferir-container" data-su-actual="<?php echo (int)($_SESSION['sucursal_smp'] ?? 0); ?>" data-rol-usuario="<?php echo (int)($_SESSION['rol_smp'] ?? 0); ?>">
-        <div class="ph">
-            <div>
-                <div class="ptit">
-                    <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
-                </div>
-                <div class="psub">Busque y seleccione medicamentos disponibles para transferir entre sucursales</div>
+<div id="transferir-container"
+     data-su-actual="<?php echo $sucursal_origen; ?>"
+     data-su-origen-nombre="<?php echo htmlspecialchars($sucursal_origen_nombre); ?>"
+     data-mi-sucursal="<?php echo $mi_sucursal; ?>"
+     data-rol-usuario="<?php echo $rol_usuario; ?>">
+
+<?php if ($sucursal_origen === 0) { ?>
+
+    <div class="ph">
+        <div>
+            <div class="ptit">
+                <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
             </div>
+            <div class="psub">Elija la sucursal desde la que desea enviar el inventario</div>
         </div>
+    </div>
 
-        <div class="card mb16">
-            <div class="ch">
-                <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+    <div class="card mb16">
+        <div class="ch">
+            <div class="ct"><ion-icon name="business-outline"></ion-icon> Sucursal de Origen</div>
+        </div>
+        <div class="cb">
+            <?php if (empty($sucursales_origen)) { ?>
+                <p class="txctr tmut" style="padding: 20px;">
+                    <ion-icon name="alert-circle-outline" style="font-size: 48px;"></ion-icon><br>
+                    No tiene sucursales disponibles para transferir
+                </p>
+            <?php } else { ?>
+                <div class="grid3">
+                    <?php foreach ($sucursales_origen as $s) { ?>
+                        <a class="card" style="text-decoration:none;color:inherit;display:block;"
+                           href="<?php echo SERVER_URL; ?>transferirLista/<?php echo (int)$s['su_id']; ?>/">
+                            <div class="cb" style="display:flex;align-items:center;gap:14px;">
+                                <div class="siw bl" style="width:48px;height:48px;">
+                                    <ion-icon name="business-outline" style="font-size:24px"></ion-icon>
+                                </div>
+                                <div style="flex:1;">
+                                    <div class="th4"><?php echo htmlspecialchars($s['su_nombre']); ?></div>
+                                    <div class="tbs tmut">
+                                        Transferir desde esta sucursal
+                                    </div>
+                                </div>
+                                <ion-icon name="chevron-forward" style="font-size:22px;color:var(--text-faint)"></ion-icon>
+                            </div>
+                        </a>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+
+<?php } else { ?>
+
+    <div class="ph">
+        <div>
+            <div class="ptit">
+                <ion-icon name="swap-horizontal-outline"></ion-icon> Transferir Medicamentos
             </div>
-            <div class="cb">
-                <form class="filtro-dinamico" id="form-buscar-lotes-transfer">
-                    <div class="fr3">
-                        <?php if ($_SESSION['rol_smp'] == 1) { ?>
-                            <div class="fg">
-                                <label class="fl">Sucursal Origen</label>
-                                <select class="sel select-filtro" name="su_origen_filter" id="su_origen_filter_transfer">
-                                    <option value="">Mi sucursal</option>
-                                    <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                                        <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                        <?php } ?>
+            <div class="psub">Origen: <strong><?php echo htmlspecialchars($sucursal_origen_nombre); ?></strong> &mdash; elija la sucursal destino</div>
+        </div>
+    </div>
 
-                        <div class="fg">
-                            <label class="fl">Vence hasta</label>
-                            <input class="inp" type="date" name="fecha_venc_max_transfer" id="fecha_venc_max_transfer">
-                        </div>
+    <div class="card mb16">
+        <div class="cb" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="siw bl" style="width:40px;height:40px;">
+                    <ion-icon name="business-outline" style="font-size:20px"></ion-icon>
+                </div>
+                <div>
+                    <div class="tbs tmut">Enviando desde</div>
+                    <div class="th4" style="color:var(--accent-primary)"><?php echo htmlspecialchars($sucursal_origen_nombre); ?></div>
+                </div>
+            </div>
+            <a class="btn btn-def" href="<?php echo SERVER_URL; ?>transferirLista/">
+                <ion-icon name="arrow-back-outline"></ion-icon> Cambiar sucursal
+            </a>
+        </div>
+    </div>
 
-                        <div class="fg">
-                            <label class="fl">Búsqueda</label>
-                            <div class="inpg">
-                                <input class="inp" type="text" name="busqueda_transfer" id="busqueda_transfer" placeholder="Buscar medicamento o lote...">
-                                <button type="button" class="btn btn-def btn-search" id="btn-buscar-lotes-transfer">
-                                    <ion-icon name="search"></ion-icon>
-                                </button>
-                            </div>
+    <div class="card mb16">
+        <div class="ch">
+            <div class="ct"><ion-icon name="filter-outline"></ion-icon> Filtros de Búsqueda</div>
+        </div>
+        <div class="cb">
+            <form class="filtro-dinamico" id="form-buscar-lotes-transfer">
+                <div class="fr3">
+                    <div class="fg">
+                        <label class="fl">Vence hasta</label>
+                        <input class="inp" type="date" name="fecha_venc_max_transfer" id="fecha_venc_max_transfer">
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Búsqueda</label>
+                        <div class="inpg">
+                            <input class="inp" type="text" name="busqueda_transfer" id="busqueda_transfer" placeholder="Buscar medicamento o lote...">
+                            <button type="button" class="btn btn-def btn-search" id="btn-buscar-lotes-transfer">
+                                <ion-icon name="search"></ion-icon>
+                            </button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+    </div>
 
         <div class="card mb16">
             <div class="ch">
@@ -185,8 +276,8 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
                     <label class="fl req">Sucursal Destino</label>
                     <select class="sel" id="modal-sucursal-destino-transfer" required>
                         <option value="">Seleccione...</option>
-                        <?php foreach ($datos_select['sucursales'] as $sucursal) { ?>
-                            <option value="<?php echo $sucursal['su_id'] ?>"><?php echo $sucursal['su_nombre'] ?></option>
+                        <?php foreach ($sucursales_destino as $sucursal) { ?>
+                            <option value="<?php echo (int)$sucursal['su_id'] ?>"><?php echo htmlspecialchars($sucursal['su_nombre']); ?></option>
                         <?php } ?>
                     </select>
                 </div>
@@ -209,8 +300,7 @@ if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_s
         </div>
     </div>
 
-
-    
+<?php } ?>
 
     <script src="<?php echo SERVER_URL; ?>views/script/transferirLista-view.js"></script>
 

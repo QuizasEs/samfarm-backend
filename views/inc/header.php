@@ -26,7 +26,6 @@
         'ajusteInventarioCompleto' => 'Ajuste de Inventario',
         'proveedorLista' => 'Proveedores',
         'transferirLista' => 'Transferencias',
-        'recepcionarLista' => 'Recepcionar',
 
         // Reportes
         'ventasHistorialLista' => 'Historial de Ventas',

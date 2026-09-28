@@ -362,6 +362,7 @@ class preciosModel extends mainModel
                 bp.lm_id,
                 bp.bp_precio_anterior,
                 bp.bp_precio_nuevo,
+                bp.bp_detalle,
                 bp.bp_creado_en,
                 u.us_nombres,
                 u.us_apellido_paterno,

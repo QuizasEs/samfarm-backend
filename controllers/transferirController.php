@@ -10,16 +10,55 @@ if ($peticionAjax) {
 
 class transferirController extends transferirModel
 {
+    private function obtener_sucursal_origen_permitida()
+    {
+        $rol = $_SESSION['rol_smp'] ?? 3;
+        $propia = (int)($_SESSION['sucursal_smp'] ?? 0);
+
+        if ($rol != 1) {
+            return $propia;
+        }
+
+        $solicitada = (int)($_POST['su_origen'] ?? 0);
+        if ($solicitada <= 0) {
+            return $propia;
+        }
+
+        $existe = transferirModel::sucursal_existe_model($solicitada);
+        if (!$existe) {
+            throw new Exception("La sucursal de origen seleccionada no existe o esta inactiva");
+        }
+
+        return (int)$existe['su_id'];
+    }
+
+    public function sucursales_origen_controller()
+    {
+        $rol = $_SESSION['rol_smp'] ?? 3;
+        $propia = (int)($_SESSION['sucursal_smp'] ?? 0);
+        $permitidas = transferirModel::sucursales_origen_permitidas_model($rol, $propia);
+        return json_encode($permitidas, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function listar_sucursales_origen_view($rol, $su_propia)
+    {
+        return transferirModel::sucursales_origen_permitidas_model($rol, $su_propia);
+    }
+
+    public function listar_sucursales_destino_view($su_origen)
+    {
+        $destinos = array();
+        foreach (transferirModel::sucursales_activas_model() as $s) {
+            if ((int)$s['su_id'] !== (int)$su_origen) {
+                $destinos[] = $s;
+            }
+        }
+        return $destinos;
+    }
+
     public function buscar_lotes_disponibles_controller()
     {
-        $su_origen = $_SESSION['sucursal_smp'];
-        $rol = $_SESSION['rol_smp'];
-
-        if ($rol == 1 && isset($_POST['su_origen']) && !empty($_POST['su_origen'])) {
-            $su_origen = mainModel::limpiar_cadena($_POST['su_origen']);
-        } elseif ($rol != 1) {
-            $su_origen = $_SESSION['sucursal_smp'];
-        }
+        $su_origen = $this->obtener_sucursal_origen_permitida();
 
         $busqueda = mainModel::limpiar_cadena($_POST['busqueda'] ?? '');
         $fecha_venc_max = mainModel::limpiar_cadena($_POST['fecha_venc_max'] ?? '');
@@ -58,15 +97,23 @@ class transferirController extends transferirModel
             return json_encode(['error' => 'No hay items para transferir']);
         }
 
-        $su_origen = $_SESSION['sucursal_smp'];
+        $observaciones = mainModel::limpiar_cadena($_POST['observaciones'] ?? '');
+
+        try {
+            $su_origen = $this->obtener_sucursal_origen_permitida();
+        } catch (Exception $e) {
+            return json_encode(['error' => $e->getMessage()]);
+        }
+
         $us_emisor = $_SESSION['id_smp'];
         $rol = $_SESSION['rol_smp'];
-        $observaciones = mainModel::limpiar_cadena($_POST['observaciones'] ?? '');
 
         $sucursales_destino = array_unique(array_column($items, 'su_destino'));
 
-        if (in_array($su_origen, $sucursales_destino)) {
-            return json_encode(['error' => 'No puede transferir a su propia sucursal']);
+        foreach ($sucursales_destino as $destino) {
+            if ((int)$destino === $su_origen) {
+                return json_encode(['error' => 'No puede transferir a la sucursal de origen']);
+            }
         }
 
         if ($rol != 1 && count($sucursales_destino) > 1) {
@@ -103,10 +150,22 @@ class transferirController extends transferirModel
                 $cantidad_unidades = (int)$item['cantidad_unidades'];
                 $su_destino = (int)$item['su_destino'];
 
+                if ($lm_id <= 0 || $cantidad_cajas <= 0 || $cantidad_unidades <= 0) {
+                    throw new Exception("Cantidades inválidas en el detalle de la transferencia");
+                }
+
+                if ($su_destino <= 0 || $su_destino === $su_origen) {
+                    throw new Exception("Sucursal destino inválida");
+                }
+
                 $lote = transferirModel::datos_lote_transfer_model($lm_id)->fetch();
 
                 if (!$lote) {
                     throw new Exception("Lote no encontrado");
+                }
+
+                if ((int)$lote['su_id'] !== (int)$su_origen) {
+                    throw new Exception("El lote seleccionado no pertenece a su sucursal");
                 }
 
                 if ($lote['lm_origen_id'] !== null) {
@@ -117,7 +176,7 @@ class transferirController extends transferirModel
                     throw new Exception("Stock insuficiente en lote " . ($lote['lm_numero_lote'] ?? 'desconocido'));
                 }
 
-                $subtotal = $cantidad_unidades * $lote['lm_precio_venta'];
+                $subtotal = $cantidad_cajas * $lote['lm_precio_compra'];
 
                 $datos_detalle = [
                     'tr_id' => $tr_id,
@@ -131,7 +190,7 @@ class transferirController extends transferirModel
                     'dt_subtotal_valorado' => $subtotal
                 ];
 
-                transferirModel::insertar_detalle_transferencia_model($datos_detalle);
+                $dt_id = transferirModel::insertar_detalle_transferencia_model($datos_detalle);
 
                 transferirModel::descontar_stock_lote_model($lm_id, $cantidad_cajas, $cantidad_unidades);
 
@@ -168,6 +227,64 @@ class transferirController extends transferirModel
 
                 transferirModel::registrar_historial_lote_model($datos_historial);
 
+                $datos_lote_destino = [
+                    ':pr_id' => $lote['pr_id'] ?? null,
+                    ':pr_id_compra' => $lote['pr_id_compra'] ?? null,
+                    ':med_id' => $lote['med_id'],
+                    ':su_id' => $su_destino,
+                    ':lm_numero_lote' => $lote['lm_numero_lote'],
+                    ':lm_cant_caja' => $lote['lm_cant_caja'],
+                    ':lm_cant_blister' => $lote['lm_cant_blister'],
+                    ':lm_cant_unidad' => $lote['lm_cant_unidad'],
+                    ':lm_cant_actual_cajas' => $cantidad_cajas,
+                    ':lm_cant_actual_unidades' => $cantidad_unidades,
+                    ':lm_costo_lista' => $lote['lm_costo_lista'] ?? 0,
+                    ':lm_precio_compra' => $lote['lm_precio_compra'],
+                    ':lm_precio_venta' => $lote['lm_precio_venta'],
+                    ':lm_margen_u' => $lote['lm_margen_u'] ?? null,
+                    ':lm_margen_c' => $lote['lm_margen_c'] ?? null,
+                    ':lm_precio_min_u' => $lote['lm_precio_min_u'] ?? null,
+                    ':lm_precio_min_c' => $lote['lm_precio_min_c'] ?? null,
+                    ':lm_fecha_vencimiento' => $lote['lm_fecha_vencimiento'],
+                    ':lm_origen_id' => $lm_id
+                ];
+
+                $lm_destino_id = transferirModel::crear_lote_en_destino_model($datos_lote_destino);
+
+                transferirModel::actualizar_detalle_lote_destino_model($dt_id, $lm_destino_id);
+
+                transferirModel::actualizar_inventario_destino_model(
+                    $lote['med_id'],
+                    $su_destino,
+                    $cantidad_cajas,
+                    $cantidad_unidades,
+                    $subtotal
+                );
+
+                $datos_movimiento_entrada = [
+                    'lm_id' => $lm_destino_id,
+                    'med_id' => $lote['med_id'],
+                    'su_id' => $su_destino,
+                    'us_id' => $us_emisor,
+                    'mi_tipo' => 'entrada',
+                    'mi_cantidad' => $cantidad_unidades,
+                    'mi_unidad' => 'unidad',
+                    'mi_referencia_tipo' => 'transferencia_entrada',
+                    'mi_referencia_id' => $tr_id,
+                    'mi_motivo' => "Entrada de {$cantidad_cajas} cajas por transferencia #{$tr_numero}"
+                ];
+
+                transferirModel::registrar_movimiento_entrada_model($datos_movimiento_entrada);
+
+                $datos_historial_destino = [
+                    'lm_id' => $lm_destino_id,
+                    'us_id' => $us_emisor,
+                    'hl_accion' => 'transferencia_entrada',
+                    'hl_descripcion' => "Ingreso de {$cantidad_cajas} cajas por transferencia #{$tr_numero}"
+                ];
+
+                transferirModel::registrar_historial_lote_model($datos_historial_destino);
+
                 $total_cajas += $cantidad_cajas;
                 $total_unidades += $cantidad_unidades;
                 $total_valorado += $subtotal;
@@ -185,7 +302,7 @@ class transferirController extends transferirModel
                 'total_cajas' => $total_cajas,
                 'total_unidades' => $total_unidades,
                 'total_valorado' => $total_valorado,
-                'tr_estado' => 'pendiente'
+                'tr_estado' => 'aceptada'
             ];
 
             transferirModel::registrar_informe_model([
@@ -312,127 +429,4 @@ class transferirController extends transferirModel
         return base64_encode($pdf_output);
     }
 
-
-
-    public function aceptar_transferencia_controller()
-    {
-        $tr_id = isset($_POST['tr_id']) ? (int)$_POST['tr_id'] : 0;
-        $us_receptor = $_SESSION['id_smp'] ?? 0;
-        $rol = $_SESSION['rol_smp'] ?? 0;
-        $su_usuario = $_SESSION['sucursal_smp'] ?? 0;
-
-        if (!$tr_id || !$us_receptor) {
-            return json_encode(['error' => 'Datos inválidos']);
-        }
-
-        try {
-            $conexion = mainModel::conectar();
-            $conexion->beginTransaction();
-
-            $stmt_tr = transferirModel::datos_transferencia_completa_model($tr_id);
-            $transferencia = $stmt_tr->fetch(PDO::FETCH_ASSOC);
-
-            if (!$transferencia) {
-                throw new Exception("Transferencia no encontrada");
-            }
-
-            if ($rol != 1 && $transferencia['su_destino_id'] != $su_usuario) {
-                throw new Exception("No tiene permisos para aceptar esta transferencia");
-            }
-
-            if ($transferencia['tr_estado'] != 'pendiente') {
-                throw new Exception("La transferencia no está en estado pendiente");
-            }
-
-            $stmt_dt = transferirModel::detalle_transferencia_model($tr_id);
-            $detalles = $stmt_dt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($detalles as $det) {
-                $lm_origen_id = $det['dt_id'];
-                $med_id = $det['med_id'];
-                $dt_cantidad_cajas = $det['dt_cantidad_cajas'];
-                $dt_cantidad_unidades = $det['dt_cantidad_unidades'];
-                $dt_numero_lote = $det['dt_numero_lote_origen'];
-                $dt_precio_compra = $det['dt_precio_compra'];
-                $dt_precio_venta = $det['dt_precio_venta'];
-                $subtotal = $det['dt_subtotal_valorado'];
-
-                $stmt_lm_origen = transferirModel::datos_lote_transfer_model($det['lm_origen_id']);
-                $lm_origen = $stmt_lm_origen->fetch(PDO::FETCH_ASSOC);
-
-                if (!$lm_origen) {
-                    throw new Exception("Lote origen no encontrado");
-                }
-
-                $datos_lote = [
-                    'med_id' => $med_id,
-                    'su_id' => $transferencia['su_destino_id'],
-                    'lm_numero_lote' => $dt_numero_lote,
-                    'lm_cant_caja' => $dt_cantidad_cajas,
-                    'lm_cant_blister' => $lm_origen['lm_cant_blister'],
-                    'lm_cant_unidad' => $lm_origen['lm_cant_unidad'],
-                    'lm_cant_actual_cajas' => $dt_cantidad_cajas,
-                    'lm_cant_actual_unidades' => $dt_cantidad_unidades,
-                    'lm_precio_compra' => $dt_precio_compra,
-                    'lm_precio_venta' => $dt_precio_venta,
-                    'lm_fecha_vencimiento' => $lm_origen['lm_fecha_vencimiento'],
-                    'lm_origen_id' => $det['lm_origen_id']
-                ];
-
-                $lm_destino_id = transferirModel::crear_lote_en_destino_model($datos_lote);
-
-                transferirModel::actualizar_inventario_destino_model(
-                    $med_id,
-                    $transferencia['su_destino_id'],
-                    $dt_cantidad_cajas,
-                    $dt_cantidad_unidades,
-                    $subtotal
-                );
-
-                $datos_movimiento = [
-                    'lm_id' => $lm_destino_id,
-                    'med_id' => $med_id,
-                    'su_id' => $transferencia['su_destino_id'],
-                    'us_id' => $us_receptor,
-                    'mi_tipo' => 'entrada',
-                    'mi_cantidad' => $dt_cantidad_unidades,
-                    'mi_unidad' => 'unidad',
-                    'mi_referencia_tipo' => 'transferencia_entrada',
-                    'mi_referencia_id' => $tr_id,
-                    'mi_motivo' => "Entrada de {$dt_cantidad_cajas} cajas por transferencia #{$transferencia['tr_numero']}"
-                ];
-
-                transferirModel::registrar_movimiento_entrada_model($datos_movimiento);
-
-                $sql_update_detalle = "UPDATE detalle_transferencia SET lm_destino_id = :lm_destino_id WHERE dt_id = :dt_id";
-                $stmt_update = mainModel::conectar()->prepare($sql_update_detalle);
-                $stmt_update->execute([':lm_destino_id' => $lm_destino_id, ':dt_id' => $det['dt_id']]);
-            }
-
-            transferirModel::actualizar_estado_transferencia_model($tr_id, 'aceptada', $us_receptor);
-
-            $conexion->commit();
-
-            return json_encode([
-                'Tipo' => 'success',
-                'Titulo' => 'Transferencia aceptada',
-                'texto' => "Transferencia #{$transferencia['tr_numero']} aceptada correctamente"
-            ], JSON_UNESCAPED_UNICODE);
-
-        } catch (Exception $e) {
-            if (isset($conexion)) {
-                $conexion->rollBack();
-            }
-            error_log("Error en aceptar_transferencia: " . $e->getMessage());
-            return json_encode(['error' => $e->getMessage()]);
-        }
-    }
-
-    private function truncar_texto($texto, $longitud)
-    {
-        if (strlen($texto) > $longitud) {
-            return substr($texto, 0, $longitud - 3) . '...';
-        }
-        return $texto;
-    }
 }

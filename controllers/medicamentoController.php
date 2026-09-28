@@ -617,7 +617,6 @@ class medicamentoController extends medicamentoModel
                         <tr>
                             <th>N°</th>
                             <th>NOMBRE</th>
-                            <th>IMAGEN</th>
                             <th>CREADO EN</th>
                             <th>ACTUALIZADO EN</th>
                             <th>ESTADO</th>
@@ -635,16 +634,10 @@ class medicamentoController extends medicamentoModel
                 // Estado visual
                 $estado = $rows['vd_estado'] == 1 ? '<span class="estado-activo">Activo</span>' : '<span class="estado-inactivo">Inactivo</span>';
 
-                // Imagen (si existe)
-                $img_tag = $rows['vd_imagen']
-                    ? '<img src="' . SERVER_URL . 'uploads/vias/' . htmlspecialchars($rows['vd_imagen']) . '" alt="imagen" class="thumb-table">'
-                    : '<span class="sin-imagen">—</span>';
-
                 $tabla .= '
                         <tr>
                             <td>' . $contador . '</td>
                             <td>' . htmlspecialchars($rows["vd_nombre"]) . '</td>
-                            <td>' . $img_tag . '</td>
                             <td>' . date('d/m/Y H:i', strtotime($rows["vd_creado_en"])) . '</td>
                             <td>' . date('d/m/Y H:i', strtotime($rows["vd_actualizado_en"])) . '</td>
                             <td>' . $estado . '</td>
@@ -663,9 +656,9 @@ class medicamentoController extends medicamentoModel
             $reg_final = $contador - 1;
         } else {
             if ($total >= 1) {
-                $tabla .= '<tr><td colspan="7"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
+                $tabla .= '<tr><td colspan="6"><a class="btn-primary" href="' . $url . '">Recargar</a></td></tr>';
             } else {
-                $tabla .= '<tr><td colspan="7">No hay registros en el sistema.</td></tr>';
+                $tabla .= '<tr><td colspan="6">No hay registros en el sistema.</td></tr>';
             }
         }
 

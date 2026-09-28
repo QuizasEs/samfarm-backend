@@ -49,7 +49,7 @@ class siatModel extends mainModel
             'pkey' => $certs['pkey'],
         ];
     }
-/* manipula la firma usando librerias xml */
+    /* manipula la firma usando librerias xml */
     private static function firmarXML($xmlString)
     {
         $certData = self::cargarCertificadoP12();
@@ -58,40 +58,43 @@ class siatModel extends mainModel
 
         $dom = new DOMDocument();
         $dom->preserveWhiteSpace = false;
-        $dom->loadXML($xmlString);
-
-        // El nodo raíz DEBE tener Id para que la firma lo referencie
-        $root = $dom->documentElement;
-        if (!$root->hasAttribute('Id')) {
-            $root->setAttribute('Id', 'factura');
+        if (!$dom->loadXML($xmlString)) {
+            throw new Exception("No se pudo cargar el XML a firmar");
         }
 
-        // 1. Crear objeto firma (namespace global - xmlseclibs v1.x)
-        $objDSig = new XMLSecurityDSig();
-
-        // 2. Canonicalización exclusiva (requerido por SIAT)
-        $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
-
-        // 3. Agregar referencia al documento completo
-        //    URI='#factura' apunta al Id del root
-        //    Algoritmo digest SHA256
+        /* Estructura, algoritmos y canonicalizacion calcados del ejemplo oficial
+           del SIN (facturaElectronicaCompraVenta.xml):
+             - <Signature> con namespace por defecto, sin prefijo
+             - CanonicalizationMethod: C14N inclusivo
+             - Transforms: enveloped-signature + c14n inclusivo con comentarios
+             - Reference URI="" (documento completo)
+             - SignatureMethod rsa-sha256, DigestMethod sha256
+           El SignatureSchema.xsd solo exige que Signature exista, pero el SIN
+           valida ademas la firma criptograficamente, asi que se sigue el
+           formato de su codigo de referencia. */
+        $objDSig = new XMLSecurityDSig('');
+        $objDSig->setCanonicalMethod(XMLSecurityDSig::C14N);
         $objDSig->addReference(
             $dom,
             XMLSecurityDSig::SHA256,
-            null,
-            ['force_uri' => true]
+            array(
+                'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
+                XMLSecurityDSig::C14N_COMMENTS,
+            ),
+            array('force_uri' => true)
         );
 
-        // 4. Crear llave privada RSA-SHA256
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
 
-        // 5. Cargar llave privada + certificado (concatenados)
-        $objKey->loadKey($pkeyPem . $certPem, false, false);
+        /* loadKey() no devuelve valor: hay que capturar la excepcion, no probar
+           el retorno, o se pisaria la llave ya cargada. */
+        try {
+            $objKey->loadKey($pkeyPem, false, false);
+        } catch (Throwable $e) {
+            throw new Exception("No se pudo cargar la llave privada del certificado: " . $e->getMessage());
+        }
 
-        // 6. Firmar y adjuntar al nodo raíz
-        $objDSig->sign($objKey, $root);
-
-        // 7. Agregar certificado X509 al KeyInfo
+        $objDSig->sign($objKey, $dom->documentElement);
         $objDSig->add509Cert($certPem, true, false);
 
         return $dom->saveXML();

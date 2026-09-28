@@ -31,7 +31,6 @@
                 "sucursalLista",
                 "categoriaLista",
                 "transferirLista",
-                "recepcionarLista",
                 "transferirHistorialLista",
                 "mermaRegistrar",
                 "mermaLista",
