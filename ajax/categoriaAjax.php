@@ -76,7 +76,7 @@ if (isset($_POST['categoriaAjax'])) {
         exit();
     }
 
-    if ($valor == "cambiar_estado_uso") {
+    if ($valor == "cambiar_estado_uso" || $valor == "eliminar_uso") {
         header('Content-Type: application/json; charset=utf-8');
         echo $ins_categoria->cambiar_estado_uso_farmacologico_controller();
         exit();
@@ -114,7 +114,7 @@ if (isset($_POST['categoriaAjax'])) {
         exit();
     }
 
-    if ($valor == "cambiar_estado_via") {
+    if ($valor == "cambiar_estado_via" || $valor == "eliminar_via") {
         header('Content-Type: application/json; charset=utf-8');
         echo $ins_categoria->cambiar_estado_via_administracion_controller();
         exit();
@@ -153,7 +153,7 @@ if (isset($_POST['categoriaAjax'])) {
         exit();
     }
 
-    if ($valor == "cambiar_estado_forma") {
+    if ($valor == "cambiar_estado_forma" || $valor == "eliminar_forma") {
         header('Content-Type: application/json; charset=utf-8');
         echo $ins_categoria->cambiar_estado_forma_farmaceutica_controller();
         exit();

@@ -40,8 +40,8 @@ if (isset($_POST['accion'])) {
             echo $ins_ajuste->actualizar_lote_controlador();
             break;
         
-        case 'eliminar_lote':
-            echo $ins_ajuste->eliminar_lote_controlador();
+        case 'terminar_lote':
+            echo $ins_ajuste->terminar_lote_controlador();
             break;
         
         case 'obtener_listas':

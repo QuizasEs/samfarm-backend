@@ -57,23 +57,22 @@ function cerrarModalEditarUsoFarmacologico() {
     App.closeM('modalEditarUsoFarmacologico');
 }
 
-function cambiarEstadoUsoFarmacologico(id, nuevoEstado) {
+function eliminarUsoFarmacologico(id) {
     Swal.fire({
-        title: nuevoEstado == 1 ? '¿Activar uso farmacológico?' : '¿Desactivar uso farmacológico?',
-        text: 'Esta acción cambiará el estado del registro',
+        title: '¿Eliminar uso farmacológico?',
+        text: 'Esta acción eliminará el registro. No se podrá recuperar.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: nuevoEstado == 1 ? '#28a745' : '#d33',
+        confirmButtonColor: '#d33',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, confirmar',
+        confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
                 const formData = new FormData();
-                formData.append('categoriaAjax', 'cambiar_estado_uso');
+                formData.append('categoriaAjax', 'eliminar_uso');
                 formData.append('id', id);
-                formData.append('estado', nuevoEstado);
 
                 const response = await fetch(AJAX_URL, {
                     method: 'POST',
@@ -94,7 +93,7 @@ function cambiarEstadoUsoFarmacologico(id, nuevoEstado) {
 
             } catch (error) {
                 console.error('Error:', error);
-                Swal.fire('Error', 'No se pudo cambiar el estado', 'error');
+                Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
             }
         }
     });
@@ -144,23 +143,22 @@ function cerrarModalEditarViaAdministracion() {
     App.closeM('modalEditarViaAdministracion');
 }
 
-function cambiarEstadoViaAdministracion(id, nuevoEstado) {
+function eliminarViaAdministracion(id) {
     Swal.fire({
-        title: nuevoEstado == 1 ? '¿Activar vía de administración?' : '¿Desactivar vía de administración?',
-        text: 'Esta acción cambiará el estado del registro',
+        title: '¿Eliminar vía de administración?',
+        text: 'Esta acción eliminará el registro. No se podrá recuperar.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: nuevoEstado == 1 ? '#28a745' : '#d33',
+        confirmButtonColor: '#d33',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, confirmar',
+        confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
                 const formData = new FormData();
-                formData.append('categoriaAjax', 'cambiar_estado_via');
+                formData.append('categoriaAjax', 'eliminar_via');
                 formData.append('id', id);
-                formData.append('estado', nuevoEstado);
 
                 const response = await fetch(AJAX_URL, {
                     method: 'POST',
@@ -181,7 +179,7 @@ function cambiarEstadoViaAdministracion(id, nuevoEstado) {
 
             } catch (error) {
                 console.error('Error:', error);
-                Swal.fire('Error', 'No se pudo cambiar el estado', 'error');
+                Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
             }
         }
     });
@@ -231,23 +229,22 @@ function cerrarModalEditarFormaFarmaceutica() {
     App.closeM('modalEditarFormaFarmaceutica');
 }
 
-function cambiarEstadoFormaFarmaceutica(id, nuevoEstado) {
+function eliminarFormaFarmaceutica(id) {
     Swal.fire({
-        title: nuevoEstado == 1 ? '¿Activar forma farmacéutica?' : '¿Desactivar forma farmacéutica?',
-        text: 'Esta acción cambiará el estado del registro',
+        title: '¿Eliminar forma farmacéutica?',
+        text: 'Esta acción eliminará el registro. No se podrá recuperar.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: nuevoEstado == 1 ? '#28a745' : '#d33',
+        confirmButtonColor: '#d33',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, confirmar',
+        confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
                 const formData = new FormData();
-                formData.append('categoriaAjax', 'cambiar_estado_forma');
+                formData.append('categoriaAjax', 'eliminar_forma');
                 formData.append('id', id);
-                formData.append('estado', nuevoEstado);
 
                 const response = await fetch(AJAX_URL, {
                     method: 'POST',
@@ -268,7 +265,7 @@ function cambiarEstadoFormaFarmaceutica(id, nuevoEstado) {
 
             } catch (error) {
                 console.error('Error:', error);
-                Swal.fire('Error', 'No se pudo cambiar el estado', 'error');
+                Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
             }
         }
     });

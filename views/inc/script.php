@@ -2672,21 +2672,50 @@ class ProviderSearchManager {
             // Abrir en nueva ventana
             const ventanaPDF = window.open(url, '_blank');
 
-            // Limpiar URL cuando se cierre la ventana
-            if (ventanaPDF) {
-                ventanaPDF.onbeforeunload = function() {
-                    URL.revokeObjectURL(url);
-                };
+            /* window.open devuelve null cuando el navegador bloquea el popup, y
+               eso es lo que pasa si la llamada no viene de un clic: el
+               comprobante se genera bien pero no se abre nada. Antes se
+               devolvia true igual y el usuario se quedaba creyendo que la
+               reimpresion no funcionaba, sin ningun aviso.
+
+               Este archivo se llama siempre despues de un await, asi que la
+               activacion del usuario ya puede haber caducado. Por eso se
+               revisa, en vez de asumir que si. */
+            if (!ventanaPDF) {
+                URL.revokeObjectURL(url);
+
+                /* Swal viene de un CDN. Si no cargo, este manejador se caeria
+                   justo cuando debe avisar, asi que no se le llama sin
+                   comprobar. */
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Ventana bloqueada',
+                        text: 'El navegador impidió abrir el comprobante. Permite los pop-ups para este sitio y vuelve a intentarlo.'
+                    });
+                } else {
+                    window.alert('El navegador impidió abrir el comprobante. Permite los pop-ups para este sitio y vuelve a intentarlo.');
+                }
+                return false;
             }
+
+            // Limpiar URL cuando se cierre la ventana
+            ventanaPDF.onbeforeunload = function() {
+                URL.revokeObjectURL(url);
+            };
 
             return true;
 
         } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo abrir el PDF. Intenta nuevamente.'
-            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo abrir el PDF. Intenta nuevamente.'
+                });
+            } else {
+                window.alert('No se pudo abrir el comprobante. Intenta nuevamente.');
+            }
             return false;
         }
     };

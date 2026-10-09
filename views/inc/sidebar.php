@@ -72,9 +72,9 @@ if ($_SESSION['rol_smp'] == 1) {
                     <a href="<?php echo SERVER_URL ?>inventarioLista/" class="smi <?php echo $current_view == 'inventarioLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="list-outline"></ion-icon>Inventario
                     </a>
-                    <!-- <a href="<?php echo SERVER_URL ?>ajusteInventarioCompleto/" class="smi <?php echo $current_view == 'ajusteInventarioCompleto' ? 'ac' : ''; ?>">
+                    <a href="<?php echo SERVER_URL ?>ajusteInventarioCompleto/" class="smi <?php echo $current_view == 'ajusteInventarioCompleto' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="build-outline"></ion-icon>Ajuste de Inventario
-                    </a> -->
+                    </a>
 
                     <a href="<?php echo SERVER_URL ?>transferirLista/" class="smi <?php echo $current_view == 'transferirLista' ? 'ac' : ''; ?>">
                         <ion-icon class="smd" name="swap-horizontal-outline"></ion-icon>Transferencias

@@ -2,6 +2,15 @@
 
 require_once "mainModel.php";
 
+/* El PDF del comprobante imprime CUF, CUFD, leyenda y el QR, que son cosas del
+   modulo SIAT. siatModel no estaba cargado aqui porque antes el PDF no sabia
+   nada de facturacion electronica: se cargaba por el camino de la venta, nunca
+   desde el modelo. Se incluye una vez, con class_exists para no romper si otro
+   flujo ya lo habia cargado. */
+if (!class_exists('siatModel', false)) {
+    require_once __DIR__ . '/siatModel.php';
+}
+
 
 
 class ventaModel extends mainModel
@@ -340,7 +349,21 @@ class ventaModel extends mainModel
         return $sql;
     }
 
-    /* Guardar una nueva venta */
+    /* Guardar una nueva venta
+
+       NOTA sobre ve_numero_documento:
+       Este campo es un identificador INTERNO de la aplicacion, no es el numero
+       de la venta a efectos de facturacion. Se genera como
+       "SU<sucursal>-<timestamp unix>" y solo se usa para referenciar la venta
+       en el historial, los PDF, las devoluciones y la caja.
+
+       NO debe tomarse en cuenta para facturacion. El numero de factura que ve el
+       SIN no sale de aqui: sale del correlativo de la tabla factura_secuencia
+       (columna fs_ultimo_nro), que se consume al emitir y queda embebido dentro
+       del CUF. Ese correlativo se guarda despues en factura.fa_numero_siat.
+
+       Ademas la columna esta prevista para eliminarse a futuro, asi que nada
+       fuera de este INSERT debe depender de su formato. */
     public static function guardar_venta_model($datos)
     {
         $db = mainModel::conectar();
@@ -403,7 +426,14 @@ class ventaModel extends mainModel
         return $stmt;
     }
 
-    /* Generar un número de documento para la venta */
+    /* Generar un número de documento para la venta
+
+       Este es un numero INTERNO de la aplicacion, no el numero de venta para
+       facturacion. Solo sirve para identificar y referenciar la venta dentro del
+       sistema (historial, PDF, devoluciones, caja).
+
+       El numero que ve el SIN es otro: sale del correlativo de factura_secuencia
+       (fs_ultimo_nro) y va embebido en el CUF. No confundirlos. */
     public static function generar_numero_venta_model($sucursal_id)
     {
         // ejemplo: SU{su_id}-TS{timestamp}
@@ -847,7 +877,36 @@ class ventaModel extends mainModel
                 $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
             }
 
-            return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
+            /* Datos de facturacion electronica para el pie del comprobante.
+
+               Se leen de la fila que acabo de traer, que ya tiene fa_cuf,
+               fa_numero_siat y fa_cufd. La leyenda se pide por la actividad que
+               resolvio el SIN, que es la misma que va en el XML firmado: si
+               difieren, el comprobante impreso mostraria una leyenda que no es
+               la del documento fiscal. */
+            $siat = [];
+            if (!empty($data['fa_cuf']) && !empty($data['fa_numero_siat'])) {
+                $siat = [
+                    'cuf'        => $data['fa_cuf'],
+                    'numero'     => (string)(int)$data['fa_numero_siat'],
+                    'leyenda'    => $data['fa_leyenda'] ?? '',
+                    'estado_anulacion' => '',
+                ];
+
+                // Si la factura no trae leyenda guardada (facturas viejas), se
+                // pide por la actividad economica vigente.
+                if (empty($siat['leyenda'])) {
+                    try {
+                        $siat['leyenda'] = siatModel::obtener_leyenda_siat_model(
+                            siatModel::resolverActividadEconomica()
+                        );
+                    } catch (Throwable $e) {
+                        error_log("PDF: no se pudo obtener la leyenda SIAT: " . $e->getMessage());
+                    }
+                }
+            }
+
+            return $this->generar_pdf_nota_venta($data, $detalles, $empresa, $siat);
 
         } catch (Exception $e) {
             error_log("  Error generando PDF: " . $e->getMessage());
@@ -919,7 +978,47 @@ class ventaModel extends mainModel
                 $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
             }
 
-            return $this->generar_pdf_nota_venta($data, $detalles, $empresa);
+            /* Esta consulta historicaba desde ventas, sin tocar factura, asi que
+               una factura electronica reimpresa desde el historial salia como
+               nota de venta: sin CUF, sin QR y con el titulo mal. Se
+               hace LEFT JOIN con factura para recuperar los datos fiscales.
+
+               fa_cufd se trae en el SELECT pero ya no se usa: ver la nota de
+               por que el CUFD no se imprime, mas abajo. */
+            $sqlSiat = $db->prepare("
+                SELECT f.fa_cuf, f.fa_numero_siat, f.fa_cufd, f.fa_leyenda,
+                       fe.fe_estado_siat
+                  FROM factura f
+                  LEFT JOIN facturacion_electronica fe ON fe.fa_id = f.fa_id
+                 WHERE f.ve_id = :ve_id
+                 LIMIT 1
+            ");
+            $sqlSiat->execute([':ve_id' => $ve_id]);
+            $filaSiat = $sqlSiat->fetch(PDO::FETCH_ASSOC);
+
+            $siat = [];
+            if ($filaSiat && !empty($filaSiat['fa_cuf']) && !empty($filaSiat['fa_numero_siat'])) {
+                $siat = [
+                    'cuf'    => $filaSiat['fa_cuf'],
+                    'numero' => (string)(int)$filaSiat['fa_numero_siat'],
+                    'leyenda' => $filaSiat['fa_leyenda'] ?? '',
+                    'estado_anulacion' => (strtoupper((string)($filaSiat['fe_estado_siat'] ?? '')) === 'ANULADA')
+                        ? 'anulada'
+                        : '',
+                ];
+
+                if (empty($siat['leyenda'])) {
+                    try {
+                        $siat['leyenda'] = siatModel::obtener_leyenda_siat_model(
+                            siatModel::resolverActividadEconomica()
+                        );
+                    } catch (Throwable $e) {
+                        error_log("PDF historial: no se pudo obtener la leyenda SIAT: " . $e->getMessage());
+                    }
+                }
+            }
+
+            return $this->generar_pdf_nota_venta($data, $detalles, $empresa, $siat);
 
         } catch (Exception $e) {
             error_log("  Error generando PDF reimpresión: " . $e->getMessage());
@@ -928,24 +1027,88 @@ class ventaModel extends mainModel
         }
     }
 
-    /* Método común para generar el PDF de nota de venta */
-    private function generar_pdf_nota_venta($data, $detalles, $empresa)
-    {
-        // Calcular altura dinámica
-        $altura_base = 95;
-        $altura_items = 0;
-        $line_height = 4;
-        $char_per_line = 45;
+    /* Genera el PDF del comprobante.
 
-        foreach ($detalles as $d) {
-            $nombre_producto = $d['med_nombre'] ?? 'Producto';
-            $lineas_nombre = ceil(mb_strlen($nombre_producto, 'UTF-8') / $char_per_line);
-            $altura_items += $lineas_nombre * $line_height;
+       Sirve para dos cosas distintas que antes eran el mismo metodo:
+
+         - nota de venta: comprobante interno, no lleva QR
+         - factura electronica: lleva la leyenda y el QR de consulta, que es lo
+           que permite al cliente verificarla en el portal del SIN
+
+       Que documento es NO se deduce del parametro $tipo que recibia antes,
+       porque los llamadores pasaban siempre 'nota_venta' incluso para facturas:
+       el tipo real vive en ventas.ve_tipo_documento y en la existencia de CUF.
+       Por eso se lee de ahi y no del argumento. El parametro se mantiene para no
+       romper la firma, pero ya no decide nada.
+
+       Los datos de facturacion electronica llegan en $siat. Si vienen vacios, el
+       comprobante sale como nota de venta: es preferible eso a imprimir una
+       factura sin CUF, que el SIN no reconoce como fiscal. */
+    private function generar_pdf_nota_venta($data, $detalles, $empresa, $siat = [])
+    {
+        $esFactura = !empty($siat['cuf']) && !empty($siat['numero']);
+
+        /* El QR es un PNG temporal en disco porque FPDF no acepta base64. Vive
+           aca, en el envoltorio, y no en el dibujado: este dibuja dos veces y en
+           la primera pasada todavia se lo necesita. */
+        $qrPath = null;
+        if ($esFactura) {
+            $qrPath = siatModel::qrEnDisco(
+                $empresa['ce_nit'] ?? '',
+                $siat['cuf'],
+                $siat['numero']
+            );
+            if ($qrPath === null) {
+                error_log("PDF: no se pudo generar el PNG del QR de la factura");
+            }
         }
 
-        $altura_total = $altura_base + $altura_items;
+        try {
+            /* El alto del rollo se MIDE, no se calcula.
 
-        $pdf = new FPDF('P', 'mm', [80, $altura_total]);
+               Se dibuja una vez en una pagina holgada solo para ver cuanto
+               consume el contenido, y otra vez con ese alto exacto. Es la unica
+               forma de que no quede corto: con SetAutoPageBreak(false) lo que no
+               entra se dibuja fuera de la pagina y se pierde sin decir nada.
+
+               Antes se calculaba a mano y quedo mal por partida doble. Cuando el
+               comprobante todavia imprimia el CUF y el CUFD, los 95 mm de base
+               de la nota de venta ya eran insuficiente y su ultima linea se
+               dibujaba 5 mm fuera del rollo. Cuando se quitaron los
+               identificadores, el alto de la factura quedo 14 mm corto y el QR
+               cayo a 1.5 mm del borde, que es la zona muerta de una impresora
+               termica: el papel salia sin pie y sin QR visible, que es
+               justamente lo que el comprobante tiene que asegurar. */
+            $medida = $this->dibujar_comprobante($data, $detalles, $empresa, $siat, $qrPath, 400);
+
+            /* Los 5 mm finales son el margen inferior. No es estetico: una
+               impresora de 80 mm no imprime en los ultimos milimetros del
+               rollo, y el QR es lo que no puede quedar ahi. */
+            $alto = (int)ceil($medida['usado_mm'] + 5);
+
+            $pdf = $this->dibujar_comprobante($data, $detalles, $empresa, $siat, $qrPath, $alto);
+        } finally {
+            siatModel::borrarQR($qrPath);
+        }
+
+        error_log("PDF generado exitosamente para venta #{$data['ve_id']}");
+        return $pdf['pdf'];
+    }
+
+    /* Dibuja el comprobante en una pagina del alto indicado.
+
+       Devuelve el PDF en base64 y 'usado_mm': cuanto alto ocupo el contenido,
+       medido con el propio cursor de FPDF, que va en mm desde el borde superior
+       de la pagina.
+
+       Devolver la medida es lo que permite que generar_pdf_nota_venta() dibuje
+       dos veces y acierte el alto sin tener que carrying ninguna cuenta de lineas
+       que se pueda desincronizar de lo que se dibuja. */
+    private function dibujar_comprobante($data, $detalles, $empresa, $siat, $qrPath, $altoPagina)
+    {
+        $esFactura = !empty($siat['cuf']) && !empty($siat['numero']);
+
+        $pdf = new FPDF('P', 'mm', [80, $altoPagina]);
         $pdf->AddPage();
         $pdf->SetMargins(5, 5, 5);
         $pdf->SetAutoPageBreak(false);
@@ -960,9 +1123,11 @@ class ventaModel extends mainModel
         $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'C');
         $pdf->Ln(3);
 
-        // Título
+        // Título. Antes decía siempre NOTA DE VENTA, incluso en facturas
+        // electrónicas: el rótulo mentía y el comprobante impreso no era el
+        // documento fiscal que decía ser.
         $pdf->SetFont('Arial', 'B', 9);
-        $pdf->Cell(0, 5, 'NOTA DE VENTA', 0, 1, 'C');
+        $pdf->Cell(0, 5, $esFactura ? 'FACTURA' : 'NOTA DE VENTA', 0, 1, 'C');
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
 
@@ -976,6 +1141,15 @@ class ventaModel extends mainModel
         $pdf->Cell(15, 4, 'Fecha:', 0, 0);
         $pdf->SetFont('Arial', '', 7);
         $pdf->Cell(0, 4, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
+
+        /* Numero fiscal. Solo tiene sentido en la factura: es el numero que ve el
+           SIN, y es distinto del "N Venta" que es el folio interno. */
+        if ($esFactura) {
+            $pdf->SetFont('Arial', 'B', 7);
+            $pdf->Cell(22, 4, 'N Factura:', 0, 0);
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->Cell(0, 4, (string)$siat['numero'], 0, 1);
+        }
 
         $nombre_cliente = trim(
             ($data['cl_nombres'] ?? '') . ' ' .
@@ -1014,7 +1188,11 @@ class ventaModel extends mainModel
             $y_actual = $pdf->GetY();
             $x_actual = $pdf->GetX();
 
-            $pdf->MultiCell(35, 4, ($d['med_nombre']), 0, 'L');
+            /* La guarda importa: sin ella, una fila sin el alias (una consulta
+               distinta a las dos que alimentan este metodo) mete un notice y
+               deja el nombre del producto en blanco en el papel del cliente.
+               El calculo de altura, mas arriba, ya usa el mismo patron. */
+            $pdf->MultiCell(35, 4, ($d['med_nombre'] ?? 'Producto'), 0, 'L');
             $y_despues = $pdf->GetY();
 
             $pdf->SetXY($x_actual + 35, $y_actual);
@@ -1036,15 +1214,100 @@ class ventaModel extends mainModel
 
         $pdf->Ln(5);
 
+        /* Bloque de facturacion electronica.
+
+           Solo se imprime en la factura. Va antes del pie porque el QR, el CUF y
+           la leyenda son el documento fiscal: el "gracias por su compra" es lo
+           ultimo que se lee. */
+        if ($esFactura) {
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
+
+            // Leyenda Ley 453. Sin acentos ni caracteres raros a proposito: FPDF
+            // core no trae fuente Unicode y los 度degree con tildes salen como
+            // caracteres rotos en la impresora termica. Se deja el texto plano.
+            if (!empty($siat['leyenda'])) {
+                $pdf->SetFont('Arial', '', 6);
+                $pdf->MultiCell(0, 3.2, $this->textoSinAcentos($siat['leyenda']), 0, 'C');
+                $pdf->Ln(1);
+            }
+
+            /* QR. FPDF necesita un archivo en disco, no base64, asi que qrEnDisco
+               deja un PNG temporal que se borra SIEMPRE al final, incluso si
+               algo falla antes. Sin ese finally los PNG se acumulan en el temp
+               del servidor. */
+            if ($qrPath) {
+                try {
+                    $pdf->Image($qrPath, 25, $pdf->GetY(), 30, 30, 'PNG');
+                    $pdf->SetY($pdf->GetY() + 31);
+                } catch (Throwable $e) {
+                    error_log("PDF: no se pudo incrustar el QR: " . $e->getMessage());
+                }
+            }
+
+            $pdf->SetFont('Arial', '', 6);
+            $pdf->Cell(0, 3.5, 'Escanee para verificar la factura en el portal del SIN', 0, 1, 'C');
+
+            /* Aca ya no se imprime ningun identificador.
+
+               Se fueron primero el CUFD y despues el CUF. Los dos son
+               identificadores internos entre la caja y el SIN: el cliente no
+               puede verificarlos con nada, y 64 caracteres de CUF partido en
+               dos lineas mas 16 de CUFD empujaban el resto del comprobante
+               hacia abajo sin aportar nada.
+
+               El CUF no se pierde de todos modos: va DENTRO del QR, que es la
+               forma en que se consulta hoy en dia. Quitarlo del papel no deja
+               de poder verificar la factura, solo deja de estar escrito en un
+               idioma que el cliente no usa.
+
+               Quien lo necesite para una conciliacion lo tiene en
+               factura.fa_cuf, en el XML firmado y en los logs. */
+            if (!empty($siat['estado_anulacion'])) {
+                $pdf->SetFont('Arial', 'B', 8);
+                $pdf->Cell(0, 4, '*** FACTURA ANULADA ***', 0, 1, 'C');
+            }
+        }
+
         // Pie
         $pdf->SetFont('Arial', 'I', 7);
         $pdf->Cell(0, 4, '¡Gracias por su compra!', 0, 1, 'C');
-        $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
+        if ($esFactura) {
+            $pdf->Cell(0, 4, 'Documento fiscal electronico emitido ante el SIN.', 0, 1, 'C');
+        } else {
+            $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
+        }
 
         $contenido_pdf = $pdf->Output('S');
-        $pdf_base64 = base64_encode($contenido_pdf);
 
-        error_log("PDF generado exitosamente para venta #{$data['ve_id']}");
-        return $pdf_base64;
+        /* GetY() quedo en el borde inferior de la ultima linea dibujada. Eso es
+           el alto que el contenido necesita, en mm desde arriba. El QR no se
+           borra aca: lo borra el envoltorio, que es el que sabe que todavia
+           falta una segunda pasada. */
+        return [
+            'pdf' => base64_encode($contenido_pdf),
+            'usado_mm' => $pdf->GetY(),
+        ];
+    }
+
+    /* Quita lo que FPDF core no sabe dibujar.
+
+       FPDF con las fuentes estandar (core) solo maneja latin-1: la leyenda de la
+       Ley 453 trae '°' y tildes que salen como caracteres rotos o como
+       interrogantes en la impresora de 80 mm. Convertir a ascii deja el texto
+       legible, que es lo que importa en un ticket de 8 cm de ancho. */
+    private function textoSinAcentos($texto)
+    {
+        $buscar = ['°', 'º', 'á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ü', 'Ñ'];
+        $poner =  ['o', 'o', 'a', 'e', 'i', 'o', 'u', 'u', 'n', 'A', 'E', 'I', 'O', 'U', 'U', 'N'];
+        $texto = str_replace($buscar, $poner, (string)$texto);
+
+        $map = [];
+        for ($i = 192; $i <= 255; $i++) {
+            $map[chr($i)] = iconv('ISO-8859-1', 'ASCII//TRANSLIT', chr($i));
+        }
+        $texto = strtr($texto, $map);
+
+        return preg_replace('/[^\x20-\x7E\n]/', '', $texto);
     }
 }

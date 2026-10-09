@@ -39,7 +39,6 @@ class categoriaController extends categoriaModel
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
-                            <th>ESTADO</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
@@ -51,23 +50,19 @@ class categoriaController extends categoriaModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $rows) {
-                $estado_html = $rows['uf_estado'] == 1
-                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
-
-                $tabla .= '
-                    <tr onclick="abrirModalEditarUsoFarmacologico(' . $rows['uf_id'] . ')" style="cursor:pointer;">
-                        <td>' . $contador . '</td>
+                 $tabla .= '
+                     <tr onclick="abrirModalEditarUsoFarmacologico(' . $rows['uf_id'] . ')" style="cursor:pointer;">
+                         <td>' . $contador . '</td>
                         <td><strong>' . htmlspecialchars($rows['uf_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['uf_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['uf_actualizado_en'])) . '</td>
-                        <td>' . $estado_html . '</td>
+        
                         <td class="buttons">
                             <a href="javascript:void(0)"
-                               class="btn ' . ($rows['uf_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
-                               onclick="event.stopPropagation(); cambiarEstadoUsoFarmacologico(' . $rows['uf_id'] . ', ' . ($rows['uf_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['uf_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
-                                ' . ($rows['uf_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
+                               class="btn btn-douc"
+                               onclick="event.stopPropagation(); eliminarUsoFarmacologico(' . $rows['uf_id'] . ')">
+                                <ion-icon name="trash-outline"></ion-icon>
+                                ELIMINAR
                             </a>
                         </td>
                     </tr>
@@ -76,7 +71,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -251,7 +246,6 @@ class categoriaController extends categoriaModel
     public function cambiar_estado_uso_farmacologico_controller()
     {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-        $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 0;
 
         if ($id <= 0) {
             $alerta = [
@@ -264,20 +258,43 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $resultado = self::cambiar_estado_uso_farmacologico_model($id, $estado);
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (!in_array($rol, [1, 2])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No cuenta con los privilegios necesarios para realizar esta acción',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (self::verificar_medicamentos_asociados_uso_farmacologico_model($id)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No se puede eliminar el uso farmacológico porque tiene medicamentos asociados',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $resultado = self::cambiar_estado_uso_farmacologico_model($id, 0);
 
         if ($resultado->rowCount() == 1) {
             $alerta = [
                 'Alerta' => 'recargar',
-                'Titulo' => 'Estado actualizado',
-                'texto' => 'El estado se cambió correctamente',
+                'Titulo' => 'Categoría eliminada',
+                'texto' => 'El uso farmacológico se eliminó correctamente',
                 'Tipo' => 'success'
             ];
         } else {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'No se pudo cambiar el estado',
+                'texto' => 'No se pudo eliminar el uso farmacológico',
                 'Tipo' => 'error'
             ];
         }
@@ -318,7 +335,6 @@ class categoriaController extends categoriaModel
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
-                            <th>ESTADO</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
@@ -330,23 +346,19 @@ class categoriaController extends categoriaModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $rows) {
-                $estado_html = $rows['vd_estado'] == 1
-                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
-
-                $tabla .= '
-                    <tr onclick="abrirModalEditarViaAdministracion(' . $rows['vd_id'] . ')" style="cursor:pointer;">
-                        <td>' . $contador . '</td>
+                 $tabla .= '
+                     <tr onclick="abrirModalEditarViaAdministracion(' . $rows['vd_id'] . ')" style="cursor:pointer;">
+                         <td>' . $contador . '</td>
                         <td><strong>' . htmlspecialchars($rows['vd_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['vd_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['vd_actualizado_en'])) . '</td>
-                        <td>' . $estado_html . '</td>
+        
                         <td class="buttons">
                             <a href="javascript:void(0)"
-                               class="btn ' . ($rows['vd_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
-                               onclick="event.stopPropagation(); cambiarEstadoViaAdministracion(' . $rows['vd_id'] . ', ' . ($rows['vd_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['vd_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
-                                ' . ($rows['vd_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
+                               class="btn btn-douc"
+                               onclick="event.stopPropagation(); eliminarViaAdministracion(' . $rows['vd_id'] . ')">
+                                <ion-icon name="trash-outline"></ion-icon>
+                                ELIMINAR
                             </a>
                         </td>
                     </tr>
@@ -355,7 +367,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -530,7 +542,6 @@ class categoriaController extends categoriaModel
     public function cambiar_estado_via_administracion_controller()
     {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-        $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 0;
 
         if ($id <= 0) {
             $alerta = [
@@ -543,20 +554,43 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $resultado = self::cambiar_estado_via_administracion_model($id, $estado);
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (!in_array($rol, [1, 2])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No cuenta con los privilegios necesarios para realizar esta acción',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (self::verificar_medicamentos_asociados_via_administracion_model($id)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No se puede eliminar la vía de administración porque tiene medicamentos asociados',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $resultado = self::cambiar_estado_via_administracion_model($id, 0);
 
         if ($resultado->rowCount() == 1) {
             $alerta = [
                 'Alerta' => 'recargar',
-                'Titulo' => 'Estado actualizado',
-                'texto' => 'El estado se cambió correctamente',
+                'Titulo' => 'Categoría eliminada',
+                'texto' => 'La vía de administración se eliminó correctamente',
                 'Tipo' => 'success'
             ];
         } else {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'No se pudo cambiar el estado',
+                'texto' => 'No se pudo eliminar la vía de administración',
                 'Tipo' => 'error'
             ];
         }
@@ -596,7 +630,6 @@ class categoriaController extends categoriaModel
                             <th>NOMBRE</th>
                             <th>FECHA CREACIÓN</th>
                             <th>ÚLTIMA ACTUALIZACIÓN</th>
-                            <th>ESTADO</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
@@ -608,23 +641,19 @@ class categoriaController extends categoriaModel
             $reg_inicio = $inicio + 1;
 
             foreach ($datos as $rows) {
-                $estado_html = $rows['ff_estado'] == 1
-                    ? '<span class="badge bgr"><ion-icon name="checkmark-circle-outline"></ion-icon> Activo</span>'
-                    : '<span class="badge bgry"><ion-icon name="close-circle-outline"></ion-icon> Inactivo</span>';
-
-                $tabla .= '
-                    <tr onclick="abrirModalEditarFormaFarmaceutica(' . $rows['ff_id'] . ')" style="cursor:pointer;">
-                        <td>' . $contador . '</td>
+                 $tabla .= '
+                     <tr onclick="abrirModalEditarFormaFarmaceutica(' . $rows['ff_id'] . ')" style="cursor:pointer;">
+                         <td>' . $contador . '</td>
                         <td><strong>' . htmlspecialchars($rows['ff_nombre']) . '</strong></td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['ff_creado_en'])) . '</td>
                         <td>' . date('d/m/Y H:i', strtotime($rows['ff_actualizado_en'])) . '</td>
-                        <td>' . $estado_html . '</td>
+        
                         <td class="buttons">
                             <a href="javascript:void(0)"
-                               class="btn ' . ($rows['ff_estado'] == 1 ? 'btn-douc' : 'btn-souc') . '"
-                               onclick="event.stopPropagation(); cambiarEstadoFormaFarmaceutica(' . $rows['ff_id'] . ', ' . ($rows['ff_estado'] == 1 ? 0 : 1) . ')">
-                                <ion-icon name="' . ($rows['ff_estado'] == 1 ? 'ban-outline' : 'checkmark-outline') . '"></ion-icon>
-                                ' . ($rows['ff_estado'] == 1 ? 'DESACTIVAR' : 'ACTIVAR') . '
+                               class="btn btn-douc"
+                               onclick="event.stopPropagation(); eliminarFormaFarmaceutica(' . $rows['ff_id'] . ')">
+                                <ion-icon name="trash-outline"></ion-icon>
+                                ELIMINAR
                             </a>
                         </td>
                     </tr>
@@ -633,7 +662,7 @@ class categoriaController extends categoriaModel
             }
             $reg_final = $contador - 1;
         } else {
-            $tabla .= '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
+            $tabla .= '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999;">
                         <ion-icon name="folder-open-outline"></ion-icon> No hay registros disponibles
                     </td></tr>';
         }
@@ -808,7 +837,6 @@ class categoriaController extends categoriaModel
     public function cambiar_estado_forma_farmaceutica_controller()
     {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-        $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 0;
 
         if ($id <= 0) {
             $alerta = [
@@ -821,20 +849,43 @@ class categoriaController extends categoriaModel
             exit();
         }
 
-        $resultado = self::cambiar_estado_forma_farmaceutica_model($id, $estado);
+        $rol = $_SESSION['rol_smp'] ?? 0;
+        if (!in_array($rol, [1, 2])) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No cuenta con los privilegios necesarios para realizar esta acción',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if (self::verificar_medicamentos_asociados_forma_farmaceutica_model($id)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'No se puede eliminar la forma farmacéutica porque tiene medicamentos asociados',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $resultado = self::cambiar_estado_forma_farmaceutica_model($id, 0);
 
         if ($resultado->rowCount() == 1) {
             $alerta = [
                 'Alerta' => 'recargar',
-                'Titulo' => 'Estado actualizado',
-                'texto' => 'El estado se cambió correctamente',
+                'Titulo' => 'Categoría eliminada',
+                'texto' => 'La forma farmacéutica se eliminó correctamente',
                 'Tipo' => 'success'
             ];
         } else {
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'No se pudo cambiar el estado',
+                'texto' => 'No se pudo eliminar la forma farmacéutica',
                 'Tipo' => 'error'
             ];
         }

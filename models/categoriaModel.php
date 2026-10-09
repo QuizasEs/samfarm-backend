@@ -13,7 +13,7 @@ class categoriaModel extends mainModel
                     uf_actualizado_en,
                     uf_estado
                 FROM uso_farmacologico
-                WHERE 1=1";
+                WHERE uf_estado = 1";
 
         $params = [];
 
@@ -40,7 +40,7 @@ class categoriaModel extends mainModel
 
     protected static function contar_uso_farmacologico_model($busqueda = '')
     {
-        $sql = "SELECT COUNT(*) as total FROM uso_farmacologico WHERE 1=1";
+        $sql = "SELECT COUNT(*) as total FROM uso_farmacologico WHERE uf_estado = 1";
 
         $params = [];
 
@@ -125,6 +125,17 @@ class categoriaModel extends mainModel
         return $sql;
     }
 
+    protected static function verificar_medicamentos_asociados_uso_farmacologico_model($id)
+    {
+        $sql = mainModel::conectar()->prepare("
+            SELECT COUNT(*) as total FROM medicamento WHERE uf_id = :id
+        ");
+        $sql->bindParam(':id', $id, PDO::PARAM_INT);
+        $sql->execute();
+        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+        return (int)$resultado['total'] > 0;
+    }
+
     protected static function verificar_nombre_uso_existe_model($nombre, $id = null)
     {
         $sql = "SELECT COUNT(*) as total FROM uso_farmacologico WHERE uf_nombre = :nombre";
@@ -155,7 +166,7 @@ class categoriaModel extends mainModel
                     vd_actualizado_en,
                     vd_estado
                 FROM via_de_administracion
-                WHERE 1=1";
+                WHERE vd_estado = 1";
 
         $params = [];
 
@@ -182,7 +193,7 @@ class categoriaModel extends mainModel
 
     protected static function contar_via_administracion_model($busqueda = '')
     {
-        $sql = "SELECT COUNT(*) as total FROM via_de_administracion WHERE 1=1";
+        $sql = "SELECT COUNT(*) as total FROM via_de_administracion WHERE vd_estado = 1";
 
         $params = [];
 
@@ -267,6 +278,17 @@ class categoriaModel extends mainModel
         return $sql;
     }
 
+    protected static function verificar_medicamentos_asociados_via_administracion_model($id)
+    {
+        $sql = mainModel::conectar()->prepare("
+            SELECT COUNT(*) as total FROM medicamento WHERE vd_id = :id
+        ");
+        $sql->bindParam(':id', $id, PDO::PARAM_INT);
+        $sql->execute();
+        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+        return (int)$resultado['total'] > 0;
+    }
+
     protected static function verificar_nombre_via_existe_model($nombre, $id = null)
     {
         $sql = "SELECT COUNT(*) as total FROM via_de_administracion WHERE vd_nombre = :nombre";
@@ -296,7 +318,7 @@ class categoriaModel extends mainModel
                     ff_actualizado_en,
                     ff_estado
                 FROM forma_farmaceutica
-                WHERE 1=1";
+                WHERE ff_estado = 1";
 
         $params = [];
 
@@ -323,7 +345,7 @@ class categoriaModel extends mainModel
 
     protected static function contar_forma_farmaceutica_model($busqueda = '')
     {
-        $sql = "SELECT COUNT(*) as total FROM forma_farmaceutica WHERE 1=1";
+        $sql = "SELECT COUNT(*) as total FROM forma_farmaceutica WHERE ff_estado = 1";
 
         $params = [];
 
@@ -406,6 +428,17 @@ class categoriaModel extends mainModel
 
         $sql->execute();
         return $sql;
+    }
+
+    protected static function verificar_medicamentos_asociados_forma_farmaceutica_model($id)
+    {
+        $sql = mainModel::conectar()->prepare("
+            SELECT COUNT(*) as total FROM medicamento WHERE ff_id = :id
+        ");
+        $sql->bindParam(':id', $id, PDO::PARAM_INT);
+        $sql->execute();
+        $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+        return (int)$resultado['total'] > 0;
     }
 
     protected static function verificar_nombre_forma_farmaceutica_existe_model($nombre, $id = null)

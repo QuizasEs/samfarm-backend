@@ -151,7 +151,6 @@ if (!isset($_SESSION['id_smp']) || !in_array($_SESSION['rol_smp'], [1, 2, 3])) {
                                         <option value="targeta">Tarjeta</option>
                                     </select></div>
                                 <div class="fg"><label class="fl">Documento</label><select class="sel" name="documento_venta" id="documento_venta">
-                                        <option value="">Documento</option>
                                         <option value="nota de venta">Nota de Venta</option>
                                         <option value="factura">Factura</option>
                                     </select></div>

@@ -101,6 +101,27 @@ if (isset($_POST['ventasHistorialAjax'])) {
         exit();
     }
 
+    /* Anular factura contra el SIN. Se declara aparte y no como un caso mas
+       del bloque general porque el rol 3 ya esta excluido arriba, pero el rol
+       2 tambien tiene que quedar fuera: anular una factura solo le compete al
+       administrador (rol 1). El controller repite el chequeo, esta es la
+       primera de las dos barreras, no la unica. */
+    if ($valor === "anular_factura") {
+        if ($rol_usuario != 1) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Acceso denegado',
+                'texto' => 'Solo un administrador puede anular facturas.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        echo $ins_ventas->anular_factura_controller();
+        exit();
+    }
+
 } else {
     session_start(['name' => 'SMP']);
     session_unset();

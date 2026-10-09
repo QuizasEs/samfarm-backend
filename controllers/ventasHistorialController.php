@@ -2,8 +2,10 @@
 
 if ($peticionAjax) {
     require_once '../models/ventasHistorialModel.php';
+    require_once '../models/siatModel.php';
 } else {
     require_once './models/ventasHistorialModel.php';
+    require_once './models/siatModel.php';
 }
 class ventasHistorialController extends ventasHistorialModel
 {
@@ -70,6 +72,14 @@ class ventasHistorialController extends ventasHistorialModel
             $filtros['tipo_documento'] = $f4;
         }
 
+        /* Estado de la factura electronica (select5). Se acepta solo un grupo
+           conocido: el valor viene del formulario y se termina usando en el
+           WHERE, asi que la lista blanca es lo que impide que alguien
+           inyecte SQL por aqui. Los grupos se definen en el modelo. */
+        if ($f5 !== '' && in_array($f5, ['revision', 'pendiente', 'aceptada', 'sin_factura'], true)) {
+            $filtros['estado_siat'] = $f5;
+        }
+
         if (!empty($busqueda)) {
             $filtros['busqueda'] = $busqueda;
         }
@@ -92,7 +102,7 @@ class ventasHistorialController extends ventasHistorialModel
         $Npaginas = ceil($total / $registros);
 
         $mostrar_columna_sucursal = ($rol_usuario == 1 && empty($f1));
-        $colspan_total = $mostrar_columna_sucursal ? 10 : 9;
+        $colspan_total = $mostrar_columna_sucursal ? 11 : 10;
 
         $tabla .= '
             <div class="table-container">
@@ -107,6 +117,7 @@ class ventasHistorialController extends ventasHistorialModel
                             ($mostrar_columna_sucursal ? '<th>SUCURSAL</th>' : '') .
                             '
                             <th>TOTAL</th>
+                            <th>N° FACTURA</th>
                             <th>TIPO DOC.</th>
                             <th>ACCIONES</th>
                         </tr>
@@ -127,9 +138,57 @@ class ventasHistorialController extends ventasHistorialModel
                     ? strtoupper($row['ve_tipo_documento'])
                     : 'VENTA';
 
-                $tipo_doc_html = '<span class="badge bgr" style="font-size:10px;">' . $tipo_doc . '</span>';
+                // Se distingue la factura electronica de la nota de venta.
+                //
+                // Una factura electronica se reconoce por su CUF: es el codigo
+                // unico que se genera al emitirla y que el SIN exige. Si hay CUF
+                // la venta SI paso por facturacion electronica, aunque todavia
+                // no se haya enviado. Se muestra ademas el estado del envío
+                // para que quede claro si el SIN ya la acepto.
+                $es_factura_electronica = !empty($row['fa_cuf']);
+
+                if ($es_factura_electronica) {
+                    $tipo_doc_html = '<div class="badge bdef bsm">'
+                        . '<span class="bdt"></span>FACTURA ELECTRONICA</div>';
+
+                    // Segundo badge con el estado ante el SIN, solo si la fila
+                    // llego a registrarse en facturacion_electronica.
+                    $estado = $row['fe_estado_siat'] ?? '';
+                    if ($estado === '' || $estado === null) {
+                        $estado_label = 'PENDIENTE';
+                        $estado_clase = 'bwar';
+                    } elseif (in_array(strtoupper($estado), ['908', 'VALIDADO'], true)) {
+                        $estado_label = 'ACEPTADA';
+                        $estado_clase = 'bgr';
+                    } elseif (in_array(strtoupper($estado), ['CONTINGENCIA', 'PENDIENTE_VALIDACION'], true)) {
+                        $estado_label = 'EN CONTINGENCIA';
+                        $estado_clase = 'bwar';
+                    } else {
+                        $estado_label = 'RECHAZADA';
+                        $estado_clase = 'bdan';
+                    }
+
+                    $tipo_doc_html .= '<div class="badge ' . $estado_clase . ' bsm" style="margin-top:4px;">'
+                        . '<span class="bdt"></span>' . $estado_label . '</div>';
+                } else {
+                    $tipo_doc_html = '<span class="badge bgry bsm">'
+                        . '<span class="bdt"></span>' . $tipo_doc . '</span>';
+                }
 
                 $tiene_factura = !empty($row['fa_id']);
+
+                // N° de factura. En una factura electronica se muestra el
+                // correlativo numerico que el SIN usa (fa_numero_siat), porque
+                // es ese el que va embebido en el CUF. En una nota de venta se
+                // muestra su codigo interno.
+                if ($es_factura_electronica && !empty($row['fa_numero_siat'])) {
+                    $celda_factura = '<strong>' . (int)$row['fa_numero_siat'] . '</strong>'
+                        . '<br><small style="color:#999;">CUF ' . htmlspecialchars(substr($row['fa_cuf'], 0, 8)) . '...</small>';
+                } elseif (!empty($row['fa_numero_control'])) {
+                    $celda_factura = '<span style="color:#999;">' . htmlspecialchars($row['fa_numero_control']) . '</span>';
+                } else {
+                    $celda_factura = '<span style="color:#999;">-</span>';
+                }
 
                 $tabla .= '
                     <tr class="tr-click" onclick="VentasHistorialModals.verDetalle(' . $row['ve_id'] . ', \'' . addslashes($row['ve_numero_documento']) . '\')">
@@ -140,12 +199,13 @@ class ventasHistorialController extends ventasHistorialModel
                         <td>' . htmlspecialchars($row['vendedor_nombre']) . '</td>' .
                     ($mostrar_columna_sucursal ? '<td><span style=";padding:4px 8px;border-radius:4px;font-weight:600;color:#1565C0;">' . htmlspecialchars($row['sucursal_nombre']) . '</span></td>' : '') .'
                         <td style="text-align:right;font-size:14px;"><strong style="color:#2e7d32;">Bs. ' . number_format($row['ve_total'], 2) . '</strong></td>
+                        <td style="text-align:center;">' . $celda_factura . '</td>
                         <td style="text-align:center;">' . $tipo_doc_html . '</td>
                         <td >
                             <a href="javascript:void(0)" 
                                class="btn btn-out btn-sm" 
-                               title="Reimprimir nota de venta"
-                               onclick="event.stopPropagation(); VentasHistorialModals.reimprimirNota(' . $row['ve_id'] . ')">
+title="Reimprimir comprobante"
+                                onclick="event.stopPropagation(); VentasHistorialModals.reimprimirComprobante(' . $row['ve_id'] . ')">
                                 <ion-icon name="print-outline"></ion-icon>Imprimir
                             </a>
                     </td>
@@ -237,6 +297,89 @@ class ventasHistorialController extends ventasHistorialModel
                     ($venta['us_apellido_materno'] ?? '')
             );
 
+            // Datos de facturacion electronica. Se agregan solo si la venta
+            // llego a tener CUF, que es la senal de que paso por el proceso de
+            // facturacion electronica.
+            $esFacturaElectronica = !empty($venta['fa_cuf']);
+
+            $siat = null;
+            if ($esFacturaElectronica) {
+                /* La etiqueta del estado sale de siatModel, no de un if/elseif
+                   aqui. El estado mezcla codigos del SIN (902, 908) con
+                   etiquetas internas (ANULADA, OBSERVADO) y este archivo no
+                   tiene por que conocer ese catalogo: si se agrega un estado
+                   nuevo, se actualiza un solo lugar. */
+                list($etiqueta, $clase) = siatModel::etiquetaEstadoFactura($venta['fe_estado_siat'] ?? '');
+
+                /* Lo que se manda al navegador es lo que el modal dibuja, ni una
+                   clave mas. cufd, codigo_recepcion y fecha_envio se sacaron: el
+                   modal ya no los muestra y mandarlos solo hacia que alguien los
+                   lea en la pestaña de la consola creyendo que significan algo
+                   para el usuario. El CUF tampoco se manda: va impreso en el
+                   comprobante y dentro del QR, que es donde tiene que estar. */
+                $siat = [
+                    'es_factura_electronica' => true,
+                    'fa_id' => !empty($venta['fa_id']) ? (int)$venta['fa_id'] : null,
+                    'numero_factura' => !empty($venta['fa_numero_siat'])
+                        ? (string)(int)$venta['fa_numero_siat']
+                        : null,
+                    'numero_control' => $venta['fa_numero_control'] ?? null,
+                    'estado_etiqueta' => $etiqueta,
+                    'estado_clase' => $clase,
+                ];
+
+                /* Anulacion. El modelo decide si la factura se puede anular y
+                   por que no; aca solo se traduce su respuesta a algo que el
+                   modal pueda mostrar.
+
+                   Solo el administrador (rol 1) ve el boton. Que el backend
+                   tambien lo exija es lo que hace que esto sea una restriccion
+                   y no solo un cartel: un rol 2 puede llamar al ajax a mano. */
+                $anulacion = siatModel::estadoAnulacionFactura($venta['fa_id'] ?? 0);
+                $esAdmin = (($_SESSION['rol_smp'] ?? 0) == 1);
+
+                $motivosAnulacion = [];
+                foreach (siatModel::motivosAnulacion() as $codigo => $descripcion) {
+                    $motivosAnulacion[] = ['codigo' => (int)$codigo, 'descripcion' => $descripcion];
+                }
+
+                $siat['anulacion'] = [
+                    'es_admin' => $esAdmin,
+                    'puede_anular' => $anulacion['anulable'],
+                    'motivo_bloqueo' => $anulacion['anulable'] ? null : $anulacion['motivo'],
+                    'motivos' => $motivosAnulacion,
+                ];
+
+                /* QR de consulta del portal del SIN.
+
+                   Se construye aqui y no se lee de fe_qr porque la URL es
+                   determinista a partir de (nit, cuf, numero): da igual si la
+                   factura se valido hoy o hace seis meses, el QR sale igual. Eso
+                   es justamente lo que permite reimprimir un comprobante viejo
+                   sin depender de que se haya guardado la imagen al validar.
+
+                   Se genera solo si hay numero fiscal: sin el, el QR apuntaria a
+                   una factura que el SIN no encuentra. */
+                if (!empty($venta['fa_numero_siat']) && !empty($venta['fa_cuf'])) {
+                    $siat['qr_url'] = siatModel::urlQR(
+                        siatModel::obtenerNitEmpresa(),
+                        $venta['fa_cuf'],
+                        $venta['fa_numero_siat']
+                    );
+
+                    // render() devuelve el PNG en base64 pelado, sin el prefijo
+                    // data: URI. El prefijo lo pone el JS.
+                    $siat['qr_img'] = siatModel::generarQR(
+                        siatModel::obtenerNitEmpresa(),
+                        $venta['fa_cuf'],
+                        $venta['fa_numero_siat']
+                    );
+                } else {
+                    $siat['qr_url'] = null;
+                    $siat['qr_img'] = null;
+                }
+            }
+
             $response = [
                 'venta' => [
                     've_numero_documento' => $venta['ve_numero_documento'],
@@ -250,7 +393,8 @@ class ventasHistorialController extends ventasHistorialModel
                     'vendedor_nombre' => $vendedor_nombre,
                     'sucursal_nombre' => $venta['su_nombre'],
                     'caja_nombre' => $venta['caja_nombre'] ?? 'N/A',
-                    'fa_numero_control' => $venta['fa_numero_control'] ?? null
+                    'fa_numero_control' => $venta['fa_numero_control'] ?? null,
+                    'siat' => $siat
                 ],
                 'items' => $itemsFormateados
             ];
@@ -270,7 +414,86 @@ class ventasHistorialController extends ventasHistorialModel
         }
     }
 
-    /* Generar el PDF de reimpresión de nota de venta desde historial */
+    /* Anula una factura electronica ante el SIN.
+
+       Solo el administrador (rol 1) puede llegar aca. El chequeo se repite en el
+       ajax: el boton puede estar oculto en pantalla, pero la llamada se puede
+       escribir a mano desde la consola del navegador, y anular una factura es
+       de las pocas cosas de este sistema que no tiene vuelta atras. */
+    public function anular_factura_controller()
+    {
+        $fa_id = isset($_POST['fa_id']) ? (int)$_POST['fa_id'] : 0;
+        $motivo = isset($_POST['codigo_motivo']) ? (int)$_POST['codigo_motivo'] : 0;
+
+        if ((($_SESSION['rol_smp'] ?? 0) != 1)) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Acceso denegado',
+                'texto' => 'Solo un administrador puede anular facturas.',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        if ($fa_id <= 0) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'Error',
+                'texto' => 'Factura no valida',
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        /* El modelo decide si se puede y valida el motivo contra el catalogo.
+           No se reimplementa ninguna de las dos reglas aca. */
+        $resultado = siatModel::anularFacturaConControl($fa_id, $motivo);
+
+        if (!$resultado['ok']) {
+            $alerta = [
+                'Alerta' => 'simple',
+                'Titulo' => 'No se pudo anular',
+                'texto' => $resultado['mensaje'],
+                'Tipo' => 'error'
+            ];
+            echo json_encode($alerta);
+            exit();
+        }
+
+        $alerta = [
+            'Alerta' => 'simple',
+            'Titulo' => 'Factura anulada',
+            'texto' => $resultado['mensaje'],
+            'Tipo' => 'success'
+        ];
+        echo json_encode($alerta);
+        exit();
+    }
+
+    /* Reimpresion del comprobante desde el historial.
+
+       Es la UNICA reimpresion del sistema y vive aca, en el boton de cada fila
+       de la tabla, no en el modal de detalle. Dos razones:
+
+         - el modal es informativo: que se imprima desde ahi duplicaba la accion
+           y obligaba a mantener dos generadores de PDF, que se desincronizan
+           entre si sin que nada avise;
+         - este metodo ya existe desde antes de la facturacion electronica, asi
+           que la reimpresion nunca estuvo rota: lo que estaba roto era el
+           generador que este metodo usaba.
+
+       Antes traia su propia consulta y su propio metodo privado
+       generar_pdf_nota_venta_rep(), copia del PDF de venta anterior al modulo
+       SIAT: historicaba desde ventas sin tocar la tabla factura, asi que una
+       factura electronica salia reimpresa rotulada "NOTA DE VENTA", sin CUF, sin
+       leyenda y sin QR. El cliente se llevaba un papel que el SIN no reconoce.
+
+       ventaModel::generar_pdf_factura_historial_model() ya hacia esto bien: hace
+       LEFT JOIN con factura, recupera los datos fiscales y decide el titulo
+       segun exista o no CUF. Este metodo solo lo delega y ya no reimprime nada
+       por su cuenta. */
     public function generar_pdf_nota_controller()
     {
         $ve_id = isset($_POST['ve_id']) ? (int)$_POST['ve_id'] : 0;
@@ -279,7 +502,7 @@ class ventasHistorialController extends ventasHistorialModel
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'Parámetros inválidos',
+                'texto' => 'ParÃ¡metros invÃ¡lidos',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
@@ -287,218 +510,35 @@ class ventasHistorialController extends ventasHistorialModel
         }
 
         try {
-            require_once '../libs/fpdf/fpdf.php';
+            require_once '../models/ventaModel.php';
 
-            // Consulta directa desde ventas (sin depender de factura)
-            $db = mainModel::conectar();
-            $sql = "
-                SELECT
-                    v.ve_id, v.ve_numero_documento, v.ve_total, v.ve_subtotal, v.ve_impuesto, v.ve_fecha_emision,
-                    c.cl_nombres, c.cl_apellido_paterno, c.cl_apellido_materno, c.cl_carnet,
-                    u.us_nombres, u.us_apellido_paterno,
-                    s.su_nombre
-                FROM ventas v
-                LEFT JOIN clientes c ON c.cl_id = v.cl_id
-                INNER JOIN usuarios u ON u.us_id = v.us_id
-                INNER JOIN sucursales s ON s.su_id = v.su_id
-                WHERE v.ve_id = :ve_id
-            ";
-
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
-            $stmt->execute();
-
-            if ($stmt->rowCount() <= 0) {
-                $alerta = [
-                    'Alerta' => 'simple',
-                    'Titulo' => 'Error',
-                    'texto' => 'Venta no encontrada',
-                    'Tipo' => 'error'
-                ];
-                echo json_encode($alerta);
-                exit();
-            }
-
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // Consulta detalles de venta
-            $sql2 = "
-                SELECT dv.*,
-                    m.med_nombre_quimico AS med_nombre,
-                    COALESCE(m.med_version_comercial, '') AS version_comercial,
-                    COALESCE(ff.ff_nombre, '') AS presentacion
-                FROM detalle_venta dv
-                INNER JOIN medicamento m ON m.med_id = dv.med_id
-                LEFT JOIN forma_farmaceutica ff ON ff.ff_id = m.ff_id
-                WHERE dv.ve_id = :ve_id
-            ";
-            $stmt2 = $db->prepare($sql2);
-            $stmt2->bindParam(":ve_id", $ve_id, PDO::PARAM_INT);
-            $stmt2->execute();
-            $detalles = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-            // Config empresa
-            $cfg_sql = "SELECT * FROM configuracion_empresa ORDER BY ce_id DESC LIMIT 1";
-            $cfg_stmt = $db->prepare($cfg_sql);
-            $cfg_stmt->execute();
-            $empresa = $cfg_stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$empresa) {
-                $empresa = ['ce_nombre' => 'SAMFARM', 'ce_nit' => 'S/N', 'ce_direccion' => '', 'ce_telefono' => '', 'ce_logo' => null];
-            }
-
-            // Generar PDF usando la misma lógica que venta (sin utf8_decode deprecated)
-            $pdf_base64 = $this->generar_pdf_nota_venta_rep($data, $detalles, $empresa);
+            $ins_venta = new ventaModel();
+            $pdf_base64 = $ins_venta->generar_pdf_factura_historial_model($ve_id);
 
             if (!$pdf_base64) {
                 $alerta = [
                     'Alerta' => 'simple',
                     'Titulo' => 'Error',
-                    'texto' => 'No se pudo generar el PDF',
+                    'texto' => 'No se pudo generar el comprobante',
                     'Tipo' => 'error'
                 ];
                 echo json_encode($alerta);
                 exit();
             }
 
-            $response = [
-                'success' => true,
-                'pdf_base64' => $pdf_base64
-            ];
-
-            echo json_encode($response);
+            echo json_encode(['success' => true, 'pdf_base64' => $pdf_base64]);
             exit();
         } catch (Exception $e) {
             error_log("  Error en generar_pdf_nota_controller: " . $e->getMessage());
             $alerta = [
                 'Alerta' => 'simple',
                 'Titulo' => 'Error',
-                'texto' => 'Error al generar PDF: ' . $e->getMessage(),
+                'texto' => 'Error al generar el comprobante',
                 'Tipo' => 'error'
             ];
             echo json_encode($alerta);
             exit();
         }
-    }
-
-    /* Método para generar PDF de nota de venta para reimpresión (igual que venta pero sin utf8_decode) */
-    private function generar_pdf_nota_venta_rep($data, $detalles, $empresa)
-    {
-        // Calcular altura dinámica
-        $altura_base = 95;
-        $altura_items = 0;
-        $line_height = 4;
-        $char_per_line = 45;
-
-        foreach ($detalles as $d) {
-            $nombre_producto = $d['med_nombre'] ?? 'Producto';
-            $lineas_nombre = ceil(mb_strlen($nombre_producto, 'UTF-8') / $char_per_line);
-            $altura_items += $lineas_nombre * $line_height;
-        }
-
-        $altura_total = $altura_base + $altura_items;
-
-        $pdf = new FPDF('P', 'mm', [80, $altura_total]);
-        $pdf->AddPage();
-        $pdf->SetMargins(5, 5, 5);
-        $pdf->SetAutoPageBreak(false);
-
-        // Encabezado empresa
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(0, 5, ($empresa['ce_nombre']), 0, 1, 'C');
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(0, 4, 'Sucursal: ' . ($data['su_nombre']), 0, 1, 'C');
-        $pdf->MultiCell(0, 4, ($empresa['ce_direccion']), 0, 'C');
-        $pdf->Cell(0, 4, 'Telf: ' . $empresa['ce_telefono'], 0, 1, 'C');
-        $pdf->Cell(0, 4, 'NIT: ' . $empresa['ce_nit'], 0, 1, 'C');
-        $pdf->Ln(3);
-
-        // Título
-        $pdf->SetFont('Arial', 'B', 9);
-        $pdf->Cell(0, 5, 'NOTA DE VENTA', 0, 1, 'C');
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
-
-        // Datos venta
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(15, 4, 'N Venta:', 0, 0);
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(0, 4, $data['ve_numero_documento'], 0, 1);
-
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(15, 4, 'Fecha:', 0, 0);
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->Cell(0, 4, date('d/m/Y H:i', strtotime($data['ve_fecha_emision'])), 0, 1);
-
-        $nombre_cliente = trim(
-            ($data['cl_nombres'] ?? '') . ' ' .
-                ($data['cl_apellido_paterno'] ?? '') . ' ' .
-                ($data['cl_apellido_materno'] ?? '')
-        );
-        if (empty($nombre_cliente)) $nombre_cliente = 'Sin Cliente';
-
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(15, 4, 'Cliente:', 0, 0);
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->MultiCell(0, 4, ($nombre_cliente));
-
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(15, 4, 'CI/NIT:', 0, 0);
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->Cell(0, 4, $data['cl_carnet'] ?? 'S/N', 0, 1);
-
-        $vendedor_nombre = trim(($data['us_nombres'] ?? '') . ' ' . ($data['us_apellido_paterno'] ?? ''));
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(15, 4, 'Vendedor:', 0, 0);
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->Cell(0, 4, ($vendedor_nombre), 0, 1);
-
-        $pdf->Ln(2);
-
-        // Tabla detalles
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(35, 5, 'Producto', 'B', 0, 'L');
-        $pdf->Cell(10, 5, 'Cant.', 'B', 0, 'C');
-        $pdf->Cell(12, 5, 'P.U.', 'B', 0, 'R');
-        $pdf->Cell(13, 5, 'Subtotal', 'B', 1, 'R');
-
-        $pdf->SetFont('Arial', '', 7);
-        foreach ($detalles as $d) {
-            $y_actual = $pdf->GetY();
-            $x_actual = $pdf->GetX();
-
-            $pdf->MultiCell(35, 4, ($d['med_nombre']), 0, 'L');
-            $y_despues = $pdf->GetY();
-
-            $pdf->SetXY($x_actual + 35, $y_actual);
-            $pdf->Cell(10, 4, $d['dv_cantidad'], 0, 0, 'C');
-            $pdf->Cell(12, 4, number_format($d['dv_precio_unitario'], 2), 0, 0, 'R');
-            $pdf->Cell(13, 4, number_format($d['dv_subtotal'], 2), 0, 1, 'R');
-            $pdf->SetY($y_despues);
-        }
-        $pdf->Cell(0, 4, '-------------------------------------------------------------------', 0, 1, 'C');
-
-        // Totales
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->Cell(45, 5, 'Subtotal:', 0, 0, 'R');
-        $pdf->Cell(25, 5, 'Bs. ' . number_format($data['ve_subtotal'], 2), 0, 1, 'R');
-
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(45, 6, 'TOTAL A PAGAR:', 0, 0, 'R');
-        $pdf->Cell(25, 6, 'Bs. ' . number_format($data['ve_total'], 2), 0, 1, 'R');
-
-        $pdf->Ln(5);
-
-        // Pie
-        $pdf->SetFont('Arial', 'I', 7);
-        $pdf->Cell(0, 4, '¡Gracias por su compra!', 0, 1, 'C');
-        $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
-
-        $contenido_pdf = $pdf->Output('S');
-        $pdf_base64 = base64_encode($contenido_pdf);
-
-        error_log("PDF reimpresión generado exitosamente para venta #{$data['ve_id']}");
-        return $pdf_base64;
     }
 
 
@@ -534,6 +574,11 @@ class ventasHistorialController extends ventasHistorialModel
 
         if (isset($_GET['tipo_documento']) && !empty($_GET['tipo_documento'])) {
             $filtros['tipo_documento'] = mainModel::limpiar_cadena($_GET['tipo_documento']);
+        }
+
+        $estados_validos = ['revision', 'pendiente', 'aceptada', 'sin_factura'];
+        if (isset($_GET['estado_siat']) && in_array($_GET['estado_siat'], $estados_validos, true)) {
+            $filtros['estado_siat'] = $_GET['estado_siat'];
         }
 
         try {

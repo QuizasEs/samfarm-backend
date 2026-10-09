@@ -186,11 +186,25 @@ try {
     ]);
     
     $root = $resp->RespuestaListaProductos ?? null;
-    if ($root && isset($root->listaProductos)) {
-        $productos = is_array($root->listaProductos) ? $root->listaProductos : [$root->listaProductos];
+    // OJO: el SIN no llama a este nodo listaProductos, lo llama listaCodigos.
+    // Antes se leia listaProductos, que nunca existe, y por eso el script
+    // reportaba "en PILOTO suele venir VACIO" cuando en realidad venait con
+    // 1430 productos. El guardado de verdad lo hace
+    // siatModel::sincronizarCatalogos().
+    $productos = $root->listaCodigos ?? ($root->listaProductos ?? null);
+    if ($productos) {
+        $productos = is_array($productos) ? $productos : [$productos];
+        echo "   ✅ NODO CORRECTO: listaCodigos\n";
         echo "   ✅ Productos obtenidos: " . count($productos) . "\n";
+        $count = 0;
+        foreach ($productos as $pr) {
+            if (++$count > 3) break;
+            echo "      - " . ($pr->codigoProducto ?? 'N/A') . " / " . ($pr->descripcionProducto ?? 'N/A')
+               . " / act=" . ($pr->codigoActividad ?? 'N/A') . "\n";
+        }
+        echo "   ℹ️  Para guardarlos en siat_productos usa siatModel::sincronizarCatalogos()\n";
     } else {
-        echo "   ⚠️  Respuesta SIN (nodo RespuestaListaProductos). En PILOTO suele venir VACIO.\n";
+        echo "   ⚠️  Respuesta SIN listaCodigos ni listaProductos\n";
         debugSoapResponse($client, 'sincronizarListaProductosServicios', $resp);
         if (isset($root->mensajesList)) { echo "   MENSAJES SIN:\n"; print_r($root->mensajesList); }
     }
@@ -250,10 +264,14 @@ try {
     ]);
     
     $root = $resp->RespuestaListaParametricas ?? null;
-    if ($root && isset($root->listaUnidadesMedida)) {
-        $unidades = is_array($root->listaUnidadesMedida) ? $root->listaUnidadesMedida : [$root->listaUnidadesMedida];
+    // Mismo caso que productos: el nodo real es listaCodigos con
+    // codigoClasificador, no listaUnidadesMedida.
+    $unidades = $root->listaCodigos ?? ($root->listaUnidadesMedida ?? null);
+    if ($unidades) {
+        $unidades = is_array($unidades) ? $unidades : [$unidades];
+        echo "   ✅ NODO CORRECTO: listaCodigos\n";
         echo "   ✅ Unidades de medida obtenidas: " . count($unidades) . "\n";
-        
+
         // Guardar en siat_parametricas
         $stmt = $pdo->prepare("
             INSERT INTO siat_parametricas (par_tipo, par_codigo, par_descripcion, par_vigente, par_sincronizado_en)
@@ -262,16 +280,17 @@ try {
         ");
         $count = 0;
         foreach ($unidades as $u) {
-            $cod = $u->codigoUnidadMedida ?? ($u->codigo ?? '');
+            // El SIN usa codigoClasificador en esta sincronizacion.
+            $cod = $u->codigoClasificador ?? ($u->codigoUnidadMedida ?? ($u->codigo ?? ''));
             $desc = $u->descripcion ?? '';
-            if ($cod !== '') {
+            if ($cod !== '' && $cod !== null) {
                 $stmt->execute([':cod' => $cod, ':desc' => $desc, ':desc2' => $desc]);
                 $count++;
             }
         }
-        echo "   ✅ Guardadas $count unidades en siat_parametricas\n";
+        echo "   ✅ Guardadas/actualizadas $count unidades en siat_parametricas\n";
     } else {
-        echo "   ⚠️  Respuesta SIN (nodo RespuestaListaParametricas). En PILOTO suele venir VACIO.\n";
+        echo "   ⚠️  Respuesta SIN listaCodigos de unidades de medida\n";
         debugSoapResponse($client, 'sincronizarParametricaUnidadMedida', $resp);
         if (isset($root->mensajesList)) { echo "   MENSAJES SIN:\n"; print_r($root->mensajesList); }
     }
