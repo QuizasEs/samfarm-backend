@@ -1271,11 +1271,11 @@ class ventaModel extends mainModel
 
         // Pie
         $pdf->SetFont('Arial', 'I', 7);
-        $pdf->Cell(0, 4, '¡Gracias por su compra!', 0, 1, 'C');
+        $pdf->Cell(0, 4, utf8_decode('¡Gracias por su compra!'), 0, 1, 'C');
         if ($esFactura) {
-            $pdf->Cell(0, 4, 'Documento fiscal electronico emitido ante el SIN.', 0, 1, 'C');
+            $pdf->Cell(0, 4, utf8_decode('Documento fiscal electrónico emitido ante el SIN.'), 0, 1, 'C');
         } else {
-            $pdf->Cell(0, 4, 'Este documento es una nota de venta.', 0, 1, 'C');
+            $pdf->Cell(0, 4, utf8_decode('Este documento es una nota de venta.'), 0, 1, 'C');
         }
 
         $contenido_pdf = $pdf->Output('S');
