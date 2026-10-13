@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /* Zona horaria de Bolivia (UTC-4, sin horario de verano).
 

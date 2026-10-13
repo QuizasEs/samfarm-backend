@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (isset($_SESSION['id_smp']) && ($_SESSION['rol_smp'] == 1 || $_SESSION['rol_smp'] == 2)) {
     require_once "./controllers/medicamentoController.php";
     $ins_med = new medicamentoController();

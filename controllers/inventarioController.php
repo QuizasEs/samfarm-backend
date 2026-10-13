@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 if ($peticionAjax) {
     require_once '../models/inventarioModel.php';

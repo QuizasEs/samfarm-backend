@@ -41,9 +41,22 @@
   --sidebar-label:     rgba(255,255,255,.28);
 
   --overlay: rgba(0,0,0,.45);
+
+  /* ===== Variables exclusivas para el buscador de medicamentos (caja) ===== */
+  --ms-bg:             #e0f2f1;
+  --ms-border:         #14b8a3;
+  --ms-text:           #0c4a59;
+  --ms-placeholder:    #64748b;
+  --ms-focus-border:   #0284c7;
+  --ms-focus-shadow:   rgba(2,132,199,.4);
+  --ms-static-shadow:  rgba(20,184,166,.35);
+  --ms-btn-bg:         #14b8a3;
+  --ms-btn-text:       #0f2c33;
+  --ms-btn-hover-bg:   #0284c7;
+  --ms-btn-hover-text: #ffffff;
 }
 
-/* variables dark */
+/* ===== Variables exclusivas para el buscador de medicamentos (dark) ===== */
 [data-theme="dark"] {
   --bg-primary:        #1e1e1e;
   --bg-secondary:      #252526;
@@ -85,6 +98,54 @@
   --sidebar-label:     rgba(255,255,255,.2);
 
   --overlay: rgba(0,0,0,.68);
+
+  /* ===== Variables exclusivas para el buscador de medicamentos (dark) ===== */
+  --ms-bg:             #011120;
+  --ms-border:         #22d3ee;
+  --ms-text:           #f0fdfd;
+  --ms-placeholder:    #64748b;
+  --ms-focus-border:   #7dd3fc;
+  --ms-focus-shadow:   rgba(56,189,248,.4);
+  --ms-static-shadow:  rgba(34,211,238,.4);
+  --ms-btn-bg:         #22d3ee;
+  --ms-btn-text:       #020617;
+  --ms-btn-hover-bg:   #7dd3fc;
+  --ms-btn-hover-text: #020617;
+}
+
+/* ===== BUSCADOR DE MEDICAMENTOS EN CAJA - ESTILOS EXCLUSIVOS ===== */
+.inp.med_search {
+  background: var(--ms-bg) !important;
+  border: 2px solid var(--ms-border) !important;
+  color: var(--ms-text) !important;
+  box-shadow: 0 0 0 3px var(--ms-static-shadow) !important;
+  transition: background .3s ease, border-color .3s ease, box-shadow .3s ease !important;
+}
+
+.inp.med_search::placeholder {
+  color: var(--ms-placeholder) !important;
+}
+
+.inp.med_search:focus {
+  background: var(--bg-primary) !important;
+  border-color: var(--ms-focus-border) !important;
+  box-shadow: 0 0 0 4px var(--ms-focus-shadow) !important;
+  outline: none !important;
+}
+
+[data-theme="dark"] .inp.med_search {
+  box-shadow: 0 0 0 3px var(--ms-static-shadow) !important;
+}
+
+.inpg .btn.btn_buscar_med {
+  background: var(--ms-btn-bg) !important;
+  color: var(--ms-btn-text) !important;
+  border: none !important;
+  border-radius: 0 var(--r) var(--r) 0 !important;
+}
+
+.inpg .btn.btn_buscar_med:hover {
+  background: var(--ms-btn-hover-bg) !important;
 }
 
 /* reset & base */

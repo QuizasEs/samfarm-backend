@@ -305,7 +305,7 @@ class mermaModel extends mainModel
      * NO crea mermas, solo detecta. El gerente/admin decide si crear la merma
      * Excluye lotes que ya han sido registrados en merma
      */
-    protected static function detectar_lotes_caducados_model()
+    public static function detectar_lotes_caducados_model()
     {
         $sql = "
             SELECT 
